@@ -1,3 +1,3 @@
 # Index — iniciativa plataforma
-- Temas: upgrade/framework -> PGTO-160
-- Demandas: PGTO-160 (Design — aguardando aprovação de arquitetura)
+- Temas: upgrade/framework -> PGTO-160 (concluída)
+- Demandas: PGTO-160 (concluída)
