@@ -1,7 +1,10 @@
 # Architecture — 3 layers (D8/D15)
 
+Foundations: **Alfred = customized AI-DLC** (D1), engine in `rules/` (D38), modular layout without prefix (D39).
+Tracking (D4): `state` always · `decisions` (Std/SAFE) · `audit` (all modes); Compliance is out of scope.
+
 ## Layers
-1. **Framework** (this repo) — the methodology. **Referenced, never copied** into HUB/App (D15).
+1. **Framework** (this repo) — the methodology (customized AI-DLC, D1). **Referenced, never copied** into HUB/App (D15).
 2. **HUB** (1 per sigla) — artifacts only; **source of truth** of `state`.
 3. **App** (per repo) — technical artifacts under `.alfred/`.
 
