@@ -8,7 +8,7 @@
 > Note: framework files are in English. Interactions and generated artifacts (HUB/App) are pt-BR.
 
 ## Structure (variant C — modular)
-- `core/` — kernel + entry: principles, risk-mode, boot, model-policy, architecture, glossary.
+- `core/` — kernel + entry: principles, **squad (hybrid operating model)**, risk-mode, boot, model-policy, architecture, glossary.
 - `rules/` — the engine (customized AI-DLC): `common/`, `demand-types/`, `lanes/`, `lifecycle/`, `agents/`.
 - `skills/` — pluggable capabilities (opt-in, JIT): coding-standard (SOLID), lang-*, etc.
 - `connectors/` — access to external systems (observability, vcs, tracker, notification, telemetry).

@@ -15,6 +15,9 @@ Never invent. On any doubt (which repo, which sigla, which demand), STOP and ASK
 
 ---
 
+## Step 0 — Load the foundation (always)
+Load the minimal always-context: `core/principles.md` (incl. supreme law) and `core/squad.md` (who-does-what / human↔AI protocol). Everything else is loaded just-in-time.
+
 ## Step 1 — Greet
 Show the message in `core/welcome.md`, once. Do not repeat it later in the session.
 
