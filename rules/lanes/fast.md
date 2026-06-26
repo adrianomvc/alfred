@@ -1,11 +1,25 @@
-# Lane: FAST (D2/D25)
+# Lane: FAST — operational prompt (D2/D7/D25/D27)
 
-Low risk & complexity. Speed and flow.
-- **Inception:** 1 paragraph (problem+objective).
-- **Design:** inline (spec = the PR; no separate file).
-- **Execution:** autonomous, small PR, self-review.
-- **Validation:** local tests pass.
-- **Operation:** optional note; closes on merge.
-- **Checkpoints:** delegated autonomy (human accountable via audit); explicit only on escalation triggers (D27).
-- **Artifacts:** `state` + lean `audit` + PR.
-- **DoD:** problem/objective clear; tests pass; PR merged.
+When Risk Mode = FAST, APPLY this. Low risk & complexity → speed and flow.
+
+## Autonomy
+Delegated autonomy: proceed WITHOUT per-step human confirmation; the human remains accountable, recorded in `audit` (D7). Immediately STOP and ask on any escalation trigger (D27): scope grew · risk rose · cost over cap · destructive/irreversible op · security · ambiguity · cross-app · repeated failure.
+
+## Per-phase behavior (compressed, never skipped)
+- Inception: 1 paragraph (problem+objective); requirements inline, few/no questions.
+- Design: inline (spec = the PR; no separate spec file).
+- Execution: implement; small PR; self-review; lean `audit`.
+- Validation: relevant local tests pass.
+- Operation: closes on merge; note optional.
+
+## Artifacts (minimum)
+`state` + lean `audit` + PR. No formal spec/decisions.
+
+## DoD (gate)
+problem/objective clear · tests pass · PR merged (human merge = acceptance, D23).
+
+## Toolbar (one line, still shows cost+model — D10/D46)
+ALFRED · id · FAST · fase (x/5) · falta: ... · modelo: m · ~US$ c
+
+## If unsure it is really FAST
+Re-run the checklist; if any hard override applies → raise the mode and re-confirm. Never keep a critical change in FAST.

@@ -1,10 +1,24 @@
-# Lane: SAFE (D2/D25)
+# Lane: SAFE — operational prompt (D2/D7/D23/D25)
 
-High risk/impact/complexity. Strong governance (NOT a SAFE clone).
-- **Inception:** + stakeholders, impact analysis, risk analysis; mode confirmed by role.
-- **Design:** + alternatives, dependencies, rollout/rollback; architecture approved (Tech Lead).
-- **Execution:** + dependency management, role approvals, evidence.
-- **Validation:** full suite (integration/contract/e2e/perf/security as applicable) + formal evidence + sign-off.
-- **Operation:** + monitoring, active rollback, post-mortem (if emergency).
-- **Checkpoints:** at each phase transition; approvals by role (PM=scope, Tech Lead=architecture/tech risk, QA=accept, Sponsor=cost/strategy).
-- **Artifacts:** all of Standard + risk analysis + rollout/rollback + approvals + full `audit`.
+When Risk Mode = SAFE, APPLY this. High risk/impact → strong governance (only stronger control; not a clone).
+
+## Checkpoints (HITL by role)
+A checkpoint at EVERY phase transition, with role-based approval:
+- PM = scope · Tech Lead = architecture/technical risk · QA = acceptance · Sponsor/Leadership = cost/strategy.
+Acceptance = human merge (D23). Compliance is NOT an Alfred role (D4) — regulated demands only add audit/evidence.
+
+## Per-phase behavior (full depth)
+- Inception: + stakeholders, impact analysis, risk analysis; mode confirmed by role.
+- Design: + alternatives, dependencies, rollout/rollback; architecture approved (Tech Lead).
+- Execution: + dependency management, role approvals, evidence; phased PRs for migrations.
+- Validation: full suite (integration/contract/e2e/perf/security as applicable) + formal evidence + sign-off.
+- Operation: + monitoring, active rollback, post-mortem (if emergency).
+
+## Artifacts (minimum)
+All of Standard + risk analysis + rollout/rollback + approvals log + full audit.
+
+## Model policy
+SAFE floor = strong tier (D46). Do not drop below; warn if a fixed model below floor is requested.
+
+## Anti-degeneration
+SAFE requires explicit justification in decisions; if the squad classifies >~25% as SAFE, review the criteria (D32).

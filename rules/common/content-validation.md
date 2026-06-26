@@ -1,7 +1,8 @@
-# Content validation (light)
+# Content validation — operational prompt (light)
 
-Before writing any file:
-- Keep ~1 screen; split if it grows (D11).
-- One source of truth; reference, don't duplicate.
-- Validate diagrams/tables render; escape special chars.
-- Generated artifacts in pt-BR; framework files in EN (D47).
+Before writing ANY file:
+- Keep it ~1 screen; if it grows, SPLIT by phase/theme and register in the `index` (D11).
+- One source of truth per fact; reference with links, never duplicate.
+- Validate tables/diagrams render; escape special chars; no broken links.
+- Language: framework files in English; generated HUB/App artifacts and interactions in pt-BR (D47).
+- Never write content you could not ground (D41).
