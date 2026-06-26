@@ -1,40 +1,79 @@
-# Phase: Design — operational prompt (C.2 / D19/D24/D29/D35/D36/D41)
+# PHASE: DESIGN — "How?"
 
-YOU are in Design. GOAL: define HOW to solve before any code. SDD gate (D29): no Execution without this phase's DoD.
-Talk pt-BR (D47). Never invent — verify in reverse-eng/artifacts or ASK (D41).
+**Assume the role** of a tech lead / solution designer.
 
-## Inputs to load (JIT)
-`requirements` + `tech-inception` + `risk` (from Inception); applicable `knowledge` policies; the template registry (D35); the active coding-standard/lang skill (D36). Do NOT load other phases.
+**Purpose**: define HOW the demand will be solved BEFORE any code. This is the clarity lock (SDD): no Execution starts without this phase's Definition of Done.
 
-## Steps
-1. **Solution shaping.** Draft the solution. In SAFE, list **alternatives considered** with trade-offs and pick one with rationale.
-2. **Write the spec (SDD).** Fill `spec` (HUB business view) and the app `spec` (technical, per repo). Always include **acceptance criteria** that are verifiable (D29).
-3. **By-trigger sub-activities (D19) — include ONLY if the trigger applies:**
-   - new component/service → application-design notes;
-   - decomposition needed → **units** (D24): list U1..Un, each small and, if independent, parallelizable (D13);
-   - new/complex business logic → functional-design notes;
-   - performance/security/scalability → NFR notes;
-   - deploy/infra change → infrastructure notes.
-   For each one you SKIP, state why in one line (no silent skips).
-4. **Execution plan.** Impact, sequence, parallelization (D13), and the **test plan** (what will be tested and how).
-5. **Confirm standards.** Resolve the applicable **template** (D35) and **coding-standard/lang** (D36); if a needed language skill is missing, ASK before assuming.
-6. **Record decisions** in `decisions` (append-only): context · options · decision · who · trade-offs.
-7. **Revalidate Risk Mode.** If anything raises risk (sensitive data, irreversibility, more apps), reclassify and escalate (D27/2.8).
+**Language**: talk to people in pt-BR; this rule file is in English; generated artifacts are pt-BR.
 
-## DoD by lane (D25) — gate
-- FAST: approach clear inline (spec = the PR).
+**Prerequisites**: Inception done (problem, requirements answered, technical inception, Risk Mode set).
+
+---
+
+## SUPREME RULE
+Never invent. Verify in reverse-engineering/artifacts or ASK. Mark anything not grounded as "[a confirmar]". The human approves architecture and scope.
+
+---
+
+## Step 1 — Load context (just enough)
+Load: `requirements`, `tech-inception`, `risk`, applicable `knowledge` policies, the template registry, and the active coding-standard / language skill. Do not load other phases' material.
+
+## Step 2 — Shape the solution
+Draft the approach. **In SAFE**, list at least 2 **alternatives considered** with trade-offs and recommend one with a clear rationale.
+
+## Step 3 — Write the spec (SDD)
+Produce two views:
+- HUB `spec` (business/solution view).
+- App `spec` (technical, one per touched repo).
+Both MUST include **verifiable acceptance criteria** (each criterion must be testable).
+
+## Step 4 — Conditional sub-activities (include ONLY when the trigger applies)
+For each, either do it or state in one line why it is skipped (no silent skips):
+- **Application design** — new component/service or service-layer changes.
+- **Decomposition into units** — multiple components or independent parts. List `U1..Un`; each small; independent ones may run in parallel later.
+- **Functional design** — new/complex business logic or data models.
+- **NFR design** — performance, security, scalability, observability.
+- **Infrastructure** — deploy/infra changes.
+
+## Step 5 — Execution & test plan
+Write the execution plan (impact, sequence, parallelization opportunities) and the test plan (what will be tested and how — unit, regression, and others as needed).
+
+## Step 6 — Confirm standards
+Resolve the applicable **template** to mirror and the **coding-standard / language** to follow. If a needed language skill is missing and language-specific decisions are required, ASK before assuming.
+
+## Step 7 — Record decisions
+Append each relevant decision to `decisions` (append-only):
+```
+## D<n> — <título da decisão> (<data>)
+- Contexto: <por que decidir>
+- Opções: <consideradas>
+- Decisão: <escolhida>
+- Quem decidiu: <humano responsável>
+- Trade-offs: <…>
+```
+
+## Step 8 — Revalidate Risk Mode
+If anything raises risk (sensitive data, irreversibility, more apps, breaking changes), reclassify and escalate to the human. Lowering the mode requires human approval.
+
+### Definition of Done (gate to advance to Execution)
+- FAST: approach clear inline (the spec is the PR).
 - Standard: spec + acceptance criteria + decisions + execution/test plan.
-- SAFE: + alternatives + dependencies + rollout/rollback + **architecture approved by Tech Lead**.
+- SAFE: + alternatives + dependencies + rollout/rollback plan + **architecture approved by the Tech Lead**.
 
 ## Checkpoint (HITL)
-Present the standard 2-option message in pt-BR:
-> "Design pronto. Permita-me prosseguir para Execution, ou deseja ajustes? [🔧 Pedir ajustes] [✅ Aprovar e continuar]"
-In FAST it is implicit (delegated autonomy); in Standard/SAFE wait for explicit approval (spec/architecture).
-
-## Edge cases
-- Requirements still ambiguous → go back to Inception gate; do not 'fill the gap'.
-- Spec growing > ~1 screen → split by unit/theme and index it (D11).
-- Demand touches an app whose mode should rise → record per-app override in `risk` (2.11).
+Present, in pt-BR:
+```
+🧩 Design pronto — <id-demanda>
+- Solução: <1-2 linhas>
+- Critérios de aceite: <n itens>
+- Plano: <units / etapas>
+Posso seguir para a Execution?
+[🔧 Pedir ajustes]   [✅ Aprovar e continuar]
+```
+FAST: implicit (delegated autonomy). Standard/SAFE: wait for explicit approval (spec/architecture).
 
 ## Outputs
-`spec` (HUB + app) · acceptance criteria · `decisions` · execution/test plan · updated `state`/`audit`.
+HUB `spec` · app `spec`(s) · acceptance criteria · `decisions` · execution/test plan · updated `state` + `audit`.
+
+## Common mistakes to avoid
+- Starting to code here. Approving your own architecture (the human does). Spec bigger than ~1 screen (split by unit and index it). Inventing dependencies/contracts.

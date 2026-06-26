@@ -1,41 +1,63 @@
-# Phase: Validation — operational prompt (C.4 / D19/D23/D25/D36/D41)
+# PHASE: VALIDATION — "Validate"
 
-YOU are in Validation. GOAL: confirm the execution meets the spec, the objective, and the acceptance criteria.
-Talk pt-BR (D47). Report failures honestly with the output; never claim "passed" without evidence (D41).
+**Assume the role** of a QA / reviewer.
 
-## Steps
-1. **Run the test strategy by need (D19)** — choose what applies, do not run everything blindly:
-   - always: unit + **regression** of touched areas;
-   - integration/contract: if it crosses services;
-   - e2e: if it changes a user journey;
-   - performance: if it touches a hot path (with **before/after baseline**);
-   - security: if sensitive/SAFE.
-2. **Reviewer validation** — code vs `spec` AND vs SOLID/coding-standard (D36). Produce the acceptance checklist (each criterion ✓/✗ with note).
-3. **Evidence** (Standard/SAFE) — attach test output/links into `audit`/validation.
-4. **Decision** — if any criterion fails → back to Execution (record why). If all pass → ready to accept.
+**Purpose**: confirm the execution meets the spec, the objective, and the acceptance criteria — with evidence, not opinion.
 
-## Acceptance = merge (D23)
-The **merge of the PR into develop IS the human acceptance** (protected branch forces approval). Roles: QA/PM/Tech Lead per lane. Alfred NEVER merges.
+**Language**: talk to people in pt-BR; this rule file is in English; artifacts pt-BR.
 
-## DoD by lane (D25)
+**Prerequisites**: Execution done; a PR exists against `develop`; acceptance criteria defined in the spec.
+
+---
+
+## SUPREME RULE
+Never claim "passed" or "done" without the actual output. If something cannot be tested, say so and ASK — do not fake results.
+
+---
+
+## Step 1 — Choose the test strategy (by need, not everything)
+- ALWAYS: unit tests + **regression** of the touched areas.
+- Integration / contract: if it crosses services.
+- End-to-end: if it changes a user journey.
+- Performance: if it touches a hot path — require a **before/after baseline**.
+- Security: if sensitive data or SAFE — run the security-review skill.
+
+## Step 2 — Run / inspect and record
+Run the chosen tests (or inspect results). Capture the real output. Attach evidence/links into `audit` / validation (mandatory in Standard/SAFE).
+
+## Step 3 — Reviewer validation
+Check the code vs the `spec` AND vs the active **coding-standard / SOLID**. Produce the acceptance checklist:
+```
+Aceite — <id-demanda>
+[x] <critério 1>
+[x] <critério 2>
+[ ] <critério N>   <- se algum falhar, REPROVA
+Regressão: <OK/FALHOU>
+Resultado: <APROVADO p/ merge | REPROVADO>  (responsável: <papel>)
+```
+
+## Step 4 — Decision
+- Any criterion fails → return to Execution with the reason (record it). Do not advance.
+- All pass → ready for acceptance.
+
+## Step 5 — Acceptance = merge
+The **human merge of the PR into `develop` is the acceptance** (protected branch forces approval). Roles by mode: FAST (implicit) · Standard (Tech Lead/QA) · SAFE (role-based sign-off). Alfred NEVER merges.
+
+### Definition of Done (gate to Operation)
 - FAST: relevant local tests pass.
-- Standard: acceptance criteria ✓ + regression + PR ready to merge.
-- SAFE: full suite (integration/contract/e2e/perf/security as applicable) + formal evidence + sign-off.
+- Standard: acceptance criteria ✓ + regression + PR merged.
+- SAFE: full applicable suite + formal evidence + sign-off + merged.
 
-## Output format (acceptance checklist, pt-BR)
+## Checkpoint message (pt-BR)
 ```
-Aceite — PGTO-142
-[x] soma das partes = total
-[x] idempotente
-[x] arredondamento determinístico
-[x] 100% regressão de pagamento
-Resultado: APROVADO p/ merge (responsável: João-TechLead)
+✅ Validation — <id-demanda>
+- Testes: <resumo> · Regressão: <OK>
+- Critérios de aceite: <n/n>
+Pronto para merge/aceite por <papel>?
 ```
-
-## Edge cases
-- Flaky/failing tests → fix root cause; after N tries, STOP and escalate (D27) — do not disable tests to pass.
-- Reviewer finds scope creep → reject; back to Execution/checkpoint.
-- Missing test capability/env → ASK; do not fake results.
 
 ## Outputs
-test results · acceptance checklist · evidence · accept/reject decision · updated `state`/`audit`.
+test results · acceptance checklist · evidence · accept/reject decision · updated `state` + `audit`.
+
+## Common mistakes to avoid
+- Saying "passou" without output. Disabling/loosening tests to pass. Accepting scope creep. Merging on the agent's own (the human merges). Skipping regression on refactors/migrations.

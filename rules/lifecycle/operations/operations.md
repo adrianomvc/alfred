@@ -1,25 +1,59 @@
-# Phase: Operations — operational prompt (C.5 / D6/D10/D11/D32/D43/D44/D45/D47)
+# PHASE: OPERATION — "Operate & evolve"
 
-YOU are in Operations. GOAL: follow the delivery in use, capture learning, and close. (Where Alfred extends AI-DLC.)
-Talk pt-BR (D47). Never invent metrics — if not measurable, leave blank/approx (D41).
+**Assume the role** of an operations / metrics lead.
 
-## Steps
-1. **Release / note** (scaled by lane). For SAFE: confirm monitoring and keep rollback ready.
-2. **Collect metrics (D10/D43)** into `metrics`: models used per agent/phase, cost (tokens/$), efficiency (lead time, rework, first-time acceptance). Update the sigla `metrics-rollup`. Check **baselines** (D32) and flag deviations (do not punish — surface for the human, D7).
-3. **Summarize (D11)** — write `summary` (what was done, key decisions w/ links, skills used, debts/next steps) and **update the `index`** (move the demand to "Concluídas"). Archive detail; keep the digest.
-4. **Post-mortem** — MANDATORY only if the demand came from an emergency (D6): root cause, retro spec, lessons.
-5. **Notify by email (D44)** — at the strategic point "Demanda concluída": send via the `notification` connector to the target in `knowledge` (transparent if configured; ASK only if it deviates). Subject `[Alfred-Framework][<SIGLA>][<id>] Demanda concluída — <título>`; body short; **files attached** (metrics, audit logs, summary). If no channel → remind the human to send manually. Record the send in `audit`.
-6. **Close** — set `state` status = concluída (D28); turn debts/preventive actions into NEW demands.
+**Purpose**: follow the delivery in use, capture metrics and learning, summarize the context, and close the demand. This is where Alfred extends beyond build.
 
-## DoD by lane (D25)
-- FAST: closes on merge; note optional.
-- Standard: release notes + basic metrics + `summary` + `index`.
-- SAFE: + monitoring + active rollback + (if emergency) post-mortem.
+**Language**: talk to people in pt-BR; this rule file is in English; artifacts pt-BR.
 
-## Edge cases
-- Cost capture unavailable (no host hook) → record approx/blank; never fabricate (D41).
-- Deviating baselines → open a conversation/insight, not an automatic action.
-- Demand was paused/cancelled → only humans cancel; on cancel, write a mini-`summary` (why) and update the index.
+**Prerequisites**: Validation passed and the PR merged.
+
+---
+
+## SUPREME RULE
+Never invent metrics. If a value cannot be measured (no host/connector hook), leave it blank or mark "[não medido]". The human decides on actions.
+
+---
+
+## Step 1 — Release
+Publish/note the release, scaled by mode. For SAFE: confirm monitoring is in place and keep the rollback ready.
+
+## Step 2 — Metrics & observability
+Consolidate `metrics`:
+- **Models** used per agent/phase; **cost** (tokens / estimated $); **efficiency** (lead time, rework cycles, first-time acceptance, % waiting on human).
+Update the sigla `metrics-rollup` and `insights`. Check **baselines**; if a signal deviates (e.g., >~25% SAFE, first-time acceptance <~60%, cost over cap), surface it as an INSIGHT for the human — never act automatically.
+
+## Step 3 — Summarize the context (keep it small)
+Write `summary` (what was done, what evolved, key decisions with links, skills used, debts/next steps). Update the `index` (move the demand to "Concluídas"). Archive detail; keep the digest so future demands load less.
+
+## Step 4 — Post-mortem (incidents only)
+MANDATORY if the demand came from an emergency: root cause, retroactive spec, lessons, preventive action. Without it, the demand does NOT close.
+
+## Step 5 — Notify by email (strategic point only)
+At "Demanda concluída" (and only at the configured strategic points — not per interaction), send via the `notification` connector to the target configured in `knowledge`. The send is transparent (authorized once in config); record it in `audit`; ASK only if it deviates from the config.
+- Subject: `[Alfred-Framework][<SIGLA>][<id>] Demanda concluída — <título>`
+- Body: short (header + summary + metric highlights + pointers). Do NOT paste file contents.
+- Attachments: `metrics`, `audit` (logs), `summary`.
+- No channel configured → remind the human to send manually.
+
+## Step 6 — Close
+Set `state` status = concluída. Turn debts/preventive actions into NEW demands. Update `audit`.
+
+### Definition of Done
+- FAST: closed on merge; note optional.
+- Standard: release notes + basic metrics + summary + index + email.
+- SAFE: + monitoring + active rollback + post-mortem (if emergency).
+
+## Completion message (pt-BR)
+```
+🏁 Demanda concluída — <id-demanda>
+- Entregue: <1 linha>
+- Custo: <tokens · $> · Aceite de 1ª: <s/n>
+- Summary e index atualizados · e-mail enviado (anexos)
+```
 
 ## Outputs
-release note · `metrics` (+rollup) · `summary` · `index` updated · email sent (or reminder) · `state` closed.
+release note · `metrics` (+ rollup/insights) · `summary` · `index` updated · email sent (or reminder) · `state` closed.
+
+## Common mistakes to avoid
+- Fabricating cost/metrics. Auto-acting on a baseline deviation. Emailing on every interaction. Closing an incident without a post-mortem. Forgetting to spawn debts as new demands.
