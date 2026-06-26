@@ -1,7 +1,7 @@
-# Skills registry + contract — operational prompt (D12/D22/E-2)
+# Skills registry + contract — operational prompt
 
 Skill = pluggable CAPABILITY/knowledge. NOT a policy (that is `knowledge/`, always-in-force) and NOT access (that is `connectors/`).
-Opt-in and loaded JIT: load only ACTIVE skills, and only the relevant SECTION of each (D11).
+Opt-in and loaded JIT: load only ACTIVE skills, and only the relevant SECTION of each .
 
 ## How the Orchestrator uses this
 1. At demand start, read this registry; propose the skills whose `trigger` matches (stream/type · mode · phase).
@@ -12,7 +12,7 @@ Opt-in and loaded JIT: load only ACTIVE skills, and only the relevant SECTION of
 ## Contract (each skill file declares)
 name · purpose · trigger · inputs · expected output · link · sections (for internal JIT).
 
-## Precedence on conflict (D22)
+## Precedence on conflict
 1. more restrictive/safer wins · 2. more specific (app/sigla) > generic (framework) · 3. tie → human decides (logged in `decisions`/`audit`).
 
 ## Registry

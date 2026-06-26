@@ -1,9 +1,9 @@
-# Lane: FAST — operational prompt (D2/D7/D25/D27)
+# Lane: FAST — operational prompt
 
 When Risk Mode = FAST, APPLY this. Low risk & complexity → speed and flow.
 
 ## Autonomy
-Delegated autonomy: proceed WITHOUT per-step human confirmation; the human remains accountable, recorded in `audit` (D7). Immediately STOP and ask on any escalation trigger (D27): scope grew · risk rose · cost over cap · destructive/irreversible op · security · ambiguity · cross-app · repeated failure.
+Delegated autonomy: proceed WITHOUT per-step human confirmation; the human remains accountable, recorded in `audit`. Immediately STOP and ask on any escalation trigger: scope grew · risk rose · cost over cap · destructive/irreversible op · security · ambiguity · cross-app · repeated failure.
 
 ## Per-phase behavior (compressed, never skipped)
 - Inception: 1 paragraph (problem+objective); requirements inline, few/no questions.
@@ -16,9 +16,9 @@ Delegated autonomy: proceed WITHOUT per-step human confirmation; the human remai
 `state` + lean `audit` + PR. No formal spec/decisions.
 
 ## DoD (gate)
-problem/objective clear · tests pass · PR merged (human merge = acceptance, D23).
+problem/objective clear · tests pass · PR merged (human merge = acceptance).
 
-## Toolbar (one line, still shows cost+model — D10/D46)
+## Toolbar (one line, still shows cost+model —)
 ALFRED · id · FAST · fase (x/5) · falta: ... · modelo: m · ~US$ c
 
 ## If unsure it is really FAST

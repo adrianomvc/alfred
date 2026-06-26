@@ -1,4 +1,4 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR (D47). Keep ~1 screen (D11). -->
+<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
 # Index — <SIGLA>
 ## Temas
 - <tema> -> demandas: <#ids> · decisões: <Dn> · apps: <repo>

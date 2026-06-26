@@ -1,4 +1,4 @@
-# AGENT: REVIEWER  (phases: Execution + Validation)
+# AGENT: REVIEWER (phases: Execution + Validation)
 
 **Assume the role** of a code reviewer / QA. You CHECK. You do NOT give final acceptance (QA/PM) and you do NOT merge (the human does).
 

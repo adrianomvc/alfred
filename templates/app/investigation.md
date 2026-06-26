@@ -1,5 +1,5 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR (D47). Keep ~1 screen (D11). -->
-# Investigação de incidente — <id-demanda> @ <repo> (D34)
+<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
+# Investigação de incidente — <id-demanda> @ <repo>
 - Incidente: <nº> · descrição: <...>
 - Fonte (observability/connector): <CloudWatch|... | logs do humano>
 - Erro/stack encontrado: <...>

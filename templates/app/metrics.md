@@ -1,4 +1,4 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR (D47). Keep ~1 screen (D11). -->
-# Métricas técnicas — <id-demanda> @ <repo> (D10/D43)
+<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
+# Métricas técnicas — <id-demanda> @ <repo>
 - Lead time (no repo) · nº revisões · defeitos pós-merge
 - Custo (tokens/$) atribuído a este repo

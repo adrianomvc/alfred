@@ -27,7 +27,7 @@ Determine and record in `state`:
 **IF** a business inception arrived from an external agent:
 - Save it as-is in `inception-input.md` (do NOT rewrite it).
 - Validate completeness against the checklist below. If anything is missing, ASK THE SOURCE — do not invent business intent.
-  - [ ] problem · [ ] objective/value · [ ] scope / out-of-scope · [ ] impacted users · [ ] business rules/constraints
+ - [ ] problem · [ ] objective/value · [ ] scope / out-of-scope · [ ] impacted users · [ ] business rules/constraints
 **ELSE** (Engineering/Operacional): you will gather the minimal business framing yourself (usually short).
 
 ## Step 3 — Intent analysis
@@ -95,7 +95,7 @@ Run the checklist in `core/risk-mode.md` (risk axis + complexity axis). Then:
 - Riscos iniciais: <bullets>
 
 Posso seguir para o Design?
-[🔧 Pedir ajustes]   [✅ Aprovar e continuar]
+[🔧 Pedir ajustes] [✅ Aprovar e continuar]
 ```
 
 ## Outputs

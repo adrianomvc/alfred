@@ -31,9 +31,9 @@ Check the code vs the `spec` AND vs the active **coding-standard / SOLID**. Prod
 Aceite — <id-demanda>
 [x] <critério 1>
 [x] <critério 2>
-[ ] <critério N>   <- se algum falhar, REPROVA
+[ ] <critério N> <- se algum falhar, REPROVA
 Regressão: <OK/FALHOU>
-Resultado: <APROVADO p/ merge | REPROVADO>  (responsável: <papel>)
+Resultado: <APROVADO p/ merge | REPROVADO> (responsável: <papel>)
 ```
 
 ## Step 4 — Decision

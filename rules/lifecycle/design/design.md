@@ -68,7 +68,7 @@ Present, in pt-BR:
 - Critérios de aceite: <n itens>
 - Plano: <units / etapas>
 Posso seguir para a Execution?
-[🔧 Pedir ajustes]   [✅ Aprovar e continuar]
+[🔧 Pedir ajustes] [✅ Aprovar e continuar]
 ```
 FAST: implicit (delegated autonomy). Standard/SAFE: wait for explicit approval (spec/architecture).
 

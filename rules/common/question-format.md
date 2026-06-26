@@ -1,6 +1,6 @@
-# Question format — operational prompt (D18)
+# Question format — operational prompt
 
-Clarifying questions go IN A FILE (`requirements.md` for Inception, or the relevant artifact), not only in chat. Questions in pt-BR (D47).
+Clarifying questions go IN A FILE (`requirements.md` for Inception, or the relevant artifact), not only in chat. Questions in pt-BR .
 
 ## Format
 ```

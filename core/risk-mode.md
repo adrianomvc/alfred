@@ -1,8 +1,8 @@
-# Risk Mode (D2/D31)
+# Risk Mode
 
 Risk Mode selects the **lane** (governance level) per demand: FAST / Standard / SAFE.
 Rule: **risk ≠ complexity** (two axes); the **higher axis sets the floor**.
-AI proposes, human confirms (FAST proceeds by delegated autonomy; Std/SAFE confirmed). D2.10.
+AI proposes, human confirms (FAST proceeds by delegated autonomy; Std/SAFE confirmed). .
 
 ## Checklist (0/1/2 each; sum per axis, 0–10)
 ### Risk (consequence if it goes wrong)
@@ -31,15 +31,15 @@ AI proposes, human confirms (FAST proceeds by delegated autonomy; Std/SAFE confi
 - Architectural change or multi-squad → **SAFE**.
 
 ## Anti-degeneration
-- **Anti-SAFE:** SAFE requires explicit justification in `decisions`; review if >~25% of demands are SAFE (D32).
+- **Anti-SAFE:** SAFE requires explicit justification in `decisions`; review if >~25% of demands are SAFE .
 - **Anti-FAST-for-critical:** hard overrides + mandatory reclassification on trigger.
-- **Emergency:** governance still applies; only order/timing compress (Execution-first, D6).
+- **Emergency:** governance still applies; only order/timing compress (Execution-first).
 
-## Per-app override (D2.11)
+## Per-app override
 Demand has a **base mode**; a specific app may **rise** (never fall). Record in `risk.md` with justification.
 
 ## Reclassification
 Initial in Inception, revalidated in Design. Rises on any override trigger (AI must pause/escalate). Lowering requires human approval. Every change logged in `decisions`.
 
-## Inputs from intent analysis (D31)
+## Inputs from intent analysis
 Scope→components/blast; complexity→novelty/effort; clarity→ambiguity; type→override hints; data/customer→hard overrides. AI pre-fills, marks "inferred", proposes the mode.

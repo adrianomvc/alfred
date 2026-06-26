@@ -1,5 +1,5 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR (D47). Keep ~1 screen (D11). -->
-# Notification email (D44) — padrão [Alfred-Framework]
+<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
+# Notification email — padrão [Alfred-Framework]
 ## Subject (fixo)
 [Alfred-Framework][<SIGLA>][<id-demanda>] <evento> — <título curto>
 # <evento>: Demanda concluída | Checkpoint <fase> | Incidente | Status
