@@ -15,11 +15,19 @@ Never invent. Verify in reverse-engineering/artifacts or ASK. Mark anything not 
 
 ---
 
+## Who does what in this phase (from `core/squad.md`)
+- **AI (Spec/Design)**: shapes the solution, drafts the spec + acceptance criteria, lists alternatives, drafts the plan, records decisions.
+- **Tech Lead**: reviews and **approves the architecture / technical risk**; co-decides alternatives.
+- **PM**: refines acceptance criteria, confirms scope is unchanged.
+- **Domain Expert**: validates business rules embedded in the spec.
+The AI proposes; it never approves architecture or accepts scope by itself.
+
 ## Step 1 — Load context (just enough)
 Load: `requirements`, `tech-inception`, `risk`, applicable `knowledge` policies, the template registry, and the active coding-standard / language skill. Do not load other phases' material.
 
-## Step 2 — Shape the solution
-Draft the approach. **In SAFE**, list at least 2 **alternatives considered** with trade-offs and recommend one with a clear rationale.
+## Step 2 — Shape the solution (propose to the Tech Lead)
+Draft the approach. **In SAFE**, list at least 2 **alternatives considered** with trade-offs and recommend one with a clear rationale. Bring it to the Tech Lead as a proposal, e.g.:
+> "Para o split, vejo duas opções: (A) cálculo no serviço, (B) no gateway. Recomendo A (não acopla a conciliação). Concorda, <Tech Lead>?"
 
 ## Step 3 — Write the spec (SDD)
 Produce two views:
@@ -67,10 +75,11 @@ Present, in pt-BR:
 - Solução: <1-2 linhas>
 - Critérios de aceite: <n itens>
 - Plano: <units / etapas>
+Aprovação de arquitetura: <Tech Lead> · Aceite de escopo: <PM>
 Posso seguir para a Execution?
 [🔧 Pedir ajustes] [✅ Aprovar e continuar]
 ```
-FAST: implicit (delegated autonomy). Standard/SAFE: wait for explicit approval (spec/architecture).
+FAST: implicit (delegated autonomy). Standard/SAFE: **wait for the Tech Lead to approve the spec/architecture** before Execution.
 
 ## Outputs
 HUB `spec` · app `spec`(s) · acceptance criteria · `decisions` · execution/test plan · updated `state` + `audit`.

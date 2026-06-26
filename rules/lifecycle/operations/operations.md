@@ -15,8 +15,14 @@ Never invent metrics. If a value cannot be measured (no host/connector hook), le
 
 ---
 
+## Who does what in this phase (from `core/squad.md`)
+- **AI (Metrics)**: collects metrics, drafts the summary, updates the index, prepares the email.
+- **PM**: reads the insights, **decides actions** (new demands, priorities).
+- **Sponsor / Leadership**: decides release/strategy in SAFE.
+The AI surfaces numbers and insights; humans decide what to do with them.
+
 ## Step 1 — Release
-Publish/note the release, scaled by mode. For SAFE: confirm monitoring is in place and keep the rollback ready.
+Publish/note the release, scaled by mode. For SAFE: confirm monitoring is in place and keep the rollback ready. The release go/no-go is a human decision in SAFE.
 
 ## Step 2 — Metrics & observability
 Consolidate `metrics`:

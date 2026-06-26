@@ -15,6 +15,12 @@ Never invent an API, library, path, or behavior — verify in the repo / reverse
 
 ---
 
+## Who does what in this phase (from `core/squad.md`)
+- **AI (Code Generator + Reviewer)**: drafts the plan, implements per the plan, self-reviews, opens the PR, keeps `state`/`audit`.
+- **Developer**: pairs on implementation choices, can take over any step, runs things locally.
+- **Tech Lead**: does the **technical review** of the PR; approves dependency/risk calls.
+The AI implements and proposes; a human reviews and the human merge is the acceptance (Validation).
+
 ## PART 1 — Planning (single source of truth)
 Create a numbered, checkbox plan. If the demand has units, one block per unit:
 ```
@@ -23,7 +29,9 @@ Plano de execução — <id-demanda>
 [ ] U2: <…>
 ```
 - Number every step. Include file paths and the tests that will prove each step.
-- **Standard/SAFE**: get the plan approved before generating. **FAST**: proceed.
+- **Standard/SAFE**: present the plan and get it approved before generating, e.g.:
+  > "Plano em 4 units (U1..U4), com arquivos e testes de cada. Aprova para eu começar pela U1, <Tech Lead/Dev>?"
+- **FAST**: proceed (delegated autonomy; recorded in `audit`).
 - This plan is THE source of truth for generation — follow it exactly; do not improvise.
 
 ## PART 2 — Generation (loop, step by step)

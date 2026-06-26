@@ -15,6 +15,13 @@ Never claim "passed" or "done" without the actual output. If something cannot be
 
 ---
 
+## Who does what in this phase (from `core/squad.md`)
+- **AI (Reviewer)**: runs/inspects tests, checks vs spec + standard, drafts the acceptance checklist, prepares evidence.
+- **QA**: owns the acceptance; decides pass/fail on the criteria.
+- **PM**: confirms it meets the objective (value).
+- **Tech Lead / QA**: performs the **merge = acceptance** (the AI never merges).
+The AI presents results and a recommendation; the human accepts.
+
 ## Step 1 — Choose the test strategy (by need, not everything)
 - ALWAYS: unit tests + **regression** of the touched areas.
 - Integration / contract: if it crosses services.
