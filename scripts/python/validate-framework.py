@@ -33,6 +33,8 @@ REQUIRED_PATHS = [
     "templates/hub/execution-plan.md",
     "templates/hub/environment-parameters.md",
     "templates/hub/validation-evidence.md",
+    "knowledge/README.md",
+    "knowledge/policy-template.md",
     "docs/implementation-status.md",
     "docs/layer-1-framework-closure.md",
     "docs/onboarding-sigla.md",

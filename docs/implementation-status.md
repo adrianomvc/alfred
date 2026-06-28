@@ -63,6 +63,10 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D14/D40/D45: connector contracts and adapter-shaped examples now have automated validation.
 - D46: model policy floors, tier map, adjustments, override warning, and toolbar transparency now have automated validation.
 - D15/D26: release `0.1.0` is prepared with `VERSION`, changelog, validation policy, and adoption guidance.
+- D3/D14/D39: Python helper set under `scripts/python/` mirrors every PowerShell helper so validation runs on machines without PowerShell; scripts are split by runtime (`scripts/powershell/`, `scripts/python/`).
+- D23: branch promotion path (demand branch → develop → main) and HUB vs App protection are now defined in `connectors/git.md`.
+- D12: external skill versioning (pinned by default, opt-in track-latest, recorded ref) is now defined in `skills/skills.md`.
+- D42: a knowledge guardrail policy template (`knowledge/policy-template.md`) is now available and tracked by framework validation.
 
 ## Still incomplete
 - D10/D43: cost/tokens can be attributed from host exports, but are not automatically collected without a host usage source.
