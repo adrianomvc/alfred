@@ -55,23 +55,36 @@ $requiredPaths = @(
   "docs/version-adoption.md"
   "docs/release-governance.md"
   "CHANGELOG.md"
-  "scripts/alfred-boot.ps1"
-  "scripts/render-toolbar.ps1"
+  "scripts/powershell/alfred-boot.ps1"
+  "scripts/powershell/render-toolbar.ps1"
   "docs/skills-activation.md"
   "skills/lang-python.md"
   "skills/lang-sql.md"
   "skills/lang-terraform.md"
   "skills/platform-aws-data.md"
-  "scripts/collect-observability.ps1"
-  "scripts/generate-metrics-rollup.ps1"
-  "scripts/normalize-usage-cost.ps1"
-  "scripts/validate-demand.ps1"
-  "scripts/validate-reverse-eng-staleness.ps1"
-  "scripts/validate-sdd-gate.ps1"
-  "scripts/validate-toolbar-fixtures.ps1"
-  "scripts/validate-skills-registry.ps1"
-  "scripts/validate-connectors.ps1"
-  "scripts/validate-model-policy.ps1"
+  "scripts/powershell/collect-observability.ps1"
+  "scripts/powershell/generate-metrics-rollup.ps1"
+  "scripts/powershell/normalize-usage-cost.ps1"
+  "scripts/powershell/validate-demand.ps1"
+  "scripts/powershell/validate-reverse-eng-staleness.ps1"
+  "scripts/powershell/validate-sdd-gate.ps1"
+  "scripts/powershell/validate-toolbar-fixtures.ps1"
+  "scripts/powershell/validate-skills-registry.ps1"
+  "scripts/powershell/validate-connectors.ps1"
+  "scripts/powershell/validate-model-policy.ps1"
+  "scripts/python/alfred-boot.py"
+  "scripts/python/render-toolbar.py"
+  "scripts/python/collect-observability.py"
+  "scripts/python/generate-metrics-rollup.py"
+  "scripts/python/normalize-usage-cost.py"
+  "scripts/python/validate-framework.py"
+  "scripts/python/validate-demand.py"
+  "scripts/python/validate-reverse-eng-staleness.py"
+  "scripts/python/validate-sdd-gate.py"
+  "scripts/python/validate-toolbar-fixtures.py"
+  "scripts/python/validate-skills-registry.py"
+  "scripts/python/validate-connectors.py"
+  "scripts/python/validate-model-policy.py"
   "connectors/usage-cost.md"
   "connectors/adapter-template.md"
   "docs/adapter-implementation.md"
@@ -100,13 +113,13 @@ foreach ($file in $jsonlFiles) {
 Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-export.jsonl")
 Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attribution-events.jsonl")
 
-& (Join-Path $rootPath "scripts/validate-toolbar-fixtures.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/validate-skills-registry.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/validate-connectors.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/validate-model-policy.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
-& (Join-Path $rootPath "scripts/alfred-boot.ps1") -Root $rootPath | Out-Null
-& (Join-Path $rootPath "scripts/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-& (Join-Path $rootPath "scripts/validate-sdd-gate.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
+& (Join-Path $rootPath "scripts/powershell/validate-toolbar-fixtures.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-skills-registry.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-connectors.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-model-policy.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
+& (Join-Path $rootPath "scripts/powershell/alfred-boot.ps1") -Root $rootPath | Out-Null
+& (Join-Path $rootPath "scripts/powershell/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+& (Join-Path $rootPath "scripts/powershell/validate-sdd-gate.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
 
 Write-Output "Framework validation completed."

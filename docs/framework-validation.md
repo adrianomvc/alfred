@@ -24,6 +24,16 @@ Use this checklist after changing Alfred itself.
 - `docs/`
 - `examples/`
 
+## One-shot Validation
+Run all structure, JSONL, and behavioral sub-checks at once. Use either runtime:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-framework.ps1
+```
+```bash
+python scripts/python/validate-framework.py
+```
+
 ## JSONL Checks
 Run a JSON parse over all observability logs in examples and active pilots.
 
@@ -58,8 +68,8 @@ Get-ChildItem -Path examples -Recurse -Filter *observability-log.jsonl -Force |
 - `docs/version-adoption.md` keeps active-demand framework upgrades explicit and human-approved.
 - `docs/release-governance.md` and `CHANGELOG.md` record release intent and compatibility notes.
 - `docs/adapter-implementation.md` keeps concrete host adapters explicit, auditable, and degradable.
-- `scripts/validate-connectors.ps1` checks connector contracts and adapter-shaped examples.
-- `scripts/validate-model-policy.ps1` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
+- `scripts/powershell/validate-connectors.ps1` checks connector contracts and adapter-shaped examples.
+- `scripts/powershell/validate-model-policy.ps1` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
 
 ## Acceptance
 A framework change is acceptable when:

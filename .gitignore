@@ -1,0 +1,6 @@
+# Python helper bytecode (scripts/python/)
+__pycache__/
+*.py[cod]
+
+# Local validation scratch output
+.tmp-*

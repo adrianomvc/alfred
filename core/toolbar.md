@@ -2,7 +2,7 @@
 
 The toolbar is rendered by the Orchestrator at the top of every interaction. It is derived from `state`; it is never a separate source of truth.
 
-`scripts/render-toolbar.ps1` is an optional helper that renders the same information from a `001-state.md`. Hosts that cannot run scripts render the toolbar manually from the same fields.
+`scripts/powershell/render-toolbar.ps1` is an optional helper that renders the same information from a `001-state.md`. Hosts that cannot run scripts render the toolbar manually from the same fields.
 
 ## FAST format
 One line only:

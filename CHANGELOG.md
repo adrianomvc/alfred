@@ -2,6 +2,15 @@
 
 All notable Alfred framework changes should be recorded here.
 
+## Unreleased
+
+### Added
+- Python 3 helper set under `scripts/python/` mirroring every PowerShell helper, so the framework can be validated on machines without PowerShell (D3 portability).
+
+### Changed
+- Helper scripts are now organized by runtime: `scripts/powershell/*.ps1` and `scripts/python/*.py`. Both runtimes accept the same flags and produce equivalent output.
+- Docs and examples now reference the runtime-scoped script paths.
+
 ## 0.1.0 - 2026-06-28
 
 ### Summary
@@ -32,4 +41,4 @@ First operational Alfred framework release for markdown-first AI-DLC adoption ac
 - Active demands already running on `0.1.0-dev` should either stay frozen until close or record a human-approved in-flight upgrade.
 
 ### Validation
-- `scripts/validate-framework.ps1` passed on 2026-06-28 for this release preparation.
+- `scripts/powershell/validate-framework.ps1` passed on 2026-06-28 for this release preparation.

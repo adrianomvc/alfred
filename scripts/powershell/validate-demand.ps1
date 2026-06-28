@@ -306,7 +306,7 @@ if ($phaseNumber -ge 4) {
 }
 
 if ($phaseNumber -ge 3) {
-  $sddGateScript = Join-Path (Split-Path -Parent $PSScriptRoot) "scripts/validate-sdd-gate.ps1"
+  $sddGateScript = Join-Path $PSScriptRoot "validate-sdd-gate.ps1"
   if (Test-Path -LiteralPath $sddGateScript) {
     $sddArgs = @{
       HubDemandPath = $hub
@@ -363,7 +363,7 @@ if ($AppDemandPath -ne "") {
   Assert-Jsonl -FilePath (Join-Path $app "05-operation/008-observability-log.jsonl") -Label "App observability log"
 
   if ($hasReverseEng) {
-    $stalenessScript = Join-Path (Split-Path -Parent $PSScriptRoot) "scripts/validate-reverse-eng-staleness.ps1"
+    $stalenessScript = Join-Path $PSScriptRoot "validate-reverse-eng-staleness.ps1"
     if (Test-Path -LiteralPath $stalenessScript) {
       $stalenessOutput = & $stalenessScript -ReverseEngPath (Join-Path $app "01-inception/002-reverse-eng.md")
       foreach ($line in $stalenessOutput) {

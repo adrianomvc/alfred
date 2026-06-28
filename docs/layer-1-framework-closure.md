@@ -22,22 +22,24 @@ The following are part of the framework core:
 - Templates for HUB and App artifacts.
 
 ## Optional Helpers
-The scripts under `scripts/` are optional helpers. They make framework rules easier to verify, but Alfred must still work manually through Markdown if scripts cannot run.
+The scripts under `scripts/` are optional helpers. They make framework rules easier to verify, but Alfred must still work manually through Markdown if scripts cannot run. Each helper ships in two equivalent runtimes: `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py` (for machines without PowerShell).
 
 Daily-use helpers:
-- `alfred-boot.ps1`
-- `render-toolbar.ps1`
-- `validate-demand.ps1`
-- `validate-framework.ps1`
+- `alfred-boot`
+- `render-toolbar`
+- `validate-demand`
+- `validate-framework`
 
 Specialized helpers:
-- `validate-sdd-gate.ps1`
-- `validate-reverse-eng-staleness.ps1`
-- `validate-skills-registry.ps1`
-- `validate-toolbar-fixtures.ps1`
-- `collect-observability.ps1`
-- `generate-metrics-rollup.ps1`
-- `normalize-usage-cost.ps1`
+- `validate-sdd-gate`
+- `validate-reverse-eng-staleness`
+- `validate-skills-registry`
+- `validate-toolbar-fixtures`
+- `validate-connectors`
+- `validate-model-policy`
+- `collect-observability`
+- `generate-metrics-rollup`
+- `normalize-usage-cost`
 
 ## Validated Behaviors
 - Framework structure is validated.
@@ -61,9 +63,9 @@ These items are intentionally not closed inside Layer 1 because they need a real
 
 ## Exit Criteria
 Layer 1 can be considered ready to apply to Layer 2 when:
-- `scripts/validate-framework.ps1` passes;
+- `scripts/powershell/validate-framework.ps1` (or `scripts/python/validate-framework.py`) passes;
 - `docs/implementation-status.md` lists only host/credential/policy-dependent gaps;
-- a pilot example passes `validate-demand.ps1 -Strict`;
+- a pilot example passes `validate-demand -Strict` in either runtime;
 - README and roadmap point the next step to HUB/App adoption.
 
 ## Next Layer
