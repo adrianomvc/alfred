@@ -1,8 +1,14 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Decisões — <id-demanda> (append-only; Std/SAFE)
-## D<n> — <título> (<data>)
-- Contexto: <por que decidir>
-- Opções: <consideradas>
-- Decisão: <escolhida>
-- Quem decidiu: <humano responsável>
-- Consequências/trade-offs: <...>
+# Decision
+
+> Generated content should be written in pt-BR. Use `006-decisions.md` as the demand log; this file is a single-entry helper when needed.
+
+## Date
+
+## Decision
+
+## Owner
+
+## Rationale
+
+## Impact
+

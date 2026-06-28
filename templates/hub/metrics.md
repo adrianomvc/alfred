@@ -1,11 +1,21 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Métricas — <id-demanda>
-## Processo
-- Risk Mode acertou? <s/n; nº reclassificações> · Retrabalho (ciclos): <n> · Aceite de 1ª: <s/n>
-## Agentes
-- Por agente: nº outputs · % aproveitado · correções humanas
-## Custo
-- Tokens (in/out) · $ estimado · nº interações · custo por fase/agente · vs teto
-## Observabilidade
-- Modelos usados por agente/fase (id · host) · mix %
-- Eficiência: lead time · % aguardando humano
+# Metrics
+
+> Generated content should be written in pt-BR.
+
+## Demand metrics
+- source: `05-operation/011-observability-log.jsonl`
+- alfred version:
+- alfred framework ref:
+- alfred framework commit:
+- observability schema:
+- started:
+- closed:
+- lane:
+- interactions:
+- model/cost:
+- review cycles:
+- tests:
+- acceptance:
+
+## Events
+- Metrics are computed from structured events in `05-operation/011-observability-log.jsonl`.

@@ -1,35 +1,34 @@
-# Process Toolbar — single source of truth
+# Toolbar
 
-Rendered by the Orchestrator at the START of every interaction, from the `state`.
-Interactions are pt-BR. ASCII is the official form; rich UI is optional.
+The toolbar is rendered by the Orchestrator at the top of every interaction. It is derived from `state`; it is never a separate source of truth.
 
-## Required fields (always present)
-- Identity: `SIGLA · <id-demanda> · "<title>"`
-- **Mode** (lane) + **current model**
-- Phase X/5 + **5-phase track**: ✓ done · ▶ current · ◻ pending · ⏸ waiting human · ⚠ risk
-- Progress bar / %
-- Units checklist (if decomposed —)
-- **Cost line (ALWAYS —): `Custo: <tokens> · ~US$ <valor> · <interações>`**
-- "Falta na fase" (DoD gap —)
-- Next HITL checkpoint
-- Next step
+`scripts/render-toolbar.ps1` is an optional helper that renders the same information from a `001-state.md`. Hosts that cannot run scripts render the toolbar manually from the same fields.
 
-## Standard/SAFE example
-```
-ALFRED · SIGLA:PGTO · PGTO-142 "novo split de pagamento" · Standard · modelo: claude-opus-4-8
-[✓ Inception] [✓ Design] [▶ Execution] [◻ Validate] [◻ Operation] ██████░░░░ ~50%
-Units: [◻ U1] [◻ U2] [◻ U3] [◻ U4]
-Custo: 312k tokens · ~US$ 4,80 · 18 interações
-Falta na fase: U1..U4 + PR · Próximo checkpoint: revisão+merge (Tech Lead)
-→ Próximo passo: iniciar U1
+## FAST format
+One line only:
+
+```text
+ALFRED | SIGLA:SQ9 | #001-implantacao-alfred | FAST | Execution (3/5) | model: <current> | cost: <compact> | left: PR + merge
 ```
 
-## FAST one-line (compact, still shows cost)
+## Standard/SAFE format
+ASCII block with demand, lane, model, progress, phase track, current step, checkpoint, next step, and accumulated cost.
+
+```text
++-- ALFRED ------------------------------- SIGLA:SQ9 | #001-implantacao-alfred --+
+| Lane: STANDARD        Model: <current>       Progress: 45%     |
+| Cost: 312k tokens | ~US$ 4.80 | 18 interactions                |
+| 1 Inception [x] -> 2 Design [>] -> 3 Execution [ ] -> 4 Validate [ ] -> 5 Operation [ ] |
+| Step : generating technical spec (app: sq9-app)                |
+| HITL : spec approval - Tech Lead                               |
+| Next : review routing alternatives                             |
++----------------------------------------------------------------+
 ```
-ALFRED · PGTO-143 · FAST · Execution (3/5) · falta: PR+merge · modelo: haiku · ~US$ 0,40
-```
+
 
 ## Rules
-- Cost and model are NEVER omitted. FAST uses the compact line.
-- Model change between stages is announced here + audit event.
-- Emergency: track shows Execution ▶ with Inception/Design ⏳ post.
+- Show where the demand is, what remains, and the next human checkpoint.
+- Use pt-BR when rendered to people.
+- If model changes, announce it and record an audit event.
+- If emergency Execution-first is active, mark Inception/Design as post-mortem pending.
+- Optional tooling must never become the source of truth; `state` remains authoritative.

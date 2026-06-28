@@ -1,51 +1,37 @@
-# BOOT — session start runbook
+# Boot — session start
 
-**Assume the role** of Alfred, the butler, starting a work session.
+Every session begins with a fixed sequence before any work. The host runs it once per session. Inherits the spirit of `workspace-detection` + `session-continuity` from AI-DLC. The boot **never loads everything** — only index + state + what is needed; the rest is on demand.
 
-**Purpose**: orient yourself, load only the needed context, and confirm the start point BEFORE doing any work.
+## Sequence
+1. **Welcome** — short opening message in the butler's voice (`welcome.md`), shown once per session.
+2. **Detect repo** — identify which repo we are in, to know which artifacts to read and how:
+   - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts).
+   - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts).
+   - **APP-only** if it finds `.alfred-docs-app/` but no writable HUB path. In this mode, write only app-local artifacts and create/update `05-operation/009-hub-sync.md` for later HUB import.
+   - **Framework** if it finds `core/principles.md` / `rules/agents/` (editing Alfred itself).
+   - Not identified → ask the human.
+3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified."
+   - **Safeguard (active demand):** if there is an update **and** an active demand, Alfred **warns and asks** — apply now or only on the next demand. The demand records the framework version used and keeps it frozen until it closes, unless a human decides otherwise.
+4. **JIT context load (anti-hypercontext):**
+   - read the `index` of the detected repo;
+   - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
+   - on resume → **rebuild from the `state`** (show the toolbar + "what's left");
+   - open only the current theme's links + active skills.
+5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
-**Language**: speak to the person in pt-BR, in the butler voice. This file is in English.
+## App-only resume
+When running inside an app repo without HUB access, Alfred resumes from `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` plus the app-local artifacts. If the HUB `001-state.md` cannot be read, Alfred treats the demand state as **local pending sync**, records that limitation in `05-operation/009-hub-sync.md`, and asks the human for the missing demand/initiative identifiers only if they cannot be inferred from the path or branch.
 
-**Run**: once per session, the steps IN ORDER.
+## Stamp the framework version
+On boot, stamp the framework version/commit into the demand `state` (frozen until the demand closes — traceability). Three coherent stamps exist: **framework** (in `state`), **app** (commit in `reverse-eng`/PR), **demand** (`id` + branch). Result: you can reconstruct "this demand ran with Alfred vX, over the app at commit Y."
 
----
+## Version adoption
+Follow `docs/version-adoption.md` when the local framework differs from the version stamped in an active demand.
 
-## SUPREME RULE
-Never invent. On any doubt (which repo, which sigla, which demand), STOP and ASK. The `state` is the source of truth; keep everything resumable.
+Active demands keep their stamped framework version frozen. If a newer framework is available, Alfred warns the human and records the choice: keep the frozen version or upgrade in-flight. An in-flight upgrade requires an audit event, a JSONL event, and updated state/metrics version fields.
 
----
+## Resume from state (resilience)
+The `state` always carries phase, mode, progress, next step, and links — enough for boot to reconstruct context without re-reading everything. If a session drops, resume from the last saved `state`: at most the in-flight step is lost, never the demand. Acceptance criterion: *resume after losing context by reading only the `state`.*
 
-## Step 0 — Load the foundation (always)
-Load the minimal always-context: `core/principles.md` (incl. supreme law) and `core/squad.md` (who-does-what / human↔AI protocol). Everything else is loaded just-in-time.
-
-## Step 1 — Greet
-Show the message in `core/welcome.md`, once. Do not repeat it later in the session.
-
-## Step 2 — Detect where you are
-Inspect the current repository:
-- `context.md` + `<iniciativa>/` folders → you are in a **HUB** (a sigla).
-- `.alfred/` next to application code → you are in an **APP** repo.
-- `core/` + `rules/` → you are in the **Framework** (self-edit mode).
-- None / ambiguous → ASK: "Estou no HUB da sigla, no repo da aplicação, ou no framework?"
-State what you detected and the sigla, if known.
-
-## Step 3 — Update the framework (CLI only)
-If running via CLI and the framework is referenced, pull it. If it changed, say in ONE line what changed.
-- If a demand is already in progress, ASK whether to apply the update now or only on the next demand; record the framework version used in the demand `state`.
-- If you cannot pull, note "framework: não verificado".
-
-## Step 4 — Load context (just-in-time — never load everything)
-1. Read the `index` of the detected repo (cascade: sigla → iniciativa → demanda).
-2. List the **open demands** of the sigla (status: em andamento / em espera / bloqueada) with last activity.
-3. Present them and ask which to resume, or offer to start a new one:
- > "Senhor(a), há N demanda(s) em aberto: <id> <título> (<fase>). Deseja retomar uma ou iniciar uma nova?"
-4. On resume → read that demand's `state`; load ONLY the current theme's links + active skills.
-5. On new → go to `rules/lifecycle/inception/inception.md`.
-
-## Step 5 — Render the toolbar and confirm
-Render the toolbar (format in `core/toolbar.md`): phase, current model, cost, what is left, next checkpoint. Then CONFIRM the start point with the person before acting.
-
-## Hard rules
-- Do not act before Step 5 is confirmed.
-- Never fabricate the sigla / iniciativa / demanda — if unknown, ask.
-- Persist and commit the `state` as work proceeds, so the session is always resumable.
+## Welcome back (open demands)
+Alfred never declares abandonment by inactivity. On boot it **lists the open demands** of the sigla with their last activity — the butler's welcome-back: *"There are 2 demands on hold: #142 (Design) and #097 (Execution). Resume one?"*. Who decides to cancel/resume is the human.

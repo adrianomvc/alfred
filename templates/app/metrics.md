@@ -1,4 +1,14 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Métricas técnicas — <id-demanda> @ <repo>
-- Lead time (no repo) · nº revisões · defeitos pós-merge
-- Custo (tokens/$) atribuído a este repo
+# App Metrics
+
+> Generated content should be written in pt-BR.
+
+## Technical metrics
+- source: `05-operation/008-observability-log.jsonl`
+- alfred version:
+- alfred framework ref:
+- alfred framework commit:
+- observability schema:
+
+## Test results
+
+## Defects / regressions

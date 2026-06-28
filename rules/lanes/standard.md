@@ -1,19 +1,30 @@
-# Lane: Standard — operational prompt
+# Lane — Standard
 
-When Risk Mode = Standard, APPLY this. Balance of speed, clarity, control.
+Medium risk/complexity. Basic discovery, clear spec, acceptance criteria, technical review, one human checkpoint, validation before release.
 
-## Checkpoints (HITL)
-Two explicit checkpoints: (1) approve the spec at Design->Execution; (2) acceptance = merge of the PR at Validation . Present the 2-option message (Request Changes / Approve & Continue) in pt-BR.
+> Contract: `DoD per phase` · `HITL checkpoints` · `minimal artifacts` · `tracking`. Items **accumulate**: Standard includes FAST.
 
-## Per-phase behavior
-- Inception: problem statement + scope/out-of-scope + initial risks; requirements gate with answers.
-- Design: spec + acceptance criteria + decisions; execution/test plan; revalidate mode.
-- Execution: planning approved -> generation; technical review; units [x]; no unapproved scope growth; commits per step.
-- Validation: acceptance criteria OK + regression; PR ready.
-- Operation: release notes + basic metrics; summary + index; email at "demanda concluída".
+## DoD per phase (+ FAST)
+| Phase | Done when |
+|---|---|
+| Inception | requirements answered (gate); scope/out-of-scope; initial risks |
+| Design | spec + acceptance criteria + decisions; execution plan; mode revalidated |
+| Execution | technical review ok; units [x]; no unapproved new scope; tests during |
+| Validate | acceptance criteria ✓; regression; **PR ready to merge** |
+| Operation | release notes; basic metrics; `summary` + `index` |
 
-## Artifacts (minimum)
-state · spec · decisions · audit · metrics · PR.
+## HITL checkpoints
+- 1 checkpoint at the Design→Execution transition (approve the spec).
+- 1 final acceptance in Validate. **The PR merge into develop IS the acceptance** (protected branch forces human approval).
 
-## DoD
-Per phase as above; advance only when met. Acceptance is the human merge.
+## Minimal artifacts
+`state` + `spec` (problem, solution, acceptance criteria) + `decisions` + `audit` + PR.
+
+## Tracking
+`state` + `decisions` + `audit`.
+
+## Toolbar (full ASCII block)
+Rendered by the Orchestrator at the top of each interaction (see `core/...` toolbar spec): mode, % progress, the 5-phase track, current step, checkpoint, next step, accumulated cost.
+
+## Standardized HITL
+Every relevant transition presents 2 options: **🔧 Request Changes** / **✅ Approve & Continue** — no emergent menus. Preceded by a factual summary of what was done.

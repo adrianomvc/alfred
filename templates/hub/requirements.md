@@ -1,10 +1,19 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Requirements — <id-demanda>
-## Intent analysis
-- Clareza: <clara|vaga|incompleta> · Tipo: <stream/tipo> · Escopo: <...> · Complexidade: <...>
-## Perguntas (gate — preencher [Answer]:)
-## Q1 <pergunta>
-A) <...> B) <...> X) Outro
-[Answer]:
-## Consolidação
-- <requisitos consolidados>
+# Requirements
+
+> Generated content should be written in pt-BR.
+
+## Functional requirements
+
+## Non-functional requirements
+
+## Questions
+### Q1 - <pergunta clara e especifica?>
+- A) <opcao recomendada> (Recomendado)
+- B) <opcao alternativa>
+- C) A confirmar
+- D) <opcional, se necessario>
+- E) <opcional, se necessario>
+
+[Resposta]:
+
+## Contradictions / pending decisions

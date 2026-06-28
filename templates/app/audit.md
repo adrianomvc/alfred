@@ -1,6 +1,12 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Audit técnico — <id-demanda> @ <repo> (ações no código; evento)
-## <data> — <ator>
-- Ação (arquivo/commit): <...>
-- Sob delegação de: <humano>
-- [evento] modelo: <id> · status: <...>
+# Technical Audit
+
+> Generated content should be written in pt-BR.
+> Use `05-operation/008-observability-log.jsonl` for measurement events and metric calculation.
+
+## Alfred
+- version:
+- framework ref:
+- framework commit:
+
+| Time | Actor | Action | Evidence | Result |
+|---|---|---|---|---|

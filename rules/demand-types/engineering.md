@@ -1,22 +1,24 @@
-# Demand-type: Engineering — operational prompt
+# Demand-type — Engineering
 
-Types: refactor · debito tecnico · upgrade · migracao · observabilidade · performance · FinOps · automacao interna · arquitetura · mudanca por provedor.
+> Contract: `types covered` · `phase emphasis` · `typical sub-activities` · `mode tendency` · `special path`. References connectors/skills by **role**, not name.
 
-## Common
-Short Inception (clear technical problem) + strong technical lens (`tech-inception`); reverse-eng matters (refresh if stale); Design emphasis on decisions/ADR; Validation emphasis on regression; usually no business inception.
+## Types covered
+Refactor · tech debt · upgrade · migration · performance · security · FinOps · internal automation · architecture · provider change.
 
-## Subtype behavior
-- Refactor / tech debt: behavior preserved → acceptance = "tests pass + behavior unchanged". SOLID/template central. Standard; broad refactor rises by complexity.
-- Upgrade: breaking-change risk → review changelog/compat → update → regression → rollback. SAFE if major/many dependents.
-- Migration: high risk → SAFE; phased rollout (strangler/parallel-run), data care, explicit rollback; usually N units; phased PRs.
-- Performance: baseline before/after + perf tests; ties to cost/FinOps.
-- Security: security skill; tends SAFE; may originate as incident.
-- Observability / internal automation / FinOps: usually low risk → FAST/Standard.
-- Provider-driven (deprecation): external deadline; treat as upgrade/migration by size.
+## Common traits
+Short Inception (clear technical problem) with a **strong technical lens** (`tech-inception`); **reverse-eng matters** (staleness-checked); Design emphasizes **decisions/ADR**; Validate emphasizes **regression**; usually no external business Inception.
 
-## Edge cases
-- Reverse-eng stale vs current commit → refresh before acting; only touch with certainty.
-- Migration touching data → never irreversible without rollback + human ok.
+## Sub-flows by type
+- **Refactor / tech debt** — behavior **preserved**. Acceptance = "tests pass + behavior unchanged." SOLID/template at the center. Standard; broad refactor (many components) rises by complexity.
+- **Upgrade (dependency/framework)** — risk comes from **breaking changes**. Steps: review changelog/compat → update → **regression** → rollback plan. **SAFE** override if major/breaking or many dependents.
+- **Migration (tech/platform/provider)** — **high risk → SAFE**. Irreversibility + multi-component. Needs **phased rollout** (strangler/parallel-run), care with **data migration**, explicit **rollback**. Reverse-eng essential; often splits into several **units**.
+- **Performance** — requires **baseline before/after** (metrics) and **performance tests** in Validate. Risk if it touches a hot path. Ties to cost/FinOps.
+- **Security** — uses the **security skill** (precedence: most restrictive wins); tends SAFE; if a production vuln, may be born as an **incident** (Operacional).
+- **Observability / internal automation / FinOps** — usually low risk/internal → FAST/Standard.
+- **Provider change (deprecation)** — has an **external deadline**; risk by blast radius; treat as upgrade/migration by size.
 
-## Output example (pt-BR)
-"Upgrade major (breaking) → propondo SAFE. Plano faseado (strangler) com rollback por release; 3 units. Preciso da aprovacao de arquitetura."
+## Mode tendency
+Tends to **Standard**; **migration / architecture / security / breaking-upgrade → SAFE** (hard overrides).
+
+## Sub-activities (Design, by trigger)
+application-design · units-generation · NFR · infrastructure-design.

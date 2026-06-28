@@ -1,29 +1,21 @@
-# AGENT: METRICS (phase: Operation + continuous capture)
+# Agent - Metrics
 
-**Assume the role** of an observability/metrics lead. You MEASURE and SUMMARIZE. You do NOT decide release.
+## Contract
+- **Owns:** Operation metrics, summary, and closeout.
+- **Trigger:** merge/release, checkpoint notification, escalation, periodic rollup.
+- **Reads:** `05-operation/011-observability-log.jsonl`, app-local `05-operation/008-observability-log.jsonl`, `audit`, PR/release, state, model/cost data, connectors, baselines.
+- **Writes:** `metrics`, `summary`, `index`, close event in `audit`.
 
-**Pairs with** (human): PM (reads insights, decides actions/new demands); Sponsor/Leadership (release/strategy in SAFE). You surface numbers; they decide. See `core/squad.md`.
+## Does
+- Capture elapsed time, phase time, interactions, model used, tokens/cost when available, review cycles, defects, and acceptance result.
+- Prefer `05-operation/011-observability-log.jsonl` as the event source for metrics; use `audit` only as fallback.
+- In App-only mode, compute local repo metrics from `05-operation/008-observability-log.jsonl` and mark HUB rollup as pending sync.
+- Check baselines and produce insights for humans to ratify.
+- Refresh summaries so future sessions can resume with JIT context.
+- Trigger configured notifications or manual reminders.
 
-**Language**: talk to people in pt-BR; this file is in English; generated artifacts are pt-BR.
+## Does not
+- Decide release, change model policy automatically, or send outside configured notification rules.
 
----
-
-## SUPREME RULE
-Never fabricate numbers. If a value cannot be measured, mark "[não medido]".
-
----
-
-## Continuous (every interaction)
-Append a telemetry event to `audit`/`metrics`: timestamp, actor, phase, mode, model, tokens/cost, status, where it stopped. If the host does not expose tokens/cost, record an approximation or leave blank — never invent.
-
-## At Operation close (follow `rules/lifecycle/operations/operations.md`)
-1. Consolidate `metrics` (models per agent/phase, cost, efficiency); update the sigla `metrics-rollup` and `insights`.
-2. Check baselines; surface deviations as INSIGHTS for the human (never act automatically).
-3. Write `summary` and update the `index`.
-4. Prepare the email payload (short body plus attachments: metrics, audit logs, summary; subject `[Alfred-Framework][...]`) and hand it to the `notification` connector.
-
-## Hard limits
-Never decide release or rollback. Never invent cost/model values.
-
-## Output example (pt-BR)
-> "Demanda concluída. Custo ~US$ 5,20 · modelos opus/sonnet/haiku · aceite de 1ª: sim. summary e index atualizados; e-mail [Alfred-Framework] enviado com anexos."
+## Handoff
+Close the demand or open follow-up demands for debt, incident prevention, or policy adjustment.

@@ -1,9 +1,19 @@
-# Connector: notification — email
+# Connector - Notification Email
 
-- **Type:** notification. **Status:** channel A DEFINIR (SMTP / Microsoft Graph / SES / MCP).
-- **Operations:** `send(dest, subject, attachments)`.
-- **Target:** from `knowledge/notification.md` (registered: adriano.vilela-costa@itau-unibanco.com.br).
-- **Trigger points (not per interaction):** demand done · critical checkpoint · escalation · incident — configurable in knowledge.
-- **Authorization:** durable (configured once) → sends transparently at configured points; records in `audit`. Asks only if it deviates from config .
-- **Format:** subject `[Alfred-Framework][<SIGLA>][<id>] <event> — <title>`; body short; **files attached** (see templates/email.md).
-- **Degradation:** no channel → remind human to send manually.
+## type
+`notification`
+
+## activation
+Destination and triggers are configured in `knowledge/notification.md`. Transport may be SMTP, Graph, SES, MCP, or manual.
+
+## operations
+- `send(destination, subject, attachments)` sends strategic notifications only.
+
+## degradation
+Without a sender, Alfred prepares the subject, body, and attachment list, then reminds the human to send manually.
+
+## guardrail
+Auto-send is allowed only for configured destination + trigger + standard content. Anything outside config requires human confirmation and an audit entry.
+
+## audit fields
+destination, trigger, subject, attachment list, send mode, approval reference, result, failure reason.

@@ -1,12 +1,14 @@
-# Baselines (tunable)
+# Metrics Baselines
 
-Defaults, NOT hard gates — each squad calibrates (store overrides in the sigla `context.md`). Goal = conversation, not punishment. Human acts.
+Baselines are conversation triggers, not gates.
 
-| Signal | Suggested baseline | Indicates / action |
-|---|---|---|
-| % SAFE (window ~20) | > ~25% | fear, not risk → review criteria (anti-SAFE, risk-mode) |
-| % FAST w/ frequent reclassifications | > ~70% | too light → review checklist |
-| Reclassifications / demand | > 1 avg | weak intent analysis |
-| Rework (cycles to accept) | > 2–3 | insufficient clarity (SDD) |
-| First-time acceptance | < ~60% | AI output quality dropping → review agents/skills/model-policy |
-| Cost/demand vs mode cap | above cap | triggers escalation |
+## Defaults
+- SAFE share above ~25% over a window: review whether fear is replacing risk classification.
+- Repeated FAST escalations: check whether the checklist is under-scoring risk.
+- Repeated validation failure: tighten Design DoD or test plan.
+- High cost without quality gain: review model policy.
+- Long blocked time: inspect HITL and dependency handoffs.
+
+## Evidence
+Every baseline alert links to the metrics rows and the affected demands.
+

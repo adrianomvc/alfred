@@ -1,14 +1,34 @@
-# Connectors registry + contracts
+# Connectors Registry
 
-Connector = ACCESS to an external system. Rules depend on the **type/contract**, never the concrete (DIP). Optional: no connector → degrade to manual.
+Connectors are optional adapters. Alfred rules depend on the **role contract**, not a concrete tool. Without a connector, Alfred degrades to markdown and asks the human for the missing input/action.
 
-| Type | Contract (operations) | Degradation |
-|---|---|---|
-| observability | `get_logs(query, window) -> entries` · `get_alarms` | human provides logs |
-| vcs | `create_branch(id)` · `commit(msg)` · `open_pr(base,head)` — never merge protected | human commits/opens PR |
-| tracker | `get_demand(id) -> {title,desc,type}` · `open_issue` | human informs id / opens issue |
-| notification | `send(dest, subject, attachments)` | remind human to send manually |
-| telemetry (future) | `send_events(batch) -> ack` | events stay in audit/metrics (markdown) |
+## Required sections per connector
+- `type`
+- `activation`
+- `operations`
+- `degradation`
+- `audit fields`
 
-Each concrete connector file declares: type · activation (config/credential) · operations · degradation · status.
-Golden rule: swap CloudWatch→Datadog = new `observability` connector, rules untouched.
+Concrete host adapters must also follow `connectors/adapter-template.md` and `docs/adapter-implementation.md`.
+
+## Types
+| Type | Contract |
+|---|---|
+| observability | `get_logs(query, window)`, `get_alarms()` |
+| vcs | `create_branch(id)`, `commit(message)`, `open_pr(base, head)` |
+| tracker | `get_demand(id)`, `open_issue(data)` |
+| notification | `send(destination, subject, attachments)` |
+| telemetry | `send_events(batch)` |
+| usage-cost | `read_usage(window, filters)`, `map_usage(record)`, `append_usage_event(event)` |
+
+## Adapter states
+| State | Meaning |
+|---|---|
+| contract | role contract only; no host call |
+| handoff | Alfred prepares a manual action |
+| dry-run | adapter can validate/simulate without external mutation |
+| active | adapter may execute approved operations |
+| disabled | adapter exists but must not run |
+
+## Golden rule
+Rules reference the type. Swapping CloudWatch for Datadog or GitHub for GitLab is a connector change, not a lifecycle change.

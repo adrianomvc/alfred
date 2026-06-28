@@ -1,25 +1,32 @@
-# Lane: FAST — operational prompt
+# Lane — FAST
 
-When Risk Mode = FAST, APPLY this. Low risk & complexity → speed and flow.
+Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few checkpoints. The supreme law still applies (no hallucination; on doubt, stop and ask).
 
-## Autonomy
-Delegated autonomy: proceed WITHOUT per-step human confirmation; the human remains accountable, recorded in `audit`. Immediately STOP and ask on any escalation trigger: scope grew · risk rose · cost over cap · destructive/irreversible op · security · ambiguity · cross-app · repeated failure.
+> Contract (uniform across lanes): `DoD per phase` · `HITL checkpoints` · `minimal artifacts` · `tracking`. The lifecycle asks for "the active lane," not a fixed mode.
 
-## Per-phase behavior (compressed, never skipped)
-- Inception: 1 paragraph (problem+objective); requirements inline, few/no questions.
-- Design: inline (spec = the PR; no separate spec file).
-- Execution: implement; small PR; self-review; lean `audit`.
-- Validation: relevant local tests pass.
-- Operation: closes on merge; note optional.
+## DoD per phase
+| Phase | Done when |
+|---|---|
+| Inception | problem + objective clear; Risk Mode proposed |
+| Design | approach clear (inline) — no separate Design phase; folds into Execution |
+| Execution | small PR; self-review; lean audit |
+| Validate | relevant local tests pass |
+| Operation | merge done; optional note |
 
-## Artifacts (minimum)
-`state` + lean `audit` + PR. No formal spec/decisions.
+## HITL checkpoints
+**Delegated autonomy** — the AI executes and **records in `audit`** (the human stays responsible). Explicit human call **only** when an escalation trigger fires (`../common/overconfidence.md`): scope grew, risk rose, cost over ceiling, destructive op, security, unresolved ambiguity, cross-app effect, repeated failure.
 
-## DoD (gate)
-problem/objective clear · tests pass · PR merged (human merge = acceptance).
+## Minimal artifacts
+`state` (1 entry) + lean `audit` + PR. The spec **is** the PR's title + description. No formal `decisions`.
 
-## Toolbar (one line, still shows cost+model —)
-ALFRED · id · FAST · fase (x/5) · falta: ... · modelo: m · ~US$ c
+## Tracking
+`state` + lean `audit`. Lean audit = action + responsibility (`Sob delegação de: <human>`), **not** a raw input/output log. Minimum fields: date, action, under-delegation-of.
 
-## If unsure it is really FAST
-Re-run the checklist; if any hard override applies → raise the mode and re-confirm. Never keep a critical change in FAST.
+## Toolbar (single line)
+```
+ALFRED | SIGLA:SQ9 | #001-implantacao-alfred | FAST | Execution (3/5) | falta: PR + merge
+```
+Includes compact cost. FAST does not render the full ASCII block.
+
+## Anti-degeneration
+A critical thing must not be treated as FAST: hard overrides (`core/risk-mode.md`) force the mode up; on detecting a trigger, reclassification is mandatory.

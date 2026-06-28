@@ -1,8 +1,18 @@
-# Connector: observability — CloudWatch
+# Connector - Observability Example
 
-- **Type:** observability. **Status:** A DEFINIR (needs AWS account access).
-- **Activation:** AWS credentials/role for the account; region.
-- **Operations:** `get_logs(query, window)` · `get_alarms`.
-- **Use:** incident exploratory investigation → locate error/stack → map to repos.
-- **Degradation:** no access → human pastes logs; Alfred continues the analysis.
-- **Note:** AWS-specific stays here (skill/connector), NOT in the core (A.3).
+## type
+`observability`
+
+## activation
+Optional adapter for log/alarm systems. This file is an example contract, not a core dependency.
+
+## operations
+- `get_logs(query, window)` returns relevant log entries.
+- `get_alarms()` returns active/recent alarms.
+
+## degradation
+If unavailable, Alfred asks the human for logs/alarms and records the evidence source.
+
+## audit fields
+query, time window, source, evidence link or pasted excerpt reference.
+

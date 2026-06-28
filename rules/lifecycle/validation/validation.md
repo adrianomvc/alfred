@@ -1,70 +1,22 @@
-# PHASE: VALIDATION — "Validate"
+# Lifecycle - Validate ("Does it work?")
 
-**Assume the role** of a QA / reviewer.
+Prove the change satisfies the spec and avoids relevant regressions. Owner agent: **Reviewer**. Validation depth comes from the active lane and the actual risk.
 
-**Purpose**: confirm the execution meets the spec, the objective, and the acceptance criteria — with evidence, not opinion.
+## Steps
+1. Load `spec`, acceptance criteria, execution plan, PR/change, and active lane.
+2. Select the test strategy by need: unit, regression, integration, contract, e2e, performance, security.
+3. Run or request the relevant checks; record commands, result, and gaps.
+4. Review implementation against `spec`, SOLID/coding-standard, and acceptance criteria.
+5. Prepare evidence; satisfy **DoD Validate**; request final human acceptance when required.
+6. Treat merge to the protected branch as human acceptance; the AI never merges protected branches.
 
-**Language**: talk to people in pt-BR; this rule file is in English; artifacts pt-BR.
-
-**Prerequisites**: Execution done; a PR exists against `develop`; acceptance criteria defined in the spec.
-
----
-
-## SUPREME RULE
-Never claim "passed" or "done" without the actual output. If something cannot be tested, say so and ASK — do not fake results.
-
----
-
-## Who does what in this phase (from `core/squad.md`)
-- **AI (Reviewer)**: runs/inspects tests, checks vs spec + standard, drafts the acceptance checklist, prepares evidence.
-- **QA**: owns the acceptance; decides pass/fail on the criteria.
-- **PM**: confirms it meets the objective (value).
-- **Tech Lead / QA**: performs the **merge = acceptance** (the AI never merges).
-The AI presents results and a recommendation; the human accepts.
-
-## Step 1 — Choose the test strategy (by need, not everything)
-- ALWAYS: unit tests + **regression** of the touched areas.
-- Integration / contract: if it crosses services.
-- End-to-end: if it changes a user journey.
-- Performance: if it touches a hot path — require a **before/after baseline**.
-- Security: if sensitive data or SAFE — run the security-review skill.
-
-## Step 2 — Run / inspect and record
-Run the chosen tests (or inspect results). Capture the real output. Attach evidence/links into `audit` / validation (mandatory in Standard/SAFE).
-
-## Step 3 — Reviewer validation
-Check the code vs the `spec` AND vs the active **coding-standard / SOLID**. Produce the acceptance checklist:
-```
-Aceite — <id-demanda>
-[x] <critério 1>
-[x] <critério 2>
-[ ] <critério N> <- se algum falhar, REPROVA
-Regressão: <OK/FALHOU>
-Resultado: <APROVADO p/ merge | REPROVADO> (responsável: <papel>)
-```
-
-## Step 4 — Decision
-- Any criterion fails → return to Execution with the reason (record it). Do not advance.
-- All pass → ready for acceptance.
-
-## Step 5 — Acceptance = merge
-The **human merge of the PR into `develop` is the acceptance** (protected branch forces approval). Roles by mode: FAST (implicit) · Standard (Tech Lead/QA) · SAFE (role-based sign-off). Alfred NEVER merges.
-
-### Definition of Done (gate to Operation)
-- FAST: relevant local tests pass.
-- Standard: acceptance criteria ✓ + regression + PR merged.
-- SAFE: full applicable suite + formal evidence + sign-off + merged.
-
-## Checkpoint message (pt-BR)
-```
-✅ Validation — <id-demanda>
-- Testes: <resumo> · Regressão: <OK>
-- Critérios de aceite: <n/n>
-Pronto para merge/aceite por <papel>?
-```
+Use `../../../templates/hub/validation-evidence.md` for Standard/SAFE evidence. FAST may inline the same fields in the PR or summary when the change is small.
 
 ## Outputs
-test results · acceptance checklist · evidence · accept/reject decision · updated `state` + `audit`.
+validation result, test evidence, review findings, residual risks, updated `state` and `audit`.
 
-## Common mistakes to avoid
-- Saying "passou" without output. Disabling/loosening tests to pass. Accepting scope creep. Merging on the agent's own (the human merges). Skipping regression on refactors/migrations.
+## Human roles
+QA/PM for acceptance; Tech Lead for technical risk; Sponsor only when SAFE requires it.
+
+## Depth by mode
+FAST = relevant local checks and self-review. Standard = acceptance + regression evidence. SAFE = formal evidence plus integration/contract/e2e/perf/security as applicable.

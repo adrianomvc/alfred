@@ -1,7 +1,31 @@
-<!-- TEMPLATE — framework meta in EN; fill/generate content in pt-BR . Keep ~1 screen . -->
-# Summary — <id-demanda> (fechamento)
-- O que foi feito / o que evoluiu: <...>
-- Decisões-chave: <links D<n>>
-- Skills usadas: <...>
-- Débitos / próximas melhorias: <...>
-- Post-mortem (se emergência): <link>
+# Summary
+
+> Generated content should be written in pt-BR.
+
+## Outcome
+- status:
+- closed at:
+- accepted by:
+- release / PR:
+
+## What changed
+- 
+
+## Evidence
+- validation:
+- metrics:
+- observability log:
+- app artifacts:
+
+## Decisions
+- 
+
+## Follow-ups
+- 
+
+## Index updates
+- HUB index updated: yes | no | n/a
+- App index updated: yes | no | n/a
+
+## Resume note
+Short note for future sessions:

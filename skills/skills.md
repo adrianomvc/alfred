@@ -1,24 +1,30 @@
-# Skills registry + contract — operational prompt
+# Skills Registry
 
-Skill = pluggable CAPABILITY/knowledge. NOT a policy (that is `knowledge/`, always-in-force) and NOT access (that is `connectors/`).
-Opt-in and loaded JIT: load only ACTIVE skills, and only the relevant SECTION of each .
+Skills are optional specialty packs loaded just in time. They extend Alfred without changing core rules.
 
-## How the Orchestrator uses this
-1. At demand start, read this registry; propose the skills whose `trigger` matches (stream/type · mode · phase).
-2. The human confirms activation; record active skills in the HUB `skills.md`.
-3. The phase agent loads only the active skill(s), only the needed section. External skills: resolve the pointer (repo/URL) on activation; read only the needed part.
-4. At close, the `summary` records which skills were used.
+## Required sections per skill
+- `name`
+- `purpose`
+- `trigger`
+- `inputs`
+- `expected output`
+- `link`
+- `sections to load`
 
-## Contract (each skill file declares)
-name · purpose · trigger · inputs · expected output · link · sections (for internal JIT).
+## Precedence
+When skills conflict: safer/more restrictive wins; then more specific wins; unresolved conflict goes to the human.
 
-## Precedence on conflict
-1. more restrictive/safer wins · 2. more specific (app/sigla) > generic (framework) · 3. tie → human decides (logged in `decisions`/`audit`).
+## Loading
+The Orchestrator loads only active skills for the current phase, lane, demand type, and app context.
 
-## Registry
-| Skill | Purpose | Trigger |
+## Built-in skills
+| Skill | Link | Trigger |
 |---|---|---|
-| coding-standard | SOLID + good practices (base) | Execution/Validation (all) |
-| lang-<language> | language standard (overrides base) | Execution in that language |
-| security-review | security review | security / SAFE / sensitive data |
-| <external> | pointer to another repo | per its trigger |
+| `coding-standard` | `skills/coding-standard.md` | default Execution/Validate guidance |
+| `lang-python` | `skills/lang-python.md` | Python files, tests, Glue jobs, FastAPI, scripts |
+| `lang-sql` | `skills/lang-sql.md` | SQL files, DDL, validation queries, reconciliation, embedded SQL |
+| `lang-terraform` | `skills/lang-terraform.md` | Terraform files, IaC modules, providers, variables, outputs, plans |
+| `platform-aws-data` | `skills/platform-aws-data.md` | AWS Glue, DMS, S3, Catalog, Lake Formation, Step Functions, IAM, CloudWatch |
+| `security-review` | `skills/security-review.md` | security-sensitive changes or SAFE lane |
+
+See `docs/skills-activation.md` for activation and precedence examples.

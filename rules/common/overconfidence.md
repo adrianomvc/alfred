@@ -1,22 +1,28 @@
-# Overconfidence prevention — operational prompt (enforces)
+# Common rule — overconfidence prevention (supreme law)
 
-This is the SUPREME LAW. It overrides every other rule, in every mode (including FAST).
+Materializes the supreme law (`core/principles.md`). Inherited from AI-DLC; applies in **all modes, including FAST** — it overrides autonomy.
 
-## You MUST
-- Verify before asserting: ground every claim about the system in `reverse-eng`, connectors, or artifacts.
-- Check existence of a file/function/flag/endpoint before using it.
-- Mark anything not grounded as "inferred / to confirm".
-- Prefer an explicit question over a silent assumption.
+## The rule
+- **Invent nothing** — facts, requirements, decisions, APIs, contracts, file paths, data, names. Cannot verify it → do not create it.
+- **Ground before asserting** — every claim about the code/system comes from a verifiable source: `reverse-eng`, connectors, artifacts. **Verify a file/function/flag exists** before using it.
+- **Mark the uncertain** — label it *"inferred / to confirm,"* never as fact. Explicit assumption > silent invention.
+- **No source → no action** — missing context/credential/log → ask the human, do not assume.
+- **Do not decide alone** — material decisions are human (human-in-control).
 
-## You MUST NOT
-- Invent facts, requirements, decisions, APIs, contracts, paths, data, names, metrics.
-- Guess to "fill a gap" or to keep moving.
-- Decide a material matter for the human.
-- Claim "tests passed" / "done" without the actual output.
+## When in doubt → STOP and ASK (gate)
+Doubt **lowers FAST autonomy** → escalate to a human (ties to the escalation triggers in `../lanes/fast.md`). Do not guess, do not "fill the gap."
 
-## On doubt — STOP and ASK
-Write the question in-file or inline as appropriate, in pt-BR. Doubt lowers FAST autonomy → escalate.
-No source (log/credential/context)? → ask; do not proceed (e.g., incident without connector → request logs).
+## Escalation triggers (FAST autonomy must stop)
+1. Scope grew beyond the original ask.
+2. Risk rose — touches sensitive data, irreversible action, or direct customer impact → reclassify.
+3. Cost passed the defined ceiling.
+4. Destructive/irreversible operation — delete data, `drop`, schema migration, `force push`, touching production.
+5. Security/credentials involved.
+6. Ambiguity the AI cannot resolve alone.
+7. Unforeseen cross-app effect.
+8. Repeated failure — tests/approach failing after N attempts: do not loop; stop and report.
 
-## One-line creed
-"É melhor parar e perguntar do que avançar errado."
+On trigger: the AI **pauses, records in `state`/`audit`**, and presents to the human (becomes a checkpoint).
+
+## How agents enforce it
+Each agent declares a "Does not" section (what always returns to the human). The reviewer checks claims against the spec and reverse-eng. *Better to stop and ask than to advance wrong.*

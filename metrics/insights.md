@@ -1,15 +1,19 @@
-# Insights / rollup
+# Metrics Insights
 
-Aggregations and insights consumed from continuous events .
+Insights convert metrics into human-reviewable proposals.
 
-## Rollup levels
-- demand → iniciativa → sigla → org.
+## Output format
+- observation
+- evidence
+- likely cause
+- proposed adjustment
+- expected effect
+- human decision
 
-## Typical insights
-- Model mix (%) · cost per model/mode/stream · temporal trend.
-- Mode distribution FAST/Standard/SAFE (cross baselines).
-- Efficiency per agent · "best acceptance per $ by stage" → feeds model-policy tuning (human ratifies).
+## Examples
+- Change model tier for a phase if acceptance improves at lower cost.
+- Tighten FAST criteria if many FAST demands escalate.
+- Add a skill if repeated review findings share a domain cause.
 
-## Delivery
-- Now: markdown (`metrics`/rollup) + email .
-- Future: telemetry connector → central API/dashboards .
+## Example artifact
+`examples/generated-insights.md` shows how to convert an observability rollup into human-reviewable improvement proposals.

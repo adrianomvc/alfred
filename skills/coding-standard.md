@@ -1,24 +1,39 @@
-# Skill: coding-standard (SOLID base) — operational prompt
+# Skill - Coding Standard
 
-APPLY when writing/modifying code (Execution); the Reviewer checks against it (Validation).
-This is the BASE; if a `lang-<language>` skill is active and defines standards, IT WINS (more specific).
+## name
+`coding-standard`
 
-## Enforce (SOLID)
-- Single responsibility: one reason to change per unit/class/function.
-- Open/closed: extend without modifying stable code.
-- Liskov: subtypes are substitutable.
-- Interface segregation: small, focused interfaces.
-- Dependency inversion: depend on abstractions, not concretions.
+## purpose
+Default engineering standard when no language-specific skill is active.
 
-## Good practices (always)
-- Brownfield: modify in-place — NEVER create `Class_v2`, `file_new`.
-- Small, traceable changes; commit per step on the demand branch.
-- Automation-friendly UI (`data-testid` etc.).
-- Mirror the applicable template .
-- Never invent API/lib/path — verify in reverse-eng/repo first .
+## trigger
+Load during Execution and Validate when code, configuration, tests, or automation artifacts are changed.
 
-## Reviewer checklist (what to flag)
-SRP violations · hidden coupling · missing tests · duplicated logic (DRY) · naming inconsistent with the template · TODO/FIXME left · broad changes beyond scope.
+## inputs
+- active demand `state`
+- technical `spec`
+- execution plan when present
+- changed files and tests
 
-## If a language skill is missing
-Apply this base; if language-specific decisions are needed and unclear, ASK before assuming .
+## expected output
+- implementation guidance
+- review findings
+- proportional test strategy
+
+## link
+`skills/coding-standard.md`
+
+## sections to load
+- `rules`
+- `output`
+
+## rules
+- Prefer small, cohesive changes.
+- Respect existing architecture and naming.
+- Apply SOLID pragmatically: one reason to change, explicit dependencies, substitutable contracts, narrow interfaces.
+- Keep brownfield changes in place; never create `file_v2` as a workaround.
+- Add tests proportional to risk and blast radius.
+- Make automation-friendly UI/API changes where applicable.
+
+## output
+Execution and Reviewer use this as the baseline for code plans, implementation, and review findings.

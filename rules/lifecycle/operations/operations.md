@@ -1,65 +1,22 @@
-# PHASE: OPERATION — "Operate & evolve"
+# Lifecycle - Operation ("Did it land?")
 
-**Assume the role** of an operations / metrics lead.
+Close the demand after release/merge with traceability, metrics, and a resumable summary. Owner agent: **Metrics**.
 
-**Purpose**: follow the delivery in use, capture metrics and learning, summarize the context, and close the demand. This is where Alfred extends beyond build.
-
-**Language**: talk to people in pt-BR; this rule file is in English; artifacts pt-BR.
-
-**Prerequisites**: Validation passed and the PR merged.
-
----
-
-## SUPREME RULE
-Never invent metrics. If a value cannot be measured (no host/connector hook), leave it blank or mark "[não medido]". The human decides on actions.
-
----
-
-## Who does what in this phase (from `core/squad.md`)
-- **AI (Metrics)**: collects metrics, drafts the summary, updates the index, prepares the email.
-- **PM**: reads the insights, **decides actions** (new demands, priorities).
-- **Sponsor / Leadership**: decides release/strategy in SAFE.
-The AI surfaces numbers and insights; humans decide what to do with them.
-
-## Step 1 — Release
-Publish/note the release, scaled by mode. For SAFE: confirm monitoring is in place and keep the rollback ready. The release go/no-go is a human decision in SAFE.
-
-## Step 2 — Metrics & observability
-Consolidate `metrics`:
-- **Models** used per agent/phase; **cost** (tokens / estimated $); **efficiency** (lead time, rework cycles, first-time acceptance, % waiting on human).
-Update the sigla `metrics-rollup` and `insights`. Check **baselines**; if a signal deviates (e.g., >~25% SAFE, first-time acceptance <~60%, cost over cap), surface it as an INSIGHT for the human — never act automatically.
-
-## Step 3 — Summarize the context (keep it small)
-Write `summary` (what was done, what evolved, key decisions with links, skills used, debts/next steps). Update the `index` (move the demand to "Concluídas"). Archive detail; keep the digest so future demands load less.
-
-## Step 4 — Post-mortem (incidents only)
-MANDATORY if the demand came from an emergency: root cause, retroactive spec, lessons, preventive action. Without it, the demand does NOT close.
-
-## Step 5 — Notify by email (strategic point only)
-At "Demanda concluída" (and only at the configured strategic points — not per interaction), send via the `notification` connector to the target configured in `knowledge`. The send is transparent (authorized once in config); record it in `audit`; ASK only if it deviates from the config.
-- Subject: `[Alfred-Framework][<SIGLA>][<id>] Demanda concluída — <título>`
-- Body: short (header + summary + metric highlights + pointers). Do NOT paste file contents.
-- Attachments: `metrics`, `audit` (logs), `summary`.
-- No channel configured → remind the human to send manually.
-
-## Step 6 — Close
-Set `state` status = concluída. Turn debts/preventive actions into NEW demands. Update `audit`.
-
-### Definition of Done
-- FAST: closed on merge; note optional.
-- Standard: release notes + basic metrics + summary + index + email.
-- SAFE: + monitoring + active rollback + post-mortem (if emergency).
-
-## Completion message (pt-BR)
-```
-🏁 Demanda concluída — <id-demanda>
-- Entregue: <1 linha>
-- Custo: <tokens · $> · Aceite de 1ª: <s/n>
-- Summary e index atualizados · e-mail enviado (anexos)
-```
+## Steps
+1. Confirm release/merge state and link PR/release note.
+2. Collect metrics from `05-operation/011-observability-log.jsonl`: elapsed time, phase time, interactions, model/tokens/cost if available, retries, defects, blockers, and acceptance result.
+   - In App-only mode, collect local metrics from `05-operation/008-observability-log.jsonl` and leave HUB rollup changes in `05-operation/009-hub-sync.md`.
+3. Check baselines and flag drift: too much SAFE, excessive cost, repeated rework, missing post-mortem.
+4. Write `summary` and refresh `index` so future sessions load the result without re-reading all artifacts.
+   - HUB: update `alfred-docs-hub/index.md` open/closed demand rows, metrics/insights links, and follow-ups.
+   - App: update `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` reverse-eng status, evidence links, and HUB sync status.
+   - Summary: include a short resume note that explains the outcome and where future work should start.
+5. If Execution-first was used, complete post-mortem before closure.
+6. Send or remind the strategic notification configured in `knowledge/notification.md`; record the action in `audit`.
+7. Close `state`; convert follow-ups/debts into new demands.
 
 ## Outputs
-release note · `metrics` (+ rollup/insights) · `summary` · `index` updated · email sent (or reminder) · `state` closed.
+metrics, summary, updated index, notification record, final state.
 
-## Common mistakes to avoid
-- Fabricating cost/metrics. Auto-acting on a baseline deviation. Emailing on every interaction. Closing an incident without a post-mortem. Forgetting to spawn debts as new demands.
+## Depth by mode
+FAST = short close note and lean metrics. Standard = summary + baseline check. SAFE = complete evidence, post-release watch, and explicit follow-ups.

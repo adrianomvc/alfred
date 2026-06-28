@@ -1,66 +1,36 @@
-# PHASE: EXECUTION — "Do"
+# Lifecycle — Execution ("Do")
 
-**Assume the role** of a careful implementer.
+Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewer** (review) + Code Generator (generation). Subject to the supreme law; escalation triggers watched.
 
-**Purpose**: implement EXACTLY what the approved spec/plan says, in small, traceable, reviewed changes.
+## Steps
+1. Load `spec` + template + active coding-standard (JIT).
+2. **Planning** — numbered plan with checkboxes (single source) → approval (Standard/SAFE).
+3. **Generation** — step by step / **loop per unit**; **brownfield in-place** (never `file_v2`); mirror the template + SOLID. Code automation-friendly (`data-testid`, etc.).
+4. Commit on the **demand branch** at each step; update `state` + `audit`; watch the **escalation triggers**.
+5. Technical review (Reviewer); satisfy **DoD Execution** → PR ready.
 
-**Language**: talk to people in pt-BR; this rule file is in English; generated artifacts/code follow the repo + standards.
+## Inherited from AI-DLC
+- **Planning + Generation** — numbered plan with checkboxes (single source of truth) → step-by-step generation marking [x]; trace requirement→code.
+- **Two-level checkbox** — checkbox in the plan (detail) + in the `state` (phase) → feeds the toolbar.
+- **Brownfield in-place** — modify existing files; never create `arquivo_v2`.
 
-**Prerequisites**: Design done and approved (or, in FAST, a clear approach). A demand branch `alfred/<id-demanda>` exists.
+## Escalation
+Use `../../common/escalation-triggers.md` continuously. If a hard trigger fires, stop the unit, persist state/audit/observability, and ask the responsible human.
 
----
-
-## SUPREME RULE
-Never invent an API, library, path, or behavior — verify in the repo / reverse-engineering first, or ASK. Report failures honestly.
-
----
-
-## Who does what in this phase (from `core/squad.md`)
-- **AI (Code Generator + Reviewer)**: drafts the plan, implements per the plan, self-reviews, opens the PR, keeps `state`/`audit`.
-- **Developer**: pairs on implementation choices, can take over any step, runs things locally.
-- **Tech Lead**: does the **technical review** of the PR; approves dependency/risk calls.
-The AI implements and proposes; a human reviews and the human merge is the acceptance (Validation).
-
-## PART 1 — Planning (single source of truth)
-Create a numbered, checkbox plan. If the demand has units, one block per unit:
-```
-Plano de execução — <id-demanda>
-[ ] U1: <o quê> — arquivos: <paths> — testes: <quais>
-[ ] U2: <…>
-```
-- Number every step. Include file paths and the tests that will prove each step.
-- **Standard/SAFE**: present the plan and get it approved before generating, e.g.:
-  > "Plano em 4 units (U1..U4), com arquivos e testes de cada. Aprova para eu começar pela U1, <Tech Lead/Dev>?"
-- **FAST**: proceed (delegated autonomy; recorded in `audit`).
-- This plan is THE source of truth for generation — follow it exactly; do not improvise.
-
-## PART 2 — Generation (loop, step by step)
-For each step/unit in order (independent units MAY run in parallel — see parallelism):
-1. Open the target file(s). **Brownfield: modify in-place.** NEVER create `Class_v2.java`, `file_new.ts`, copies, or duplicates.
-2. Mirror the applicable **template** and obey the **coding-standard / SOLID** (language skill wins if active).
-3. Write the code AND its tests.
-4. Mark the step `[x]` in the plan; update `state` progress (the unit checkbox, current model, cost) and append an `audit` event: actor · action · model · status · where-it-stopped.
-5. **Commit on the demand branch** `alfred/<id-demanda>`, message referencing the id. Commit at each meaningful step (so work survives a crash).
-
-## Parallelism (safe only)
-You MAY fan out INDEPENDENT tasks (e.g., one per app). Each task writes to its OWN artifact; the Orchestrator serializes the merge into `state`. NEVER parallelize a checkpoint or edits to the same file.
-
-## STOP and ASK (escalation triggers)
-Immediately pause and ask the human if: scope grows beyond the spec · risk rises (sensitive data / irreversible / customer impact) · cost passes the cap · a destructive/irreversible op is needed (drop, schema change, force-push, production) · security/credentials involved · ambiguity you cannot resolve · a cross-app effect appears · the same approach fails after N attempts (do not loop).
-
-## Review and PR
-The Reviewer checks each change vs the spec AND vs the active coding-standard. Open the PR **against `develop`**. NEVER merge — the human merge is the acceptance (next phase). Protected branches enforce this.
-
-### Definition of Done (gate to Validation)
-- FAST: small PR + self-review + lean audit.
-- Standard: technical review done; all units `[x]`; tests written; no unapproved scope growth.
-- SAFE: + dependency management + role approvals + evidence; phased PRs for migrations.
-
-## Emergency note (incidents)
-For an incident, Execution comes FIRST (stabilize) — follow `rules/demand-types/operacional.md`. Still: nothing destructive without minimal human ok; record everything; the post-mortem is mandatory later.
+## Coding standard
+Code per the active coding-standard (SOLID) — use the **language skill** if present (override: most specific wins), else the base (`../../../skills/coding-standard.md`). Mirror the applicable **template** repo (load only relevant sections, JIT).
 
 ## Outputs
-in-place code changes · tests · PR (vs develop) · updated `state` + `audit` · commits on the branch.
+code/change · evidence · updated state · recorded deviations · technical review · PR.
 
-## Common mistakes to avoid
-- Creating `_v2`/duplicate files. Improvising beyond the plan. Skipping commits/state updates. Disabling tests to move on. Looping on a failing approach instead of escalating.
+## Human roles
+Developer, Tech Lead (review).
+
+## Checkpoint
+PR technical review (Standard/SAFE); dependency approvals (SAFE). FAST: only if scope grows.
+
+## Depth by mode
+FAST = self-review + small PR · Standard = PR + technical review · SAFE = + dependency management + approvals + evidence.
+
+## Special — emergency
+Execution-first: stabilize with minimal authorization; Inception/Design become a post-mortem (`../../demand-types/operacional.md`).
