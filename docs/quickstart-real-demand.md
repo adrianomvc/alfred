@@ -45,6 +45,9 @@ When creating `01-inception/002-reverse-eng.md`, record the app commit used for 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-reverse-eng-staleness.ps1 -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
 ```
+```bash
+python scripts/python/validate-reverse-eng-staleness.py -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
+```
 
 ## App-only mode
 If the demand starts while Alfred is running only in the app repo, create/update only `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
@@ -81,6 +84,9 @@ Before entering Execution for Standard/SAFE, run the optional SDD gate:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-sdd-gate.ps1 -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```
+```bash
+python scripts/python/validate-sdd-gate.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
+```
 
 Keep `001-state.md` current. A demand is only closed when the checklist is complete and `05-operation/009-summary.md`/`05-operation/008-metrics.md` are updated from `05-operation/011-observability-log.jsonl`.
 
@@ -95,6 +101,9 @@ Before advancing to a major checkpoint or closing a demand, run the optional dem
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-demand.ps1 -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
+```
+```bash
+python scripts/python/validate-demand.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```
 
 Use `-Strict` before closure when warnings should block the close.
