@@ -17,6 +17,15 @@ When skills conflict: safer/more restrictive wins; then more specific wins; unre
 ## Loading
 The Orchestrator loads only active skills for the current phase, lane, demand type, and app context.
 
+## External skills
+External skills live in other repos and are referenced by a pointer (path, URL, or sigla), resolved only on activation (JIT). They are not copied into the framework; only the pointer is registered (in the HUB `skills.md` for the sigla).
+
+## Versioning of external skills
+Default is **pinned**, for reproducibility (mirrors the framework version freeze and the anti-overconfidence rule):
+- On activation, Alfred resolves the external skill to a concrete **ref (branch + commit)** and records it in the demand `state`/`audit`. The pinned ref stays frozen for the demand unless a human changes it — so you can reconstruct which skill version ran.
+- A skill may opt into **track-latest** explicitly. Then Alfred re-resolves on each activation and **still records the resolved commit** in `audit`. On a new demand or re-activation it re-checks the ref (same idea as reverse-eng staleness); if the ref moved, it notes the change rather than assuming.
+- Degradation: if the host cannot resolve a remote ref, the human supplies the skill content/path and Alfred records the **unresolved ref** instead of guessing (anti-overconfidence).
+
 ## Built-in skills
 | Skill | Link | Trigger |
 |---|---|---|
