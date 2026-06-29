@@ -12,19 +12,22 @@ https://github.com/adrianomvc/alfred.git). Install: copy this file to
 (project); then invoke it. If `~/.alfred` is missing, tell the user to clone it
 and stop.
 
-## Locate the framework first
-The framework is in your home directory at `.alfred`: `$HOME/.alfred` on
-macOS/Linux, `%USERPROFILE%\.alfred` on Windows (e.g. `C:\Users\<you>\.alfred`).
-Resolve the **real absolute path** before reading — if `~`/`$HOME`/`$USERPROFILE`
-does not expand in your file tool, run a shell command to print the home
-directory (`echo $HOME` / `echo %USERPROFILE%` / `pwd` inside the dir) and use that.
-**Never** read a literal `~`, `$HOME`, or `$USER` placeholder, and never guess the
-username — read it from the resolved path.
+## Locate the framework first (mandatory — do this before any read)
+The framework is in the **logged-in user's** home at `.alfred`. **Never type or
+guess a username** (not `Administrator`, not a name) and never read a literal
+`~`/`$HOME`/`$USER`. Instead, run a command and use its **exact output** as the path:
 
-**Windows + Git Bash/MSYS gotcha:** the shell prints Unix-style paths like
-`/c/Users/<you>/.alfred`, but a Windows-native file tool needs `C:\Users\<you>\.alfred`.
-Convert `/c/...` → `C:\...` (and use backslashes) for the file tool. Do not pass
-`/c/...`, `/home/...`, or `~` to a native file reader.
+- **Windows + Git Bash/MSYS (the usual case):** `cygpath -w "$HOME/.alfred/core/boot.md"`
+  → prints e.g. `C:\Users\adria\.alfred\core\boot.md`. Read that **verbatim**.
+  Git Bash reports `/c/Users/.../.alfred`, which a native file tool rejects;
+  `cygpath -w` produces the `C:\...` form it accepts.
+- **macOS/Linux:** `echo "$HOME/.alfred/core/boot.md"`.
+- **Only in a real cmd.exe/PowerShell shell:** `echo %USERPROFILE%\.alfred\core\boot.md`.
+  **Do not** use `%USERPROFILE%`/`%APPDATA%` in Git Bash — `%VAR%` does not expand
+  there (it stays literal); use `$HOME`/`$USERPROFILE` (with `$`) + `cygpath` instead.
+
+Resolve the directory the same way for any other framework file. The username is
+whatever the command prints — taken from the live session, never assumed or typed.
 
 ## On invocation
 1. **Update (version-aware)** — decide by the state of `~/.alfred`:

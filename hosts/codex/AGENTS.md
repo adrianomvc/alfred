@@ -8,14 +8,12 @@ The framework is plain markdown at `~/.alfred` (clone once:
 `git clone https://github.com/adrianomvc/alfred.git ~/.alfred`). If it is missing,
 tell the user to clone it and stop.
 
-**Locate it first:** `$HOME/.alfred` on macOS/Linux, `%USERPROFILE%\.alfred` on
-Windows (e.g. `C:\Users\<you>\.alfred`). Resolve the real absolute path before
-reading — if `~`/`$HOME`/`$USERPROFILE` does not expand in your file tool, run a
-shell command to print the home directory and use that. **Never** read a literal
-`~`, `$HOME`, or `$USER` placeholder, and never guess the username — take it from
-the resolved path. **Windows + Git Bash/MSYS:** convert the shell's
-`/c/Users/<you>/.alfred` to native `C:\Users\<you>\.alfred` (backslashes) for the
-file tool; do not pass `/c/...`, `/home/...`, or `~` to a native file reader.
+**Locate it first (mandatory):** resolve the **logged-in user's** path by running
+a command and using its exact output — never type or guess a username, never read
+a literal `~`/`$HOME`/`$USER`:
+- Windows + Git Bash/MSYS (usual): `cygpath -w "$HOME/.alfred/core/boot.md"` → `C:\Users\<live-user>\.alfred\core\boot.md`; read verbatim (native readers reject `/c/Users/...`).
+- macOS/Linux: `echo "$HOME/.alfred/core/boot.md"`.
+- Only in real cmd.exe/PowerShell: `echo %USERPROFILE%\.alfred\...` — `%VAR%` does **not** expand in Git Bash (stays literal); there use `$HOME`/`$USERPROFILE` + `cygpath`.
 
 ## On start
 1. **Update (version-aware):** on the default branch, `git -C ~/.alfred pull --ff-only`;

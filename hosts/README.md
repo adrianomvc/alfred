@@ -17,17 +17,15 @@ itself never changes per host (D3, agnostic markdown).
    (supreme law: never invent), `core/risk-mode.md` (FAST/Standard/SAFE), butler persona.
 
 ### Path resolution (read this)
-The install location is `$HOME/.alfred` (macOS/Linux) or `%USERPROFILE%\.alfred`
-(Windows, e.g. `C:\Users\<you>\.alfred`). Hosts must resolve the **real absolute
-path** — if `~`/`$HOME`/`$USERPROFILE` does not expand in the file tool, print the
-home directory via a shell command and use that. Never read a literal `~`,
-`$HOME`, or `$USER` placeholder, and never guess the username — take it from the
-resolved path.
+The install location is the **logged-in user's** home at `.alfred`. Hosts must
+**never type or guess a username** and never read a literal `~`/`$HOME`/`$USER`.
+Resolve the path by running a command and using its **exact output**:
 
-**Windows + Git Bash/MSYS:** the shell reports `/c/Users/<you>/.alfred`, but a
-Windows-native file tool needs `C:\Users\<you>\.alfred`. Convert `/c/...` → `C:\...`
-with backslashes for the file tool; do not pass `/c/...`, `/home/...`, or `~` to a
-native file reader.
+- **Windows + Git Bash/MSYS (usual case):** `cygpath -w "$HOME/.alfred/core/boot.md"` → `C:\Users\<live-user>\.alfred\core\boot.md` (native readers reject the shell's `/c/Users/...`; `cygpath -w` produces the accepted `C:\...` form).
+- **macOS/Linux:** `echo "$HOME/.alfred/..."`.
+- **Only in a real cmd.exe/PowerShell:** `echo %USERPROFILE%\.alfred\...`. Do **not** use `%USERPROFILE%`/`%APPDATA%` in Git Bash — `%VAR%` stays literal there; use `$HOME`/`$USERPROFILE` + `cygpath`.
+
+The username is whatever the command prints — taken from the live session, never assumed or typed.
 
 ## Hosts
 | Host | Native entry mechanism | Entry file | Install |
