@@ -110,7 +110,7 @@ if (Test-Path -LiteralPath (Join-Path $InstallDir "VERSION")) {
 Info "Framework version: $installedVersion$(if ($Version -ne '') { " (pinned $Version)" })"
 
 # 3. Install the /alfred skill for the DEVIN CLI
-$skillSource = Join-Path $InstallDir "install/devin/alfred/SKILL.md"
+$skillSource = Join-Path $InstallDir "hosts/devin-cli/SKILL.md"
 if (-not (Test-Path -LiteralPath $skillSource)) {
   throw "Skill source not found: $skillSource"
 }

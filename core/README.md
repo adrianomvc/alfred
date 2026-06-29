@@ -32,6 +32,7 @@ The framework is the **single source, referenced — not copied — into HUBs/ap
 - [`glossary.md`](glossary.md) — terminology (sigla / initiative / demand / unit / lane).
 - `../rules/` — the customized AI-DLC engine (lanes · demand-types · lifecycle · agents · common).
 - `../skills/`, `../connectors/`, `../metrics/`, `../knowledge/`, `../templates/`, `../examples/`.
+- `../hosts/` — per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex) that load this framework via each host's native mechanism.
 
 ## Operating model
 Alfred has **no runtime of its own**. It is markdown instructions/artifacts consumed by host agents (DEVIN CLI/Web, Claude CLI, GitHub Copilot). Everything **degrades to plain markdown/ASCII** — any automation (metrics collection, cost, rich toolbar) is an optional layer. Nothing in the framework may require a specific model, API, CI, or UI.

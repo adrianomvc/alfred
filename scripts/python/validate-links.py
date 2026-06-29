@@ -25,7 +25,7 @@ from _common import read_text  # noqa: E402
 # Folders whose Markdown is part of the framework source (not generated artifacts).
 SCAN_DIRS = [
     "core", "rules", "skills", "connectors", "metrics",
-    "knowledge", "templates", "docs", "install",
+    "knowledge", "templates", "docs", "install", "hosts",
 ]
 # CHANGELOG.md is intentionally excluded: it is a historical ledger where path
 # references are point-in-time (a past entry may name a file that has since

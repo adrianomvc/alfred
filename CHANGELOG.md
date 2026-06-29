@@ -4,6 +4,12 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+### Added
+- `hosts/` — per-host integration entry points that bind Alfred to a coding agent through its native mechanism, distinct from connector adapters in `connectors/`. New: `claude-code/SKILL.md`, `github-copilot/copilot-instructions.md`, `codex/AGENTS.md`, plus `hosts/README.md` (common bind + per-host model-policy note). Each is a thin entry point that reads `core/boot.md` — the framework stays a single referenced source (D15).
+
+### Changed
+- DEVIN skill source moved from `install/devin/alfred/SKILL.md` to `hosts/devin-cli/SKILL.md`, so all host integrations live in one place; `install/` keeps the turn-key DEVIN installer (scripts updated to the new source path). Repo maps (`README.md`, `core/README.md`) now list `hosts/`. `validate-links` now also scans `hosts/`.
+
 ## 0.3.0 - 2026-06-29
 
 ### Summary
