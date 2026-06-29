@@ -9,6 +9,11 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
 
+> **Other hosts (Claude Code, GitHub Copilot, Codex):** this installer is the
+> turn-key path for the DEVIN CLI. The per-host entry points live in `hosts/`
+> (see `hosts/README.md`) — clone the framework, then register that host's entry
+> file. The DEVIN skill source itself now lives at `hosts/devin-cli/SKILL.md`.
+
 ## Windows (PowerShell)
 ```powershell
 powershell -ExecutionPolicy Bypass -File install/install.ps1

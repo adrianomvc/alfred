@@ -92,7 +92,7 @@ INSTALLED_VERSION="unknown"
 info "Framework version: $INSTALLED_VERSION${VERSION:+ (pinned $VERSION)}"
 
 # 2. Install the /alfred skill for the DEVIN CLI
-SKILL_SOURCE="$INSTALL_DIR/install/devin/alfred/SKILL.md"
+SKILL_SOURCE="$INSTALL_DIR/hosts/devin-cli/SKILL.md"
 [ -f "$SKILL_SOURCE" ] || { echo "Skill source not found: $SKILL_SOURCE" >&2; exit 1; }
 SKILL_TARGET="$SKILLS_DIR/alfred"
 mkdir -p "$SKILL_TARGET"

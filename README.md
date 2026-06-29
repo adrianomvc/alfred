@@ -24,6 +24,7 @@ Layer 1 of the framework is operational for pilots and real demands, and the SQ9
 - `connectors/` - plug-in contracts for VCS, tracker, notification, telemetry, observability.
 - `metrics/` - measurement contract, baselines, and insight rules.
 - `knowledge/` - org-level defaults and policy hooks.
+- `hosts/` - per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex) that load Alfred.
 - `docs/` and `examples/` - adoption guidance and minimal examples.
 
 ## Operating rule

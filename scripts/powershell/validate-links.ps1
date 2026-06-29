@@ -17,7 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 
-$scanDirs = @("core", "rules", "skills", "connectors", "metrics", "knowledge", "templates", "docs", "install")
+$scanDirs = @("core", "rules", "skills", "connectors", "metrics", "knowledge", "templates", "docs", "install", "hosts")
 $rootFiles = @("README.md")
 $inlinePathPattern = '^(core|rules|skills|connectors|metrics|knowledge|templates|docs|scripts|examples|install)/[\w./-]+$'
 
