@@ -62,7 +62,10 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D14/D40/D45: concrete host adapter activation now has states, a template, and runtime safety rules.
 - D14/D40/D45: connector contracts and adapter-shaped examples now have automated validation.
 - D46: model policy floors, tier map, adjustments, override warning, and toolbar transparency now have automated validation.
-- D15/D26: releases `0.1.0`–`0.2.2` are shipped with `VERSION`, changelog, validation policy, and adoption guidance.
+- D15/D26: releases `0.1.0`–`0.3.0` are shipped with `VERSION`, changelog, validation policy, and adoption guidance.
+- D39/D40: markdown-SOLID directory pass — `rules/` entry index, navigation-vs-contract naming convention, architecture SOLID extension checklist with an owner, and presentation moved out of the kernel into `core/presentation/`.
+- D39/D3: `validate-links` checks internal Markdown references (links + inline framework paths) in both runtimes, wired into `validate-framework`.
+- D14/D20/D44/D3: sandbox connector simulators (tracker, notification) joining the VCS dry-run adapter let a demand be rehearsed end-to-end offline before a real host exists.
 - D3/D14/D39: Python helper set under `scripts/python/` mirrors every PowerShell helper so validation runs on machines without PowerShell; scripts are split by runtime (`scripts/powershell/`, `scripts/python/`).
 - D23: branch promotion path (demand branch → develop → main) and HUB vs App protection are now defined in `connectors/git.md`.
 - D12: external skill versioning (pinned by default, opt-in track-latest, recorded ref) is now defined in `skills/skills.md`.
