@@ -4,6 +4,20 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 0.2.2 - 2026-06-28
+
+### Summary
+Presentation, persona, and AI-DLC depth pass, kept within the v0.2 line.
+
+### Added
+- Personalized butler welcome (`core/welcome.md`) stating the 5 phases, the FAST/Standard/SAFE risk modes, and the interaction style, plus an ASCII flow of phases and risk lanes.
+- Presentation profiles (`core/presentation.md`): one `state`, many renderers (`text` / `rich-cli` / `web`); the model stays on the compact source while helpers render (token economy). `render-toolbar` gains `-Profile rich` (ANSI color/bar/icons) and `-Profile web` (self-contained SVG). README embeds a self-contained flow SVG (`docs/assets/alfred-fluxo.svg`).
+- Design sub-activities materialized as JIT files (`rules/lifecycle/design/sub-activities/`): user-stories, application-design, functional-design, nfr-design, infrastructure-design, with a trigger ladder — closing the AI-DLC depth gap (A.2/D19).
+- Mid-workflow changes rule (`rules/common/workflow-changes.md`): safely add/skip/redo a sub-activity with confirm + impact warning + audit trail.
+
+### Changed
+- `escalation-triggers` now includes an error-handling recovery procedure with severity levels (critical/high/medium/low).
+
 ## 0.2.1 - 2026-06-28
 
 ### Added
