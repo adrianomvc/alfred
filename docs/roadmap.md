@@ -16,10 +16,9 @@
 - Host adapter implementation states and template are documented.
 - Connector contract and adapter-shape validation are automated.
 - Model-policy validation is automated for lane floors and transparency rules.
-- Release `0.1.0` is prepared in `VERSION` and `CHANGELOG.md`.
+- Releases `0.1.0` through `0.2.2` are shipped (`VERSION`, `CHANGELOG.md`); the v0.2 line added Python helpers, the DEVIN installer, per-type playbooks, the knowledge subsystem, presentation profiles, AI-DLC Design sub-activities, and the `property-based-testing` opt-in skill exercised by dogfooding.
 
 ## Next
-- Commit and optionally tag the human-approved `0.1.0` release.
 - Complete integrated validation for one real SQ9 demand after required environment parameters are provided.
 - Use `04-validate/014-environment-parameters.md` when real accounts, secrets, endpoints, buckets, schemas, or host access are missing.
 - Sync app-local work back to the HUB using `05-operation/009-hub-sync.md` when running App-only.

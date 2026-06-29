@@ -4,7 +4,7 @@ Prove the change satisfies the spec and avoids relevant regressions. Owner agent
 
 ## Steps
 1. Load `spec`, acceptance criteria, execution plan, PR/change, and active lane.
-2. Select the test strategy by need: unit, regression, integration, contract, e2e, performance, security.
+2. Select the test strategy by need: unit, regression, integration, contract, e2e, performance, security. Each strategy has concise JIT guidance in `sub-activities/` — load only the rungs the change triggers. These are sub-activities **inside Validate**, never new phases.
 3. Run or request the relevant checks; record commands, result, and gaps.
 4. Review implementation against `spec`, SOLID/coding-standard, and acceptance criteria.
 5. Prepare evidence; satisfy **DoD Validate**; request final human acceptance when required.

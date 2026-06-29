@@ -9,6 +9,8 @@ Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewe
 4. Commit on the **demand branch** at each step; update `state` + `audit`; watch the **escalation triggers**.
 5. Technical review (Reviewer); satisfy **DoD Execution** → PR ready.
 
+Each step has concise JIT guidance in `sub-activities/` (`workflow-planning` / `unit-loop` / `code-generation` / `technical-review`) — load only the rungs the demand triggers. These are sub-activities **inside Execution**, never new phases.
+
 ## Inherited from AI-DLC
 - **Planning + Generation** — numbered plan with checkboxes (single source of truth) → step-by-step generation marking [x]; trace requirement→code.
 - **Two-level checkbox** — checkbox in the plan (detail) + in the `state` (phase) → feeds the toolbar.

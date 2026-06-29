@@ -62,7 +62,7 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D14/D40/D45: concrete host adapter activation now has states, a template, and runtime safety rules.
 - D14/D40/D45: connector contracts and adapter-shaped examples now have automated validation.
 - D46: model policy floors, tier map, adjustments, override warning, and toolbar transparency now have automated validation.
-- D15/D26: release `0.1.0` is prepared with `VERSION`, changelog, validation policy, and adoption guidance.
+- D15/D26: releases `0.1.0`–`0.2.2` are shipped with `VERSION`, changelog, validation policy, and adoption guidance.
 - D3/D14/D39: Python helper set under `scripts/python/` mirrors every PowerShell helper so validation runs on machines without PowerShell; scripts are split by runtime (`scripts/powershell/`, `scripts/python/`).
 - D23: branch promotion path (demand branch → develop → main) and HUB vs App protection are now defined in `connectors/git.md`.
 - D12: external skill versioning (pinned by default, opt-in track-latest, recorded ref) is now defined in `skills/skills.md`.
@@ -72,6 +72,7 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D42/D3/D39: reconciled the parallel knowledge work — richer policy template, knowledge-governance guide, automation-fallback matrix, and a `validate-knowledge` helper (both runtimes) wired into framework validation.
 - D9/D3: presentation profiles (`core/presentation.md`) — text/rich-cli/web renderers over one `state`; `render-toolbar` gained `-Profile rich` (ANSI) and `web` (SVG); README embeds a self-contained flow SVG.
 - A.2/D19: Design sub-activities materialized as JIT files (`rules/lifecycle/design/sub-activities/`: user-stories, application-design, functional-design, nfr-design, infrastructure-design) — closing the AI-DLC depth gap.
+- A.2/D19: lifecycle depth parity — the other four phases now materialize their sub-activities as JIT files too (Inception: business/technical-inception, requirements-elicitation, risk-mode-proposal; Execution: workflow-planning, unit-loop, code-generation, technical-review; Validate: the 7 test strategies; Operation: metrics-collection, baseline-drift-check, closure-summary, hub-sync, strategic-notification, followup-conversion), each with a trigger ladder README and tracked by `validate-framework` in both runtimes.
 - AI-DLC parity: error-handling recovery procedure folded into `escalation-triggers`, and a new `rules/common/workflow-changes.md` for safe mid-demand process changes.
 - 8.3/8.4 + D12: acceptance criteria exercised by dogfooding — Alfred ran its own evolution (add the `property-based-testing` opt-in skill) as a real Engineering/Standard demand through all 5 phases in a dedicated dev HUB, passing `validate-demand -Strict` (0/0) in both runtimes. Closes the last AI-DLC opt-in extension gap.
 
@@ -86,8 +87,7 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - Release tags and adoption cadence still need human governance outside the framework.
 
 ## Next Implementation Order
-1. Commit and optionally tag the human-approved `0.1.0` release.
-2. Complete one real SQ9 demand through integrated validation once environment parameters are supplied.
-3. Add real host adapters only when a target host, credential owner, and allowed operations are defined.
-4. Add more language-, platform-, and organization-specific skills as new stacks appear.
-5. Convert repeated manual handoff patterns into optional scripts or adapters only after they prove stable in real use.
+1. Complete one real SQ9 demand through integrated validation once environment parameters are supplied.
+2. Add real host adapters only when a target host, credential owner, and allowed operations are defined.
+3. Add more language-, platform-, and organization-specific skills as new stacks appear.
+4. Convert repeated manual handoff patterns into optional scripts or adapters only after they prove stable in real use.

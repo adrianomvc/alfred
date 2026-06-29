@@ -10,6 +10,8 @@ Understand the demand before designing a solution. Owner agent: **Discovery**. S
 5. Pre-fill and **propose Risk Mode** (intent → checklist); human confirms in Standard/SAFE.
 6. Consolidate `problem`/`requirements`; record risks; satisfy **DoD Inception** (active lane) → checkpoint.
 
+Each step has concise JIT guidance in `sub-activities/` (`business-inception` / `technical-inception` / `requirements-elicitation` / `risk-mode-proposal`) — load only the rungs the demand triggers. These are sub-activities **inside Inception**, never new phases.
+
 ## Two lenses
 - **Business** — for Produto, imported from an external agent (`inception-input`). Alfred validates completeness, does not redo it.
 - **Technical** — always done by Alfred (`tech-inception`): what is affected, constraints, technical risks, feasibility, technical questions.
