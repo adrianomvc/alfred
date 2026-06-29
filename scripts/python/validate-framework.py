@@ -35,6 +35,10 @@ REQUIRED_PATHS = [
     "templates/hub/validation-evidence.md",
     "knowledge/README.md",
     "knowledge/policy-template.md",
+    "docs/knowledge-governance.md",
+    "docs/automation-fallback.md",
+    "scripts/powershell/validate-knowledge.ps1",
+    "scripts/python/validate-knowledge.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
@@ -145,6 +149,7 @@ def main():
     run_sub(root, "scripts/python/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-connectors.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-model-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
     run_sub(root, "scripts/python/alfred-boot.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-reverse-eng-staleness.py",

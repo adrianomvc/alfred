@@ -68,6 +68,8 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D12: external skill versioning (pinned by default, opt-in track-latest, recorded ref) is now defined in `skills/skills.md`.
 - D42: a knowledge guardrail policy template (`knowledge/policy-template.md`) is now available and tracked by framework validation.
 - D5/3.6: per-type playbooks now have a convention (`rules/demand-types/playbooks/`) and a first Migration playbook distilled from the real SQ9 migration pattern, referenced from the Engineering demand-type.
+- D14/D15: DEVIN CLI installer (`install/`) clones the framework into `~/.alfred` and installs the `/alfred` skill (verified against the real DEVIN skill format).
+- D42/D3/D39: reconciled the parallel knowledge work — richer policy template, knowledge-governance guide, automation-fallback matrix, and a `validate-knowledge` helper (both runtimes) wired into framework validation.
 
 ## Still incomplete
 - D10/D43: cost/tokens can be attributed from host exports, but are not automatically collected without a host usage source.

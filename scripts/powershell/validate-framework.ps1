@@ -49,6 +49,10 @@ $requiredPaths = @(
   "templates/hub/validation-evidence.md",
   "knowledge/README.md",
   "knowledge/policy-template.md",
+  "docs/knowledge-governance.md",
+  "docs/automation-fallback.md",
+  "scripts/powershell/validate-knowledge.ps1",
+  "scripts/python/validate-knowledge.py",
   "rules/demand-types/playbooks/README.md",
   "rules/demand-types/playbooks/migration.md",
   "install/README.md",
@@ -125,6 +129,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attributi
 & (Join-Path $rootPath "scripts/powershell/validate-skills-registry.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-connectors.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-model-policy.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-knowledge.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
 & (Join-Path $rootPath "scripts/powershell/alfred-boot.ps1") -Root $rootPath | Out-Null
 & (Join-Path $rootPath "scripts/powershell/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
