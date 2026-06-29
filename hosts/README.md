@@ -16,6 +16,13 @@ itself never changes per host (D3, agnostic markdown).
 3. The entry point then follows Alfred's own rules: boot sequence, `core/principles.md`
    (supreme law: never invent), `core/risk-mode.md` (FAST/Standard/SAFE), butler persona.
 
+### Path resolution (read this)
+The install location is `$HOME/.alfred` (macOS/Linux) or `%USERPROFILE%\.alfred`
+(Windows, e.g. `C:\Users\<you>\.alfred`). Hosts must resolve the **real absolute
+path** — if `~`/`$HOME`/`$USERPROFILE` does not expand in the file tool, print the
+home directory via a shell command and use that. Never read a literal `~`,
+`$HOME`, or `$USER` placeholder as part of the path.
+
 ## Hosts
 | Host | Native entry mechanism | Entry file | Install |
 |---|---|---|---|

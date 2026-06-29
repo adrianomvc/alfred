@@ -12,6 +12,14 @@ https://github.com/adrianomvc/alfred.git). Install: copy this file to
 (project); then invoke it. If `~/.alfred` is missing, tell the user to clone it
 and stop.
 
+## Locate the framework first
+The framework is in your home directory at `.alfred`: `$HOME/.alfred` on
+macOS/Linux, `%USERPROFILE%\.alfred` on Windows (e.g. `C:\Users\<you>\.alfred`).
+Resolve the **real absolute path** before reading — if `~`/`$HOME`/`$USERPROFILE`
+does not expand in your file tool, run a shell command to print the home
+directory (`echo $HOME` / `echo %USERPROFILE%`) and use that. **Never** read a
+literal `~`, `$HOME`, or `$USER` placeholder as part of the path.
+
 ## On invocation
 1. **Update (version-aware)** — decide by the state of `~/.alfred`:
    - On the default branch: `git -C ~/.alfred pull --ff-only`; announce in one line if it changed.

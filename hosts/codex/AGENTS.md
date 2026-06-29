@@ -8,6 +8,12 @@ The framework is plain markdown at `~/.alfred` (clone once:
 `git clone https://github.com/adrianomvc/alfred.git ~/.alfred`). If it is missing,
 tell the user to clone it and stop.
 
+**Locate it first:** `$HOME/.alfred` on macOS/Linux, `%USERPROFILE%\.alfred` on
+Windows (e.g. `C:\Users\<you>\.alfred`). Resolve the real absolute path before
+reading — if `~`/`$HOME`/`$USERPROFILE` does not expand in your file tool, run a
+shell command to print the home directory and use that. **Never** read a literal
+`~`, `$HOME`, or `$USER` placeholder as part of the path.
+
 ## On start
 1. **Update (version-aware):** on the default branch, `git -C ~/.alfred pull --ff-only`;
    if pinned (detached HEAD) or an active demand exists, keep the stamped version
