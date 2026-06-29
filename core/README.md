@@ -26,7 +26,7 @@ The framework is the **single source, referenced — not copied — into HUBs/ap
 - [`architecture.md`](architecture.md) — the 3 layers (Framework / HUB / App).
 - [`boot.md`](boot.md) — session start: detect HUB/APP → pull → JIT load.
 - [`welcome.md`](welcome.md) — the butler's voice (persona).
-- [`toolbar.md`](toolbar.md) — progress header rendered from `state`.
+- [`presentation/`](presentation/README.md) — optional rendering layer (profiles + toolbar) over one `state`; degrades to text.
 - [`squad.md`](squad.md) — human/agent responsibilities and HITL ownership.
 - [`model-policy.md`](model-policy.md) — model per phase/agent/lane (tunable).
 - [`glossary.md`](glossary.md) — terminology (sigla / initiative / demand / unit / lane).

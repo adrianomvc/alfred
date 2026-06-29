@@ -23,7 +23,7 @@ Alfred uses AI-DLC and agents to accelerate, but **the decision is always human 
 - **Anti-hypercontext** — no artifact past ~1 screen; split when it grows.
 - **Traceability** — `audit` in all modes (lean in FAST, complete in SAFE).
 - **Agnostic markdown** — everything degrades to markdown/ASCII; automation is an optional layer.
-- **SOLID** — applied to the framework itself and to generated code.
+- **SOLID** — applied in two scopes, each with an owner: **generated code** follows `skills/coding-standard.md` (Execution applies it, the Reviewer validates it); **Alfred's own architecture** follows the SOLID section + extension checklist in `core/architecture.md`, enforced at framework-change review by `docs/framework-validation.md`.
 
 ## Anti-goals (what Alfred is NOT)
 A clone of any heavy methodology; a copy of a light one; "just prompts"; "just a folder"; markdown bureaucracy; a heavy process; a human replacement; a framework that needs many files to start; one heavy ritual for everything; an agent that loads all context; docs nobody uses.

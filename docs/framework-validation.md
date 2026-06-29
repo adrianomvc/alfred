@@ -70,10 +70,12 @@ Get-ChildItem -Path examples -Recurse -Filter *observability-log.jsonl -Force |
 - `docs/adapter-implementation.md` keeps concrete host adapters explicit, auditable, and degradable.
 - `scripts/powershell/validate-connectors.ps1` checks connector contracts and adapter-shaped examples.
 - `scripts/powershell/validate-model-policy.ps1` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
+- The architecture SOLID **extension checklist** in `core/architecture.md` passes for any added/moved module, file, or artifact (one reason to change; extend by adding; substitutable via contract; loads only what it needs; depends on a role, not a concrete).
 
 ## Acceptance
 A framework change is acceptable when:
 - the changed rule/template has a clear owner module;
+- the architecture SOLID extension checklist (`core/architecture.md`) passes for added/moved files;
 - examples or docs reflect the new convention;
 - JSONL examples still parse;
 - connector contracts and adapter examples pass validation;
