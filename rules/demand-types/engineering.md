@@ -22,3 +22,7 @@ Tends to **Standard**; **migration / architecture / security / breaking-upgrade 
 
 ## Sub-activities (Design, by trigger)
 application-design · units-generation · NFR · infrastructure-design.
+
+## Playbooks
+Operational step-by-step roteiros for a type, loaded JIT when it applies (see `rules/demand-types/playbooks/`):
+- Migration → `rules/demand-types/playbooks/migration.md`.

@@ -67,6 +67,7 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D23: branch promotion path (demand branch → develop → main) and HUB vs App protection are now defined in `connectors/git.md`.
 - D12: external skill versioning (pinned by default, opt-in track-latest, recorded ref) is now defined in `skills/skills.md`.
 - D42: a knowledge guardrail policy template (`knowledge/policy-template.md`) is now available and tracked by framework validation.
+- D5/3.6: per-type playbooks now have a convention (`rules/demand-types/playbooks/`) and a first Migration playbook distilled from the real SQ9 migration pattern, referenced from the Engineering demand-type.
 
 ## Still incomplete
 - D10/D43: cost/tokens can be attributed from host exports, but are not automatically collected without a host usage source.
