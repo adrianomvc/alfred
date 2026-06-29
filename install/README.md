@@ -35,8 +35,23 @@ DEVIN CLI reads on every platform).
 |---|---|---|---|
 | Framework repo | `-FrameworkUrl` | `ALFRED_FRAMEWORK_URL` | `https://github.com/adrianomvc/alfred.git` |
 | Install dir | `-InstallDir` | `ALFRED_INSTALL_DIR` | `~/.alfred` |
+| Version (tag) | `-Version` | `ALFRED_VERSION` | latest on default branch |
 | Branch | `-Branch` | `ALFRED_BRANCH` | repo default |
 | Skills dir | `-SkillsDir` | `ALFRED_SKILLS_DIR` | `%APPDATA%\devin\skills` / `~/.agents/skills` |
+
+## Versions
+Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).
+- **Latest stable** (default): the installer tracks the default branch (`main`).
+- **Pinned** (reproducible): pass a tag to freeze the framework version.
+```powershell
+powershell -ExecutionPolicy Bypass -File install/install.ps1 -Version v0.2.0
+```
+```bash
+ALFRED_VERSION=v0.2.0 bash install/install.sh
+```
+Re-running with a different `-Version` switches `~/.alfred` to that tag; re-running
+without it returns to the latest on the default branch. A pinned version maps to
+the framework version a demand stamps in its `state` (reproducibility — D26).
 
 ## Verify
 ```bash

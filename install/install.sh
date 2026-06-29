@@ -13,29 +13,40 @@ set -euo pipefail
 FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-https://github.com/adrianomvc/alfred.git}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
 BRANCH="${ALFRED_BRANCH:-}"
+VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
 SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.agents/skills}"
 
 info() { echo "[alfred] $*"; }
 
 command -v git >/dev/null 2>&1 || { echo "git is required but not found on PATH." >&2; exit 1; }
 
+# VERSION (a tag) takes precedence over BRANCH; with neither, default branch (latest).
+REF="${VERSION:-$BRANCH}"
+
 # 1. Clone or update the framework into ~/.alfred
 if [ -d "$INSTALL_DIR/.git" ]; then
   info "Updating existing framework at $INSTALL_DIR"
-  git -C "$INSTALL_DIR" fetch --quiet origin
-  [ -n "$BRANCH" ] && git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
-  git -C "$INSTALL_DIR" pull --quiet --ff-only
+  git -C "$INSTALL_DIR" fetch --quiet --tags origin
+  if [ -n "$VERSION" ]; then
+    git -C "$INSTALL_DIR" checkout --quiet "$VERSION"   # pinned tag (detached); no pull
+  elif [ -n "$BRANCH" ]; then
+    git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
+    git -C "$INSTALL_DIR" pull --quiet --ff-only
+  else
+    git -C "$INSTALL_DIR" pull --quiet --ff-only
+  fi
 elif [ -e "$INSTALL_DIR" ]; then
   echo "$INSTALL_DIR exists but is not a git repo. Move or remove it, then re-run." >&2
   exit 1
 else
   info "Cloning framework into $INSTALL_DIR"
-  if [ -n "$BRANCH" ]; then
-    git clone --quiet --branch "$BRANCH" "$FRAMEWORK_URL" "$INSTALL_DIR"
-  else
-    git clone --quiet "$FRAMEWORK_URL" "$INSTALL_DIR"
-  fi
+  git clone --quiet "$FRAMEWORK_URL" "$INSTALL_DIR"
+  [ -n "$REF" ] && git -C "$INSTALL_DIR" checkout --quiet "$REF"
 fi
+
+INSTALLED_VERSION="unknown"
+[ -f "$INSTALL_DIR/VERSION" ] && INSTALLED_VERSION="$(head -n1 "$INSTALL_DIR/VERSION" | tr -d '[:space:]')"
+info "Framework version: $INSTALLED_VERSION${VERSION:+ (pinned $VERSION)}"
 
 # 2. Install the /alfred skill for the DEVIN CLI
 SKILL_SOURCE="$INSTALL_DIR/install/devin/alfred/SKILL.md"

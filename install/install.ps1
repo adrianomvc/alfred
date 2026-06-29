@@ -12,11 +12,16 @@
 
 .EXAMPLE
   irm https://raw.githubusercontent.com/adrianomvc/alfred/main/install/install.ps1 | iex
+
+.EXAMPLE
+  # Pin a specific framework version (reproducible)
+  powershell -ExecutionPolicy Bypass -File install/install.ps1 -Version v0.2.0
 #>
 param(
   [string]$FrameworkUrl = "https://github.com/adrianomvc/alfred.git",
   [string]$InstallDir = (Join-Path $HOME ".alfred"),
   [string]$Branch = "",
+  [string]$Version = "",
   [string]$SkillsDir = (Join-Path $env:APPDATA "devin/skills")
 )
 
@@ -29,23 +34,36 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
   throw "git is required but was not found on PATH."
 }
 
+# $Version (a release tag, e.g. v0.2.0) pins a reproducible version; it takes
+# precedence over $Branch. With neither, the default branch (latest) is used.
+$ref = if ($Version -ne "") { $Version } else { $Branch }
+
 # 2. Clone or update the framework into ~/.alfred
 if (Test-Path -LiteralPath (Join-Path $InstallDir ".git")) {
   Info "Updating existing framework at $InstallDir"
-  git -C $InstallDir fetch --quiet origin
-  if ($Branch -ne "") { git -C $InstallDir checkout --quiet $Branch }
-  git -C $InstallDir pull --quiet --ff-only
+  git -C $InstallDir fetch --quiet --tags origin
+  if ($Version -ne "") {
+    git -C $InstallDir checkout --quiet $Version   # pinned tag (detached); no pull
+  } elseif ($Branch -ne "") {
+    git -C $InstallDir checkout --quiet $Branch
+    git -C $InstallDir pull --quiet --ff-only
+  } else {
+    git -C $InstallDir pull --quiet --ff-only
+  }
 } elseif (Test-Path -LiteralPath $InstallDir) {
   throw "$InstallDir exists but is not a git repo. Move or remove it, then re-run."
 } else {
   Info "Cloning framework into $InstallDir"
   # core.longpaths handles deep example paths beyond the Windows MAX_PATH limit.
-  if ($Branch -ne "") {
-    git -c core.longpaths=true clone --quiet --branch $Branch $FrameworkUrl $InstallDir
-  } else {
-    git -c core.longpaths=true clone --quiet $FrameworkUrl $InstallDir
-  }
+  git -c core.longpaths=true clone --quiet $FrameworkUrl $InstallDir
+  if ($ref -ne "") { git -C $InstallDir checkout --quiet $ref }
 }
+
+$installedVersion = "unknown"
+if (Test-Path -LiteralPath (Join-Path $InstallDir "VERSION")) {
+  $installedVersion = (Get-Content -LiteralPath (Join-Path $InstallDir "VERSION") -TotalCount 1).Trim()
+}
+Info "Framework version: $installedVersion$(if ($Version -ne '') { " (pinned $Version)" })"
 
 # 3. Install the /alfred skill for the DEVIN CLI
 $skillSource = Join-Path $InstallDir "install/devin/alfred/SKILL.md"
