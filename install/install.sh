@@ -70,6 +70,12 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
     git -C "$INSTALL_DIR" pull --quiet --ff-only
   else
+    # Return to the latest on the default branch. This also recovers from a
+    # pinned/rolled-back (detached) state, where a bare `pull` would fail.
+    git -C "$INSTALL_DIR" remote set-head origin --auto >/dev/null 2>&1 || true
+    DEFAULT="$(git -C "$INSTALL_DIR" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')"
+    [ -n "$DEFAULT" ] || DEFAULT="main"
+    git -C "$INSTALL_DIR" checkout --quiet "$DEFAULT"
     git -C "$INSTALL_DIR" pull --quiet --ff-only
   fi
 elif [ -e "$INSTALL_DIR" ]; then

@@ -86,6 +86,12 @@ if (Test-Path -LiteralPath (Join-Path $InstallDir ".git")) {
     git -C $InstallDir checkout --quiet $Branch
     git -C $InstallDir pull --quiet --ff-only
   } else {
+    # Return to the latest on the default branch. This also recovers from a
+    # pinned/rolled-back (detached) state, where a bare `pull` would fail.
+    git -C $InstallDir remote set-head origin --auto | Out-Null
+    $default = (git -C $InstallDir symbolic-ref --quiet --short refs/remotes/origin/HEAD)
+    if ($default) { $default = $default -replace '^origin/', '' } else { $default = "main" }
+    git -C $InstallDir checkout --quiet $default
     git -C $InstallDir pull --quiet --ff-only
   }
 } elseif (Test-Path -LiteralPath $InstallDir) {

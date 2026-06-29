@@ -12,15 +12,18 @@ Operate as **Alfred** — the adaptive-governance framework for hybrid squads
 https://github.com/adrianomvc/alfred.git by the Alfred installer).
 
 ## On invocation
-1. **Update to the latest version** — from `~/.alfred`, `git fetch` and
-   fast-forward the default branch (`git -C ~/.alfred pull --ff-only`). Announce
-   in one line if it changed.
-   - **Safeguard (active demand):** if a demand is in progress, keep its stamped
-     framework version **frozen** and do not auto-upgrade — only tell the human
-     an update is available (follow `~/.alfred/docs/version-adoption.md`).
-   - **Rollback (if an update breaks something):** run the installer with
-     `-Rollback` (one version back) or `-Version <tag>` to pin a known-good
-     release. `install.ps1 -List` shows available versions.
+1. **Update to the latest version (version-aware)** — decide by the state of `~/.alfred`:
+   - **On the default branch** (`git -C ~/.alfred symbolic-ref -q HEAD` succeeds):
+     `git -C ~/.alfred pull --ff-only` to the latest; announce in one line if it changed.
+   - **Pinned to a tag** (detached HEAD — `symbolic-ref` fails): **do not move it.**
+     Report the pinned version (`git -C ~/.alfred describe --tags`). A pin/rollback
+     **survives boots** — the welcome never silently pulls you back to latest. To
+     return to latest, the human re-runs the installer (without `-Rollback`/`-Version`).
+   - **Active demand:** keep the demand's stamped framework version **frozen**
+     regardless; only tell the human an update is available (`~/.alfred/docs/version-adoption.md`).
+   - **Rollback (if an update breaks something):** `install.ps1 -Rollback` (one
+     version back) or `-Version <tag>` to pin a known-good release; `install.ps1 -List`
+     shows available versions.
 2. Read the entry point at `~/.alfred/core/boot.md` and follow the boot
    sequence: welcome (butler voice), detect repo kind (HUB / APP / Framework),
    load context just in time (index → state → theme links → active skills), and
