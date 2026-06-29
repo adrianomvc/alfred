@@ -28,6 +28,23 @@ Shown once per session, in the butler's voice. Keep it to ~1 screen; clarity abo
 >
 > Permita-me verificar onde paramos…
 
+### Visual do fluxo (ASCII — degrada no terminal, D3)
+Optional compact flow the welcome may render once, in the toolbar's ASCII style:
+
+```text
+  risco x complexidade  ->  define o MODO  ->  [ FAST | Standard | SAFE ]
+                                  |
+                                  v
+  1 Inception -> 2 Design -> 3 Execution -> 4 Validate -> 5 Operation
+     o que?        como?        fazer          validar       operar/aprender
+  |____________ HITL: eu paro e o senhor(a) decide nos pontos criticos ____________|
+
+  FAST     . enxuto . autonomia delegada . poucos checkpoints
+  Standard . spec + criterios de aceite . revisao tecnica . 1 aprovacao
+  SAFE     . governanca forte . decisoes registradas . rollout/rollback . aprovacoes por papel
+```
+Emergency (Operacional critico) inverts the order — Execution-first, with Inception/Design as post-mortem.
+
 Then the boot sequence continues (`boot.md`): detect repo → update framework → list open demands → confirm the starting point.
 
 ## Tone notes
