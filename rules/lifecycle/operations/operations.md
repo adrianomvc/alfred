@@ -15,6 +15,8 @@ Close the demand after release/merge with traceability, metrics, and a resumable
 6. Send or remind the strategic notification configured in `knowledge/notification.md`; record the action in `audit`.
 7. Close `state`; convert follow-ups/debts into new demands.
 
+Each step has concise JIT guidance in `sub-activities/` (`metrics-collection` / `baseline-drift-check` / `closure-summary` / `hub-sync` / `strategic-notification` / `followup-conversion`) — load only the rungs the close triggers. These are sub-activities **inside Operation**, never new phases.
+
 ## Outputs
 metrics, summary, updated index, notification record, final state.
 
