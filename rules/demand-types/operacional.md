@@ -5,6 +5,20 @@
 ## Types covered
 Bug · incident · hotfix · alert · production failure · pipeline error · degradation · emergency rollback · support.
 
+## Paths (compact)
+The branch between the normal cycle and the emergency Execution-first (degrades to plain ASCII):
+
+```text
+  Operational demand
+        │ urgent?
+   no ──┴── yes (incident · hotfix · rollback · production failure)
+   │                                   │
+   ▼ normal (linear)                   ▼ Execution-first (stabilize first, record later)
+   Inception ─► Design ─►        Declare ─► Investigate ─► Authorize (HITL min) ─► Stabilize
+   Execution ─► Validate ─►        ─► Validate-stab ─► Post-mortem (Inception/Design retroactive)
+   Operation                        ─► Operation     · rule: no post-mortem ─► does NOT close
+```
+
 ## Normal (bug, support, alert, light degradation)
 - Lean cycle, FAST/Standard: reproduce → fix → regression test → PR/merge.
 - Inception/Design compressed (1 line each); Validate focuses on regression.

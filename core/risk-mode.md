@@ -41,6 +41,25 @@ Take the **greater** of the two sums (0–10 each):
 - SAFE requires an **explicit justification** in `decisions` (which override/score fired). No justification → drops to Standard.
 - Periodic review: if the squad classifies > ~25% as SAFE in a window, it is fear, not risk → revisit criteria (see `../metrics/baselines.md`).
 
+## Decision flow (compact)
+The whole classification as one scannable flow (degrades to plain ASCII):
+
+```text
+  RISK (0-10) ─┐
+               ├─► take the GREATER ─► 0-3 FAST · 4-6 Standard · 7-10 SAFE
+  COMPLEX(0-10)┘                                   │
+                                                   ▼  hard overrides (force UP, never down)
+   sensitive | irreversible | customer-impact = 2 ─► min Standard  (2+ of these ─► SAFE)
+   architectural change | multi-squad             ─► SAFE
+                                                   │
+                                                   ▼
+   SAFE chosen? ─► justify in `decisions`  (no justification ─► drop to Standard)
+                                                   │
+                                                   ▼
+   AI proposes ─► human confirms (Standard/SAFE) · delegated autonomy (FAST)
+   later: rises any time on a trigger · lowering needs human approval
+```
+
 ## Time axis (Operational stream)
 Risk Mode measures *governance*. For critical Operational (incident/hotfix/rollback) there is an orthogonal axis — **urgency**:
 - **Normal** — full cycle at the mode's depth.
