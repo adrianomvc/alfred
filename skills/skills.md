@@ -35,5 +35,6 @@ Default is **pinned**, for reproducibility (mirrors the framework version freeze
 | `lang-terraform` | `skills/lang-terraform.md` | Terraform files, IaC modules, providers, variables, outputs, plans |
 | `platform-aws-data` | `skills/platform-aws-data.md` | AWS Glue, DMS, S3, Catalog, Lake Formation, Step Functions, IAM, CloudWatch |
 | `security-review` | `skills/security-review.md` | security-sensitive changes or SAFE lane |
+| `property-based-testing` | `skills/property-based-testing.md` | SAFE lane or units with clear invariants |
 
 See `docs/skills-activation.md` for activation and precedence examples.
