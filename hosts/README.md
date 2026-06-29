@@ -21,7 +21,13 @@ The install location is `$HOME/.alfred` (macOS/Linux) or `%USERPROFILE%\.alfred`
 (Windows, e.g. `C:\Users\<you>\.alfred`). Hosts must resolve the **real absolute
 path** — if `~`/`$HOME`/`$USERPROFILE` does not expand in the file tool, print the
 home directory via a shell command and use that. Never read a literal `~`,
-`$HOME`, or `$USER` placeholder as part of the path.
+`$HOME`, or `$USER` placeholder, and never guess the username — take it from the
+resolved path.
+
+**Windows + Git Bash/MSYS:** the shell reports `/c/Users/<you>/.alfred`, but a
+Windows-native file tool needs `C:\Users\<you>\.alfred`. Convert `/c/...` → `C:\...`
+with backslashes for the file tool; do not pass `/c/...`, `/home/...`, or `~` to a
+native file reader.
 
 ## Hosts
 | Host | Native entry mechanism | Entry file | Install |

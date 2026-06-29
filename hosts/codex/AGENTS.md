@@ -12,7 +12,10 @@ tell the user to clone it and stop.
 Windows (e.g. `C:\Users\<you>\.alfred`). Resolve the real absolute path before
 reading — if `~`/`$HOME`/`$USERPROFILE` does not expand in your file tool, run a
 shell command to print the home directory and use that. **Never** read a literal
-`~`, `$HOME`, or `$USER` placeholder as part of the path.
+`~`, `$HOME`, or `$USER` placeholder, and never guess the username — take it from
+the resolved path. **Windows + Git Bash/MSYS:** convert the shell's
+`/c/Users/<you>/.alfred` to native `C:\Users\<you>\.alfred` (backslashes) for the
+file tool; do not pass `/c/...`, `/home/...`, or `~` to a native file reader.
 
 ## On start
 1. **Update (version-aware):** on the default branch, `git -C ~/.alfred pull --ff-only`;
