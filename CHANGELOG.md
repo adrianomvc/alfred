@@ -4,8 +4,13 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 0.2.1 - 2026-06-28
+
 ### Added
 - Installer auto-updates `~/.alfred` to the latest version on each `/alfred` boot (with the active-demand freeze safeguard), plus `-List`/`list` and one-step `-Rollback`/`rollback` to a previous release tag in both runtimes.
+
+### Fixed
+- Version-aware boot update: the welcome only fast-forwards when on the default branch; a pin/rollback (detached HEAD) is respected and survives boots instead of erroring. Re-running the installer recovers the latest from a pinned state and refreshes a stale `origin/HEAD`.
 
 ## 0.2.0 - 2026-06-28
 
