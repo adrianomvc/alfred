@@ -16,6 +16,7 @@ from _common import find_observability_logs, iter_jsonl  # noqa: E402
 
 REQUIRED_PATHS = [
     "core",
+    "core/presentation.md",
     "rules/common",
     "rules/demand-types",
     "rules/lanes",

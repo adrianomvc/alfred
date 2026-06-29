@@ -32,3 +32,4 @@ ASCII block with demand, lane, model, progress, phase track, current step, check
 - If model changes, announce it and record an audit event.
 - If emergency Execution-first is active, mark Inception/Design as post-mortem pending.
 - Optional tooling must never become the source of truth; `state` remains authoritative.
+- Visual richness follows `core/presentation.md`: `text` is the floor; `rich-cli` and `web` are optional, helper-rendered profiles over the same `state` (the model stays on the compact source — token economy).
