@@ -17,8 +17,14 @@ The framework is in your home directory at `.alfred`: `$HOME/.alfred` on
 macOS/Linux, `%USERPROFILE%\.alfred` on Windows (e.g. `C:\Users\<you>\.alfred`).
 Resolve the **real absolute path** before reading — if `~`/`$HOME`/`$USERPROFILE`
 does not expand in your file tool, run a shell command to print the home
-directory (`echo $HOME` / `echo %USERPROFILE%`) and use that. **Never** read a
-literal `~`, `$HOME`, or `$USER` placeholder as part of the path.
+directory (`echo $HOME` / `echo %USERPROFILE%` / `pwd` inside the dir) and use that.
+**Never** read a literal `~`, `$HOME`, or `$USER` placeholder, and never guess the
+username — read it from the resolved path.
+
+**Windows + Git Bash/MSYS gotcha:** the shell prints Unix-style paths like
+`/c/Users/<you>/.alfred`, but a Windows-native file tool needs `C:\Users\<you>\.alfred`.
+Convert `/c/...` → `C:\...` (and use backslashes) for the file tool. Do not pass
+`/c/...`, `/home/...`, or `~` to a native file reader.
 
 ## On invocation
 1. **Update (version-aware)** — decide by the state of `~/.alfred`:
