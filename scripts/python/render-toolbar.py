@@ -65,6 +65,55 @@ def _render_rich(sigla, demand_id, lane, phase, nxt, step, checkpoint,
     ]
 
 
+# --- web profile (optional): self-contained SVG of the state, helper-rendered ---
+_WEB_LANE = {
+    "fast": ("#eaf6e9", "#2f6b1f", "#639922"),
+    "standard": ("#fdf3df", "#8a5a08", "#ba7517"),
+    "safe": ("#fbe9e9", "#a32d2d", "#e24b4a"),
+}
+
+
+def _esc(s):
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def _render_web(sigla, demand_id, lane, nxt, step, progress, markers):
+    fill, txt, bar = _WEB_LANE.get(lane.lower(), ("#eef0f2", "#444", "#888"))
+    bar_w = round(360 * progress / 100)
+    circles = []
+    cx = [44, 138, 232, 326, 420]
+    for i, (_, m) in enumerate(markers[:5]):
+        if m == "x":
+            cf, cs, ct, lbl = "#eaf6e9", "#639922", "#2f6b1f", "✓"
+        elif m == ">":
+            cf, cs, ct, lbl = "#e6f1fb", "#378add", "#185fa5", str(i + 1)
+        else:
+            cf, cs, ct, lbl = "#f1f3f5", "#d0d7de", "#8a8f98", str(i + 1)
+        circles.append(
+            f'<circle cx="{cx[i]}" cy="86" r="13" fill="{cf}" stroke="{cs}"/>'
+            f'<text x="{cx[i]}" y="91" text-anchor="middle" font-size="13" fill="{ct}">{lbl}</text>'
+        )
+    conns = "".join(
+        f'<line x1="{cx[i]+14}" y1="86" x2="{cx[i+1]-14}" y2="86" stroke="#d0d7de"/>'
+        for i in range(4)
+    )
+    return ['<svg width="520" viewBox="0 0 520 132" role="img" '
+            'font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" '
+            'xmlns="http://www.w3.org/2000/svg">'
+            f'<title>Alfred · {_esc(sigla)} · {_esc(demand_id)}</title>'
+            '<rect x="0.5" y="0.5" width="519" height="131" rx="12" fill="#ffffff" stroke="#e1e4e8"/>'
+            f'<text x="20" y="30" font-size="14" fill="#24292f"><tspan font-weight="600">ALFRED</tspan>'
+            f'<tspan fill="#57606a">  ·  SIGLA:{_esc(sigla)} · #{_esc(demand_id)}</tspan></text>'
+            f'<rect x="416" y="16" width="88" height="22" rx="6" fill="{fill}"/>'
+            f'<text x="460" y="31" text-anchor="middle" font-size="12" font-weight="600" fill="{txt}">{_esc(lane.upper())}</text>'
+            '<rect x="20" y="50" width="360" height="8" rx="4" fill="#e1e4e8"/>'
+            f'<rect x="20" y="50" width="{bar_w}" height="8" rx="4" fill="{bar}"/>'
+            f'<text x="392" y="58" font-size="12" fill="#57606a">{progress}%</text>'
+            f'{conns}{"".join(circles)}'
+            f'<text x="20" y="120" font-size="12" fill="#57606a">→ {_esc(shorten(nxt, 72))}</text>'
+            '</svg>']
+
+
 def render(state_path, model="default", cost="n/a", profile="text"):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
@@ -121,6 +170,8 @@ def render(state_path, model="default", cost="n/a", profile="text"):
     if profile == "rich":
         return _render_rich(sigla, demand_id, lane, phase, nxt, step,
                             checkpoint, model, cost, progress, markers)
+    if profile == "web":
+        return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
     lines = []
     if lane.lower() == "fast":
@@ -154,7 +205,7 @@ def main():
     parser.add_argument("--model", "-Model", dest="model", default="default")
     parser.add_argument("--cost", "-Cost", dest="cost", default="n/a")
     parser.add_argument("--profile", "-Profile", dest="profile", default="text",
-                        choices=["text", "rich"])
+                        choices=["text", "rich", "web"])
     args = parser.parse_args()
 
     for line in render(args.state_path, args.model, args.cost, args.profile):

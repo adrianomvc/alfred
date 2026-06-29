@@ -5,7 +5,7 @@ param(
   [string]$Model = "default",
   [string]$Cost = "n/a",
 
-  [ValidateSet("text", "rich")]
+  [ValidateSet("text", "rich", "web")]
   [string]$Profile = "text"
 )
 
@@ -146,6 +146,38 @@ if ($Profile -eq "rich") {
   Write-Output "  $($trackR.TrimEnd())"
   Write-Output "  $(Ansi '2' 'etapa') $(Shorten $step 60)   $(Ansi '2' 'HITL') $(Shorten $checkpoint 40)"
   Write-Output "  $(Ansi '2' "`u{2192}") $(Shorten $next 60)   $(Ansi '2' "$Model `u{00B7} $Cost")"
+  exit 0
+}
+
+# web profile (optional): self-contained SVG of the state, helper-rendered.
+if ($Profile -eq "web") {
+  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  function Esc($s) { ("$s" -replace '&', '&amp;' -replace '<', '&lt;' -replace '>', '&gt;') }
+  $laneWeb = @{ fast = @('#eaf6e9', '#2f6b1f', '#639922'); standard = @('#fdf3df', '#8a5a08', '#ba7517'); safe = @('#fbe9e9', '#a32d2d', '#e24b4a') }
+  $lw = $laneWeb[$lane.ToLowerInvariant()]; if (-not $lw) { $lw = @('#eef0f2', '#444', '#888') }
+  $barW = [int][Math]::Round(360 * $progress / 100)
+  $cx = @(44, 138, 232, 326, 420)
+  $circles = ""
+  for ($i = 0; $i -lt [Math]::Min(5, $markers.Count); $i++) {
+    if ($markers[$i] -eq "x") { $cf = '#eaf6e9'; $cs = '#639922'; $ct = '#2f6b1f'; $lbl = [char]0x2713 }
+    elseif ($markers[$i] -eq ">") { $cf = '#e6f1fb'; $cs = '#378add'; $ct = '#185fa5'; $lbl = $i + 1 }
+    else { $cf = '#f1f3f5'; $cs = '#d0d7de'; $ct = '#8a8f98'; $lbl = $i + 1 }
+    $circles += '<circle cx="' + $cx[$i] + '" cy="86" r="13" fill="' + $cf + '" stroke="' + $cs + '"/><text x="' + $cx[$i] + '" y="91" text-anchor="middle" font-size="13" fill="' + $ct + '">' + $lbl + '</text>'
+  }
+  $conns = ""
+  for ($i = 0; $i -lt 4; $i++) { $conns += '<line x1="' + ($cx[$i] + 14) + '" y1="86" x2="' + ($cx[$i + 1] - 14) + '" y2="86" stroke="#d0d7de"/>' }
+  $svg = '<svg width="520" viewBox="0 0 520 132" role="img" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" xmlns="http://www.w3.org/2000/svg">' +
+    '<title>Alfred ' + [char]0x00B7 + ' ' + (Esc $sigla) + ' ' + [char]0x00B7 + ' ' + (Esc $id) + '</title>' +
+    '<rect x="0.5" y="0.5" width="519" height="131" rx="12" fill="#ffffff" stroke="#e1e4e8"/>' +
+    '<text x="20" y="30" font-size="14" fill="#24292f"><tspan font-weight="600">ALFRED</tspan><tspan fill="#57606a">  ' + [char]0x00B7 + '  SIGLA:' + (Esc $sigla) + ' #' + (Esc $id) + '</tspan></text>' +
+    '<rect x="416" y="16" width="88" height="22" rx="6" fill="' + $lw[0] + '"/>' +
+    '<text x="460" y="31" text-anchor="middle" font-size="12" font-weight="600" fill="' + $lw[1] + '">' + (Esc $lane.ToUpperInvariant()) + '</text>' +
+    '<rect x="20" y="50" width="360" height="8" rx="4" fill="#e1e4e8"/>' +
+    '<rect x="20" y="50" width="' + $barW + '" height="8" rx="4" fill="' + $lw[2] + '"/>' +
+    '<text x="392" y="58" font-size="12" fill="#57606a">' + $progress + '%</text>' +
+    $conns + $circles +
+    '<text x="20" y="120" font-size="12" fill="#57606a">' + [char]0x2192 + ' ' + (Esc (Shorten $next 72)) + '</text></svg>'
+  Write-Output $svg
   exit 0
 }
 
