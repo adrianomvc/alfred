@@ -51,6 +51,10 @@ $requiredPaths = @(
   "knowledge/policy-template.md",
   "rules/demand-types/playbooks/README.md",
   "rules/demand-types/playbooks/migration.md",
+  "install/README.md",
+  "install/install.ps1",
+  "install/install.sh",
+  "install/devin/alfred/SKILL.md",
   "docs/implementation-status.md",
   "docs/layer-1-framework-closure.md"
   "docs/onboarding-sigla.md",
