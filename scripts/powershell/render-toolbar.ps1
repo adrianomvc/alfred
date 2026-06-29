@@ -3,7 +3,10 @@ param(
   [string]$StatePath,
 
   [string]$Model = "default",
-  [string]$Cost = "n/a"
+  [string]$Cost = "n/a",
+
+  [ValidateSet("text", "rich")]
+  [string]$Profile = "text"
 )
 
 $ErrorActionPreference = "Stop"
@@ -100,6 +103,7 @@ if ($isExecutionFirst) {
 }
 $completed = 0
 $phaseParts = @()
+$markers = @()
 
 foreach ($item in $phases) {
   $status = Get-ChecklistStatus -Lines $content -Phase $item
@@ -112,10 +116,38 @@ foreach ($item in $phases) {
     $marker = " "
   }
   $phaseParts += "$item [$marker]"
+  $markers += $marker
 }
 
 $progress = [Math]::Min(100, [Math]::Round(($completed / 5) * 100))
 $track = $phaseParts -join " -> "
+
+# rich-cli profile (optional): ANSI color + bar + icons; helper-rendered.
+if ($Profile -eq "rich") {
+  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  $e = [char]27
+  function Ansi($code, $s) { "$e[${code}m$s$e[0m" }
+  $laneColors = @{ fast = "32"; standard = "33"; safe = "31" }
+  $col = $laneColors[$lane.ToLowerInvariant()]; if (-not $col) { $col = "36" }
+  $head = "$(Ansi '1' 'ALFRED') $(Ansi '2' "SIGLA:$sigla `u{00B7} #$id") $(Ansi $col "[$($lane.ToUpperInvariant())]")"
+  if ($lane.ToLowerInvariant() -eq "fast") {
+    Write-Output "$head $(Ansi '2' $phase)  $(Ansi '2' "`u{2192}") $(Shorten $next 56)"
+    exit 0
+  }
+  $filled = [int][Math]::Round($progress / 10)
+  $bar = (Ansi $col ([string]([char]0x2588) * $filled)) + (Ansi '2' ([string]([char]0x2591) * (10 - $filled)))
+  $circled = @("`u{2460}", "`u{2461}", "`u{2462}", "`u{2463}", "`u{2464}")
+  $trackR = ""
+  for ($i = 0; $i -lt [Math]::Min(5, $markers.Count); $i++) {
+    $mk = if ($markers[$i] -eq "x") { Ansi '32' "`u{2713}" } elseif ($markers[$i] -eq ">") { Ansi '36' "`u{25B6}" } else { Ansi '2' "`u{25FB}" }
+    $trackR += "$($circled[$i])$mk "
+  }
+  Write-Output "$head  $bar $progress%"
+  Write-Output "  $($trackR.TrimEnd())"
+  Write-Output "  $(Ansi '2' 'etapa') $(Shorten $step 60)   $(Ansi '2' 'HITL') $(Shorten $checkpoint 40)"
+  Write-Output "  $(Ansi '2' "`u{2192}") $(Shorten $next 60)   $(Ansi '2' "$Model `u{00B7} $Cost")"
+  exit 0
+}
 
 if ($lane.ToLowerInvariant() -eq "fast") {
   Write-Output "ALFRED | SIGLA:$sigla | #$id | FAST | $phase | model: $Model | cost: $Cost | next: $(Shorten $next 48)"

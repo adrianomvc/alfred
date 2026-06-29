@@ -34,7 +34,38 @@ def shorten(value, maximum=64):
     return value[: maximum - 3] + "..."
 
 
-def render(state_path, model="default", cost="n/a"):
+# --- rich-cli profile (optional): ANSI color + bar + icons; helper-rendered ---
+_ESC = "\033"
+_CIRCLED = ["①", "②", "③", "④", "⑤"]  # circled 1..5
+_LANE_COLOR = {"fast": "32", "standard": "33", "safe": "31"}   # green / amber / red
+
+
+def _c(code, s):
+    return f"{_ESC}[{code}m{s}{_ESC}[0m"
+
+
+def _render_rich(sigla, demand_id, lane, phase, nxt, step, checkpoint,
+                 model, cost, progress, markers):
+    color = _LANE_COLOR.get(lane.lower(), "36")
+    head = f"{_c('1', 'ALFRED')} {_c('2', f'SIGLA:{sigla} · #{demand_id}')} {_c(color, f'[{lane.upper()}]')}"
+    if lane.lower() == "fast":
+        return [f"{head} {_c('2', phase)}  {_c('2', '→')} {shorten(nxt, 56)}"]
+
+    filled = round(progress / 10)
+    bar = _c(color, "█" * filled) + _c("2", "░" * (10 - filled))
+    track = " ".join(
+        _CIRCLED[i] + (_c("32", "✓") if m == "x" else _c("36", "▶") if m == ">" else _c("2", "◻"))
+        for i, (_, m) in enumerate(markers[:5])
+    )
+    return [
+        f"{head}  {bar} {progress}%",
+        f"  {track}",
+        f"  {_c('2', 'etapa')} {shorten(step, 60)}   {_c('2', 'HITL')} {shorten(checkpoint, 40)}",
+        f"  {_c('2', '→')} {shorten(nxt, 60)}   {_c('2', f'{model} · {cost}')}",
+    ]
+
+
+def render(state_path, model="default", cost="n/a", profile="text"):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
 
@@ -71,6 +102,7 @@ def render(state_path, model="default", cost="n/a"):
 
     completed = 0
     phase_parts = []
+    markers = []
     for item in phases:
         status = get_checklist_status(content, item)
         if status in ("x", "X"):
@@ -81,9 +113,14 @@ def render(state_path, model="default", cost="n/a"):
         else:
             marker = " "
         phase_parts.append(f"{item} [{marker}]")
+        markers.append((item, marker))
 
     progress = min(100, round((completed / 5) * 100))
     track = " -> ".join(phase_parts)
+
+    if profile == "rich":
+        return _render_rich(sigla, demand_id, lane, phase, nxt, step,
+                            checkpoint, model, cost, progress, markers)
 
     lines = []
     if lane.lower() == "fast":
@@ -108,13 +145,19 @@ def render(state_path, model="default", cost="n/a"):
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")   # rich profile uses unicode/ANSI
+    except Exception:
+        pass
     parser = argparse.ArgumentParser(description="Render the Alfred process toolbar.")
     parser.add_argument("--state-path", "-StatePath", dest="state_path", required=True)
     parser.add_argument("--model", "-Model", dest="model", default="default")
     parser.add_argument("--cost", "-Cost", dest="cost", default="n/a")
+    parser.add_argument("--profile", "-Profile", dest="profile", default="text",
+                        choices=["text", "rich"])
     args = parser.parse_args()
 
-    for line in render(args.state_path, args.model, args.cost):
+    for line in render(args.state_path, args.model, args.cost, args.profile):
         print(line)
 
 
