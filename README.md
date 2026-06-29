@@ -14,7 +14,7 @@ Layer 1 of the framework is operational for pilots and real demands, and the SQ9
 
 ![Fluxo do Alfred: as 5 fases (Inception, Design, Execution, Validate, Operation) e os modos de risco FAST, Standard e SAFE](docs/assets/alfred-fluxo.svg)
 
-> In the terminal the same flow renders as plain ASCII (see [`core/welcome.md`](core/welcome.md)); richer profiles are optional layers over one source — see [`core/presentation.md`](core/presentation.md).
+> In the terminal the same flow renders as plain ASCII (see [`core/welcome.md`](core/welcome.md)); richer profiles are optional layers over one source — see [`core/presentation/`](core/presentation/README.md).
 
 ## Repository map
 - `core/` - principles, architecture, boot, risk mode, model policy, glossary.

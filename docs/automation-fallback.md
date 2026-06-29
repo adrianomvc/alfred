@@ -30,12 +30,12 @@ PowerShell and Python helpers may coexist. They are parallel conveniences, not c
 | Helper (`<name>`) | Script output | Manual Markdown/JSONL fallback |
 |---|---|---|
 | `alfred-boot` | terminal context summary | read HUB `001-index.md` and demand `001-state.md`; list open demands manually |
-| `render-toolbar` | terminal toolbar | render the toolbar text from `001-state.md` using `core/toolbar.md` |
+| `render-toolbar` | terminal toolbar | render the toolbar text from `001-state.md` using `core/presentation/toolbar.md` |
 | `validate-framework` | terminal validation result | execute `docs/framework-validation.md` checklist manually |
 | `validate-demand` | terminal validation result | review required HUB/App artifacts, links, JSONL, audit, metrics, skills, and adapters manually |
 | `validate-sdd-gate` | terminal validation result | review problem, requirements, risk, decisions, spec, and execution plan manually before Execution |
 | `validate-reverse-eng-staleness` | terminal freshness result | compare recorded reverse-eng commit with current app commit manually |
-| `validate-toolbar-fixtures` | fixture drift result | compare `examples/toolbar-fixtures/*` with `core/toolbar.md` manually |
+| `validate-toolbar-fixtures` | fixture drift result | compare `examples/toolbar-fixtures/*` with `core/presentation/toolbar.md` manually |
 | `validate-skills-registry` | registry consistency result | inspect `skills/skills.md` and each linked skill for required sections |
 | `validate-connectors` | connector/adapter consistency result | inspect `connectors/*.md` and adapter examples against `connectors/adapter-template.md` |
 | `validate-model-policy` | model-policy consistency result | inspect `core/model-policy.md` for lane floors, tiers, overrides, and toolbar transparency |

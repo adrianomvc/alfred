@@ -32,7 +32,7 @@ Any script output must degrade to a manual markdown checklist when the host cann
 ## Available
 Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py`.
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
-- `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile text` (default, ASCII) · `rich` (ANSI color/icons) · `web` (self-contained SVG). See `core/presentation.md`.
+- `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile text` (default, ASCII) · `rich` (ANSI color/icons) · `web` (self-contained SVG). See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.

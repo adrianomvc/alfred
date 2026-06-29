@@ -60,5 +60,18 @@ Version adoption is governed by `docs/version-adoption.md`: active demands freez
 
 Each pluggable family declares a **contract** in its registry (`connectors/connectors.md`, `skills/skills.md`, `rules/lanes/*`, `rules/agents/*`, `rules/demand-types/*`). Rules reference the contract/role, never the concrete — swapping CloudWatch for Datadog is swapping the connector, with no rule change.
 
+### Extension checklist (the guardrail)
+Code SOLID has an owner (Execution applies `skills/coding-standard.md`; the Reviewer validates it). Architecture SOLID has the same shape: this checklist is the standard, and `docs/framework-validation.md` is where it is enforced when Alfred itself changes. Run it before adding or moving any module/file/artifact:
+- **S** — does it have one reason to change? If it serves two concerns, split it (do not grow a "drawer" folder).
+- **O** — can the need be met by **adding** a skill/connector/demand-type/lane/sub-activity instead of editing the core or adding a phase?
+- **L** — if it joins a pluggable family, is it substitutable through the family contract (no consumer special-casing the concrete)?
+- **I** — does it expose only what its consumers need, with a navigation index (`README.md`) or registry so nobody loads the whole folder?
+- **D** — does it depend on a role/contract (lane, connector, agent, `state` bus), never on a concrete host/tool?
+
 ## Layout
 See the directory layout in the repo root and `core/README.md`. Two explicit axes: `demand-types` (path, per stream) × `lanes` (governance, per mode) — orthogonal; a demand combines one of each.
+
+### Folder entry-point convention
+Two file kinds act as a folder's entry point; the name signals which:
+- **Navigation index → `README.md`** — orients a reader/agent inside the folder (the project root, `core/`, `rules/`, `docs/`). One uniform JIT rule: to enter a folder, load its `README.md` first.
+- **Contract registry → `<name>.md`** — exposes a pluggable family's contract, not just navigation: `connectors/connectors.md`, `skills/skills.md`, `metrics/metrics.md`, `rules/lifecycle/lifecycle.md`. The semantic name marks it as a contract (L/D in SOLID), so it is a deliberate exception to the README rule.
