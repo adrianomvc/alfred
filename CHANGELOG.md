@@ -4,11 +4,28 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 0.4.0 - 2026-06-29
+
+### Summary
+Multi-host pass: a dedicated `hosts/` home for per-host entry points (Claude Code, Copilot, Codex) alongside the DEVIN integration, so the same agnostic framework runs on any coding agent through its native mechanism.
+
 ### Added
 - `hosts/` — per-host integration entry points that bind Alfred to a coding agent through its native mechanism, distinct from connector adapters in `connectors/`. New: `claude-code/SKILL.md`, `github-copilot/copilot-instructions.md`, `codex/AGENTS.md`, plus `hosts/README.md` (common bind + per-host model-policy note). Each is a thin entry point that reads `core/boot.md` — the framework stays a single referenced source (D15).
 
 ### Changed
 - DEVIN skill source moved from `install/devin/alfred/SKILL.md` to `hosts/devin-cli/SKILL.md`, so all host integrations live in one place; `install/` keeps the turn-key DEVIN installer (scripts updated to the new source path). Repo maps (`README.md`, `core/README.md`) now list `hosts/`. `validate-links` now also scans `hosts/`.
+
+### Fixed
+- Host path resolution: entry points said only `~/.alfred`; on Windows an agent could build `C:/Users/$USER/.alfred` (placeholder unexpanded) and fail to read `boot.md`. Each boot-reading entry point and the common bind now state the OS-specific location (`$HOME/.alfred` vs `%USERPROFILE%\.alfred`) and require resolving the real absolute path, never a literal placeholder.
+
+### Compatibility notes
+- The DEVIN skill **source** path moved inside the framework repo; the installer was updated to match, and an existing `~/.alfred` self-corrects on the next installer run (it pulls latest before copying the skill). No HUB/App artifact path, field, lane DoD, connector contract, or observability schema changed — minor bump.
+
+### Migration notes
+- Existing installs: run `git -C ~/.alfred pull --ff-only` (or re-run the installer) so the new `hosts/devin-cli/SKILL.md` source is present.
+
+### Validation evidence
+- `validate-framework` passes in both runtimes; `validate-links` reports 138 files / 156 refs / 0 broken.
 
 ## 0.3.0 - 2026-06-29
 

@@ -62,7 +62,8 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D14/D40/D45: concrete host adapter activation now has states, a template, and runtime safety rules.
 - D14/D40/D45: connector contracts and adapter-shaped examples now have automated validation.
 - D46: model policy floors, tier map, adjustments, override warning, and toolbar transparency now have automated validation.
-- D15/D26: releases `0.1.0`–`0.3.0` are shipped with `VERSION`, changelog, validation policy, and adoption guidance.
+- D15/D26: releases `0.1.0`–`0.4.0` are shipped with `VERSION`, changelog, validation policy, and adoption guidance.
+- D3/D14: `hosts/` provides per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex) that load the framework via each host's native mechanism, distinct from connector adapters.
 - D39/D40: markdown-SOLID directory pass — `rules/` entry index, navigation-vs-contract naming convention, architecture SOLID extension checklist with an owner, and presentation moved out of the kernel into `core/presentation/`.
 - D39/D3: `validate-links` checks internal Markdown references (links + inline framework paths) in both runtimes, wired into `validate-framework`.
 - D14/D20/D44/D3: sandbox connector simulators (tracker, notification) joining the VCS dry-run adapter let a demand be rehearsed end-to-end offline before a real host exists.
