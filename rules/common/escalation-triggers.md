@@ -30,6 +30,22 @@ When escalating, update:
 - observability JSONL: `event_type: "escalation_triggered"`;
 - `02-design/006-decisions.md` if a human decision changes scope, risk, or architecture.
 
+## Error handling (recovery procedure)
+When something goes wrong (tool/command error, failed step, missing input), follow one consistent procedure — never loop, never invent a fix:
+1. **Identify** — state plainly what went wrong.
+2. **Assess impact** — is it blocking, or can the work continue around it?
+3. **Communicate** — tell the human what happened and the options.
+4. **Offer a path** — a concrete way to resolve or work around it.
+5. **Record** — log it in `05-operation/007-audit.md` and emit an observability event.
+
+Severity decides the reaction:
+- **Critical** (workflow cannot continue — missing required artifact, unreadable `state`): stop, ask the human, record.
+- **High** (phase cannot complete — contradictory requirements, missing prerequisite): do **not** proceed until resolved.
+- **Medium** (can continue with a workaround — optional artifact missing): note the gap and proceed.
+- **Low** (non-blocking — formatting, optional info): log and continue.
+
+Repeated failure for the same reason is a **hard trigger** (above): stop and escalate instead of retrying in a loop.
+
 ## Degradation
 If the host cannot notify the human automatically, Alfred records the escalation and says plainly what decision is needed.
 

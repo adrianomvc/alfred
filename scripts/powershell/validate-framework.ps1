@@ -45,6 +45,7 @@ $requiredPaths = @(
   "examples",
   "rules/common/units.md",
   "rules/common/escalation-triggers.md",
+  "rules/common/workflow-changes.md",
   "rules/lifecycle/design/sub-activities/README.md",
   "rules/lifecycle/design/sub-activities/application-design.md",
   "rules/lifecycle/design/sub-activities/functional-design.md",
