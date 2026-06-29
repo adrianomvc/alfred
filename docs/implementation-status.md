@@ -70,6 +70,9 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D5/3.6: per-type playbooks now have a convention (`rules/demand-types/playbooks/`) and a first Migration playbook distilled from the real SQ9 migration pattern, referenced from the Engineering demand-type.
 - D14/D15: DEVIN CLI installer (`install/`) clones the framework into `~/.alfred` and installs the `/alfred` skill (verified against the real DEVIN skill format).
 - D42/D3/D39: reconciled the parallel knowledge work — richer policy template, knowledge-governance guide, automation-fallback matrix, and a `validate-knowledge` helper (both runtimes) wired into framework validation.
+- D9/D3: presentation profiles (`core/presentation.md`) — text/rich-cli/web renderers over one `state`; `render-toolbar` gained `-Profile rich` (ANSI) and `web` (SVG); README embeds a self-contained flow SVG.
+- A.2/D19: Design sub-activities materialized as JIT files (`rules/lifecycle/design/sub-activities/`: user-stories, application-design, functional-design, nfr-design, infrastructure-design) — closing the AI-DLC depth gap.
+- AI-DLC parity: error-handling recovery procedure folded into `escalation-triggers`, and a new `rules/common/workflow-changes.md` for safe mid-demand process changes.
 
 ## Still incomplete
 - D10/D43: cost/tokens can be attributed from host exports, but are not automatically collected without a host usage source.
