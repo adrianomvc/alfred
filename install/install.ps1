@@ -39,10 +39,11 @@ if (Test-Path -LiteralPath (Join-Path $InstallDir ".git")) {
   throw "$InstallDir exists but is not a git repo. Move or remove it, then re-run."
 } else {
   Info "Cloning framework into $InstallDir"
+  # core.longpaths handles deep example paths beyond the Windows MAX_PATH limit.
   if ($Branch -ne "") {
-    git clone --quiet --branch $Branch $FrameworkUrl $InstallDir
+    git -c core.longpaths=true clone --quiet --branch $Branch $FrameworkUrl $InstallDir
   } else {
-    git clone --quiet $FrameworkUrl $InstallDir
+    git -c core.longpaths=true clone --quiet $FrameworkUrl $InstallDir
   }
 }
 
