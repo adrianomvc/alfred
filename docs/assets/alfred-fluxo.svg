@@ -1,0 +1,49 @@
+<svg width="720" viewBox="0 0 720 392" role="img" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+<title>Fluxo do Alfred: 5 fases e modos de risco</title>
+<desc>Toda demanda passa pelas cinco fases (Inception, Design, Execution, Validate, Operation); o modo de risco (FAST, Standard, SAFE) regula a profundidade. Checkpoints HITL nos pontos criticos.</desc>
+<rect x="0.5" y="0.5" width="719" height="391" rx="12" fill="#ffffff" stroke="#e1e4e8"/>
+
+<text x="28" y="34" font-size="17" font-weight="600" fill="#24292f">Alfred — escolho o processo pelo risco, não pela preferência</text>
+<text x="28" y="56" font-size="13" fill="#57606a">Toda demanda passa pelas 5 fases · o modo regula a profundidade</text>
+
+<g font-size="13">
+<rect x="28" y="76" width="124" height="56" rx="8" fill="#f1f3f5" stroke="#d0d7de"/>
+<rect x="166" y="76" width="124" height="56" rx="8" fill="#f1f3f5" stroke="#d0d7de"/>
+<rect x="304" y="76" width="124" height="56" rx="8" fill="#f1f3f5" stroke="#d0d7de"/>
+<rect x="442" y="76" width="124" height="56" rx="8" fill="#f1f3f5" stroke="#d0d7de"/>
+<rect x="580" y="76" width="112" height="56" rx="8" fill="#f1f3f5" stroke="#d0d7de"/>
+<text x="90" y="102" text-anchor="middle" font-weight="600" fill="#24292f">1 Inception</text>
+<text x="90" y="120" text-anchor="middle" fill="#57606a">o quê</text>
+<text x="228" y="102" text-anchor="middle" font-weight="600" fill="#24292f">2 Design</text>
+<text x="228" y="120" text-anchor="middle" fill="#57606a">como</text>
+<text x="366" y="102" text-anchor="middle" font-weight="600" fill="#24292f">3 Execution</text>
+<text x="366" y="120" text-anchor="middle" fill="#57606a">fazer</text>
+<text x="504" y="102" text-anchor="middle" font-weight="600" fill="#24292f">4 Validate</text>
+<text x="504" y="120" text-anchor="middle" fill="#57606a">validar</text>
+<text x="636" y="102" text-anchor="middle" font-weight="600" fill="#24292f">5 Operation</text>
+<text x="636" y="120" text-anchor="middle" fill="#57606a">operar</text>
+<polygon points="154,98 162,102 154,106" fill="#8a8f98"/>
+<polygon points="292,98 300,102 292,106" fill="#8a8f98"/>
+<polygon points="430,98 438,102 430,106" fill="#8a8f98"/>
+<polygon points="568,98 576,102 568,106" fill="#8a8f98"/>
+</g>
+
+<path d="M28 148 L28 154 L692 154 L692 148" fill="none" stroke="#8a8f98"/>
+<text x="360" y="172" text-anchor="middle" font-size="13" fill="#57606a">HITL — eu paro e o senhor(a) decide nos pontos críticos</text>
+
+<text x="28" y="208" font-size="13" font-weight="600" fill="#24292f">O modo eu proponho pelo risco — o senhor(a) confirma</text>
+
+<rect x="28" y="220" width="664" height="40" rx="8" fill="#eaf6e9"/>
+<text x="44" y="245" font-size="13" font-weight="600" fill="#2f6b1f">FAST</text>
+<text x="150" y="245" font-size="13" fill="#3b6d11">baixo risco · enxuto, autonomia delegada, poucos checkpoints</text>
+
+<rect x="28" y="266" width="664" height="40" rx="8" fill="#fdf3df"/>
+<text x="44" y="291" font-size="13" font-weight="600" fill="#8a5a08">Standard</text>
+<text x="150" y="291" font-size="13" fill="#854f0b">risco médio · spec, critérios de aceite, revisão técnica, 1 aprovação</text>
+
+<rect x="28" y="312" width="664" height="40" rx="8" fill="#fbe9e9"/>
+<text x="44" y="337" font-size="13" font-weight="600" fill="#a32d2d">SAFE</text>
+<text x="150" y="337" font-size="13" fill="#a32d2d">alto risco · governança forte, rollout/rollback, aprovações por papel</text>
+
+<text x="28" y="378" font-size="12" fill="#57606a">Emergência (operacional crítico): Execution-first — Inception/Design viram post-mortem.</text>
+</svg>

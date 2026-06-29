@@ -12,6 +12,10 @@ Layer 1 of the framework is operational for pilots and real demands, and the SQ9
 - **Human in control:** AI proposes, organizes, executes, and records; humans decide.
 - **JIT context:** load only the current phase, lane, demand type, and active specialty.
 
+![Fluxo do Alfred: as 5 fases (Inception, Design, Execution, Validate, Operation) e os modos de risco FAST, Standard e SAFE](docs/assets/alfred-fluxo.svg)
+
+> In the terminal the same flow renders as plain ASCII (see [`core/welcome.md`](core/welcome.md)); richer profiles are optional layers over one source — see [`core/presentation.md`](core/presentation.md).
+
 ## Repository map
 - `core/` - principles, architecture, boot, risk mode, model policy, glossary.
 - `rules/` - lifecycle, lanes, demand types, common rules, and agents.
