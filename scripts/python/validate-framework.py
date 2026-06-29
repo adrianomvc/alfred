@@ -72,6 +72,8 @@ REQUIRED_PATHS = [
     "docs/automation-fallback.md",
     "scripts/powershell/validate-knowledge.ps1",
     "scripts/python/validate-knowledge.py",
+    "scripts/powershell/validate-links.ps1",
+    "scripts/python/validate-links.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
@@ -121,6 +123,9 @@ REQUIRED_PATHS = [
     "docs/adapter-implementation.md",
     "examples/connectors",
     "examples/connectors/vcs-git-dry-run-adapter.md",
+    "examples/connectors/tracker-sim-adapter.md",
+    "examples/connectors/tracker-sim-demand.md",
+    "examples/connectors/notification-sim-adapter.md",
     "examples/connectors/usage-export.jsonl",
     "examples/connectors/usage-attribution-events.jsonl",
     "examples/toolbar-fixtures/fast.txt",
@@ -183,6 +188,7 @@ def main():
     run_sub(root, "scripts/python/validate-connectors.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-knowledge.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validate-links.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
     run_sub(root, "scripts/python/alfred-boot.py", "-Root", str(root))
     run_sub(root, "scripts/python/validate-reverse-eng-staleness.py",

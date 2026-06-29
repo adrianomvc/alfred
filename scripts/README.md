@@ -42,6 +42,7 @@ Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<
 - `alfred-boot` - optional boot/resume helper for detecting context and open demands.
 - `validate-reverse-eng-staleness` - optional reverse-eng freshness check by recorded app commit.
 - `validate-sdd-gate` - optional SDD clarity gate before Execution.
+- `validate-links` - optional internal-reference check (Markdown links + inline framework paths) to catch broken cross-references after moves/renames.
 
 ## PowerShell
 

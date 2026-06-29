@@ -4,6 +4,11 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 0.3.0 - 2026-06-29
+
+### Summary
+Depth, structure, and offline-rehearsal pass: lifecycle sub-activity parity, a markdown-SOLID directory reorganization, an internal-reference validator, and sandbox connector simulators that let a demand run end-to-end without a real host.
+
 ### Added
 - Lifecycle depth parity: the four remaining phases now materialize their sub-activities as JIT files, mirroring Design (A.2/D19). Each folder has a README with a trigger ladder plus one file per sub-activity (Trigger ▸ Purpose ▸ Inputs ▸ Steps ▸ Output ▸ Depth by mode):
   - `inception/sub-activities/`: business-inception, technical-inception, requirements-elicitation, risk-mode-proposal.
@@ -16,8 +21,20 @@ All notable Alfred framework changes should be recorded here.
   - Folder entry-point convention documented in `core/architecture.md`: navigation index → `README.md` (one uniform JIT rule); contract registry → `<name>.md` (`skills.md`, `connectors.md`, `metrics.md`, `lifecycle.md`) as a deliberate, semantic exception.
   - Architecture SOLID now has an owner like code SOLID does: an **extension checklist** in `core/architecture.md`, cross-linked from `core/principles.md`, and enforced at framework-change review via `docs/framework-validation.md`.
 
+- `validate-links` helper (both runtimes) — checks internal Markdown references (links + inline framework paths) still resolve after moves/renames; wired into `validate-framework` and documented in `docs/framework-validation.md`. Catches the kind of broken cross-reference the directory pass had to chase manually.
+- Sandbox connector simulators (test doubles) so a demand can run end-to-end offline, before any real host/credential exists: `examples/connectors/tracker-sim-adapter.md` (+ `tracker-sim-demand.md` fixture) and `notification-sim-adapter.md`, joining the existing `vcs-git-dry-run-adapter.md`. All `status: dry-run`, deterministic, never mutating external state; validated by `validate-connectors` and tracked by `validate-framework`. The `examples/connectors/README.md` documents the triad as a sandbox walkthrough.
+
 ### Changed
 - Presentation moved out of the kernel into `core/presentation/` (optional rendering layer, D3/OCP): `presentation.md` → `core/presentation/README.md` (the layer's navigation index) and `toolbar.md` → `core/presentation/toolbar.md`. All live references updated (`core/README.md`, root `README.md`, `scripts/README.md`, `docs/automation-fallback.md`, `docs/implementation-status.md`, both `validate-framework` scripts); validation passes 0/0.
+
+### Compatibility notes
+- Two framework files moved: `core/presentation.md` → `core/presentation/README.md` and `core/toolbar.md` → `core/presentation/toolbar.md`. Consumers that deep-linked to the old paths must update; no HUB/App **artifact** path, required field, lane DoD, connector contract, or observability schema changed — minor bump.
+
+### Migration notes
+- None for generated HUB/App artifacts. Only update external links that pointed at the two moved framework files above.
+
+### Validation evidence
+- `validate-framework` passes in both runtimes (PowerShell + Python); `validate-links` reports 134 files / 147 refs / 0 broken; `validate-connectors` accepts both new simulator adapters.
 
 ## 0.2.2 - 2026-06-28
 
