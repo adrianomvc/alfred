@@ -117,6 +117,8 @@ $requiredPaths = @(
   "scripts/powershell/validate-skills-registry.ps1"
   "scripts/powershell/validate-connectors.ps1"
   "scripts/powershell/validate-model-policy.ps1"
+  "scripts/powershell/validate-links.ps1"
+  "scripts/python/validate-links.py"
   "scripts/python/alfred-boot.py"
   "scripts/python/render-toolbar.py"
   "scripts/python/collect-observability.py"
@@ -163,6 +165,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attributi
 & (Join-Path $rootPath "scripts/powershell/validate-connectors.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-model-policy.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-knowledge.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validate-links.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
 & (Join-Path $rootPath "scripts/powershell/alfred-boot.ps1") -Root $rootPath | Out-Null
 & (Join-Path $rootPath "scripts/powershell/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

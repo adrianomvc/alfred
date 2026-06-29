@@ -16,6 +16,8 @@ All notable Alfred framework changes should be recorded here.
   - Folder entry-point convention documented in `core/architecture.md`: navigation index → `README.md` (one uniform JIT rule); contract registry → `<name>.md` (`skills.md`, `connectors.md`, `metrics.md`, `lifecycle.md`) as a deliberate, semantic exception.
   - Architecture SOLID now has an owner like code SOLID does: an **extension checklist** in `core/architecture.md`, cross-linked from `core/principles.md`, and enforced at framework-change review via `docs/framework-validation.md`.
 
+- `validate-links` helper (both runtimes) — checks internal Markdown references (links + inline framework paths) still resolve after moves/renames; wired into `validate-framework` and documented in `docs/framework-validation.md`. Catches the kind of broken cross-reference the directory pass had to chase manually.
+
 ### Changed
 - Presentation moved out of the kernel into `core/presentation/` (optional rendering layer, D3/OCP): `presentation.md` → `core/presentation/README.md` (the layer's navigation index) and `toolbar.md` → `core/presentation/toolbar.md`. All live references updated (`core/README.md`, root `README.md`, `scripts/README.md`, `docs/automation-fallback.md`, `docs/implementation-status.md`, both `validate-framework` scripts); validation passes 0/0.
 

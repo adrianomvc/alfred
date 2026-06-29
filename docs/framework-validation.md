@@ -70,6 +70,7 @@ Get-ChildItem -Path examples -Recurse -Filter *observability-log.jsonl -Force |
 - `docs/adapter-implementation.md` keeps concrete host adapters explicit, auditable, and degradable.
 - `scripts/powershell/validate-connectors.ps1` checks connector contracts and adapter-shaped examples.
 - `scripts/powershell/validate-model-policy.ps1` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
+- `scripts/powershell/validate-links.ps1` checks that internal Markdown references (links and inline framework paths) still resolve after moves/renames.
 - The architecture SOLID **extension checklist** in `core/architecture.md` passes for any added/moved module, file, or artifact (one reason to change; extend by adding; substitutable via contract; loads only what it needs; depends on a role, not a concrete).
 
 ## Acceptance
