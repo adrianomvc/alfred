@@ -73,6 +73,7 @@ Alfred is still not a full hosted product. Remaining gaps are mostly host-, cred
 - D9/D3: presentation profiles (`core/presentation.md`) — text/rich-cli/web renderers over one `state`; `render-toolbar` gained `-Profile rich` (ANSI) and `web` (SVG); README embeds a self-contained flow SVG.
 - A.2/D19: Design sub-activities materialized as JIT files (`rules/lifecycle/design/sub-activities/`: user-stories, application-design, functional-design, nfr-design, infrastructure-design) — closing the AI-DLC depth gap.
 - AI-DLC parity: error-handling recovery procedure folded into `escalation-triggers`, and a new `rules/common/workflow-changes.md` for safe mid-demand process changes.
+- 8.3/8.4 + D12: acceptance criteria exercised by dogfooding — Alfred ran its own evolution (add the `property-based-testing` opt-in skill) as a real Engineering/Standard demand through all 5 phases in a dedicated dev HUB, passing `validate-demand -Strict` (0/0) in both runtimes. Closes the last AI-DLC opt-in extension gap.
 
 ## Still incomplete
 - D10/D43: cost/tokens can be attributed from host exports, but are not automatically collected without a host usage source.
