@@ -22,7 +22,9 @@ param(
   [string]$InstallDir = (Join-Path $HOME ".alfred"),
   [string]$Branch = "",
   [string]$Version = "",
-  [string]$SkillsDir = (Join-Path $env:APPDATA "devin/skills")
+  [string]$SkillsDir = (Join-Path $env:APPDATA "devin/skills"),
+  [switch]$List,
+  [switch]$Rollback
 )
 
 $ErrorActionPreference = "Stop"
@@ -32,6 +34,42 @@ function Info($m) { Write-Host "[alfred] $m" }
 # 1. Preconditions
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
   throw "git is required but was not found on PATH."
+}
+
+# Version-management modes operate on an existing install and exit (they do not
+# touch the installed skill). Use these to inspect or roll back the framework.
+if ($List -or $Rollback) {
+  if (-not (Test-Path -LiteralPath (Join-Path $InstallDir ".git"))) {
+    throw "No framework install found at $InstallDir. Run the installer first."
+  }
+  git -C $InstallDir fetch --quiet --tags origin
+  $tags = @(git -C $InstallDir tag --sort=-v:refname)   # descending: newest first
+  $current = (git -C $InstallDir describe --tags 2>$null)
+
+  if ($List) {
+    Info "Installed: $current"
+    Info "Available versions (newest first):"
+    foreach ($t in $tags) {
+      $mark = if ($current -like "$t*") { " <- current" } else { "" }
+      Write-Host "  $t$mark"
+    }
+    return
+  }
+
+  # Rollback one version: the tag immediately below the current one.
+  $currentTag = (git -C $InstallDir describe --tags --abbrev=0 2>$null)
+  $idx = [array]::IndexOf($tags, $currentTag)
+  if ($idx -lt 0) {
+    $previous = $tags | Select-Object -First 1          # on an untagged commit -> latest tag
+  } elseif ($idx + 1 -lt $tags.Count) {
+    $previous = $tags[$idx + 1]
+  } else {
+    throw "Already at the oldest version ($currentTag); nothing to roll back to."
+  }
+  Info "Rolling back: $currentTag -> $previous"
+  git -C $InstallDir checkout --quiet $previous
+  Info "Now on $previous. Re-run the installer without -Rollback to return to latest."
+  return
 }
 
 # $Version (a release tag, e.g. v0.2.0) pins a reproducible version; it takes

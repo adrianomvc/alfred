@@ -20,6 +20,43 @@ info() { echo "[alfred] $*"; }
 
 command -v git >/dev/null 2>&1 || { echo "git is required but not found on PATH." >&2; exit 1; }
 
+# Mode: install (default) | list | rollback. e.g. `bash install.sh rollback`.
+MODE="${1:-install}"
+
+# Version-management modes operate on an existing install and exit (they do not
+# touch the installed skill).
+if [ "$MODE" = "list" ] || [ "$MODE" = "rollback" ]; then
+  [ -d "$INSTALL_DIR/.git" ] || { echo "No framework install found at $INSTALL_DIR. Run the installer first." >&2; exit 1; }
+  git -C "$INSTALL_DIR" fetch --quiet --tags origin
+  CURRENT="$(git -C "$INSTALL_DIR" describe --tags 2>/dev/null || true)"
+  # tags newest-first
+  mapfile -t TAGS < <(git -C "$INSTALL_DIR" tag --sort=-v:refname)
+
+  if [ "$MODE" = "list" ]; then
+    info "Installed: $CURRENT"
+    info "Available versions (newest first):"
+    for t in "${TAGS[@]}"; do
+      case "$CURRENT" in "$t"*) echo "  $t <- current";; *) echo "  $t";; esac
+    done
+    exit 0
+  fi
+
+  CURRENT_TAG="$(git -C "$INSTALL_DIR" describe --tags --abbrev=0 2>/dev/null || true)"
+  PREV=""
+  for i in "${!TAGS[@]}"; do
+    if [ "${TAGS[$i]}" = "$CURRENT_TAG" ]; then
+      PREV="${TAGS[$((i+1))]:-}"
+      break
+    fi
+  done
+  [ -z "$CURRENT_TAG" ] && PREV="${TAGS[0]:-}"   # untagged commit -> latest tag
+  [ -n "$PREV" ] || { echo "Already at the oldest version ($CURRENT_TAG); nothing to roll back to." >&2; exit 1; }
+  info "Rolling back: $CURRENT_TAG -> $PREV"
+  git -C "$INSTALL_DIR" checkout --quiet "$PREV"
+  info "Now on $PREV. Re-run the installer without 'rollback' to return to latest."
+  exit 0
+fi
+
 # VERSION (a tag) takes precedence over BRANCH; with neither, default branch (latest).
 REF="${VERSION:-$BRANCH}"
 

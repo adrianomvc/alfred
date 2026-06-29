@@ -60,10 +60,28 @@ devin skills show alfred
 ```
 Then, inside a repo, type `/alfred` in the DEVIN CLI.
 
-## Update / uninstall
-- **Update:** re-run the installer; it pulls the latest framework into `~/.alfred`.
-- **Uninstall:** delete the skill folder (`%APPDATA%\devin\skills\alfred` or
-  `~/.agents/skills/alfred`); optionally remove `~/.alfred`.
+## Update and rollback
+Alfred installs the **latest** version and keeps up to date automatically: on
+each `/alfred` invocation it fast-forwards `~/.alfred` to the latest release —
+**unless a demand is in progress**, in which case the demand stays on its
+stamped (frozen) version and you are only told an update is available
+(`docs/version-adoption.md`).
+
+Manual controls:
+| Action | PowerShell | bash |
+|---|---|---|
+| Update to latest now | re-run `install.ps1` | re-run `install.sh` |
+| List available versions | `install.ps1 -List` | `bash install.sh list` |
+| Roll back one version | `install.ps1 -Rollback` | `bash install.sh rollback` |
+| Pin a specific version | `install.ps1 -Version v0.1.0` | `ALFRED_VERSION=v0.1.0 bash install.sh` |
+
+`-Rollback` moves `~/.alfred` to the previous release tag (use it if a new
+version breaks something). Re-running the installer without `-Rollback` returns
+to the latest. A demand records the version it ran on (D26), so you know which
+tag to roll back to.
+
+## Uninstall
+- Delete the skill folder (`%APPDATA%\devin\skills\alfred` or `~/.agents/skills/alfred`); optionally remove `~/.alfred`.
 
 ## How it works
 The DEVIN CLI loads skills from `SKILL.md` files under its user/project skill
