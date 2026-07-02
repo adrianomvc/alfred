@@ -7,6 +7,8 @@ How Alfred asks humans. Inherited from AI-DLC `question-format-guide`. Used in I
   - *Only exception:* a **single, one-off clarification** the model needs right now may be asked inline in chat. The moment it becomes a list, or the answer is material (scope, risk, a decision), it goes to the file.
 - **Multiple choice + free-text answer** — offer 2 to 5 options (`A` to `E`) so the human answers fast; free text goes directly in `[Resposta]:`.
 - **Recommended option** — when there is a safer/default path, mark one option with `(Recomendado)`. For unknown SAFE facts, recommend confirming before execution instead of guessing.
+- **Never pre-fill `[Resposta]:`** — the tag only orients; the human always answers (D7). No auto-confirm, not even for low-risk.
+- **Layout by priority** — group blocking questions (`🔴 bloqueiam o avanço`) before optional ones (`🟡 podem responder depois`), each with a one-line "Por quê" and a status marker (`◻ aberta` · `✓ respondida` · `⚠ contradição`). See `templates/hub/requirements.md`.
 - **`[Resposta]:` tag** — each question is followed by a `[Resposta]:` line the human fills.
 - **One decision per question** — do not bundle several decisions into one item.
 - **Option limit** — use the fewest useful options. Minimum 2, maximum 5. Do not add filler options just to reach 5.
