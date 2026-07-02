@@ -1,19 +1,45 @@
-# Requirements
+# Requirements — <id-demanda>
 
-> Generated content should be written in pt-BR.
+> Framework template — generate content in pt-BR. Canonical path (HUB):
+> `<id-iniciativa>/<id-demanda>/01-inception/003-requirements.md`.
+> This is the single place for the demand's question list (D18).
 
-## Functional requirements
+Sigla: <sigla> · Iniciativa: <id-iniciativa> · Modo proposto: <FAST | Standard | SAFE>
+Progresso: <respondidas>/<total> respondidas · <n> bloqueiam o avanço para Design
+Como responder: edite a linha `[Resposta]:` de cada pergunta (ou responda no chat que eu registro aqui).
 
-## Non-functional requirements
+## Requisitos funcionais
+- <...>
 
-## Questions
-### Q1 - <pergunta clara e especifica?>
-- A) <opcao recomendada> (Recomendado)
-- B) <opcao alternativa>
+## Requisitos não funcionais
+- <...>
+
+## Perguntas
+Regras: uma decisão por pergunta · 2 a 5 opções (A–E) · `(Recomendado)` **apenas orienta**, nunca preenche a resposta · não inventar opção (na dúvida, use "A confirmar").
+Status por pergunta: `◻ aberta` · `✓ respondida` · `⚠ contradição`.
+
+### 🔴 Bloqueiam o avanço
+
+#### Q1 — <pergunta clara e específica?>            ◻ aberta
+Por quê: <o que esta resposta destrava — ex.: blast radius / Risk Mode>.
+- A) <opção> (Recomendado)
+- B) <opção alternativa>
 - C) A confirmar
-- D) <opcional, se necessario>
-- E) <opcional, se necessario>
-
 [Resposta]:
 
-## Contradictions / pending decisions
+### 🟡 Podem responder depois (não bloqueiam)
+
+#### Q2 — <pergunta?>                                ◻ aberta
+Por quê: <impacto>.
+- A) <opção>
+- B) A confirmar
+[Resposta]:
+
+## Gate
+Não avanço para Design enquanto as perguntas 🔴 não forem respondidas e validadas.
+Ao ler as respostas, detectar contradição/ambiguidade e gerar pergunta de follow-up.
+
+## Contradições / pendências
+- <nenhuma | descrição do conflito detectado>
+
+> Piso (D3): sem emoji, `🔴/🟡` viram `[!]/[.]` e `◻/✓/⚠` viram `[ ]/[x]/(!)`; mesmo conteúdo.
