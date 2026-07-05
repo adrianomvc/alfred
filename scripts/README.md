@@ -44,6 +44,7 @@ Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<
 - `validate-sdd-gate` - optional SDD clarity gate before Execution.
 - `validate-links` - optional internal-reference check (Markdown links + inline framework paths) to catch broken cross-references after moves/renames.
 - `classify-risk` - optional Risk Mode proposal from the objective checklist (`core/risk-mode.md`): computes both axes (0/1/2 criteria), fires hard overrides, applies the anti-SAFE brake reminder, and prints a pt-BR block for `004-risk.md`. The checklist stays the source of truth; the AI proposes and the human confirms.
+- `mcp-email-server` - **Python-only** (owner decision: the notification channel is MCP + Python; degradation is the manual handoff in the connector contract, so no PowerShell mirror). MCP stdio server implementing the `notification` connector: `send_email` (allowlist, `[Alfred-Framework]` prefix, audit JSONL, dry-run outbox by default, SMTP in active mode) and `email_status`. See `connectors/notification-email.md`.
 
 ## PowerShell
 
