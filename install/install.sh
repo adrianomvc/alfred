@@ -168,6 +168,7 @@ JSON
     [ -z "$PYTHON_BIN" ] && info "Python 3 not found; the MCP e-mail server needs it."
     command -v claude >/dev/null 2>&1 || info "Claude Code CLI not found; for other MCP hosts register: python \"$MCP_SERVER\" (stdio)."
   fi
+  info "DEVIN projects: MCP servers (alfred-email + Context7) are per-repo — the /alfred skill offers to create .devin/config.local.json from hosts/devin-cli/config.local.template.json on first boot."
 fi
 
 info "Done. Open a repo and type /alfred in the DEVIN CLI."

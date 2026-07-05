@@ -70,6 +70,7 @@ Objetivo: exercitar extensão real do registry.
 - [x] W5.3 ✅ (2026-07-05) Disciplina "Eval before skill" documentada em `skills/skills.md`: skill nasce de lacuna observada + 2–3 casos que dobram como aceite.
 - [x] W5.4 ✅ (2026-07-05, aprovado pelo dono) Frontmatter YAML `name`/`description` (padrão aberto Agent Skills) nas 7 skills + convenção no registry; skills podem apontar helpers executáveis próprios (opcional, D3).
 - [x] W5.5 ✅ (2026-07-05, aprovado pelo dono) Seção "Discovery in external catalogs (on demand)" em `skills/skills.md`: busca em catálogo registrado (ex.: Context7) com os 4 gates — allowlist, pin por ref, humano confirma 1º uso, conteúdo = dado (W1.4). Sem catálogo na allowlist → perguntar, nunca buscar de fonte arbitrária. Confiabilidade analisada em [`anthropic-research-notes.md`](anthropic-research-notes.md).
+  - **Context7 ativado pelo dono** (2026-07-05): allowlist org em `knowledge/external-catalogs.md` (política no formato policy-template); registro MCP por projeto no DEVIN via template `config.local.template.json` em `hosts/devin-cli/` (alfred-email + context7), criado no primeiro boot da skill `/alfred` com confirmação humana. Gates de uso permanecem.
 
 Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar agentes novos).
 

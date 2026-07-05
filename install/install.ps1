@@ -192,6 +192,7 @@ if (-not $SkipEmail) {
       if (-not $python) { Info "Python 3 not found; the MCP e-mail server needs it. Install Python, then: claude mcp add --scope user alfred-email -- python `"$mcpServer`"" }
       elseif (-not $claude) { Info "Claude Code CLI not found; for other MCP hosts register: python `"$mcpServer`" (stdio)." }
     }
+    Info "DEVIN projects: MCP servers (alfred-email + Context7) are per-repo — the /alfred skill offers to create .devin/config.local.json from hosts/devin-cli/config.local.template.json on first boot."
   } catch {
     Info "E-mail/MCP setup skipped ($($_.Exception.Message)). The framework works without it (manual handoff)."
   }
