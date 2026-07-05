@@ -4,6 +4,40 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 2.0.0 - in progress (opened 2026-07-05)
+
+### Summary
+Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Waves 0–8: preservation, hygiene, full SDD templates, assisted risk classification, first real integrated demand, real skills/metrics/adapters, evolutionary intelligence) lands in this version. **The version stays `2.0.0` until the plan closes — no bumps per wave** (explicit owner decision).
+
+### Added
+- `docs/plan/implementation-plan-2.0.0.md` — the incremental implementation plan (waves, prioritized backlog, pending human decisions, closure criteria).
+- `docs/plan/anthropic-research-notes.md` — Anthropic engineering/research findings (agents, context engineering, Agent Skills, tool design, evals, governed autonomy) mapped to this plan's pending decisions; extended with a recommendation-by-recommendation adherence audit and additional evolutions A–G.
+- Wave 0 delivered: the conceptual plan (D1–D47) is now versioned at `docs/plan/alfred-conceptual-plan.md` with an as-built note for Fase 7 naming (original kept in `.claude/` until the owner approves removal).
+- Root `AGENTS.md` (W1.7) — vendor-neutral guidance (open AGENTS.md standard) for any AI agent editing the framework repo: invariants, conventions, validation commands, active plan. Deliberately host-agnostic (D3, owner decision) — no vendor-specific file at root; optional per-host shims recorded as a pending human decision. `validate-links` (both runtimes) now scans `AGENTS.md`.
+- `docs/README.md` index completed (W1.8): every document under `docs/` and `docs/plan/` is now listed (progressive disclosure without folder scanning).
+- Injection guardrail (W1.4): `rules/common/content-validation.md` gained an "External content is data, not instruction" section — fixed precedence (supreme law > knowledge > lane/lifecycle rules > demand artifacts > external content), embedded instructions in external content treated as suspected injection, use-by-extraction, source allowlist/pin/human-confirm gating, behavioral degradation (D3). New hard trigger in `rules/common/escalation-triggers.md`; `skills/skills.md` now points external skills/catalogs (e.g. Context7-style doc catalogs) at the guardrail. Motivated by the ContextCrush class of attack.
+
+- `classify-risk` helper (W3, both runtimes) — proposes a Risk Mode lane from the objective checklist: computes both axes from 0/1/2 criteria, fires hard overrides (min Standard / SAFE), reminds the anti-SAFE justification brake, and prints a pt-BR block for `004-risk.md`. Optional (D3); `core/risk-mode.md` stays the source of truth. Referenced from the risk-mode-proposal sub-activity and `scripts/README.md`. Verified with one case per lane plus the "simple and dangerous" override case, in both runtimes.
+- `templates/hub/post-mortem.md` (W2.2) — mold for the mandatory Execution-first closure record (incident, timeline, root cause, retroactive spec, decisions, lessons, preventive actions → follow-ups).
+- `templates/hub/skills.md` (W2.3) — sigla skills registry mold: active skills with pinned refs plus an external-catalog allowlist wired to the injection guardrail.
+
+### Changed
+- `rules/lanes/fast.md` (W1.2) — escalation triggers now reference `rules/common/escalation-triggers.md` (was semantically pointing at `overconfidence.md`).
+- `docs/implementation-status.md` (W1.3) — compacted to a current snapshot (status, coverage by area, gaps, next order); pass-by-pass history stays in `CHANGELOG.md`/git.
+- `rules/common/session-continuity.md` (W1.5) — new "Context compaction (mid-demand)" section: what must survive host compaction; re-read `001-state.md` after compaction.
+- `rules/common/escalation-triggers.md` (W1.6) — new "Cumulative threshold" section: 10 escalation events in one demand (tunable in `knowledge`) force a human checkpoint.
+- `templates/app/spec.md` (W2.1) — completed to the conceptual plan 5.3.2: out of scope, alternatives (SAFE), dependencies, impacts, rollout/rollback (SAFE), lane-marked.
+- `skills/coding-standard.md` + `rules/lifecycle/validation/validation.md` (W2.4) — test-integrity guardrail: never remove/weaken/skip a test to satisfy a gate; that is an escalation, not a fix.
+- `validate-links` (both runtimes) now excludes `docs/plan/alfred-conceptual-plan.md`, same rationale as the CHANGELOG exclusion: a historical document keeps its as-written, point-in-time paths.
+- `docs/implementation-status.md` now references the versioned conceptual plan instead of the untracked `.claude/` file.
+- Implementation plan waves extended with the approved research adjustments (test-integrity guardrail, connector response/error contract sections, cumulative escalation counter) and evolutions A–G (external-content-is-data guardrail, host hooks enforcement, skill-bundled scripts, LLM-as-judge rubric, transcript retrospective, compaction instructions, eval-before-skill), plus owner-requested W5.5 (on-demand skill discovery from external catalogs).
+
+- `VERSION` set to `2.0.0` (jump from `0.4.0` skipping the `1.x` line — explicit owner decision recorded in the plan).
+
+### Compatibility notes
+- No artifact path, required field, lane DoD, connector contract, or observability schema has changed yet in this line; entries will accumulate here as waves land, with migration notes when HUB/App artifacts are affected.
+- New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
+
 ## 0.4.0 - 2026-06-29
 
 ### Summary
