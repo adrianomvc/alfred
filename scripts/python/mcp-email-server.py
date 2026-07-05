@@ -15,13 +15,23 @@ Adapter states (``connectors/connectors.md``):
 - ``active``: sends through SMTP (STARTTLS). Requires explicit configuration.
 - ``disabled``: refuses to operate.
 
-Configuration (environment):
-- ``ALFRED_EMAIL_MODE``       dry-run | active | disabled   (default: dry-run)
-- ``ALFRED_EMAIL_DEFAULT_TO`` default destination (required to send anything)
-- ``ALFRED_EMAIL_ALLOWLIST``  comma-separated allowed recipients (default: DEFAULT_TO)
-- ``ALFRED_EMAIL_OUTBOX``     dry-run outbox dir (default: ./.alfred-email-outbox)
-- ``ALFRED_EMAIL_AUDIT``      audit JSONL path (default: <outbox>/audit-log.jsonl)
-- ``SMTP_HOST`` ``SMTP_PORT`` ``SMTP_USER`` ``SMTP_PASS`` ``SMTP_FROM``  (active mode)
+Configuration — where the destination is REGISTERED (durable authorization, D44):
+1. **Config file** (recommended; survives framework updates): JSON at
+   ``~/.alfred-email.json`` (or the path in ``ALFRED_EMAIL_CONFIG``)::
+
+       {"mode": "dry-run", "default_to": "voce@dominio.com",
+        "allowlist": ["voce@dominio.com"],
+        "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}}
+
+2. **Environment variables** (override the file):
+   ``ALFRED_EMAIL_MODE``       dry-run | active | disabled   (default: dry-run)
+   ``ALFRED_EMAIL_DEFAULT_TO`` default destination
+   ``ALFRED_EMAIL_ALLOWLIST``  comma-separated allowed recipients (default: DEFAULT_TO)
+   ``ALFRED_EMAIL_OUTBOX``     dry-run outbox dir (default: ./.alfred-email-outbox)
+   ``ALFRED_EMAIL_AUDIT``      audit JSONL path (default: <outbox>/audit-log.jsonl)
+   ``SMTP_HOST`` ``SMTP_PORT`` ``SMTP_USER`` ``SMTP_PASS`` ``SMTP_FROM``  (active mode)
+3. At adoption, the sigla records destination + triggers in its HUB ``knowledge``
+   (see ``knowledge/notification.md``); this file/env is the machine-level mirror.
 
 Register in Claude Code:  ``claude mcp add alfred-email -- python scripts/python/mcp-email-server.py``
 
@@ -46,22 +56,40 @@ SERVER_VERSION = "2.0.0"
 SUBJECT_PREFIX = "[Alfred-Framework]"
 
 
+def load_config_file():
+    path = Path(os.environ.get("ALFRED_EMAIL_CONFIG", str(Path.home() / ".alfred-email.json")))
+    if not path.is_file():
+        return {}, None
+    try:
+        return json.loads(path.read_text(encoding="utf-8-sig")), str(path)
+    except (json.JSONDecodeError, OSError):
+        return {}, str(path) + " (unreadable — fix or remove it)"
+
+
 def config():
-    mode = os.environ.get("ALFRED_EMAIL_MODE", "dry-run").strip().lower()
-    default_to = os.environ.get("ALFRED_EMAIL_DEFAULT_TO", "").strip()
-    allowlist = [a.strip().lower() for a in
-                 os.environ.get("ALFRED_EMAIL_ALLOWLIST", default_to).split(",") if a.strip()]
-    outbox = Path(os.environ.get("ALFRED_EMAIL_OUTBOX", ".alfred-email-outbox"))
-    audit = Path(os.environ.get("ALFRED_EMAIL_AUDIT", str(outbox / "audit-log.jsonl")))
+    file_cfg, config_path = load_config_file()
+    file_smtp = file_cfg.get("smtp") or {}
+    mode = (os.environ.get("ALFRED_EMAIL_MODE") or file_cfg.get("mode") or "dry-run").strip().lower()
+    default_to = (os.environ.get("ALFRED_EMAIL_DEFAULT_TO") or file_cfg.get("default_to") or "").strip()
+    allow_raw = os.environ.get("ALFRED_EMAIL_ALLOWLIST")
+    if allow_raw is not None:
+        allowlist = [a.strip().lower() for a in allow_raw.split(",") if a.strip()]
+    elif file_cfg.get("allowlist"):
+        allowlist = [str(a).strip().lower() for a in file_cfg["allowlist"] if str(a).strip()]
+    else:
+        allowlist = [default_to.lower()] if default_to else []
+    outbox = Path(os.environ.get("ALFRED_EMAIL_OUTBOX") or file_cfg.get("outbox") or ".alfred-email-outbox")
+    audit = Path(os.environ.get("ALFRED_EMAIL_AUDIT") or file_cfg.get("audit") or str(outbox / "audit-log.jsonl"))
     return {
         "mode": mode, "default_to": default_to, "allowlist": allowlist,
-        "outbox": outbox, "audit": audit,
+        "outbox": outbox, "audit": audit, "config_path": config_path,
         "smtp": {
-            "host": os.environ.get("SMTP_HOST", ""),
-            "port": int(os.environ.get("SMTP_PORT", "587") or 587),
-            "user": os.environ.get("SMTP_USER", ""),
-            "password": os.environ.get("SMTP_PASS", ""),
-            "sender": os.environ.get("SMTP_FROM", os.environ.get("SMTP_USER", "")),
+            "host": os.environ.get("SMTP_HOST") or file_smtp.get("host", ""),
+            "port": int(os.environ.get("SMTP_PORT") or file_smtp.get("port") or 587),
+            "user": os.environ.get("SMTP_USER") or file_smtp.get("user", ""),
+            "password": os.environ.get("SMTP_PASS") or file_smtp.get("password", ""),
+            "sender": os.environ.get("SMTP_FROM") or file_smtp.get("sender", "")
+                      or os.environ.get("SMTP_USER") or file_smtp.get("user", ""),
         },
     }
 
@@ -165,6 +193,59 @@ def tool_send_email(cfg, args):
               f"Audit appended to {cfg['audit']}.")
 
 
+REPORT_FILES = [
+    ("05-operation/008-metrics.md", "metrics"),
+    ("05-operation/007-audit.md", "audit"),
+    ("05-operation/009-summary.md", "summary"),
+    ("05-operation/011-observability-log.jsonl", "observability"),
+]
+
+
+def state_field(lines, names):
+    for name in names:
+        for line in lines:
+            stripped = line.strip()
+            if stripped.lower().startswith(f"- {name}:"):
+                return stripped.split(":", 1)[1].strip().strip("`")
+    return ""
+
+
+def tool_send_demand_report(cfg, args):
+    demand_path = Path(str(args.get("demand_path", "")).strip())
+    state = demand_path / "001-state.md"
+    if not state.is_file():
+        return err(f"`001-state.md` not found under '{demand_path}'. Pass the HUB demand "
+                   "folder, e.g. alfred-docs-hub/<id-iniciativa>/<id-demanda>.")
+    lines = state.read_text(encoding="utf-8-sig").splitlines()
+    demand_id = state_field(lines, ["id"]) or demand_path.name
+    sigla = state_field(lines, ["sigla"]) or "SIGLA"
+    title = state_field(lines, ["titulo", "title"]) or demand_id
+    lane = state_field(lines, ["lane", "modo"]) or "?"
+    phase = state_field(lines, ["current phase", "fase atual"]) or "?"
+    status = state_field(lines, ["status"]) or "?"
+    version = state_field(lines, ["framework version"]) or "?"
+
+    attachments, missing = [], []
+    for rel, label in REPORT_FILES:
+        path = demand_path / rel
+        (attachments if path.is_file() else missing).append(str(path) if path.is_file() else label)
+    if not attachments:
+        return err("No report artifact found (metrics/audit/summary/observability). "
+                   "Generate them before sending the report.")
+
+    subject = f"[{sigla}][{demand_id}] Relatorio — {title}"
+    body = (f"Relatorio da demanda {demand_id} ({sigla}).\n"
+            f"- lane: {lane} · fase: {phase} · status: {status} · Alfred: {version}\n"
+            f"- anexos: metricas, audit, summary e observability JSONL (quando existentes)\n"
+            + (f"- ausentes nesta demanda: {', '.join(missing)}\n" if missing else "")
+            + f"- state: {state}\n"
+            "Corpo curto por padrao (D44): o detalhe vai anexado, nao colado.")
+    return tool_send_email(cfg, {
+        "subject": subject, "body": body, "to": args.get("to", ""),
+        "trigger": args.get("trigger", "demand_report"), "attachments": attachments,
+    })
+
+
 def tool_email_status(cfg, _args):
     smtp_ready = bool(cfg["smtp"]["host"] and cfg["smtp"]["sender"])
     return ok(json.dumps({
@@ -174,6 +255,7 @@ def tool_email_status(cfg, _args):
         "smtp_configured": smtp_ready,
         "outbox": str(cfg["outbox"]),
         "audit_log": str(cfg["audit"]),
+        "config_file": cfg["config_path"] or "not found (create ~/.alfred-email.json or set ALFRED_EMAIL_CONFIG)",
         "adapter_state": ("disabled" if cfg["mode"] == "disabled"
                            else "active" if cfg["mode"] == "active" and smtp_ready
                            else "dry-run"),
@@ -201,8 +283,24 @@ TOOLS = [
         },
     },
     {
+        "name": "send_demand_report",
+        "description": ("Send the demand report e-mail: reads 001-state.md for context and attaches "
+                        "the demand's metrics, audit, summary, and observability JSONL automatically. "
+                        "Same guardrails as send_email (allowlist, prefix, audit, dry-run by default)."),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "demand_path": {"type": "string",
+                                 "description": "HUB demand folder (contains 001-state.md)"},
+                "to": {"type": "string", "description": "destination; defaults to the registered one"},
+                "trigger": {"type": "string", "description": "default: demand_report"},
+            },
+            "required": ["demand_path"],
+        },
+    },
+    {
         "name": "email_status",
-        "description": "Report the adapter state: mode (dry-run/active/disabled), allowlist, SMTP readiness, outbox and audit paths.",
+        "description": "Report the adapter state: mode (dry-run/active/disabled), allowlist, SMTP readiness, outbox/audit paths, and which config file is in use.",
         "inputSchema": {"type": "object", "properties": {}},
     },
 ]
@@ -233,9 +331,11 @@ def handle(method, params):
         args = params.get("arguments") or {}
         if name == "send_email":
             return tool_send_email(cfg, args)
+        if name == "send_demand_report":
+            return tool_send_demand_report(cfg, args)
         if name == "email_status":
             return tool_email_status(cfg, args)
-        return err(f"Unknown tool '{name}'. Available: send_email, email_status.")
+        return err(f"Unknown tool '{name}'. Available: send_email, send_demand_report, email_status.")
     return None
 
 
