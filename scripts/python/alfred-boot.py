@@ -63,6 +63,22 @@ def is_open(status):
     return status.lower() not in CLOSED
 
 
+def resume_priority(state):
+    """Lower = suggest first: pending human checkpoint > in progress > blocked."""
+    status = state["Status"].lower()
+    if "checkpoint" in status or "aguardando" in status:
+        return 0
+    if "bloquead" in status or "blocked" in status:
+        return 2
+    return 1
+
+
+def priority_reason(state):
+    return {0: "awaiting a human checkpoint",
+            1: "in progress",
+            2: "blocked - needs external input"}[resume_priority(state)]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", "-Root", dest="root", default=".")
@@ -108,7 +124,7 @@ def main():
 
     open_states = sorted(
         (s for s in states if is_open(s["Status"])),
-        key=lambda s: (s["Sigla"], s["InitiativeId"], s["DemandId"]),
+        key=lambda s: (resume_priority(s), s["LastActivity"], s["Sigla"], s["InitiativeId"], s["DemandId"]),
     )
 
     print(f"- states found: {len(states)}")
@@ -123,6 +139,7 @@ def main():
     if open_states:
         first = open_states[0]
         print("")
+        print(f"Suggested next: {first['DemandId']} ({priority_reason(first)}) - the human chooses; this is only an ordering hint.")
         print("Resume preview:")
         renderer = HERE / "render-toolbar.py"
         if renderer.exists():

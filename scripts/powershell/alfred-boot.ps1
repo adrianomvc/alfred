@@ -76,6 +76,24 @@ function Is-OpenStatus {
   return $true
 }
 
+function Get-ResumePriority {
+  # Lower = suggest first: pending human checkpoint > in progress > blocked.
+  param([string]$Status)
+  $normalized = $Status.ToLowerInvariant()
+  if ($normalized -match "checkpoint" -or $normalized -match "aguardando") { return 0 }
+  if ($normalized -match "bloquead" -or $normalized -match "blocked") { return 2 }
+  return 1
+}
+
+function Get-PriorityReason {
+  param([string]$Status)
+  switch (Get-ResumePriority -Status $Status) {
+    0 { return "awaiting a human checkpoint" }
+    2 { return "blocked - needs external input" }
+    default { return "in progress" }
+  }
+}
+
 $kind = Get-RepoKind -Path $rootPath
 $version = "unknown"
 $versionPath = Join-Path $frameworkRoot "VERSION"
@@ -117,7 +135,7 @@ if ($states.Count -eq 0) {
   exit 0
 }
 
-$openStates = @($states | Where-Object { Is-OpenStatus -Status $_.Status } | Sort-Object Sigla, InitiativeId, DemandId)
+$openStates = @($states | Where-Object { Is-OpenStatus -Status $_.Status } | Sort-Object @{Expression = { Get-ResumePriority -Status $_.Status }}, LastActivity, Sigla, InitiativeId, DemandId)
 
 Write-Output "- states found: $($states.Count)"
 Write-Output "- open demands: $($openStates.Count)"
@@ -131,6 +149,7 @@ foreach ($state in $openStates) {
 if ($openStates.Count -gt 0) {
   $first = $openStates[0]
   Write-Output ""
+  Write-Output "Suggested next: $($first.DemandId) ($(Get-PriorityReason -Status $first.Status)) - the human chooses; this is only an ordering hint."
   Write-Output "Resume preview:"
   if (Test-Path -LiteralPath $renderer) {
     & $renderer -StatePath $first.Path -Model $Model -Cost $Cost
