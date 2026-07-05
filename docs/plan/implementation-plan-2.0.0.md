@@ -157,8 +157,9 @@ Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
 - [x] Primeiro adapter real (W7.1): **notification** via MCP.
 - [x] E-mail em `knowledge/notification.md`: já não há endereço hardcoded no framework (o arquivo delega à sigla/HUB); destino vem de configuração (`ALFRED_EMAIL_DEFAULT_TO`/knowledge da adoção) — resolvido de fato.
 
+- [x] Nomes de fase ✅ (2026-07-05, decisão do dono): EN permanece canônico (pastas, regras, validadores); apelidos pt-BR **"O quê · Como · Fazer · Validar · Operar"** registrados no `core/glossary.md` e exibidos no welcome (`core/welcome.md`). Camada de apresentação apenas (D47).
+
 Ainda pendentes:
-- [ ] Nomes de fase: manter EN canônico + apelidos pt-BR ("O quê/Como/Fazer/Validar/Operar") na apresentação (recomendado) ou renomear (alto custo).
 - [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active`.
 
 ## Encerramento do plano

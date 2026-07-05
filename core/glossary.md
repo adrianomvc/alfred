@@ -9,6 +9,11 @@ Terminology of the framework. Keeps the EN↔pt-BR mapping consistent across fra
 | demand | demanda | Unit of work hanging off an initiative; holds `state` + Risk Mode. |
 | unit (of work) | unit / unidade de trabalho | Checklist item inside a demand's execution plan (no own state). |
 | lane | lane / modo | A Risk Mode governance mode: FAST / Standard / SAFE. |
+| Inception | O quê | Phase 1 — understand what is being asked. |
+| Design | Como | Phase 2 — define how to solve, with enough clarity (SDD). |
+| Execution | Fazer | Phase 3 — implement in small traceable steps. |
+| Validate | Validar | Phase 4 — prove it meets the spec without regressions. |
+| Operation | Operar | Phase 5 — release, measure, summarize, and close. |
 | stream | stream | A demand family: Produto / Operacional / Engineering. |
 | demand-type | tipo de demanda | Specific type within a stream (bug, refactor, migration…). |
 | HUB | HUB | The sigla's repo; source of truth for `state`. |

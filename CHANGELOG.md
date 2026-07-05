@@ -22,6 +22,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `templates/hub/skills.md` (W2.3) — sigla skills registry mold: active skills with pinned refs plus an external-catalog allowlist wired to the injection guardrail.
 
 ### Changed
+- Phase names: EN stays canonical everywhere (folders, rules, validators); pt-BR aliases **"O quê · Como · Fazer · Validar · Operar"** registered in `core/glossary.md` and shown in the welcome phase table (owner decision — presentation layer only, D47).
 - `scripts/` reorganized by responsibility, mirrored in both runtimes: `validators/` (all `validate-*`), `workflow/` (alfred-boot, render-toolbar, classify-risk, confidence-score, spec-vs-impl), `metrics/` (collect-observability, generate-metrics-rollup, normalize-usage-cost), and python-only `adapters/` (mcp-email-server). `_common.py` stays at the runtime root. All internal imports/spawns and every repo reference updated; verified by `validate-framework`, `validate-links`, boot, strict demand validation, and classify-risk smoke tests in both runtimes.
 - `rules/lanes/fast.md` (W1.2) — escalation triggers now reference `rules/common/escalation-triggers.md` (was semantically pointing at `overconfidence.md`).
 - `docs/implementation-status.md` (W1.3) — compacted to a current snapshot (status, coverage by area, gaps, next order); pass-by-pass history stays in `CHANGELOG.md`/git.
