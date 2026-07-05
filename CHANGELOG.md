@@ -34,8 +34,19 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 
 - `VERSION` set to `2.0.0` (jump from `0.4.0` skipping the `1.x` line — explicit owner decision recorded in the plan).
 
+- Owner approvals batch (2026-07-05, "aprovo 1–7"):
+  - `templates/hub/decision.md` removed (W1.1) — `decisions.md` is the single decision format (append-only table + optional long-form block).
+  - Agent Skills open-standard frontmatter (`name`/`description`) added to all 7 skills; registry documents the convention, skill-bundled helpers, and the "eval before skill" discipline (W5.3/W5.4).
+  - On-demand skill/doc discovery in **allowlisted external catalogs** (e.g. Context7) documented in `skills/skills.md` with 4 mandatory gates (W5.5).
+  - Root `CLAUDE.md` one-line shim importing `AGENTS.md` (content stays vendor-neutral; the shim is a host binding, D3).
+  - `rules/demand-types/produto.md` → `product.md`, `operacional.md` → `operational.md` (D47 language consistency); all references updated.
+  - `core/squad.md` gains SRE/On-call, Security, and FinOps as checkpoint owners (SAFE/emergency) with recorded fallback.
+  - Original untracked conceptual plan removed from `.claude/` after byte-level verification against the committed copy.
+- Examples fixed: app-side `05-operation/008-observability-log.jsonl` added to the 5 example app demands — `validate-demand --app-demand-path` now passes (pre-existing gap).
+- `alfred-boot` (both runtimes, W8.4): open demands are ordered by resume priority (pending human checkpoint > in progress > blocked, then last activity) and a "Suggested next" hint with the reason is printed; the human still chooses.
+
 ### Compatibility notes
-- No artifact path, required field, lane DoD, connector contract, or observability schema has changed yet in this line; entries will accumulate here as waves land, with migration notes when HUB/App artifacts are affected.
+- No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
 - New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
 
 ## 0.4.0 - 2026-06-29

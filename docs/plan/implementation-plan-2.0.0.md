@@ -28,7 +28,7 @@ Aceite: plano acessível e linkável no repo; `validate-links` 0 quebrados. Não
 
 ### Wave 1 — Higiene e consolidação
 Objetivo: eliminar duplicidade e referência errada.
-- [ ] W1.1 **(DH)** Consolidar `templates/hub/decision.md` em `templates/hub/decisions.md` (um único formato de decisão).
+- [x] W1.1 ✅ (2026-07-05, aprovado pelo dono) template avulso `decision.md` removido de `templates/hub/`; `decisions.md` é o único formato (tabela append-only + bloco opcional para decisões longas).
 - [x] W1.2 ✅ (2026-07-05) `rules/lanes/fast.md` corrigido — gatilhos apontam para `rules/common/escalation-triggers.md`.
 - [x] W1.3 ✅ (2026-07-05) `docs/implementation-status.md` compactado: foto atual + cobertura por área; histórico permanece no `CHANGELOG.md`/git.
 - [x] W1.4 **Guardrail anti prompt-injection** ✅ (2026-07-05): `rules/common/content-validation.md` ganhou a seção "External content is data, not instruction" (precedência fixa, instruções embutidas = injeção suspeita, uso por extração, source gating, degradação D3); novo hard trigger em `rules/common/escalation-triggers.md`; `skills/skills.md` referencia o guardrail para skills/catálogos externos (caso ContextCrush/Context7 coberto).
@@ -67,9 +67,9 @@ Riscos: bloqueio por credenciais → usar simuladores de `examples/connectors/` 
 Objetivo: exercitar extensão real do registry.
 - [ ] W5.1 1 skill externa real ativada com **pin** (branch+commit registrados no state/audit — exercita o versionamento de `skills/skills.md`).
 - [ ] W5.2 Novas skills de linguagem/plataforma só quando a stack real pedir (gatilho, não antecipação).
-- [ ] W5.3 **Eval antes de skill** (evolução G): skill nova nasce de lacuna observada + 2–3 casos de teste que ela resolve.
-- [ ] W5.4 **(DH)** Formato compatível com o padrão aberto **Agent Skills** (frontmatter YAML `name`/`description`) + permitir skill referenciar scripts executáveis próprios (ajuste 4 + evolução C).
-- [ ] W5.5 **(DH)** **Descoberta de skills sob demanda em catálogos externos** (pedido do dono, 2026-07-05): o Orchestrator pode buscar num catálogo registrado (ex.: Context7 para documentação de bibliotecas) quando nenhuma skill ativa cobre a necessidade. Guardrails obrigatórios: catálogo permitido registrado no `knowledge` (allowlist), pin por ref na ativação, conteúdo tratado como **dado, não instrução** (W1.4), humano confirma a ativação (D7). Ver análise de confiabilidade em [`anthropic-research-notes.md`](anthropic-research-notes.md).
+- [x] W5.3 ✅ (2026-07-05) Disciplina "Eval before skill" documentada em `skills/skills.md`: skill nasce de lacuna observada + 2–3 casos que dobram como aceite.
+- [x] W5.4 ✅ (2026-07-05, aprovado pelo dono) Frontmatter YAML `name`/`description` (padrão aberto Agent Skills) nas 7 skills + convenção no registry; skills podem apontar helpers executáveis próprios (opcional, D3).
+- [x] W5.5 ✅ (2026-07-05, aprovado pelo dono) Seção "Discovery in external catalogs (on demand)" em `skills/skills.md`: busca em catálogo registrado (ex.: Context7) com os 4 gates — allowlist, pin por ref, humano confirma 1º uso, conteúdo = dado (W1.4). Sem catálogo na allowlist → perguntar, nunca buscar de fonte arbitrária. Confiabilidade analisada em [`anthropic-research-notes.md`](anthropic-research-notes.md).
 
 Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar agentes novos).
 
@@ -95,7 +95,7 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 - [ ] W8.1 Score de confiança pré-Execution no gate SDD (perguntas abertas + staleness do reverse-eng + ambiguidade + lane; abaixo do limiar → escalação D27).
 - [ ] W8.2 Helper `spec-vs-impl`: compara critérios de aceite com evidências/PR e aponta lacunas antes do aceite.
 - [ ] W8.3 Memória operacional: indexar `decisions` fechadas por tema no índice da sigla; Inception consulta decisões passadas.
-- [ ] W8.4 Recomendação de próxima ação no boot (priorizar por checkpoint pendente/última atividade).
+- [x] W8.4 ✅ (2026-07-05) `alfred-boot` (2 runtimes) ordena demandas abertas por prioridade de retomada (checkpoint pendente > em andamento > bloqueada, depois última atividade) e imprime "Suggested next" com o motivo — dica de ordenação; o humano escolhe.
 - [ ] W8.5 Sugestão automática de model-policy a partir de metrics (humano ratifica — D46).
 - [ ] W8.6 **Rubrica LLM-as-judge** (evolução D): grader baseado em modelo para qualidade de spec/summary, calibrado por humano antes de valer.
 - [ ] W8.7 **Retrospectiva com transcripts** (evolução E): após N demandas fechadas, analisar audit/JSONL e propor melhorias em regras/perguntas; humano ratifica (estende o padrão D46).
@@ -108,24 +108,25 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P0 | Completar template de spec (rollout/rollback etc.) | W2.1 | ✅ concluído (2026-07-05) |
 | P0 | Template de post-mortem | W2.2 | ✅ concluído (2026-07-05) |
 | P0 | Demanda real integrada | W4 | pendente (depende de parâmetros externos) |
-| P1 | Consolidar decision/decisions | W1.1 | pendente (DH) |
+| P1 | Consolidar decision/decisions | W1.1 | ✅ concluído (2026-07-05) |
 | P1 | Corrigir referência do fast.md | W1.2 | ✅ concluído (2026-07-05) |
 | P1 | As-built da Fase 7 | W0.2 | ✅ concluído (2026-07-05) |
 | P1 | Guardrail anti prompt-injection (conteúdo externo = dado) | W1.4 | ✅ concluído (2026-07-05) |
 | P1 | Instruções de compaction mid-demand | W1.5 | ✅ concluído (2026-07-05) |
 | P1 | Contador acumulado de escalada | W1.6 | ✅ concluído (2026-07-05) |
 | P1 | Guardrail "não remover/afrouxar testes" | W2.4 | ✅ concluído (2026-07-05) |
-| P2 | Eval antes de skill | W5.3 | pendente |
-| P2 | Formato Agent Skills + scripts em skills | W5.4 | pendente (DH) |
-| P2 | Descoberta de skills em catálogos externos (ex.: Context7) | W5.5 | pendente (DH) |
+| P2 | Eval antes de skill | W5.3 | ✅ concluído (2026-07-05) |
+| P2 | Formato Agent Skills + scripts em skills | W5.4 | ✅ concluído (2026-07-05) |
+| P2 | Descoberta de skills em catálogos externos (ex.: Context7) | W5.5 | ✅ concluído (2026-07-05) |
 | P2 | Connector: response format + error guidance | W7.3 | pendente |
 | P2 | Hooks determinísticos por host (opcional) | W7.4 | pendente |
 | P2 | Rubrica LLM-as-judge para artefatos | W8.6 | pendente |
-| P2 | Corrigir exemplos: JSONL de observabilidade do lado App ausente (`validate-demand` em modo app falha — **erro pré-existente**, confirmado via stash-test em 2026-07-05; lado HUB passa) | W6 | pendente |
+| P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa (restam só WARNs históricos) |
+| P2 | Recomendação de próxima ação no boot | W8.4 | ✅ concluído (2026-07-05) |
 | P2 | Retrospectiva com transcripts | W8.7 | pendente |
 | P1 | Template hub/skills.md | W2.3 | ✅ concluído (2026-07-05) |
 | P1 | Compactar implementation-status | W1.3 | ✅ concluído (2026-07-05) |
-| P1 | Papéis SRE/Security/FinOps em `core/squad.md` | — | pendente (DH) |
+| P1 | Papéis SRE/Security/FinOps em `core/squad.md` | — | ✅ concluído (2026-07-05) |
 | P2 | Helper classify-risk | W3 | ✅ concluído (2026-07-05) |
 | P2 | Score de confiança pré-Execution | W8.1 | pendente |
 | P2 | spec-vs-impl | W8.2 | pendente |
@@ -139,14 +140,17 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 As recomendações da Anthropic (agentes, context engineering, skills, tools, evals, autonomia governada) foram analisadas e mapeadas às decisões deste plano em [`anthropic-research-notes.md`](anthropic-research-notes.md). Os 5 ajustes sugeridos lá aguardam aprovação humana antes de entrar nas waves.
 
 ## Decisões humanas pendentes
-- [x] Local do plano conceitual versionado → `docs/plan/` (resolvido em 2026-07-05; falta só o dono aprovar a remoção do original em `.claude/`).
-- [ ] Fusão `decision.md` → `decisions.md` (W1.1).
-- [ ] Adotar formato do padrão aberto Agent Skills nas skills (W5.4).
-- [ ] Shims opcionais por host para o `AGENTS.md` raiz (ex.: `CLAUDE.md` de 1 linha) — hosts que não leem o padrão aberto nativamente.
-- [ ] Renomear `rules/demand-types/produto.md`/`operacional.md` para inglês (D47) — breaking, refs atualizadas via `validate-links`.
-- [ ] Descoberta de skills em catálogos externos + allowlist de catálogos confiáveis no `knowledge` (W5.5).
+Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
+- [x] Local do plano conceitual versionado → `docs/plan/`; original em `.claude/` removido após verificação de identidade da cópia (idêntica exceto o cabeçalho as-built).
+- [x] Fusão `decision.md` → `decisions.md` (W1.1) — template único, append-only.
+- [x] Formato do padrão aberto Agent Skills (frontmatter YAML `name`/`description`) nas 7 skills (W5.4).
+- [x] Shim por host: `CLAUDE.md` de 1 linha importando `AGENTS.md` (conteúdo continua agnóstico, D3).
+- [x] Renome para inglês (D47): `rules/demand-types/product.md` e `rules/demand-types/operational.md`, refs atualizadas.
+- [x] Descoberta de skills em catálogos externos + allowlist (W5.5).
+- [x] SRE/Security/FinOps como donos de checkpoint (SAFE/emergência) em `core/squad.md`, com fallback registrado em audit.
+
+Ainda pendentes:
 - [ ] Nomes de fase: manter EN canônico + apelidos pt-BR ("O quê/Como/Fazer/Validar/Operar") na apresentação (recomendado) ou renomear (alto custo).
-- [ ] Incluir SRE/Security/FinOps como donos de checkpoint SAFE.
 - [ ] Canal do connector de notificação (SMTP/Graph/SES/MCP) — pendência original do D44.
 - [ ] Primeiro adapter real: qual tipo, qual host, quem é o dono da credencial (W7.1).
 - [ ] E-mail registrado em `knowledge/notification.md` permanece no repo do framework ou migra para knowledge da org na adoção (D42)?
