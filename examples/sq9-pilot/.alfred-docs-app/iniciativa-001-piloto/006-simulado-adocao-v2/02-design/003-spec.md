@@ -21,9 +21,9 @@ carimbado por commit, audit/metrics locais e evento JSONL proprio. Nenhum codigo
 - usuarios: nenhum; sistemas: nenhum; dados: nenhum (documental).
 
 ## Acceptance criteria
-- index local aponta todos os artefatos e o state do HUB;
-- reverse-eng registra o commit analisado;
-- JSONL local parseia e carimba 2.0.0.
+- index local do app aponta os artefatos e o state do HUB;
+- reverse-eng do app registra o commit analisado;
+- JSONL de observabilidade local do app parseia e carimba 2.0.0.
 
 ## Test plan
 - `validate-demand --app-demand-path ... --strict` sem erros/avisos.
