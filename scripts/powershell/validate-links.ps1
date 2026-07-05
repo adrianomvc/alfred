@@ -13,12 +13,15 @@ param(
 #   resolved relative to root, then the file.
 # URLs, mailto:, pure #anchor links, and glob patterns (*) are skipped.
 # CHANGELOG.md is excluded: it is a historical ledger with point-in-time paths.
+# docs/plan/alfred-conceptual-plan.md is excluded for the same reason: the
+# versioned original design document keeps its as-written paths.
 
 $ErrorActionPreference = "Stop"
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 
 $scanDirs = @("core", "rules", "skills", "connectors", "metrics", "knowledge", "templates", "docs", "install", "hosts")
-$rootFiles = @("README.md")
+$rootFiles = @("README.md", "AGENTS.md")
+$excludeFiles = @("docs/plan/alfred-conceptual-plan.md")
 $inlinePathPattern = '^(core|rules|skills|connectors|metrics|knowledge|templates|docs|scripts|examples|install)/[\w./-]+$'
 
 function Test-Reference {
@@ -41,7 +44,10 @@ foreach ($rel in $rootFiles) {
 foreach ($dir in $scanDirs) {
   $base = Join-Path $rootPath $dir
   if (Test-Path -LiteralPath $base) {
-    Get-ChildItem -Path $base -Recurse -Filter *.md -File | ForEach-Object { $mdFiles.Add($_.FullName) }
+    Get-ChildItem -Path $base -Recurse -Filter *.md -File | ForEach-Object {
+      $rel = $_.FullName.Substring($rootPath.Length).TrimStart('\', '/').Replace('\', '/')
+      if ($excludeFiles -notcontains $rel) { $mdFiles.Add($_.FullName) }
+    }
   }
 }
 

@@ -20,7 +20,12 @@
 Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first real demand.
 
 ## Operational docs
-- [`implementation-status.md`](implementation-status.md) tracks coverage against the original planning prompt.
+- [`plan/implementation-plan-2.0.0.md`](plan/implementation-plan-2.0.0.md) is the active incremental implementation plan; all its work lands under version `2.0.0`.
+- [`plan/alfred-conceptual-plan.md`](plan/alfred-conceptual-plan.md) is the versioned original design (D1–D47) with an as-built note.
+- [`plan/anthropic-research-notes.md`](plan/anthropic-research-notes.md) maps Anthropic agent research to the plan's decisions.
+- [`roadmap.md`](roadmap.md) records what is Now / Next / Later.
+- [`quickstart-real-demand.md`](quickstart-real-demand.md) creates the first real demand after the pilot.
+- [`implementation-status.md`](implementation-status.md) tracks coverage against the conceptual plan.
 - [`layer-1-framework-closure.md`](layer-1-framework-closure.md) records Layer 1 closure, optional helpers, and external dependencies.
 - [`onboarding-sigla.md`](onboarding-sigla.md) describes adoption for a new sigla.
 - [`framework-validation.md`](framework-validation.md) validates changes to Alfred itself.
@@ -29,3 +34,5 @@ Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first
 - [`adapter-implementation.md`](adapter-implementation.md) defines adapter states and activation rules.
 - [`version-adoption.md`](version-adoption.md) defines how HUB/App repos reference, freeze, and upgrade Alfred versions.
 - [`release-governance.md`](release-governance.md) defines how framework versions are prepared, validated, and documented.
+- [`knowledge-governance.md`](knowledge-governance.md) defines policy scopes and precedence for the knowledge base.
+- [`automation-fallback.md`](automation-fallback.md) maps each optional automation to its manual fallback (D3).

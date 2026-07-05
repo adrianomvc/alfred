@@ -30,7 +30,11 @@ SCAN_DIRS = [
 # CHANGELOG.md is intentionally excluded: it is a historical ledger where path
 # references are point-in-time (a past entry may name a file that has since
 # moved), so it must not be "corrected" to match the current tree.
-ROOT_FILES = ["README.md"]
+# docs/plan/alfred-conceptual-plan.md is excluded for the same reason: it is the
+# versioned original design document (D1-D47) whose paths reflect the plan as
+# written, not the as-built tree.
+ROOT_FILES = ["README.md", "AGENTS.md"]
+EXCLUDE_FILES = {"docs/plan/alfred-conceptual-plan.md"}
 
 TOP_DIRS = (
     "core", "rules", "skills", "connectors", "metrics", "knowledge",
@@ -85,7 +89,11 @@ def iter_markdown(root):
     for folder in SCAN_DIRS:
         base = root / folder
         if base.exists():
-            yield from sorted(base.rglob("*.md"))
+            for path in sorted(base.rglob("*.md")):
+                rel = path.relative_to(root).as_posix()
+                if rel in EXCLUDE_FILES:
+                    continue
+                yield path
 
 
 def main():
