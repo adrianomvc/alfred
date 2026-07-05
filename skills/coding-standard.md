@@ -33,6 +33,7 @@ Load during Execution and Validate when code, configuration, tests, or automatio
 - Apply SOLID pragmatically: one reason to change, explicit dependencies, substitutable contracts, narrow interfaces.
 - Keep brownfield changes in place; never create `file_v2` as a workaround.
 - Add tests proportional to risk and blast radius.
+- Never remove, weaken, or skip a test to satisfy a gate: a failing test means fix the cause or escalate — deleting/loosening tests to "pass" hides missing or buggy functionality.
 - Make automation-friendly UI/API changes where applicable.
 
 ## output
