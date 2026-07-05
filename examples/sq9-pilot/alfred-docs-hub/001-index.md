@@ -23,6 +23,7 @@ SQ9
 | 002-simulado-fast | iniciativa-001-piloto | Simulado FAST concluido |
 | 003-simulado-safe | iniciativa-001-piloto | Simulado SAFE concluido |
 | 004-execution-first | iniciativa-001-piloto | Simulado Operational Execution-first concluido |
+| 006-simulado-adocao-v2 | iniciativa-001-piloto | Simulado de adocao 2.0.0 concluido (strict 0/0) |
 
 ## Apps
 | App | Artefatos |
@@ -32,6 +33,7 @@ SQ9
 | sq9-app | `examples/sq9-pilot/.alfred-docs-app/iniciativa-001-piloto/003-simulado-safe/` |
 | sq9-app | `examples/sq9-pilot/.alfred-docs-app/iniciativa-001-piloto/004-execution-first/` |
 | sq9-app-a/sq9-app-b | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/` |
+| sq9-app | `examples/sq9-pilot/.alfred-docs-app/iniciativa-001-piloto/006-simulado-adocao-v2/` |
 
 ## Rollups
 - `002-metrics-rollup.md`
