@@ -75,6 +75,7 @@ Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar
 
 ### Wave 6 — Métricas e evidências
 Objetivo: provar valor da squad híbrida com dados.
+- [x] W6.0 ✅ (2026-07-05) **Simulado de adoção 2.0.0** (`006-simulado-adocao-v2` no exemplo sq9-pilot): ensaio ponta a ponta offline da linha 2.0.0 exercitando classify-risk, requirements por prioridade, formato único de decisions, spec completa (lado app), carimbo 2.0.0 e JSONL HUB+App — **`validate-demand --strict` 0 erros / 0 avisos nos 2 runtimes**. Vira eval de regressão permanente. De quebra, `validate-demand` ganhou `--app-repo-path`/`--app-current-commit` (encaminhados ao staleness check — lacuna real de uso).
 - [ ] W6.1 Medir em ≥5 demandas reais: retrabalho, aceite de 1ª, % aguardando humano, custo (campos D43 já definidos em `metrics/metrics.md`).
 - [ ] W6.2 `normalize-usage-cost` com export real do host.
 - [ ] W6.3 1 relatório de insights comparado com `metrics/baselines.md`, ratificado por humano.
