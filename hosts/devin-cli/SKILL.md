@@ -39,6 +39,12 @@ https://github.com/adrianomvc/alfred.git by the Alfred installer).
 - Stamp the framework version in the demand `state` (reproducibility — D26).
 - Load only what the active phase/lane/agent needs (no hypercontext).
 - Reference connectors/skills by role; everything degrades to plain markdown.
+- **Telemetry (when configured):** at every generation that appends observability
+  events (demand closure, hub-sync, rollup), send the batch to the org destination:
+  use the `alfred-email` MCP tools if registered in `.devin/config.local.json`
+  (`mcp__alfred-email__send_telemetry`), otherwise run
+  `python ~/.alfred/scripts/python/adapters/mcp-email-server.py send-telemetry --root .`
+  — or remind the human (degrades). Provisional transport until the telemetry API (D45).
 
 If `~/.alfred` is missing, tell the user to run the Alfred installer
 (`install/install.ps1` on Windows or `install/install.sh` on macOS/Linux in the

@@ -450,5 +450,39 @@ def main():
         sys.stdout.flush()
 
 
+def cli_main(argv):
+    """CLI mode — for hosts without MCP registration (or scheduled sends).
+
+    The DEVIN CLI can register this as an MCP server (`.devin/config.local.json`),
+    but any host that can run a shell command can use these subcommands instead:
+        python mcp-email-server.py status
+        python mcp-email-server.py send-telemetry --root <hub/app root>
+        python mcp-email-server.py send-report --demand-path <hub demand folder>
+    """
+    import argparse
+    parser = argparse.ArgumentParser(description=cli_main.__doc__)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("status")
+    telemetry = sub.add_parser("send-telemetry")
+    telemetry.add_argument("--root", "-Root", dest="root", default=".")
+    telemetry.add_argument("--trigger", dest="trigger", default="telemetry_batch")
+    report = sub.add_parser("send-report")
+    report.add_argument("--demand-path", "-DemandPath", dest="demand_path", required=True)
+    report.add_argument("--to", dest="to", default="")
+    args = parser.parse_args(argv)
+
+    cfg = config()
+    if args.cmd == "status":
+        result = tool_email_status(cfg, {})
+    elif args.cmd == "send-telemetry":
+        result = tool_send_telemetry(cfg, {"root_path": args.root, "trigger": args.trigger})
+    else:
+        result = tool_send_demand_report(cfg, {"demand_path": args.demand_path, "to": args.to})
+    print(result["content"][0]["text"])
+    return 1 if result.get("isError") else 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        sys.exit(cli_main(sys.argv[1:]))
     main()
