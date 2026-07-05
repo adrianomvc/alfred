@@ -93,8 +93,8 @@ Aceite: `validate-connectors` 0 erros; 1 handoff real registrado no audit. Não 
 
 ### Wave 8 — Inteligência evolutiva
 Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Waves 4–6; cada item entra como demanda dogfooding.
-- [ ] W8.1 Score de confiança pré-Execution no gate SDD (perguntas abertas + staleness do reverse-eng + ambiguidade + lane; abaixo do limiar → escalação D27).
-- [ ] W8.2 Helper `spec-vs-impl`: compara critérios de aceite com evidências/PR e aponta lacunas antes do aceite.
+- [x] W8.1 ✅ (2026-07-05) Helper `confidence-score` (2 runtimes): score 0–100 de perguntas sem resposta + lane não confirmada + decisions/plano ausentes (Std/SAFE) + reverse-eng sem commit; ≥80 segue · 50–79 revisa com humano · <50 para e escala (D27). O score informa; o humano decide.
+- [x] W8.2 ✅ (2026-07-05) Helper `spec-vs-impl` (2 runtimes): compara critérios de aceite da spec com a evidência de validação (heurística de cobertura textual); aponta lacunas, nunca aprova. **No primeiro uso já achou lacuna real**: a evidência do simulado não cobria os critérios do lado app — corrigida.
 - [ ] W8.3 Memória operacional: indexar `decisions` fechadas por tema no índice da sigla; Inception consulta decisões passadas.
 - [x] W8.4 ✅ (2026-07-05) `alfred-boot` (2 runtimes) ordena demandas abertas por prioridade de retomada (checkpoint pendente > em andamento > bloqueada, depois última atividade) e imprime "Suggested next" com o motivo — dica de ordenação; o humano escolhe.
 - [ ] W8.5 Sugestão automática de model-policy a partir de metrics (humano ratifica — D46).
@@ -129,8 +129,8 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P1 | Compactar implementation-status | W1.3 | ✅ concluído (2026-07-05) |
 | P1 | Papéis SRE/Security/FinOps em `core/squad.md` | — | ✅ concluído (2026-07-05) |
 | P2 | Helper classify-risk | W3 | ✅ concluído (2026-07-05) |
-| P2 | Score de confiança pré-Execution | W8.1 | pendente |
-| P2 | spec-vs-impl | W8.2 | pendente |
+| P2 | Score de confiança pré-Execution | W8.1 | ✅ concluído (2026-07-05) |
+| P2 | spec-vs-impl | W8.2 | ✅ concluído (2026-07-05) |
 | P2 | Memória de decisões | W8.3 | pendente |
 | P2 | Métricas de retrabalho/intervenção | W6 | pendente |
 | P3 | Adapter real (MCP candidato) | W7 | pendente (DH) |
