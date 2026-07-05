@@ -157,6 +157,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hub-demand-path", "-HubDemandPath", dest="hub_demand_path", required=True)
     parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="")
+    parser.add_argument("--app-repo-path", "-AppRepoPath", dest="app_repo_path", default="",
+                        help="app repo path forwarded to the reverse-eng staleness check")
+    parser.add_argument("--app-current-commit", "-AppCurrentCommit", dest="app_current_commit", default="",
+                        help="current app commit forwarded to the reverse-eng staleness check")
     parser.add_argument("--strict", "-Strict", dest="strict", action="store_true")
     args = parser.parse_args()
 
@@ -261,11 +265,13 @@ def main():
         if has_reverse_eng:
             staleness = HERE / "validate-reverse-eng-staleness.py"
             if staleness.exists():
-                result = subprocess.run(
-                    [sys.executable, str(staleness),
-                     "-ReverseEngPath", str(app / "01-inception/002-reverse-eng.md")],
-                    capture_output=True, text=True,
-                )
+                staleness_args = [sys.executable, str(staleness),
+                                  "-ReverseEngPath", str(app / "01-inception/002-reverse-eng.md")]
+                if args.app_current_commit:
+                    staleness_args += ["-CurrentCommit", args.app_current_commit]
+                elif args.app_repo_path:
+                    staleness_args += ["-AppRepoPath", args.app_repo_path]
+                result = subprocess.run(staleness_args, capture_output=True, text=True)
                 for line in result.stdout.splitlines():
                     print(line)
                     if line.startswith("WARN "):

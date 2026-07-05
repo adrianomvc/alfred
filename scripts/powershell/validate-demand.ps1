@@ -4,6 +4,10 @@ param(
 
   [string]$AppDemandPath = "",
 
+  # Forwarded to the reverse-eng staleness check when provided.
+  [string]$AppRepoPath = "",
+  [string]$AppCurrentCommit = "",
+
   [switch]$Strict
 )
 
@@ -365,7 +369,10 @@ if ($AppDemandPath -ne "") {
   if ($hasReverseEng) {
     $stalenessScript = Join-Path $PSScriptRoot "validate-reverse-eng-staleness.ps1"
     if (Test-Path -LiteralPath $stalenessScript) {
-      $stalenessOutput = & $stalenessScript -ReverseEngPath (Join-Path $app "01-inception/002-reverse-eng.md")
+      $stalenessExtra = @{}
+      if ($AppCurrentCommit -ne "") { $stalenessExtra["CurrentCommit"] = $AppCurrentCommit }
+      elseif ($AppRepoPath -ne "") { $stalenessExtra["AppRepoPath"] = $AppRepoPath }
+      $stalenessOutput = & $stalenessScript -ReverseEngPath (Join-Path $app "01-inception/002-reverse-eng.md") @stalenessExtra
       foreach ($line in $stalenessOutput) {
         Write-Output $line
         if ($line -like "WARN *") {
