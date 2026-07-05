@@ -84,10 +84,10 @@ Não mexer: baselines sem dados reais.
 
 ### Wave 7 — Primeiro adapter real
 Objetivo: um connector sai de `contract`/`handoff` para `active`.
-- [ ] W7.1 **(DH: qual adapter e qual host)** Escolher git, tracker ou notification; nomear dono de credencial.
-- [ ] W7.2 Percorrer os estados `contract → handoff → dry-run → active` (`docs/host-adapter-readiness.md`, `docs/adapter-implementation.md`). MCP é forma candidata de implementação (adapter, nunca core).
-- [ ] W7.3 **Contrato de connector ampliado** (ajuste 2, pesquisa): seções `response format` (conciso por padrão) e `error guidance` (erro acionável) em `connectors/connectors.md`; avaliar o adapter com transcripts antes de `active`.
-- [ ] W7.4 **Enforcement determinístico opcional** (evolução B): documentar em `hosts/` como acoplar os validadores existentes a hooks do host (regras advisórias × hooks determinísticos); degrada para manual (D3).
+- [x] W7.1 ✅ (2026-07-05, decisão do dono) Primeiro adapter = **notification**, canal = **MCP em Python** (funciona em qualquer host MCP; registrado via `claude mcp add` no Claude Code). Pendente para `active`: credenciais SMTP e dono.
+- [x] W7.2 ✅ parcial (2026-07-05) `mcp-email-server` (`scripts/python/`, stdlib puro): estados `contract → handoff → dry-run` percorridos — dry-run compõe o `.eml` no outbox (é o próprio handoff materializado); testado ponta a ponta (handshake MCP, envio dry-run, recusa fora da allowlist auditada). `active` aguarda `SMTP_*` reais.
+- [x] W7.3 ✅ (2026-07-05) Seção "Response format & error guidance" em `connectors/connectors.md`; aplicada concretamente no adapter de e-mail (resposta concisa; erro diz o próximo passo e quando só um humano desbloqueia).
+- [x] W7.4 ✅ (2026-07-05) Seção "Optional deterministic enforcement (hooks)" em `hosts/README.md`: validadores existentes como stop/pre-write hooks; advisório × determinístico; degrada (D3).
 
 Aceite: `validate-connectors` 0 erros; 1 handoff real registrado no audit. Não mexer: regra "IA nunca mergeia branch protegida".
 
@@ -150,11 +150,13 @@ Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
 - [x] Descoberta de skills em catálogos externos + allowlist (W5.5).
 - [x] SRE/Security/FinOps como donos de checkpoint (SAFE/emergência) em `core/squad.md`, com fallback registrado em audit.
 
+- [x] Canal do connector de notificação (D44): **MCP em Python** — decidido pelo dono em 2026-07-05; adapter em dry-run.
+- [x] Primeiro adapter real (W7.1): **notification** via MCP.
+- [x] E-mail em `knowledge/notification.md`: já não há endereço hardcoded no framework (o arquivo delega à sigla/HUB); destino vem de configuração (`ALFRED_EMAIL_DEFAULT_TO`/knowledge da adoção) — resolvido de fato.
+
 Ainda pendentes:
 - [ ] Nomes de fase: manter EN canônico + apelidos pt-BR ("O quê/Como/Fazer/Validar/Operar") na apresentação (recomendado) ou renomear (alto custo).
-- [ ] Canal do connector de notificação (SMTP/Graph/SES/MCP) — pendência original do D44.
-- [ ] Primeiro adapter real: qual tipo, qual host, quem é o dono da credencial (W7.1).
-- [ ] E-mail registrado em `knowledge/notification.md` permanece no repo do framework ou migra para knowledge da org na adoção (D42)?
+- [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active`.
 
 ## Encerramento do plano
 O plano é considerado concluído quando: Waves 0–4 fechadas, `validate-framework` e `validate-links` limpos, 1 demanda real estrita 0/0, e a seção `2.0.0` do `CHANGELOG.md` consolidada com notas de compatibilidade e migração. Só então uma nova versão pode ser discutida (decisão humana).
