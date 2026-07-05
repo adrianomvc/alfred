@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that the toolbar renderer does not drift from saved fixtures.
 
-Python mirror of ``scripts/powershell/validate-toolbar-fixtures.ps1``.
+Python mirror of ``scripts/powershell/validators/validate-toolbar-fixtures.ps1``.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_text  # noqa: E402
 
 CASES = [
@@ -30,7 +30,7 @@ CASES = [
 
 def load_renderer():
     spec = importlib.util.spec_from_file_location(
-        "render_toolbar", Path(__file__).resolve().parent / "render-toolbar.py"
+        "render_toolbar", Path(__file__).resolve().parent.parent / "workflow" / "render-toolbar.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

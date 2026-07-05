@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check reverse-engineering staleness against the current app commit.
 
-Python mirror of ``scripts/powershell/validate-reverse-eng-staleness.ps1``.
+Python mirror of ``scripts/powershell/validators/validate-reverse-eng-staleness.ps1``.
 """
 
 import argparse
@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_lines  # noqa: E402
 
 UNAVAILABLE = ("not-git", "unknown", "a confirmar")

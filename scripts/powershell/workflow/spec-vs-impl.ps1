@@ -6,7 +6,7 @@ param(
 )
 
 # Compare spec acceptance criteria against validation evidence (W8.2).
-# PowerShell mirror of scripts/python/spec-vs-impl.py. Optional helper (D3).
+# PowerShell mirror of scripts/python/workflow/spec-vs-impl.py. Optional helper (D3).
 # Heuristic, not a judge: flags criteria with no textual echo in the evidence
 # so the Reviewer/human looks at them - it never approves.
 

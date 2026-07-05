@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate the Alfred skills registry.
 
-Python mirror of ``scripts/powershell/validate-skills-registry.ps1``.
+Python mirror of ``scripts/powershell/validators/validate-skills-registry.ps1``.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_lines, read_text  # noqa: E402
 
 REQUIRED_SECTIONS = [

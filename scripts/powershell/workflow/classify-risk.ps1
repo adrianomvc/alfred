@@ -14,7 +14,7 @@ param(
 )
 
 # Propose a Risk Mode lane from the objective checklist (core/risk-mode.md).
-# PowerShell mirror of scripts/python/classify-risk.py. Optional helper (D3):
+# PowerShell mirror of scripts/python/workflow/classify-risk.py. Optional helper (D3):
 # the checklist in core/risk-mode.md is the source of truth and Alfred still
 # classifies manually when this cannot run. The AI proposes, the human confirms
 # (Standard/SAFE) - this helper only computes and explains the proposal.

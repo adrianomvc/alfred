@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate one Alfred demand across HUB (and optional App) artifacts.
 
-Python mirror of ``scripts/powershell/validate-demand.ps1``.
+Python mirror of ``scripts/powershell/validators/validate-demand.ps1``.
 """
 
 import argparse
@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 from _common import (  # noqa: E402
     get_field, iter_jsonl, normalize_phase, phase_number, read_lines,
 )

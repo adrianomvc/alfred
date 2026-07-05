@@ -4,7 +4,7 @@ param(
 )
 
 # Pre-Execution confidence score for a demand (W8.1).
-# PowerShell mirror of scripts/python/confidence-score.py. Optional helper (D3).
+# PowerShell mirror of scripts/python/workflow/confidence-score.py. Optional helper (D3).
 # Below the floor, the recommendation is the escalation rule (stop and ask),
 # never "proceed anyway". The score informs; the human decides.
 

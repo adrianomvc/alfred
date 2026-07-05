@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Collect Alfred observability JSONL events from a tree.
 
-Python mirror of ``scripts/powershell/collect-observability.ps1``.
+Python mirror of ``scripts/powershell/metrics/collect-observability.ps1``.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import find_observability_logs  # noqa: E402
 
 

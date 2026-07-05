@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Boot helper: detect the Alfred context and list resumable demands.
 
-Python mirror of ``scripts/powershell/alfred-boot.ps1``.
+Python mirror of ``scripts/powershell/workflow/alfred-boot.ps1``.
 """
 
 import argparse
@@ -10,10 +10,10 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 from _common import get_field, read_lines, value_or  # noqa: E402
 
-FRAMEWORK_ROOT = HERE.parent.parent
+FRAMEWORK_ROOT = HERE.parent.parent.parent
 
 CLOSED = (
     "closed", "fechado", "fechada", "concluida", "concluída", "done",

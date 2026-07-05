@@ -90,7 +90,7 @@ Get-Content -LiteralPath $inputFullPath | ForEach-Object {
         cost_usd = $record.cost_usd
       }
       model = $record.model
-      tool = "scripts/powershell/normalize-usage-cost.ps1"
+      tool = "scripts/powershell/metrics/normalize-usage-cost.ps1"
       parent_event_id = $record.parent_event_id
       artifacts = @()
       files_changed = @()

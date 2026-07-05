@@ -137,6 +137,9 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P3 | Sugestão de model-policy | W8.5 | pendente |
 | P3 | Dashboard sobre JSONL | futuro | adiado |
 
+## Organização de `scripts/` (pedido do dono, 2026-07-05)
+- [x] ✅ Diretório reorganizado por responsabilidade nos 2 runtimes: `validators/` · `workflow/` · `metrics/` · `adapters/` (python-only). Referências atualizadas em todo o repo (CHANGELOG e plano conceitual preservados como históricos); smoke tests e validação estrita 0/0 pós-mudança. Nota de compatibilidade no CHANGELOG (paths de chamada mudaram; flags idênticos).
+
 ## Base de pesquisa
 As recomendações da Anthropic (agentes, context engineering, skills, tools, evals, autonomia governada) foram analisadas e mapeadas às decisões deste plano em [`anthropic-research-notes.md`](anthropic-research-notes.md). Os 5 ajustes sugeridos lá aguardam aprovação humana antes de entrar nas waves.
 

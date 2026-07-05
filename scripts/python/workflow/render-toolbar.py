@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render the Alfred process toolbar from a demand state file.
 
-Python mirror of ``scripts/powershell/render-toolbar.ps1``.
+Python mirror of ``scripts/powershell/workflow/render-toolbar.ps1``.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import get_field, read_lines  # noqa: E402
 
 

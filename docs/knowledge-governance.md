@@ -58,10 +58,10 @@ Open-ended exceptions are not valid framework defaults.
 Run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-knowledge.ps1
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-knowledge.ps1
 ```
 ```bash
-python scripts/python/validate-knowledge.py
+python scripts/python/validators/validate-knowledge.py
 ```
 
 The validator checks the framework knowledge files, the policy template, and example HUB knowledge policies.

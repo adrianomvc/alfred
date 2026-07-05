@@ -4,11 +4,21 @@ Scripts are optional helpers. The framework must keep working without them.
 
 They ship in two equivalent runtimes so the framework can be checked on any
 machine:
-- `scripts/powershell/*.ps1` - PowerShell helpers (Windows-first).
-- `scripts/python/*.py` - Python 3 helpers for machines without PowerShell (D3 portability).
+- `scripts/powershell/` - PowerShell helpers (Windows-first).
+- `scripts/python/` - Python 3 helpers for machines without PowerShell (D3 portability).
 
 Both sets accept the same flags (`-Root`, `-StatePath`, `-HubDemandPath`, ...)
 and produce equivalent output. Pick whichever runtime the host has.
+
+## Layout (by responsibility, mirrored in both runtimes)
+| Folder | Holds | Members |
+|---|---|---|
+| `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
+| `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` |
+| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` |
+| `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
+
+`scripts/python/_common.py` stays at the runtime root (shared by all categories).
 
 ## Allowed helpers
 - validate required sections in markdown artifacts
@@ -30,7 +40,7 @@ and produce equivalent output. Pick whichever runtime the host has.
 Any script output must degrade to a manual markdown checklist when the host cannot run scripts.
 
 ## Available
-Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py`.
+Each helper exists as both `scripts/powershell/<category>/<name>.ps1` and `scripts/python/<category>/<name>.py` (except the python-only `adapters/`).
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
 - `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile text` (default, ASCII) · `rich` (ANSI color/icons) · `web` (self-contained SVG). See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
@@ -52,51 +62,51 @@ Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<
 
 Example:
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-framework.ps1
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-framework.ps1
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/render-toolbar.ps1 -StatePath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/001-state.md -Model GPT-5 -Cost "n/a"
+powershell -ExecutionPolicy Bypass -File scripts/powershell/workflow/render-toolbar.ps1 -StatePath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/001-state.md -Model GPT-5 -Cost "n/a"
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/collect-observability.ps1 -Root examples
+powershell -ExecutionPolicy Bypass -File scripts/powershell/metrics/collect-observability.ps1 -Root examples
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/generate-metrics-rollup.ps1 -Root examples
+powershell -ExecutionPolicy Bypass -File scripts/powershell/metrics/generate-metrics-rollup.ps1 -Root examples
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/normalize-usage-cost.ps1 -InputPath examples/connectors/usage-export.jsonl
+powershell -ExecutionPolicy Bypass -File scripts/powershell/metrics/normalize-usage-cost.ps1 -InputPath examples/connectors/usage-export.jsonl
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-toolbar-fixtures.ps1
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-toolbar-fixtures.ps1
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-skills-registry.ps1
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-skills-registry.ps1
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-demand.ps1 -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-demand.ps1 -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/alfred-boot.ps1 -Root .
+powershell -ExecutionPolicy Bypass -File scripts/powershell/workflow/alfred-boot.ps1 -Root .
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-reverse-eng-staleness.ps1 -ReverseEngPath examples/staleness-fixtures/reverse-eng-fresh.md -CurrentCommit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-reverse-eng-staleness.ps1 -ReverseEngPath examples/staleness-fixtures/reverse-eng-fresh.md -CurrentCommit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-sdd-gate.ps1 -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
+powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-sdd-gate.ps1 -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
 ```
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/classify-risk.ps1 -Reversibility 1 -BlastRadius 1 -SensitiveData 0 -CustomerImpact 1 -Cost 1 -Components 1 -Novelty 1 -Ambiguity 1 -Integrations 1 -Effort 1
+powershell -ExecutionPolicy Bypass -File scripts/powershell/workflow/classify-risk.ps1 -Reversibility 1 -BlastRadius 1 -SensitiveData 0 -CustomerImpact 1 -Cost 1 -Components 1 -Novelty 1 -Ambiguity 1 -Integrations 1 -Effort 1
 ```
 
 ## Python (no PowerShell)
@@ -104,21 +114,21 @@ powershell -ExecutionPolicy Bypass -File scripts/powershell/classify-risk.ps1 -R
 Same helpers, same flags, for machines without PowerShell. Requires Python 3.
 
 ```bash
-python scripts/python/validate-framework.py
+python scripts/python/validators/validate-framework.py
 ```
 
 ```bash
-python scripts/python/render-toolbar.py -StatePath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/001-state.md -Model GPT-5 -Cost "n/a"
+python scripts/python/workflow/render-toolbar.py -StatePath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/001-state.md -Model GPT-5 -Cost "n/a"
 ```
 
 ```bash
-python scripts/python/validate-demand.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
+python scripts/python/validators/validate-demand.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
 ```
 
 ```bash
-python scripts/python/alfred-boot.py -Root .
+python scripts/python/workflow/alfred-boot.py -Root .
 ```
 
-Every other helper follows the same pattern: `python scripts/python/<name>.py`
+Every other helper follows the same pattern: `python scripts/python/<category>/<name>.py`
 with the same flags shown in the PowerShell examples above (flags also accept
 the `--kebab-case` form, e.g. `--state-path`).

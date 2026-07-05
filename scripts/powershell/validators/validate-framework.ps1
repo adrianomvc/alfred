@@ -84,8 +84,8 @@ $requiredPaths = @(
   "knowledge/policy-template.md",
   "docs/knowledge-governance.md",
   "docs/automation-fallback.md",
-  "scripts/powershell/validate-knowledge.ps1",
-  "scripts/python/validate-knowledge.py",
+  "scripts/powershell/validators/validate-knowledge.ps1",
+  "scripts/python/validators/validate-knowledge.py",
   "rules/demand-types/playbooks/README.md",
   "rules/demand-types/playbooks/migration.md",
   "install/README.md",
@@ -104,38 +104,38 @@ $requiredPaths = @(
   "docs/version-adoption.md"
   "docs/release-governance.md"
   "CHANGELOG.md"
-  "scripts/powershell/alfred-boot.ps1"
-  "scripts/powershell/render-toolbar.ps1"
+  "scripts/powershell/workflow/alfred-boot.ps1"
+  "scripts/powershell/workflow/render-toolbar.ps1"
   "docs/skills-activation.md"
   "skills/lang-python.md"
   "skills/lang-sql.md"
   "skills/lang-terraform.md"
   "skills/platform-aws-data.md"
-  "scripts/powershell/collect-observability.ps1"
-  "scripts/powershell/generate-metrics-rollup.ps1"
-  "scripts/powershell/normalize-usage-cost.ps1"
-  "scripts/powershell/validate-demand.ps1"
-  "scripts/powershell/validate-reverse-eng-staleness.ps1"
-  "scripts/powershell/validate-sdd-gate.ps1"
-  "scripts/powershell/validate-toolbar-fixtures.ps1"
-  "scripts/powershell/validate-skills-registry.ps1"
-  "scripts/powershell/validate-connectors.ps1"
-  "scripts/powershell/validate-model-policy.ps1"
-  "scripts/powershell/validate-links.ps1"
-  "scripts/python/validate-links.py"
-  "scripts/python/alfred-boot.py"
-  "scripts/python/render-toolbar.py"
-  "scripts/python/collect-observability.py"
-  "scripts/python/generate-metrics-rollup.py"
-  "scripts/python/normalize-usage-cost.py"
-  "scripts/python/validate-framework.py"
-  "scripts/python/validate-demand.py"
-  "scripts/python/validate-reverse-eng-staleness.py"
-  "scripts/python/validate-sdd-gate.py"
-  "scripts/python/validate-toolbar-fixtures.py"
-  "scripts/python/validate-skills-registry.py"
-  "scripts/python/validate-connectors.py"
-  "scripts/python/validate-model-policy.py"
+  "scripts/powershell/metrics/collect-observability.ps1"
+  "scripts/powershell/metrics/generate-metrics-rollup.ps1"
+  "scripts/powershell/metrics/normalize-usage-cost.ps1"
+  "scripts/powershell/validators/validate-demand.ps1"
+  "scripts/powershell/validators/validate-reverse-eng-staleness.ps1"
+  "scripts/powershell/validators/validate-sdd-gate.ps1"
+  "scripts/powershell/validators/validate-toolbar-fixtures.ps1"
+  "scripts/powershell/validators/validate-skills-registry.ps1"
+  "scripts/powershell/validators/validate-connectors.ps1"
+  "scripts/powershell/validators/validate-model-policy.ps1"
+  "scripts/powershell/validators/validate-links.ps1"
+  "scripts/python/validators/validate-links.py"
+  "scripts/python/workflow/alfred-boot.py"
+  "scripts/python/workflow/render-toolbar.py"
+  "scripts/python/metrics/collect-observability.py"
+  "scripts/python/metrics/generate-metrics-rollup.py"
+  "scripts/python/metrics/normalize-usage-cost.py"
+  "scripts/python/validators/validate-framework.py"
+  "scripts/python/validators/validate-demand.py"
+  "scripts/python/validators/validate-reverse-eng-staleness.py"
+  "scripts/python/validators/validate-sdd-gate.py"
+  "scripts/python/validators/validate-toolbar-fixtures.py"
+  "scripts/python/validators/validate-skills-registry.py"
+  "scripts/python/validators/validate-connectors.py"
+  "scripts/python/validators/validate-model-policy.py"
   "connectors/usage-cost.md"
   "connectors/adapter-template.md"
   "docs/adapter-implementation.md"
@@ -167,15 +167,15 @@ foreach ($file in $jsonlFiles) {
 Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-export.jsonl")
 Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attribution-events.jsonl")
 
-& (Join-Path $rootPath "scripts/powershell/validate-toolbar-fixtures.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-skills-registry.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-connectors.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-model-policy.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-knowledge.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-links.ps1") -Root $rootPath
-& (Join-Path $rootPath "scripts/powershell/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
-& (Join-Path $rootPath "scripts/powershell/alfred-boot.ps1") -Root $rootPath | Out-Null
-& (Join-Path $rootPath "scripts/powershell/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-& (Join-Path $rootPath "scripts/powershell/validate-sdd-gate.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
+& (Join-Path $rootPath "scripts/powershell/validators/validate-toolbar-fixtures.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-skills-registry.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-connectors.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-model-policy.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-knowledge.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-links.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/validators/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
+& (Join-Path $rootPath "scripts/powershell/workflow/alfred-boot.ps1") -Root $rootPath | Out-Null
+& (Join-Path $rootPath "scripts/powershell/validators/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+& (Join-Path $rootPath "scripts/powershell/validators/validate-sdd-gate.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
 
 Write-Output "Framework validation completed."

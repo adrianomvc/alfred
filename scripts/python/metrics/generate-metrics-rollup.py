@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Turn observability JSONL into a Markdown metrics rollup.
 
-Python mirror of ``scripts/powershell/generate-metrics-rollup.ps1``.
+Python mirror of ``scripts/powershell/metrics/generate-metrics-rollup.ps1``.
 """
 
 import argparse
@@ -10,7 +10,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import find_observability_logs, value_or  # noqa: E402
 
 

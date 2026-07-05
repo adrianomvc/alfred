@@ -3,7 +3,7 @@ param(
 )
 
 # Validate internal Markdown references in the Alfred framework.
-# PowerShell mirror of scripts/python/validate-links.py. Optional helper (D3):
+# PowerShell mirror of scripts/python/validators/validate-links.py. Optional helper (D3):
 # Alfred still works manually through Markdown if it cannot run. It catches
 # broken cross-references after files are moved or renamed.
 #

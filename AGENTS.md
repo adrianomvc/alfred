@@ -20,8 +20,8 @@ A markdown-first governance framework for hybrid squads (humans + AI). Kernel in
 
 ## Before finishing any change
 Run in either runtime and require 0 errors (includes link validation):
-- `python scripts/python/validate-framework.py`
-- or `pwsh -File scripts/powershell/validate-framework.ps1`
+- `python scripts/python/validators/validate-framework.py`
+- or `pwsh -File scripts/powershell/validators/validate-framework.ps1`
 
 Version/release rules: `docs/release-governance.md`. All current work lands under the version in `VERSION` — no bumps per change (owner decision recorded in the plan).
 

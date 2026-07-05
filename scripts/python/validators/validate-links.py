@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate internal Markdown references in the Alfred framework.
 
-Python mirror of ``scripts/powershell/validate-links.ps1``. Optional helper
+Python mirror of ``scripts/powershell/validators/validate-links.ps1``. Optional helper
 (D3): Alfred still works manually through Markdown if it cannot run. It catches
 broken cross-references after files are moved or renamed.
 
@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 from _common import read_text  # noqa: E402
 
 # Folders whose Markdown is part of the framework source (not generated artifacts).

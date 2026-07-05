@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Map host usage exports into append-only Alfred observability events.
 
-Python mirror of ``scripts/powershell/normalize-usage-cost.ps1``.
+Python mirror of ``scripts/powershell/metrics/normalize-usage-cost.ps1``.
 """
 
 import argparse
@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import value_or  # noqa: E402
 
 
@@ -94,7 +94,7 @@ def main():
                 "cost_usd": record.get("cost_usd"),
             },
             "model": record.get("model"),
-            "tool": "scripts/python/normalize-usage-cost.py",
+            "tool": "scripts/python/metrics/normalize-usage-cost.py",
             "parent_event_id": record.get("parent_event_id"),
             "artifacts": [],
             "files_changed": [],

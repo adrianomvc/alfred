@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $rootPath = Resolve-Path -LiteralPath $Root
-$frameworkRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$frameworkRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $renderer = Join-Path $PSScriptRoot "render-toolbar.ps1"
 
 function Get-Field {

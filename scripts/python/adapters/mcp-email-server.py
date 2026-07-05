@@ -33,7 +33,7 @@ Configuration — where the destination is REGISTERED (durable authorization, D4
 3. At adoption, the sigla records destination + triggers in its HUB ``knowledge``
    (see ``knowledge/notification.md``); this file/env is the machine-level mirror.
 
-Register in Claude Code:  ``claude mcp add alfred-email -- python scripts/python/mcp-email-server.py``
+Register in Claude Code:  ``claude mcp add alfred-email -- python scripts/python/adapters/mcp-email-server.py``
 
 Guardrails (injection/authorization):
 - recipients outside the allowlist are refused — new destination requires a human

@@ -22,6 +22,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `templates/hub/skills.md` (W2.3) — sigla skills registry mold: active skills with pinned refs plus an external-catalog allowlist wired to the injection guardrail.
 
 ### Changed
+- `scripts/` reorganized by responsibility, mirrored in both runtimes: `validators/` (all `validate-*`), `workflow/` (alfred-boot, render-toolbar, classify-risk, confidence-score, spec-vs-impl), `metrics/` (collect-observability, generate-metrics-rollup, normalize-usage-cost), and python-only `adapters/` (mcp-email-server). `_common.py` stays at the runtime root. All internal imports/spawns and every repo reference updated; verified by `validate-framework`, `validate-links`, boot, strict demand validation, and classify-risk smoke tests in both runtimes.
 - `rules/lanes/fast.md` (W1.2) — escalation triggers now reference `rules/common/escalation-triggers.md` (was semantically pointing at `overconfidence.md`).
 - `docs/implementation-status.md` (W1.3) — compacted to a current snapshot (status, coverage by area, gaps, next order); pass-by-pass history stays in `CHANGELOG.md`/git.
 - `rules/common/session-continuity.md` (W1.5) — new "Context compaction (mid-demand)" section: what must survive host compaction; re-read `001-state.md` after compaction.
@@ -55,6 +56,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 
 ### Compatibility notes
 - No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
+- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/python/validate-framework.py`) must add the category segment (e.g. `scripts/python/validators/validate-framework.py`). Flags and behavior are unchanged.
 - New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
 
 ## 0.4.0 - 2026-06-29

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate the Alfred framework structure and run the sub-validators.
 
-Python mirror of ``scripts/powershell/validate-framework.ps1``. Runs the
+Python mirror of ``scripts/powershell/validators/validate-framework.ps1``. Runs the
 Python sub-validators so the framework can be checked without PowerShell.
 """
 
@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 from _common import find_observability_logs, iter_jsonl  # noqa: E402
 
 REQUIRED_PATHS = [
@@ -70,10 +70,10 @@ REQUIRED_PATHS = [
     "knowledge/policy-template.md",
     "docs/knowledge-governance.md",
     "docs/automation-fallback.md",
-    "scripts/powershell/validate-knowledge.ps1",
-    "scripts/python/validate-knowledge.py",
-    "scripts/powershell/validate-links.ps1",
-    "scripts/python/validate-links.py",
+    "scripts/powershell/validators/validate-knowledge.ps1",
+    "scripts/python/validators/validate-knowledge.py",
+    "scripts/powershell/validators/validate-links.ps1",
+    "scripts/python/validators/validate-links.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
@@ -92,36 +92,36 @@ REQUIRED_PATHS = [
     "docs/version-adoption.md",
     "docs/release-governance.md",
     "CHANGELOG.md",
-    "scripts/powershell/alfred-boot.ps1",
-    "scripts/powershell/render-toolbar.ps1",
+    "scripts/powershell/workflow/alfred-boot.ps1",
+    "scripts/powershell/workflow/render-toolbar.ps1",
     "docs/skills-activation.md",
     "skills/lang-python.md",
     "skills/lang-sql.md",
     "skills/lang-terraform.md",
     "skills/platform-aws-data.md",
-    "scripts/powershell/collect-observability.ps1",
-    "scripts/powershell/generate-metrics-rollup.ps1",
-    "scripts/powershell/normalize-usage-cost.ps1",
-    "scripts/powershell/validate-demand.ps1",
-    "scripts/powershell/validate-reverse-eng-staleness.ps1",
-    "scripts/powershell/validate-sdd-gate.ps1",
-    "scripts/powershell/validate-toolbar-fixtures.ps1",
-    "scripts/powershell/validate-skills-registry.ps1",
-    "scripts/powershell/validate-connectors.ps1",
-    "scripts/powershell/validate-model-policy.ps1",
-    "scripts/python/alfred-boot.py",
-    "scripts/python/render-toolbar.py",
-    "scripts/python/collect-observability.py",
-    "scripts/python/generate-metrics-rollup.py",
-    "scripts/python/normalize-usage-cost.py",
-    "scripts/python/validate-framework.py",
-    "scripts/python/validate-demand.py",
-    "scripts/python/validate-reverse-eng-staleness.py",
-    "scripts/python/validate-sdd-gate.py",
-    "scripts/python/validate-toolbar-fixtures.py",
-    "scripts/python/validate-skills-registry.py",
-    "scripts/python/validate-connectors.py",
-    "scripts/python/validate-model-policy.py",
+    "scripts/powershell/metrics/collect-observability.ps1",
+    "scripts/powershell/metrics/generate-metrics-rollup.ps1",
+    "scripts/powershell/metrics/normalize-usage-cost.ps1",
+    "scripts/powershell/validators/validate-demand.ps1",
+    "scripts/powershell/validators/validate-reverse-eng-staleness.ps1",
+    "scripts/powershell/validators/validate-sdd-gate.ps1",
+    "scripts/powershell/validators/validate-toolbar-fixtures.ps1",
+    "scripts/powershell/validators/validate-skills-registry.ps1",
+    "scripts/powershell/validators/validate-connectors.ps1",
+    "scripts/powershell/validators/validate-model-policy.ps1",
+    "scripts/python/workflow/alfred-boot.py",
+    "scripts/python/workflow/render-toolbar.py",
+    "scripts/python/metrics/collect-observability.py",
+    "scripts/python/metrics/generate-metrics-rollup.py",
+    "scripts/python/metrics/normalize-usage-cost.py",
+    "scripts/python/validators/validate-framework.py",
+    "scripts/python/validators/validate-demand.py",
+    "scripts/python/validators/validate-reverse-eng-staleness.py",
+    "scripts/python/validators/validate-sdd-gate.py",
+    "scripts/python/validators/validate-toolbar-fixtures.py",
+    "scripts/python/validators/validate-skills-registry.py",
+    "scripts/python/validators/validate-connectors.py",
+    "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/adapter-template.md",
     "docs/adapter-implementation.md",
@@ -187,18 +187,18 @@ def main():
     assert_jsonl(root / "examples/connectors/usage-export.jsonl")
     assert_jsonl(root / "examples/connectors/usage-attribution-events.jsonl")
 
-    run_sub(root, "scripts/python/validate-toolbar-fixtures.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-skills-registry.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-connectors.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-model-policy.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-knowledge.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-links.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
-    run_sub(root, "scripts/python/alfred-boot.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validate-reverse-eng-staleness.py",
+    run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
+    run_sub(root, "scripts/python/workflow/alfred-boot.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-reverse-eng-staleness.py",
             "-ReverseEngPath", str(root / "examples/staleness-fixtures/reverse-eng-fresh.md"),
             "-CurrentCommit", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    run_sub(root, "scripts/python/validate-sdd-gate.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
+    run_sub(root, "scripts/python/validators/validate-sdd-gate.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
 
     print("Framework validation completed.")
 

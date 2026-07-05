@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $rootPath = Resolve-Path -LiteralPath $Root
-$renderer = Join-Path $rootPath "scripts/powershell/render-toolbar.ps1"
+$renderer = Join-Path $rootPath "scripts/powershell/workflow/render-toolbar.ps1"
 
 if (-not (Test-Path -LiteralPath $renderer)) {
   throw "Missing toolbar renderer: $renderer"
