@@ -159,8 +159,10 @@ Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
 
 - [x] Nomes de fase ✅ (2026-07-05, decisão do dono): EN permanece canônico (pastas, regras, validadores); apelidos pt-BR **"O quê · Como · Fazer · Validar · Operar"** registrados no `core/glossary.md` e exibidos no welcome (`core/welcome.md`). Camada de apresentação apenas (D47).
 
+- [x] Cadastro do e-mail ✅ (2026-07-05, decisão do dono): acontece **no processo de install** — os instaladores (`install/`, 2 runtimes) perguntam o e-mail (ou `-Email`/`ALFRED_EMAIL`), gravam `~/.alfred-email.json` em dry-run sem sobrescrever config existente, e registram o MCP `alfred-email` no Claude Code quando CLI+Python existem (best-effort; degrada, D3).
+
 Ainda pendentes:
-- [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active`.
+- [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active` (preencher `smtp{}` no `~/.alfred-email.json`).
 
 ## Encerramento do plano
 O plano é considerado concluído quando: Waves 0–4 fechadas, `validate-framework` e `validate-links` limpos, 1 demanda real estrita 0/0, e a seção `2.0.0` do `CHANGELOG.md` consolidada com notas de compatibilidade e migração. Só então uma nova versão pode ser discutida (decisão humana).

@@ -23,6 +23,8 @@ param(
   [string]$Branch = "",
   [string]$Version = "",
   [string]$SkillsDir = (Join-Path $env:APPDATA "devin/skills"),
+  [string]$Email = "",        # notification destination; prompts interactively when omitted
+  [switch]$SkipEmail,          # skip the e-mail/MCP notification setup entirely
   [switch]$List,
   [switch]$Rollback
 )
@@ -131,6 +133,53 @@ if ($devin) {
   }
 } else {
   Info "DEVIN CLI not found on PATH; skill files are installed. Run 'devin skills list' to confirm."
+}
+
+# 5. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
+# server in Claude Code when available. Best-effort: failures never break the install.
+if (-not $SkipEmail) {
+  try {
+    $emailConfig = Join-Path $HOME ".alfred-email.json"
+    if (Test-Path -LiteralPath $emailConfig) {
+      Info "E-mail config already registered at $emailConfig (kept as is)."
+    } else {
+      if ($Email -eq "" -and $env:ALFRED_EMAIL) { $Email = $env:ALFRED_EMAIL }
+      if ($Email -eq "" -and [Environment]::UserInteractive) {
+        $Email = Read-Host "[alfred] E-mail para notificacoes/relatorios (Enter para pular)"
+      }
+      if ($Email -ne "") {
+        @{
+          mode      = "dry-run"
+          default_to = $Email
+          allowlist = @($Email)
+          smtp      = @{ host = ""; port = 587; user = ""; password = ""; sender = "" }
+        } | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $emailConfig -Encoding UTF8
+        Info "E-mail registered at $emailConfig (mode: dry-run — fill smtp{} and set mode: active to really send)."
+      } else {
+        Info "E-mail setup skipped. Register later: create $emailConfig (see connectors/notification-email.md)."
+      }
+    }
+
+    $mcpServer = Join-Path $InstallDir "scripts/python/adapters/mcp-email-server.py"
+    $claude = Get-Command claude -ErrorAction SilentlyContinue
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if ($claude -and $python -and (Test-Path -LiteralPath $mcpServer)) {
+      & $claude.Source mcp get alfred-email *> $null
+      if ($LASTEXITCODE -eq 0) {
+        Info "MCP 'alfred-email' already registered in Claude Code."
+      } else {
+        & $claude.Source mcp add --scope user alfred-email -- python $mcpServer *> $null
+        if ($LASTEXITCODE -eq 0) { Info "MCP 'alfred-email' registered in Claude Code (user scope)." }
+        else { Info "Could not register the MCP automatically. Manual: claude mcp add --scope user alfred-email -- python `"$mcpServer`"" }
+      }
+    } else {
+      if (-not $python) { Info "Python 3 not found; the MCP e-mail server needs it. Install Python, then: claude mcp add --scope user alfred-email -- python `"$mcpServer`"" }
+      elseif (-not $claude) { Info "Claude Code CLI not found; for other MCP hosts register: python `"$mcpServer`" (stdio)." }
+    }
+  } catch {
+    Info "E-mail/MCP setup skipped ($($_.Exception.Message)). The framework works without it (manual handoff)."
+  }
 }
 
 Info "Done. Open a repo and type /alfred in the DEVIN CLI."

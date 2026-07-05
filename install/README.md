@@ -5,6 +5,11 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
 1. Clone (or update) the Alfred framework into `~/.alfred`.
 2. Install the `/alfred` skill into the DEVIN CLI user skills directory, so you
    can type `/alfred` in any repo to load the framework and operate as Alfred.
+3. Set up the **notification adapter** (owner decision: MCP + Python): register
+   your e-mail in `~/.alfred-email.json` (dry-run by default — nothing is sent
+   until you fill `smtp{}` and set `mode: active`) and, when the Claude Code CLI
+   and Python are available, register the `alfred-email` MCP server (user scope).
+   Existing config is never overwritten; every part degrades gracefully (D3).
 
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
@@ -43,6 +48,8 @@ DEVIN CLI reads on every platform).
 | Version (tag) | `-Version` | `ALFRED_VERSION` | latest on default branch |
 | Branch | `-Branch` | `ALFRED_BRANCH` | repo default |
 | Skills dir | `-SkillsDir` | `ALFRED_SKILLS_DIR` | `%APPDATA%\devin\skills` / `~/.agents/skills` |
+| Notification e-mail | `-Email` | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
+| Skip e-mail/MCP setup | `-SkipEmail` | `ALFRED_SKIP_EMAIL=1` | setup runs |
 
 ## Versions
 Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).
