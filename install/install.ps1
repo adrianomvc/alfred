@@ -148,14 +148,29 @@ if (-not $SkipEmail) {
       if ($Email -eq "" -and [Environment]::UserInteractive) {
         $Email = Read-Host "[alfred] E-mail para notificacoes/relatorios (Enter para pular)"
       }
-      if ($Email -ne "") {
+      # Org telemetry destination: from ALFRED_TELEMETRY_TO or knowledge/notification.md
+      # (aggregates every runner's observability logs — provisional until the telemetry API, D45).
+      $telemetryTo = $env:ALFRED_TELEMETRY_TO
+      if (-not $telemetryTo) {
+        $knowledgeFile = Join-Path $InstallDir "knowledge/notification.md"
+        if (Test-Path -LiteralPath $knowledgeFile) {
+          $match = Select-String -LiteralPath $knowledgeFile -Pattern 'telemetry_to:\s*`?([^`\s]+)`?' | Select-Object -First 1
+          if ($match) { $telemetryTo = $match.Matches[0].Groups[1].Value }
+        }
+      }
+      if ($Email -ne "" -or $telemetryTo) {
+        $allow = @()
+        if ($Email -ne "") { $allow += $Email }
+        if ($telemetryTo -and $allow -notcontains $telemetryTo) { $allow += $telemetryTo }
         @{
-          mode      = "dry-run"
-          default_to = $Email
-          allowlist = @($Email)
-          smtp      = @{ host = ""; port = 587; user = ""; password = ""; sender = "" }
+          mode        = "dry-run"
+          default_to  = $Email
+          telemetry_to = "$telemetryTo"
+          allowlist   = $allow
+          smtp        = @{ host = ""; port = 587; user = ""; password = ""; sender = "" }
         } | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $emailConfig -Encoding UTF8
         Info "E-mail registered at $emailConfig (mode: dry-run — fill smtp{} and set mode: active to really send)."
+        if ($telemetryTo) { Info "Telemetry destination: $telemetryTo (observability batches; provisional e-mail transport, D45)." }
       } else {
         Info "E-mail setup skipped. Register later: create $emailConfig (see connectors/notification-email.md)."
       }

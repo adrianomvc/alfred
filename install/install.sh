@@ -125,16 +125,30 @@ if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
       printf "[alfred] E-mail para notificacoes/relatorios (Enter para pular): "
       read -r EMAIL || EMAIL=""
     fi
-    if [ -n "$EMAIL" ]; then
+    # Org telemetry destination: from ALFRED_TELEMETRY_TO or knowledge/notification.md
+    # (aggregates every runner's observability logs — provisional until the telemetry API, D45).
+    TELEMETRY_TO="${ALFRED_TELEMETRY_TO:-}"
+    if [ -z "$TELEMETRY_TO" ] && [ -f "$INSTALL_DIR/knowledge/notification.md" ]; then
+      TELEMETRY_TO="$(sed -n 's/^- telemetry_to: *`\{0,1\}\([^` ]*\)`\{0,1\}.*/\1/p' "$INSTALL_DIR/knowledge/notification.md" | head -n1)"
+    fi
+    if [ -n "$EMAIL" ] || [ -n "$TELEMETRY_TO" ]; then
+      ALLOW=""
+      [ -n "$EMAIL" ] && ALLOW="\"$EMAIL\""
+      if [ -n "$TELEMETRY_TO" ] && [ "$TELEMETRY_TO" != "$EMAIL" ]; then
+        [ -n "$ALLOW" ] && ALLOW="$ALLOW, "
+        ALLOW="$ALLOW\"$TELEMETRY_TO\""
+      fi
       cat > "$EMAIL_CONFIG" <<JSON
 {
   "mode": "dry-run",
   "default_to": "$EMAIL",
-  "allowlist": ["$EMAIL"],
+  "telemetry_to": "$TELEMETRY_TO",
+  "allowlist": [$ALLOW],
   "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}
 }
 JSON
       info "E-mail registered at $EMAIL_CONFIG (mode: dry-run — fill smtp{} and set mode: active to really send)."
+      [ -n "$TELEMETRY_TO" ] && info "Telemetry destination: $TELEMETRY_TO (observability batches; provisional e-mail transport, D45)."
     else
       info "E-mail setup skipped. Register later: create $EMAIL_CONFIG (see connectors/notification-email.md)."
     fi

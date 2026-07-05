@@ -20,8 +20,13 @@ Configuration — where the destination is REGISTERED (durable authorization, D4
    ``~/.alfred-email.json`` (or the path in ``ALFRED_EMAIL_CONFIG``)::
 
        {"mode": "dry-run", "default_to": "voce@dominio.com",
+        "telemetry_to": "central-de-metricas@organizacao.com",
         "allowlist": ["voce@dominio.com"],
         "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}}
+
+   ``telemetry_to`` is the ORG destination that receives every runner's
+   observability batches (``send_telemetry``) — provisional transport until the
+   telemetry API exists (D45). It is auto-added to the allowlist.
 
 2. **Environment variables** (override the file):
    ``ALFRED_EMAIL_MODE``       dry-run | active | disabled   (default: dry-run)
@@ -43,9 +48,11 @@ Guardrails (injection/authorization):
   the connector's audit fields.
 """
 
+import getpass
 import json
 import os
 import smtplib
+import socket
 import sys
 import time
 from email.message import EmailMessage
@@ -71,6 +78,7 @@ def config():
     file_smtp = file_cfg.get("smtp") or {}
     mode = (os.environ.get("ALFRED_EMAIL_MODE") or file_cfg.get("mode") or "dry-run").strip().lower()
     default_to = (os.environ.get("ALFRED_EMAIL_DEFAULT_TO") or file_cfg.get("default_to") or "").strip()
+    telemetry_to = (os.environ.get("ALFRED_TELEMETRY_TO") or file_cfg.get("telemetry_to") or "").strip()
     allow_raw = os.environ.get("ALFRED_EMAIL_ALLOWLIST")
     if allow_raw is not None:
         allowlist = [a.strip().lower() for a in allow_raw.split(",") if a.strip()]
@@ -78,10 +86,12 @@ def config():
         allowlist = [str(a).strip().lower() for a in file_cfg["allowlist"] if str(a).strip()]
     else:
         allowlist = [default_to.lower()] if default_to else []
+    if telemetry_to and telemetry_to.lower() not in allowlist:
+        allowlist.append(telemetry_to.lower())  # org telemetry destination is pre-authorized by config
     outbox = Path(os.environ.get("ALFRED_EMAIL_OUTBOX") or file_cfg.get("outbox") or ".alfred-email-outbox")
     audit = Path(os.environ.get("ALFRED_EMAIL_AUDIT") or file_cfg.get("audit") or str(outbox / "audit-log.jsonl"))
     return {
-        "mode": mode, "default_to": default_to, "allowlist": allowlist,
+        "mode": mode, "default_to": default_to, "telemetry_to": telemetry_to, "allowlist": allowlist,
         "outbox": outbox, "audit": audit, "config_path": config_path,
         "smtp": {
             "host": os.environ.get("SMTP_HOST") or file_smtp.get("host", ""),
@@ -246,11 +256,69 @@ def tool_send_demand_report(cfg, args):
     })
 
 
+def tool_send_telemetry(cfg, args):
+    """Batch every local observability JSONL and e-mail it to the org telemetry
+    destination — provisional transport (D45) until the telemetry API exists, so
+    logs from everyone running Alfred can be aggregated into org metrics."""
+    if not cfg["telemetry_to"]:
+        return err("No telemetry destination configured. Set `telemetry_to` in "
+                   "~/.alfred-email.json (or ALFRED_TELEMETRY_TO) — the org address "
+                   "is recorded in knowledge/notification.md.")
+    root = Path(str(args.get("root_path", "") or ".")).resolve()
+    logs = [p for p in sorted(root.rglob("*observability-log.jsonl"))
+            if ".git" not in p.parts and ".alfred-email-outbox" not in p.parts]
+    if not logs:
+        return err(f"No observability JSONL found under {root}. Pass `root_path` "
+                   "pointing at the HUB/app root (or one demand folder).")
+
+    sender_id = f"{getpass.getuser()}@{socket.gethostname()}"
+    stamp = time.strftime("%Y%m%dT%H%M%S")
+    cfg["outbox"].mkdir(parents=True, exist_ok=True)
+    batch_path = cfg["outbox"] / f"telemetry-batch-{stamp}.jsonl"
+    total = 0
+    per_source = []
+    with open(batch_path, "w", encoding="utf-8") as batch:
+        for log in logs:
+            try:
+                rel = str(log.relative_to(root))
+            except ValueError:
+                rel = str(log)
+            count = 0
+            for raw in log.read_text(encoding="utf-8-sig").splitlines():
+                raw = raw.strip()
+                if not raw:
+                    continue
+                try:
+                    event = json.loads(raw)
+                except json.JSONDecodeError:
+                    event = {"_unparsed": raw}
+                batch.write(json.dumps({"sender": sender_id, "collected_at": stamp,
+                                         "source": rel, "event": event},
+                                        ensure_ascii=False) + "\n")
+                count += 1
+                total += 1
+            per_source.append(f"- {rel}: {count} evento(s)")
+
+    subject = f"[telemetry][{sender_id}] {total} eventos de observabilidade"
+    body = ("Lote de telemetria do Alfred (transporte provisorio por e-mail ate a API existir - D45).\n"
+            f"- remetente: {sender_id}\n- raiz varrida: {root}\n- fontes: {len(logs)}\n"
+            + "\n".join(per_source)
+            + "\nCada linha do anexo = {sender, collected_at, source, event}.")
+    result = tool_send_email(cfg, {
+        "subject": subject, "body": body, "to": cfg["telemetry_to"],
+        "trigger": str(args.get("trigger", "") or "telemetry_batch"),
+        "attachments": [str(batch_path)],
+    })
+    result["content"][0]["text"] += f" | batch kept at {batch_path}"
+    return result
+
+
 def tool_email_status(cfg, _args):
     smtp_ready = bool(cfg["smtp"]["host"] and cfg["smtp"]["sender"])
     return ok(json.dumps({
         "mode": cfg["mode"],
         "default_to": cfg["default_to"] or None,
+        "telemetry_to": cfg["telemetry_to"] or None,
         "allowlist": cfg["allowlist"],
         "smtp_configured": smtp_ready,
         "outbox": str(cfg["outbox"]),
@@ -299,8 +367,24 @@ TOOLS = [
         },
     },
     {
+        "name": "send_telemetry",
+        "description": ("Batch every local observability JSONL under root_path and e-mail it to the "
+                        "org telemetry destination (telemetry_to) — provisional transport until the "
+                        "telemetry API exists. Each batch line carries {sender, collected_at, source, "
+                        "event} so logs from many people can be aggregated into org metrics. "
+                        "Same guardrails: allowlist, audit, dry-run by default."),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "root_path": {"type": "string",
+                               "description": "root to scan for *observability-log.jsonl (HUB/app root or a demand folder); default: current dir"},
+                "trigger": {"type": "string", "description": "default: telemetry_batch"},
+            },
+        },
+    },
+    {
         "name": "email_status",
-        "description": "Report the adapter state: mode (dry-run/active/disabled), allowlist, SMTP readiness, outbox/audit paths, and which config file is in use.",
+        "description": "Report the adapter state: mode (dry-run/active/disabled), destinations (default/telemetry), allowlist, SMTP readiness, outbox/audit paths, and which config file is in use.",
         "inputSchema": {"type": "object", "properties": {}},
     },
 ]
@@ -333,9 +417,11 @@ def handle(method, params):
             return tool_send_email(cfg, args)
         if name == "send_demand_report":
             return tool_send_demand_report(cfg, args)
+        if name == "send_telemetry":
+            return tool_send_telemetry(cfg, args)
         if name == "email_status":
             return tool_email_status(cfg, args)
-        return err(f"Unknown tool '{name}'. Available: send_email, send_demand_report, email_status.")
+        return err(f"Unknown tool '{name}'. Available: send_email, send_demand_report, send_telemetry, email_status.")
     return None
 
 

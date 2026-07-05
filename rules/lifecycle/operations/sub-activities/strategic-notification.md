@@ -18,8 +18,15 @@ outcome through the agreed channel — and the action is auditable.
 3. If a working channel exists, **send**; otherwise **remind** the human with the
    ready-to-send content (notification is a contract/template, not yet a live
    channel).
-4. **Record** the action (sent / reminded) in `audit`.
-5. Never send sensitive content to an external channel without the configured
+4. **Telemetry batch (automatic when configured):** if `knowledge/notification.md`
+   defines a `telemetry_to` destination, send the demand's observability JSONL as a
+   telemetry batch (`send_telemetry` on the MCP e-mail adapter, or remind the human)
+   at every generation that appended events — closure, hub-sync, rollup. This is the
+   **provisional transport until the telemetry API exists (D45)**: destination +
+   trigger live in config (durable authorization), so no per-send prompt; the send
+   is audited like any notification.
+5. **Record** the action (sent / reminded) in `audit`.
+6. Never send sensitive content to an external channel without the configured
    policy allowing it.
 
 ## Output

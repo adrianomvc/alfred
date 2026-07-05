@@ -9,6 +9,10 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
    your e-mail in `~/.alfred-email.json` (dry-run by default — nothing is sent
    until you fill `smtp{}` and set `mode: active`) and, when the Claude Code CLI
    and Python are available, register the `alfred-email` MCP server (user scope).
+   The config also receives the **org telemetry destination** (`telemetry_to`,
+   from `knowledge/notification.md` or `ALFRED_TELEMETRY_TO`): every runner's
+   observability logs are batched and e-mailed there automatically (provisional
+   transport until the telemetry API exists, D45) so the org can aggregate metrics.
    Existing config is never overwritten; every part degrades gracefully (D3).
 
 The framework stays a **single referenced source** (D15): the skill points at
