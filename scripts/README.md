@@ -43,6 +43,7 @@ Each helper exists as both `scripts/powershell/<name>.ps1` and `scripts/python/<
 - `validate-reverse-eng-staleness` - optional reverse-eng freshness check by recorded app commit.
 - `validate-sdd-gate` - optional SDD clarity gate before Execution.
 - `validate-links` - optional internal-reference check (Markdown links + inline framework paths) to catch broken cross-references after moves/renames.
+- `classify-risk` - optional Risk Mode proposal from the objective checklist (`core/risk-mode.md`): computes both axes (0/1/2 criteria), fires hard overrides, applies the anti-SAFE brake reminder, and prints a pt-BR block for `004-risk.md`. The checklist stays the source of truth; the AI proposes and the human confirms.
 
 ## PowerShell
 
@@ -89,6 +90,10 @@ powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-reverse-eng
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-sdd-gate.ps1 -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/powershell/classify-risk.ps1 -Reversibility 1 -BlastRadius 1 -SensitiveData 0 -CustomerImpact 1 -Cost 1 -Components 1 -Novelty 1 -Ambiguity 1 -Integrations 1 -Effort 1
 ```
 
 ## Python (no PowerShell)
