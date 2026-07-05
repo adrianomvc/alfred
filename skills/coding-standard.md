@@ -1,3 +1,8 @@
+---
+name: coding-standard
+description: Default engineering standard (SOLID). Load during Execution/Validate when code, configuration, tests, or automation change and no language-specific skill overrides it.
+---
+
 # Skill - Coding Standard
 
 ## name

@@ -9,7 +9,7 @@ A demand always combines **one demand type × one lane**, runs through the
 ## Two orthogonal axes
 | Axis | Folder | Question it answers | Members |
 |---|---|---|---|
-| Path (per stream) | `demand-types/` | *what kind of work is this?* | `produto.md` · `operacional.md` · `engineering.md` (+ `playbooks/`) |
+| Path (per stream) | `demand-types/` | *what kind of work is this?* | `product.md` · `operational.md` · `engineering.md` (+ `playbooks/`) |
 | Governance (per mode) | `lanes/` | *how much process does its risk require?* | `fast.md` · `standard.md` · `safe.md` |
 
 ## Process and actors

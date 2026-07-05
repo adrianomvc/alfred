@@ -1,3 +1,8 @@
+---
+name: platform-aws-data
+description: AWS data-platform standard for Glue, DMS, S3, Catalog, Lake Formation, Step Functions, EventBridge, CloudWatch, and IAM; complements language skills.
+---
+
 # Skill - AWS Data Platform Standard
 
 ## name

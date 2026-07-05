@@ -1,3 +1,8 @@
+---
+name: lang-sql
+description: SQL engineering standard; overrides coding-standard where more specific. Load for SQL files, DDL, validation queries, reconciliation, or embedded SQL.
+---
+
 # Skill - SQL Standard
 
 ## name

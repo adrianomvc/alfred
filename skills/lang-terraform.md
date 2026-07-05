@@ -1,3 +1,8 @@
+---
+name: lang-terraform
+description: Terraform engineering standard; overrides coding-standard where more specific. Load for Terraform files, IaC modules, providers, variables, outputs, or plans.
+---
+
 # Skill - Terraform Standard
 
 ## name

@@ -1,3 +1,8 @@
+---
+name: property-based-testing
+description: Property-based testing for Validate. Load in SAFE or when units have clear invariants worth checking across generated inputs.
+---
+
 # Skill - Property-Based Testing
 
 Optional specialty pack for property-based testing. Loaded just in time when the

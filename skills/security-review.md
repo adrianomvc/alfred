@@ -1,3 +1,8 @@
+---
+name: security-review
+description: Security review lens. Load for security-sensitive changes or any SAFE-lane demand.
+---
+
 # Skill - Security Review
 
 ## name
