@@ -41,6 +41,18 @@ different concrete model names, so the **tier → concrete-model map in
 `core/model-policy.md`** is the only per-host configuration. If a host cannot
 switch models, Alfred uses the default and records which model ran (degrades, D3).
 
+## Optional deterministic enforcement (hooks)
+Alfred's rules are **advisory** — the host model follows them, but nothing forces it.
+Hosts that support hooks can make the critical gates **deterministic** by wiring the
+existing validators to hook points (optional layer; everything still works without it, D3):
+- run `validate-demand` (or `validate-sdd-gate`) as a *stop/finish* hook so a session
+  cannot end with a broken demand state;
+- block writes outside the active unit's declared write scope with a *pre-write* hook;
+- run `validate-framework` before commits that touch the framework repo.
+Advisory rule vs deterministic hook: instructions can be missed under long context;
+a hook always executes. Configure per host (e.g. Claude Code `.claude/settings.json`
+hooks); record in the demand `audit` which hooks were active.
+
 ## Degradation
 No installer for a host? The integration still works manually: clone the
 framework and paste/point the entry file's instructions into the host's
