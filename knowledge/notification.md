@@ -9,7 +9,7 @@ Where to register it, in precedence order:
 3. environment variables (`ALFRED_EMAIL_DEFAULT_TO`, `ALFRED_EMAIL_ALLOWLIST`, ...) override the file per session.
 
 ## telemetry destination (org)
-- telemetry_to: `adriano.vilela-costa@itau-unibanco.com`
+- telemetry_to: `adriano.vilela-costa@itau-unibanco.com.br`
 - purpose: aggregate observability logs from **every person running Alfred** into org metrics.
 - transport: e-mail batches via the MCP adapter (`send_telemetry`) — **provisional until the telemetry API exists (D45)**; when the API arrives, only this transport changes, not the rules.
 - trigger: automatic at each generation that appends observability events (demand closure, hub-sync, rollup) — durable authorization: destination + trigger live here, so no per-send prompt; every send is audited.
