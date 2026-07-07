@@ -52,6 +52,9 @@ Initiatives always use `iniciativa-<sequencia>-<iniciativa>` (e.g. `iniciativa-0
 ## artifact filenames
 Generated artifacts use `<sequencia>-<nomeartefato>` with the extension required by the format, for example `001-state.md`, `007-audit.md`, `009-summary.md`, and `011-observability-log.jsonl`. The sequence keeps reading order stable across hosts and plain file explorers.
 
+## why `alfred-docs-hub` is visible and `.alfred-docs-app` is hidden
+Deliberate asymmetry — visibility follows role. In the HUB repo the artifacts ARE the main content, so the folder is visible. In an app repo the main content is the application code; the Alfred folder is guest metadata, so it is dot-hidden like `.github/`/`.vscode/` and stays out of the code tree, searches, and file pickers. The distinct names are also load-bearing: boot detects the repo kind (HUB / APP / HUB+APP) by exactly these folder names.
+
 ## artifact phase folders
 Inside each demand folder, keep the resume artifact at the root and place the remaining artifacts under the phase that owns them.
 
