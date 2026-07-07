@@ -34,34 +34,56 @@ def shorten(value, maximum=64):
     return value[: maximum - 3] + "..."
 
 
-# --- rich-cli profile (optional): ANSI color + bar + icons; helper-rendered ---
+# --- shared vocabulary (borderless design, owner-approved 2026-07-07) ---
 _ESC = "\033"
-_CIRCLED = ["①", "②", "③", "④", "⑤"]  # circled 1..5
 _LANE_COLOR = {"fast": "32", "standard": "33", "safe": "31"}   # green / amber / red
+_LANE_ICON = {"fast": "🟢", "standard": "🟡", "safe": "🔴"}
+_ALIAS_TEXT = {"Inception": "O que", "Design": "Como", "Execution": "Fazer",
+               "Validate": "Validar", "Operation": "Operar"}
+_ALIAS_RICH = {"Inception": "O quê", "Design": "Como", "Execution": "Fazer",
+               "Validate": "Validar", "Operation": "Operar"}
 
 
 def _c(code, s):
     return f"{_ESC}[{code}m{s}{_ESC}[0m"
 
 
-def _render_rich(sigla, demand_id, lane, phase, nxt, step, checkpoint,
-                 model, cost, progress, markers):
+def forecast_total(cost_usd, progress):
+    """Linear extrapolation of the total demand cost from recorded cost + progress.
+
+    Estimate, never a fact: labeled with '~' and omitted whenever the recorded
+    cost is not numeric or progress is 0/100 (no inventing — supreme law)."""
+    try:
+        value = float(str(cost_usd).replace(",", "."))
+    except (TypeError, ValueError):
+        return ""
+    if value <= 0 or progress <= 0 or progress >= 100:
+        return ""
+    return f"~US$ {value * 100.0 / progress:.2f}"
+
+
+def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
+                 model, cost, progress, markers, forecast):
     color = _LANE_COLOR.get(lane.lower(), "36")
-    head = f"{_c('1', 'ALFRED')} {_c('2', f'SIGLA:{sigla} · #{demand_id}')} {_c(color, f'[{lane.upper()}]')}"
+    icon = _LANE_ICON.get(lane.lower(), "⚪")
+    head = f"🎩 {_c('1', 'ALFRED')} · {sigla} · #{demand_id} · {icon} {_c(color, lane.upper())}"
     if lane.lower() == "fast":
-        return [f"{head} {_c('2', phase)}  {_c('2', '→')} {shorten(nxt, 56)}"]
+        alias = _ALIAS_RICH.get(phase, phase)
+        return [f"{head} · {alias} ▶ · custo: {cost} · {_c('2', '→')} {shorten(nxt, 56)}"]
 
     filled = round(progress / 10)
-    bar = _c(color, "█" * filled) + _c("2", "░" * (10 - filled))
-    track = " ".join(
-        _CIRCLED[i] + (_c("32", "✓") if m == "x" else _c("36", "▶") if m == ">" else _c("2", "◻"))
-        for i, (_, m) in enumerate(markers[:5])
+    bar = _c(color, "▰" * filled) + _c("2", "▱" * (10 - filled))
+    track = " · ".join(
+        _ALIAS_RICH.get(name, name)
+        + (" " + (_c("32", "✓") if m == "x" else _c("36", "▶") if m == ">" else _c("2", "◻")))
+        for name, m in markers[:5]
     )
+    cost_part = f"custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
     return [
-        f"{head}  {bar} {progress}%",
-        f"  {track}",
-        f"  {_c('2', 'etapa')} {shorten(step, 60)}   {_c('2', 'HITL')} {shorten(checkpoint, 40)}",
-        f"  {_c('2', '→')} {shorten(nxt, 60)}   {_c('2', f'{model} · {cost}')}",
+        f"{head}",
+        f"{bar} {progress}% {_c('2', '│')} {track}",
+        f"⏸ HITL: {shorten(checkpoint, 44)} {_c('2', '│')} modelo: {model} {_c('2', '│')} {cost_part}",
+        f"{_c('2', '→')} Próximo: {shorten(nxt, 76)}",
     ]
 
 
@@ -114,7 +136,7 @@ def _render_web(sigla, demand_id, lane, nxt, step, progress, markers):
             '</svg>']
 
 
-def render(state_path, model="default", cost="n/a", profile="text"):
+def render(state_path, model="default", cost="n/a", profile="text", cost_usd=""):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
 
@@ -165,34 +187,33 @@ def render(state_path, model="default", cost="n/a", profile="text"):
         markers.append((item, marker))
 
     progress = min(100, round((completed / 5) * 100))
-    track = " -> ".join(phase_parts)
+    forecast = forecast_total(cost_usd, progress)
 
     if profile == "rich":
-        return _render_rich(sigla, demand_id, lane, phase, nxt, step,
-                            checkpoint, model, cost, progress, markers)
+        return _render_rich(sigla, demand_id, lane, phase, nxt,
+                            checkpoint, model, cost, progress, markers, forecast)
     if profile == "web":
         return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
-    lines = []
+    # text floor: borderless ASCII (no box = nothing to misalign; degrades anywhere)
+    forecast_part = f" | est. total: {forecast}" if forecast else ""
     if lane.lower() == "fast":
-        lines.append(
-            f"ALFRED | SIGLA:{sigla} | #{demand_id} | FAST | {phase} | "
-            f"model: {model} | cost: {cost} | next: {shorten(nxt, 48)}"
-        )
-        return lines
+        return [
+            f"ALFRED | {sigla} | #{demand_id} | FAST | {phase} | "
+            f"model: {model} | cost: {cost}{forecast_part} | next: {shorten(nxt, 48)}"
+        ]
 
-    header = f"+-- ALFRED ------------------------------- SIGLA:{sigla} | #{demand_id} --+"
-    footer = "+" + ("-" * max(64, len(header) - 2)) + "+"
-
-    lines.append(header)
-    lines.append(f"| Lane: {lane.upper()} | Model: {model} | Progress: {progress}% |")
-    lines.append(f"| Cost: {cost} |")
-    lines.append(f"| {track} |")
-    lines.append(f"| Step : {shorten(step, 72)} |")
-    lines.append(f"| HITL : {shorten(checkpoint, 72)} |")
-    lines.append(f"| Next : {shorten(nxt, 72)} |")
-    lines.append(footer)
-    return lines
+    bar_filled = round(progress / 5)
+    bar = "[" + "#" * bar_filled + "." * (20 - bar_filled) + "]"
+    track = " -> ".join(
+        f"{_ALIAS_TEXT.get(name, name)}[{m if m.strip() else ' '}]" for name, m in markers[:5]
+    )
+    return [
+        f"ALFRED | {sigla} | #{demand_id} | {lane.upper()}",
+        f"{bar} {progress}% | {track}",
+        f"HITL: {shorten(checkpoint, 52)} | model: {model} | cost: {cost}{forecast_part}",
+        f"Next: {shorten(nxt, 76)}",
+    ]
 
 
 def main():
@@ -206,9 +227,11 @@ def main():
     parser.add_argument("--cost", "-Cost", dest="cost", default="n/a")
     parser.add_argument("--profile", "-Profile", dest="profile", default="text",
                         choices=["text", "rich", "web"])
+    parser.add_argument("--cost-usd", "-CostUsd", dest="cost_usd", default="",
+                        help="numeric cost so far (USD); enables the linear total-cost forecast")
     args = parser.parse_args()
 
-    for line in render(args.state_path, args.model, args.cost, args.profile):
+    for line in render(args.state_path, args.model, args.cost, args.profile, args.cost_usd):
         print(line)
 
 
