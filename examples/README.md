@@ -15,8 +15,8 @@ Examples should stay small and illustrative. They are not part of the framework 
 - `fresh-sigla-onboarding/`: minimal new-sigla adoption example.
 - `connectors/`: handoff examples for Git/PR, notification, and telemetry.
 - `toolbar-fixtures/`: rendered toolbar examples for FAST, SAFE, Execution-first, and Standard units.
-- `generated-metrics-rollup.md`: example Markdown rollup generated from observability JSONL.
-- `generated-insights.md`: example improvement proposals derived from the metrics rollup.
+- `generated/metrics-rollup.md`: example Markdown rollup generated from observability JSONL.
+- `generated/insights.md`: example improvement proposals derived from the metrics rollup.
 
 ## Layout
 Examples follow the same demand layout as real work:

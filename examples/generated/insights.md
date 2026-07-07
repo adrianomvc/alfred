@@ -1,6 +1,6 @@
 # Generated Metrics Insights
 
-Derived from `examples/generated-metrics-rollup.md`.
+Derived from `examples/generated/metrics-rollup.md`.
 
 ## Insight 1 - Observability Coverage
 - observation: example events cover six demands across FAST, Standard, SAFE, and Execution-first flows.

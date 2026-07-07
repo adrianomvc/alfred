@@ -150,8 +150,8 @@ $requiredPaths = @(
   "examples/toolbar-fixtures/safe.txt"
   "examples/toolbar-fixtures/execution-first.txt"
   "examples/toolbar-fixtures/standard-parallel-units.txt"
-  "examples/generated-metrics-rollup.md"
-  "examples/generated-insights.md"
+  "examples/generated/metrics-rollup.md"
+  "examples/generated/insights.md"
   "examples/staleness-fixtures/reverse-eng-fresh.md"
 )
 
