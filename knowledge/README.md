@@ -13,7 +13,7 @@ Knowledge contains always-on guardrails and defaults. It is not a skill: it is l
 Company policy sets the floor. Sigla policy may be stricter, not weaker, unless a human records an explicit exception.
 
 ## Files
+- `knowledge.md` — registry of policy scope and trigger; load it before selecting an org policy.
 - `policy-template.md` — the mold for writing a new policy (identity → rule → enforcement → audit evidence).
 - `notification.md` — company notification + telemetry destinations and triggers.
 - `external-catalogs.md` — which external catalogs (e.g. Context7) Alfred may query, and the usage gates.
-

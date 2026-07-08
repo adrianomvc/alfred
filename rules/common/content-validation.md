@@ -1,3 +1,14 @@
+---
+name: common-content-validation
+description: Common rule — content validation (light)
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — content validation (light)
 
 Inherited from AI-DLC `content-validation`, kept in a **light** version. Validate before writing — do not produce artifacts that contradict the supreme law or the existing state.

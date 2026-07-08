@@ -1,3 +1,14 @@
+---
+name: phase-execution
+description: Lifecycle — Execution ("Do")
+load: phase
+triggers:
+  phase: execution
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle — Execution ("Do")
 
 Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewer** (review) + Code Generator (generation). Subject to the supreme law; escalation triggers watched.

@@ -1,3 +1,14 @@
+---
+name: common-escalation-triggers
+description: Common Rule - Escalation Triggers
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common Rule - Escalation Triggers
 
 Escalation protects the human decision boundary. It applies in all lanes. FAST can move quickly, but it still stops when a hard trigger fires. The supreme-law gate is always the first trigger: unresolvable doubt or ambiguity → stop and ask (`core/principles.md`).

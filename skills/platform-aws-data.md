@@ -1,18 +1,17 @@
 ---
 name: platform-aws-data
 description: AWS data-platform standard for Glue, DMS, S3, Catalog, Lake Formation, Step Functions, EventBridge, CloudWatch, and IAM; complements language skills.
+trigger: Load when the active unit changes AWS data migration, ingestion, orchestration, catalog, permission, storage, observability, or reconciliation components.
+sections_to_load:
+  - rules
+  - validation
+  - review checklist
 ---
 
 # Skill - AWS Data Platform Standard
 
-## name
-`platform-aws-data`
-
 ## purpose
 AWS data-platform engineering standard for Glue, DMS, S3, Glue Catalog, Lake Formation, Step Functions, EventBridge, CloudWatch, and IAM boundaries. It complements language skills such as Python, SQL, and Terraform.
-
-## trigger
-Load when the active unit changes AWS data migration, ingestion, orchestration, catalog, permission, storage, observability, or reconciliation components.
 
 ## inputs
 - active demand `state`
@@ -28,14 +27,6 @@ Load when the active unit changes AWS data migration, ingestion, orchestration, 
 - AWS data-platform implementation guidance
 - integration and validation plan
 - review findings for cloud/data operational risk
-
-## link
-`skills/platform-aws-data.md`
-
-## sections to load
-- `rules`
-- `validation`
-- `review checklist`
 
 ## rules
 - Keep source, landing, curated, catalog, orchestration, and permission concerns explicit.

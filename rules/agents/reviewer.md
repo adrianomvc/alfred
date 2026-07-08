@@ -1,3 +1,14 @@
+---
+name: agent-reviewer
+description: Agent - Reviewer
+load: agent
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: reviewer
+---
+
 # Agent - Reviewer
 
 ## Contract

@@ -1,3 +1,14 @@
+---
+name: phase-operations
+description: Lifecycle - Operation ("Did it land?")
+load: phase
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle - Operation ("Did it land?")
 
 Close the demand after release/merge with traceability, metrics, and a resumable summary. Owner agent: **Metrics**.

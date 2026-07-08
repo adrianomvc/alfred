@@ -1,3 +1,14 @@
+---
+name: phase-design
+description: Lifecycle — Design ("How?" — strong SDD)
+load: phase
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle — Design ("How?" — strong SDD)
 
 Define how to solve before executing. Owner agent: **Spec/Design**. SDD is the clarity brake: **no relevant Execution starts without the Design DoD of the mode satisfied.**

@@ -1,3 +1,14 @@
+---
+name: agent-orchestrator
+description: Agent - Orchestrator
+load: agent
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: orchestrator
+---
+
 # Agent - Orchestrator
 
 ## Contract

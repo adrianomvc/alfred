@@ -1,3 +1,14 @@
+---
+name: lane-fast
+description: Lane — FAST
+load: lane
+triggers:
+  phase: all
+  lane: fast
+  demand-type: all
+  agent: all
+---
+
 # Lane — FAST
 
 Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few checkpoints. The supreme law still applies (no hallucination; on doubt, stop and ask).

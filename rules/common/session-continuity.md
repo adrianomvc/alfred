@@ -1,3 +1,14 @@
+---
+name: common-session-continuity
+description: Common rule — session continuity
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — session continuity
 
 Inherited from AI-DLC `session-continuity`. The core of resilience: a demand can be paused and resumed later without starting over. Alfred **never** declares abandonment by inactivity.

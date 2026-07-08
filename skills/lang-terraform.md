@@ -1,18 +1,17 @@
 ---
 name: lang-terraform
 description: Terraform engineering standard; overrides coding-standard where more specific. Load for Terraform files, IaC modules, providers, variables, outputs, or plans.
+trigger: Load when the active unit changes Terraform files, IaC modules, provider configuration, variables, outputs, state backends, or deployment plans.
+sections_to_load:
+  - rules
+  - validation
+  - review checklist
 ---
 
 # Skill - Terraform Standard
 
-## name
-`lang-terraform`
-
 ## purpose
 Terraform-specific engineering standard. It overrides `skills/coding-standard.md` only where it is more specific.
-
-## trigger
-Load when the active unit changes Terraform files, IaC modules, provider configuration, variables, outputs, state backends, or deployment plans.
 
 ## inputs
 - active demand `state`
@@ -26,14 +25,6 @@ Load when the active unit changes Terraform files, IaC modules, provider configu
 - Terraform implementation plan
 - Terraform review findings
 - validation strategy proportional to risk
-
-## link
-`skills/lang-terraform.md`
-
-## sections to load
-- `rules`
-- `validation`
-- `review checklist`
 
 ## rules
 - Keep modules focused on one infrastructure responsibility.

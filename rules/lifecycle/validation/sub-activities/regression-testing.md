@@ -1,3 +1,14 @@
+---
+name: sub-activity-regression-testing
+description: Validate sub-activity — Regression Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Regression Testing
 
 > Trigger: **existing behavior is touched** (brownfield change). Optional, inside

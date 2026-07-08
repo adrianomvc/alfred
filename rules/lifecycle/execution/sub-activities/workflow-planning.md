@@ -1,3 +1,14 @@
+---
+name: sub-activity-workflow-planning
+description: Execution sub-activity — Workflow Planning
+load: sub-activity
+triggers:
+  phase: execution
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Execution sub-activity — Workflow Planning
 
 > Trigger: **Standard/SAFE** or any non-trivial change. Optional, inside

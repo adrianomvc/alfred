@@ -20,6 +20,7 @@ REQUIRED_PATHS = [
     "core/presentation/toolbar-quick.md",
     "core/presentation/welcome-screen.md",
     "rules/common",
+    "rules/rules-index.md",
     "rules/demand-types",
     "rules/lanes",
     "rules/lifecycle",
@@ -69,6 +70,7 @@ REQUIRED_PATHS = [
     "templates/hub/environment-parameters.md",
     "templates/hub/validation-evidence.md",
     "knowledge/README.md",
+    "knowledge/knowledge.md",
     "knowledge/policy-template.md",
     "docs/knowledge-governance.md",
     "docs/automation-fallback.md",
@@ -95,6 +97,7 @@ REQUIRED_PATHS = [
     "docs/release-governance.md",
     "CHANGELOG.md",
     "scripts/powershell/workflow/alfred-boot.ps1",
+    "scripts/powershell/workflow/generate-registry.ps1",
     "scripts/powershell/workflow/render-toolbar.ps1",
     "docs/skills-activation.md",
     "skills/lang-python.md",
@@ -112,6 +115,7 @@ REQUIRED_PATHS = [
     "scripts/powershell/validators/validate-connectors.ps1",
     "scripts/powershell/validators/validate-model-policy.ps1",
     "scripts/python/workflow/alfred-boot.py",
+    "scripts/python/workflow/generate-registry.py",
     "scripts/python/workflow/render-toolbar.py",
     "scripts/python/metrics/collect-observability.py",
     "scripts/python/metrics/generate-metrics-rollup.py",
@@ -190,6 +194,7 @@ def main():
     assert_jsonl(root / "examples/connectors/usage-attribution-events.jsonl")
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
+    run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")
     run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))

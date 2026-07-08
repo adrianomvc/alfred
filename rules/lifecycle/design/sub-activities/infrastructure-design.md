@@ -1,3 +1,14 @@
+---
+name: sub-activity-infrastructure-design
+description: Design sub-activity — Infrastructure Design
+load: sub-activity
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Design sub-activity — Infrastructure Design
 
 > Trigger: the demand needs **deploy or infrastructure change** (new resource,

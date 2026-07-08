@@ -1,3 +1,14 @@
+---
+name: common-terminology
+description: Common rule — terminology
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — terminology
 
 Use the canonical terms from `core/glossary.md` consistently. This keeps artifacts, prompts, and the index aligned across the framework (English) and generated content (pt-BR).

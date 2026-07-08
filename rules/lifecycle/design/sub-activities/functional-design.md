@@ -1,3 +1,14 @@
+---
+name: sub-activity-functional-design
+description: Design sub-activity — Functional Design
+load: sub-activity
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Design sub-activity — Functional Design
 
 > Trigger: the demand adds or changes **business logic** (new rules, algorithm,

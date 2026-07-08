@@ -61,6 +61,7 @@ function Test-PolicyShape {
 }
 
 Assert-Path "knowledge/README.md"
+Assert-Path "knowledge/knowledge.md"
 Assert-Path "knowledge/notification.md"
 Assert-Path "knowledge/policy-template.md"
 Assert-Path "docs/knowledge-governance.md"
@@ -68,6 +69,10 @@ Assert-Path "docs/knowledge-governance.md"
 $readme = Get-Content -LiteralPath (Join-Path $knowledgePath "README.md") -Raw
 Assert-Section -Content $readme -Section "Scopes" -Label "knowledge/README.md"
 Assert-Section -Content $readme -Section "Rule" -Label "knowledge/README.md"
+
+$registry = Get-Content -LiteralPath (Join-Path $knowledgePath "knowledge.md") -Raw
+Assert-Section -Content $registry -Section "Registry" -Label "knowledge/knowledge.md"
+Assert-Section -Content $registry -Section "Rule" -Label "knowledge/knowledge.md"
 
 $notification = Get-Content -LiteralPath (Join-Path $knowledgePath "notification.md") -Raw
 Assert-Section -Content $notification -Section "destination" -Label "knowledge/notification.md"

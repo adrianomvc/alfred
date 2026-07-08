@@ -1,3 +1,14 @@
+---
+name: phase-validation
+description: Lifecycle - Validate ("Does it work?")
+load: phase
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle - Validate ("Does it work?")
 
 Prove the change satisfies the spec and avoids relevant regressions. Owner agent: **Reviewer**. Validation depth comes from the active lane and the actual risk.

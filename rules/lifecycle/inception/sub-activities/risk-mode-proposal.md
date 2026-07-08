@@ -1,3 +1,14 @@
+---
+name: sub-activity-risk-mode-proposal
+description: Inception sub-activity — Risk Mode Proposal
+load: sub-activity
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Inception sub-activity — Risk Mode Proposal
 
 > Trigger: **Standard/SAFE** demands (FAST is self-evident). Optional, inside

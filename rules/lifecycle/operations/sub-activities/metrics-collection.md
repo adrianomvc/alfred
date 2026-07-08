@@ -1,3 +1,14 @@
+---
+name: sub-activity-metrics-collection
+description: Operation sub-activity — Metrics Collection
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Metrics Collection
 
 > Trigger: **always**. Optional only in depth. Owner: **Metrics** agent.

@@ -1,3 +1,14 @@
+---
+name: demand-type-operational
+description: Demand-type — Operacional (Operational)
+load: demand-type
+triggers:
+  phase: all
+  lane: all
+  demand-type: operational
+  agent: all
+---
+
 # Demand-type — Operacional (Operational)
 
 > Contract: `types covered` · `phase emphasis` · `typical sub-activities` · `mode tendency` · `special path`. References connectors/skills by **role**, not name.

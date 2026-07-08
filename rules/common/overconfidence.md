@@ -1,3 +1,14 @@
+---
+name: common-overconfidence
+description: Common rule — overconfidence prevention (supreme law)
+load: always
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — overconfidence prevention (supreme law)
 
 The supreme law lives in `core/principles.md` — invent nothing · ground before asserting · mark the uncertain · no source → no action · material decisions are human. It applies in **all modes, including FAST**: it overrides autonomy. This file adds only how the rule is enforced in demands; it does not restate it.

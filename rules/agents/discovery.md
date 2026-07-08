@@ -1,3 +1,14 @@
+---
+name: agent-discovery
+description: Agent - Discovery
+load: agent
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: discovery
+---
+
 # Agent - Discovery
 
 ## Contract

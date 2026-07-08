@@ -1,18 +1,17 @@
 ---
 name: lang-sql
 description: SQL engineering standard; overrides coding-standard where more specific. Load for SQL files, DDL, validation queries, reconciliation, or embedded SQL.
+trigger: Load when the active unit changes SQL files, migration queries, DDL, data validation queries, warehouse views, stored procedures, reconciliation scripts, or embedded SQL in code.
+sections_to_load:
+  - rules
+  - validation
+  - review checklist
 ---
 
 # Skill - SQL Standard
 
-## name
-`lang-sql`
-
 ## purpose
 SQL-specific engineering standard. It overrides `skills/coding-standard.md` only where it is more specific.
-
-## trigger
-Load when the active unit changes SQL files, migration queries, DDL, data validation queries, warehouse views, stored procedures, reconciliation scripts, or embedded SQL in code.
 
 ## inputs
 - active demand `state`
@@ -26,14 +25,6 @@ Load when the active unit changes SQL files, migration queries, DDL, data valida
 - SQL implementation plan
 - data validation and reconciliation plan
 - SQL review findings
-
-## link
-`skills/lang-sql.md`
-
-## sections to load
-- `rules`
-- `validation`
-- `review checklist`
 
 ## rules
 - Keep SQL explicit: name selected columns instead of relying on `select *` in durable artifacts.

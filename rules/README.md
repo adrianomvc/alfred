@@ -2,6 +2,7 @@
 
 This is the JIT entry point for `rules/`. Load this index first, then only the
 file for the active phase, lane, demand type, or agent — never the whole folder.
+For a generated metadata view, use [`rules-index.md`](rules-index.md).
 
 A demand always combines **one demand type × one lane**, runs through the
 **lifecycle**, is carried out by **agents**, and obeys the **common** rules.

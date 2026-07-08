@@ -1,3 +1,14 @@
+---
+name: sub-activity-application-design
+description: Design sub-activity — Application Design
+load: sub-activity
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Design sub-activity — Application Design
 
 > Trigger: a demand adds or changes a **component / service boundary** (new

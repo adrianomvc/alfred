@@ -1,3 +1,14 @@
+---
+name: phase-inception
+description: Lifecycle — Inception ("What?")
+load: phase
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle — Inception ("What?")
 
 Understand the demand before designing a solution. Owner agent: **Discovery**. Subject to the supreme law and scaled by the active lane.

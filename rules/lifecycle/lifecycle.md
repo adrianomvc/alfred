@@ -1,3 +1,14 @@
+---
+name: lifecycle
+description: Lifecycle
+load: lifecycle
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Lifecycle
 
 Alfred uses 5 phases for every demand. Risk Mode changes depth; it does not remove phases. Emergency Operational work may run Execution-first, but the deferred phases are completed in post-mortem before closure.

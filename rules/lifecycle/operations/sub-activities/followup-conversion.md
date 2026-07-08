@@ -1,3 +1,14 @@
+---
+name: sub-activity-followup-conversion
+description: Operation sub-activity — Follow-up Conversion
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Follow-up Conversion
 
 > Trigger: the demand leaves **open follow-ups, debts, or deferred work**.

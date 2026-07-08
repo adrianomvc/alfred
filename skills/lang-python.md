@@ -1,18 +1,17 @@
 ---
 name: lang-python
 description: Python engineering standard; overrides coding-standard where more specific. Load when Python files, tests, Glue jobs, FastAPI, or scripts are touched.
+trigger: Load when the active unit changes Python files, Python tests, Glue Python jobs, FastAPI apps, scripts, or Python packaging.
+sections_to_load:
+  - rules
+  - testing
+  - review checklist
 ---
 
 # Skill - Python Standard
 
-## name
-`lang-python`
-
 ## purpose
 Python-specific engineering standard. It overrides `skills/coding-standard.md` only where it is more specific.
-
-## trigger
-Load when the active unit changes Python files, Python tests, Glue Python jobs, FastAPI apps, scripts, or Python packaging.
 
 ## inputs
 - active demand `state`
@@ -25,14 +24,6 @@ Load when the active unit changes Python files, Python tests, Glue Python jobs, 
 - Python implementation plan
 - Python review findings
 - test strategy proportional to risk
-
-## link
-`skills/lang-python.md`
-
-## sections to load
-- `rules`
-- `testing`
-- `review checklist`
 
 ## rules
 - Prefer small pure functions around business rules and IO boundaries.
@@ -54,4 +45,3 @@ Load when the active unit changes Python files, Python tests, Glue Python jobs, 
 - tests cover normal and failure paths relevant to the lane;
 - sensitive data is not logged;
 - runtime parameters are validated before use.
-

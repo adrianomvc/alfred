@@ -1,3 +1,14 @@
+---
+name: sub-activity-code-generation
+description: Execution sub-activity — Code Generation
+load: sub-activity
+triggers:
+  phase: execution
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Execution sub-activity — Code Generation
 
 > Trigger: **always** (the act of building). Optional only in depth. Inherited

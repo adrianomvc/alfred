@@ -34,6 +34,7 @@ $requiredPaths = @(
   "core/presentation/toolbar-quick.md",
   "core/presentation/welcome-screen.md",
   "rules/common",
+  "rules/rules-index.md",
   "rules/demand-types",
   "rules/lanes",
   "rules/lifecycle",
@@ -83,6 +84,7 @@ $requiredPaths = @(
   "templates/hub/environment-parameters.md",
   "templates/hub/validation-evidence.md",
   "knowledge/README.md",
+  "knowledge/knowledge.md",
   "knowledge/policy-template.md",
   "docs/knowledge-governance.md",
   "docs/automation-fallback.md",
@@ -107,6 +109,7 @@ $requiredPaths = @(
   "docs/release-governance.md"
   "CHANGELOG.md"
   "scripts/powershell/workflow/alfred-boot.ps1"
+  "scripts/powershell/workflow/generate-registry.ps1"
   "scripts/powershell/workflow/render-toolbar.ps1"
   "docs/skills-activation.md"
   "skills/lang-python.md"
@@ -126,6 +129,7 @@ $requiredPaths = @(
   "scripts/powershell/validators/validate-links.ps1"
   "scripts/python/validators/validate-links.py"
   "scripts/python/workflow/alfred-boot.py"
+  "scripts/python/workflow/generate-registry.py"
   "scripts/python/workflow/render-toolbar.py"
   "scripts/python/metrics/collect-observability.py"
   "scripts/python/metrics/generate-metrics-rollup.py"
@@ -170,6 +174,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-export.js
 Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attribution-events.jsonl")
 
 & (Join-Path $rootPath "scripts/powershell/validators/validate-toolbar-fixtures.ps1") -Root $rootPath
+& (Join-Path $rootPath "scripts/powershell/workflow/generate-registry.ps1") -Root $rootPath -Check
 & (Join-Path $rootPath "scripts/powershell/validators/validate-skills-registry.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-connectors.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-model-policy.ps1") -Root $rootPath

@@ -1,18 +1,16 @@
 ---
 name: coding-standard
 description: Default engineering standard (SOLID). Load during Execution/Validate when code, configuration, tests, or automation change and no language-specific skill overrides it.
+trigger: Load during Execution and Validate when code, configuration, tests, or automation artifacts are changed.
+sections_to_load:
+  - rules
+  - output
 ---
 
 # Skill - Coding Standard
 
-## name
-`coding-standard`
-
 ## purpose
 Default engineering standard when no language-specific skill is active.
-
-## trigger
-Load during Execution and Validate when code, configuration, tests, or automation artifacts are changed.
 
 ## inputs
 - active demand `state`
@@ -24,13 +22,6 @@ Load during Execution and Validate when code, configuration, tests, or automatio
 - implementation guidance
 - review findings
 - proportional test strategy
-
-## link
-`skills/coding-standard.md`
-
-## sections to load
-- `rules`
-- `output`
 
 ## rules
 - Prefer small, cohesive changes.

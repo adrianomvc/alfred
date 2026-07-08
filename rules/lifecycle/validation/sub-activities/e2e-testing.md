@@ -1,3 +1,14 @@
+---
+name: sub-activity-e2e-testing
+description: Validate sub-activity — End-to-End Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — End-to-End Testing
 
 > Trigger: a **user-facing journey** is affected. Optional, inside Validate.

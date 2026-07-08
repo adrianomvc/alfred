@@ -1,3 +1,14 @@
+---
+name: sub-activity-baseline-drift-check
+description: Operation sub-activity — Baseline Drift Check
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Baseline Drift Check
 
 > Trigger: **Standard/SAFE** close. Optional, inside Operation.

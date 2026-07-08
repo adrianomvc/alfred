@@ -1,3 +1,14 @@
+---
+name: sub-activity-contract-testing
+description: Validate sub-activity — Contract Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Contract Testing
 
 > Trigger: an **external or internal API contract** is produced or consumed by the
