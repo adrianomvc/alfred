@@ -124,7 +124,7 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Connector: response format + error guidance | W7.3 | ✅ concluído (2026-07-05) |
 | P2 | Hooks determinísticos por host (opcional) | W7.4 | ✅ concluído (2026-07-05) |
 | P2 | Rubrica LLM-as-judge para artefatos | W8.6 | pendente |
-| P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa (restam só WARNs históricos) |
+| P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa; exemplos históricos ficam no tier ilustrativo/non-strict até migração |
 | P2 | Recomendação de próxima ação no boot | W8.4 | ✅ concluído (2026-07-05) |
 | P2 | Retrospectiva com transcripts | W8.7 | pendente |
 | P1 | Otimização de contexto/tokens do framework | W1.9 | ✅ concluído (2026-07-08) |

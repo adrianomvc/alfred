@@ -3,7 +3,7 @@
 This file tracks implementation coverage against the conceptual plan (D1–D47), versioned at `docs/plan/alfred-conceptual-plan.md`. It is a **current snapshot**: pass-by-pass history lives in `CHANGELOG.md` (releases 0.1.0–0.4.0 and the 2.0.0 line) and in git history.
 
 ## Status
-Alfred Framework Layer 1 is **operational** and has been applied to a real SQ9 HUB/App pilot. Current work follows `docs/plan/implementation-plan-2.0.0.md`: integrated execution with real host credentials, environment parameters, and external adapters — plus the 2.0.0 hardening waves.
+Alfred Framework Layer 1 is **operational** and has validated HUB/App pilot examples, including the strict 2.0.0 adoption rehearsal. Current work follows `docs/plan/implementation-plan-2.0.0.md`: integrated execution with real host credentials, environment parameters, and external adapters — plus the 2.0.0 hardening waves.
 
 Alfred is not a full hosted product. Remaining gaps are host-, credential-, policy-, or real-data-dependent. See `docs/layer-1-framework-closure.md`.
 
