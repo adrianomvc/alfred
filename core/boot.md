@@ -34,5 +34,12 @@ Active demands keep their stamped framework version frozen. If a newer framework
 ## Resume from state (resilience)
 The `state` always carries phase, mode, progress, next step, and links — enough for boot to reconstruct context without re-reading everything. If a session drops, resume from the last saved `state`: at most the in-flight step is lost, never the demand. Acceptance criterion: *resume after losing context by reading only the `state`.*
 
+## Cache-friendly order
+When the host preserves prompt/cache segments, load the most stable framework
+context first and the volatile demand context last: kernel (`core/principles.md`,
+`core/boot.md`, indexes) → generated registries/manifests → phase/lane/type
+rules → active skills → demand `state` and current artifacts. This is advisory:
+if the host has no cache controls, the same order still keeps the JIT path clear.
+
 ## Welcome back (open demands)
 Alfred never declares abandonment by inactivity. On boot it **lists the open demands** of the sigla with their last activity — the butler's welcome-back: *"There are 2 demands on hold: #142 (Design) and #097 (Execution). Resume one?"*. Who decides to cancel/resume is the human.

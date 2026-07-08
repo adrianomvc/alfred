@@ -48,6 +48,14 @@ generated from `hosts/_template/shim.md` plus host deltas in
 `hosts/_template/hosts.json`. Edit the template or the delta, then run
 `scripts/*/workflow/generate-host-shims`; `validate-framework` checks drift.
 
+## Cache-friendly loading
+Hosts that expose prompt caching or persistent context should keep Alfred's
+stable kernel before volatile demand state: framework principles/boot/indexes
+first, generated registries/manifests next, active rules/skills after that, and
+the current demand `state` plus working artifacts last. Hosts without cache
+controls still follow the same order as a plain JIT discipline; no feature may
+require host-specific caching (D3).
+
 ## The one host-specific setting: model (D46/D14)
 The model policy uses abstract tiers (`cheap`/`medium`/`strong`). Each host exposes
 different concrete model names, so the **tier → concrete-model map in
