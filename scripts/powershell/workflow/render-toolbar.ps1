@@ -6,7 +6,10 @@ param(
   [string]$Cost = "n/a",
 
   [ValidateSet("text", "rich", "web")]
-  [string]$Profile = "text"
+  [string]$Profile = "text",
+
+  # numeric cost so far (USD); enables the linear total-cost forecast
+  [string]$CostUsd = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -76,6 +79,34 @@ function Shorten {
   return $Value.Substring(0, $Max - 3) + "..."
 }
 
+# --- shared vocabulary (borderless design, owner-approved 2026-07-07) ---
+$laneColors = @{ fast = "32"; standard = "33"; safe = "31" }   # green / amber / red
+$laneIcons = @{ fast = "🟢"; standard = "🟡"; safe = "🔴" }
+$aliasText = @{ Inception = "O que"; Design = "Como"; Execution = "Fazer";
+                Validate = "Validar"; Operation = "Operar" }
+$aliasRich = @{ Inception = "O quê"; Design = "Como"; Execution = "Fazer";
+                Validate = "Validar"; Operation = "Operar" }
+
+function Get-ForecastTotal {
+  # Linear extrapolation of the total demand cost from recorded cost + progress.
+  # Estimate, never a fact: labeled with '~' and omitted whenever the recorded
+  # cost is not numeric or progress is 0/100 (no inventing — supreme law).
+  param(
+    [string]$CostUsd,
+    [double]$Progress
+  )
+
+  $value = 0.0
+  $inv = [System.Globalization.CultureInfo]::InvariantCulture
+  if (-not [double]::TryParse(($CostUsd -replace ",", "."), [System.Globalization.NumberStyles]::Float, $inv, [ref]$value)) {
+    return ""
+  }
+  if ($value -le 0 -or $Progress -le 0 -or $Progress -ge 100) {
+    return ""
+  }
+  return "~US$ " + ($value * 100.0 / $Progress).ToString("F2", $inv)
+}
+
 $id = Get-Field -Lines $content -Name "id"
 $sigla = Get-Field -Lines $content -Name "sigla"
 $lane = Get-FirstField -Lines $content -Names @("lane", "modo")
@@ -102,7 +133,6 @@ if ($isExecutionFirst) {
   $phases = @("Inception", "Design", "Execution", "Validate", "Operation")
 }
 $completed = 0
-$phaseParts = @()
 $markers = @()
 
 foreach ($item in $phases) {
@@ -115,37 +145,40 @@ foreach ($item in $phases) {
   } else {
     $marker = " "
   }
-  $phaseParts += "$item [$marker]"
   $markers += $marker
 }
 
 $progress = [Math]::Min(100, [Math]::Round(($completed / 5) * 100))
-$track = $phaseParts -join " -> "
+$forecast = Get-ForecastTotal -CostUsd $CostUsd -Progress $progress
 
 # rich-cli profile (optional): ANSI color + bar + icons; helper-rendered.
 if ($Profile -eq "rich") {
   [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
   $e = [char]27
   function Ansi($code, $s) { "$e[${code}m$s$e[0m" }
-  $laneColors = @{ fast = "32"; standard = "33"; safe = "31" }
   $col = $laneColors[$lane.ToLowerInvariant()]; if (-not $col) { $col = "36" }
-  $head = "$(Ansi '1' 'ALFRED') $(Ansi '2' "SIGLA:$sigla `u{00B7} #$id") $(Ansi $col "[$($lane.ToUpperInvariant())]")"
+  $icon = $laneIcons[$lane.ToLowerInvariant()]; if (-not $icon) { $icon = "⚪" }
+  $head = "🎩 $(Ansi '1' 'ALFRED') · $sigla · #$id · $icon $(Ansi $col $lane.ToUpperInvariant())"
   if ($lane.ToLowerInvariant() -eq "fast") {
-    Write-Output "$head $(Ansi '2' $phase)  $(Ansi '2' "`u{2192}") $(Shorten $next 56)"
+    $alias = $aliasRich[$phase]; if (-not $alias) { $alias = $phase }
+    Write-Output "$head · $alias ▶ · custo: $Cost · $(Ansi '2' '→') $(Shorten $next 56)"
     exit 0
   }
   $filled = [int][Math]::Round($progress / 10)
-  $bar = (Ansi $col ([string]([char]0x2588) * $filled)) + (Ansi '2' ([string]([char]0x2591) * (10 - $filled)))
-  $circled = @("`u{2460}", "`u{2461}", "`u{2462}", "`u{2463}", "`u{2464}")
-  $trackR = ""
+  $bar = (Ansi $col ("▰" * $filled)) + (Ansi '2' ("▱" * (10 - $filled)))
+  $trackParts = @()
   for ($i = 0; $i -lt [Math]::Min(5, $markers.Count); $i++) {
-    $mk = if ($markers[$i] -eq "x") { Ansi '32' "`u{2713}" } elseif ($markers[$i] -eq ">") { Ansi '36' "`u{25B6}" } else { Ansi '2' "`u{25FB}" }
-    $trackR += "$($circled[$i])$mk "
+    $name = $aliasRich[$phases[$i]]; if (-not $name) { $name = $phases[$i] }
+    $mk = if ($markers[$i] -eq "x") { Ansi '32' "✓" } elseif ($markers[$i] -eq ">") { Ansi '36' "▶" } else { Ansi '2' "◻" }
+    $trackParts += "$name $mk"
   }
-  Write-Output "$head  $bar $progress%"
-  Write-Output "  $($trackR.TrimEnd())"
-  Write-Output "  $(Ansi '2' 'etapa') $(Shorten $step 60)   $(Ansi '2' 'HITL') $(Shorten $checkpoint 40)"
-  Write-Output "  $(Ansi '2' "`u{2192}") $(Shorten $next 60)   $(Ansi '2' "$Model `u{00B7} $Cost")"
+  $track = $trackParts -join " · "
+  $costPart = "custo: $Cost"
+  if ($forecast) { $costPart += " · previsão total: $forecast" }
+  Write-Output $head
+  Write-Output "$bar $progress% $(Ansi '2' '│') $track"
+  Write-Output "⏸ HITL: $(Shorten $checkpoint 44) $(Ansi '2' '│') modelo: $Model $(Ansi '2' '│') $costPart"
+  Write-Output "$(Ansi '2' '→') Próximo: $(Shorten $next 76)"
   exit 0
 }
 
@@ -181,19 +214,25 @@ if ($Profile -eq "web") {
   exit 0
 }
 
+# text floor: borderless ASCII (no box = nothing to misalign; degrades anywhere)
+$forecastPart = ""
+if ($forecast) { $forecastPart = " | est. total: $forecast" }
+
 if ($lane.ToLowerInvariant() -eq "fast") {
-  Write-Output "ALFRED | SIGLA:$sigla | #$id | FAST | $phase | model: $Model | cost: $Cost | next: $(Shorten $next 48)"
+  Write-Output "ALFRED | $sigla | #$id | FAST | $phase | model: $Model | cost: $Cost$forecastPart | next: $(Shorten $next 48)"
   exit 0
 }
 
-$line = "+-- ALFRED ------------------------------- SIGLA:$sigla | #$id --+"
-$footer = "+" + ("-" * ([Math]::Max(64, $line.Length - 2))) + "+"
+$barFilled = [int][Math]::Round($progress / 5)
+$bar = "[" + ("#" * $barFilled) + ("." * (20 - $barFilled)) + "]"
+$trackParts = @()
+for ($i = 0; $i -lt [Math]::Min(5, $markers.Count); $i++) {
+  $name = $aliasText[$phases[$i]]; if (-not $name) { $name = $phases[$i] }
+  $trackParts += "$name[$($markers[$i])]"
+}
+$track = $trackParts -join " -> "
 
-Write-Output $line
-Write-Output "| Lane: $($lane.ToUpperInvariant()) | Model: $Model | Progress: $progress% |"
-Write-Output "| Cost: $Cost |"
-Write-Output "| $track |"
-Write-Output "| Step : $(Shorten $step 72) |"
-Write-Output "| HITL : $(Shorten $checkpoint 72) |"
-Write-Output "| Next : $(Shorten $next 72) |"
-Write-Output $footer
+Write-Output "ALFRED | $sigla | #$id | $($lane.ToUpperInvariant())"
+Write-Output "$bar $progress% | $track"
+Write-Output "HITL: $(Shorten $checkpoint 52) | model: $Model | cost: $Cost$forecastPart"
+Write-Output "Next: $(Shorten $next 76)"

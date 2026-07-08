@@ -1,8 +1,4 @@
-+-- ALFRED ------------------------------- SIGLA:SQ9 | #005-parallel-units --+
-| Lane: STANDARD | Model: GPT-5 | Progress: 60% |
-| Cost: n/a |
-| Inception [x] -> Design [x] -> Execution [x] -> Validate [ ] -> Operation [ ] |
-| Step : executar units independentes |
-| HITL : Tech Lead |
-| Next : serializar resultado no state e validar evidencias |
-+----------------------------------------------------------------------------+
+ALFRED | SQ9 | #005-parallel-units | STANDARD
+[############........] 60% | O que[x] -> Como[x] -> Fazer[x] -> Validar[ ] -> Operar[ ]
+HITL: Tech Lead | model: GPT-5 | cost: n/a
+Next: serializar resultado no state e validar evidencias
