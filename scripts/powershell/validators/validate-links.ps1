@@ -15,13 +15,15 @@ param(
 # CHANGELOG.md is excluded: it is a historical ledger with point-in-time paths.
 # docs/plan/alfred-conceptual-plan.md is excluded for the same reason: the
 # versioned original design document keeps its as-written paths.
+# docs/plan/context-optimization-progress.md is excluded likewise: its approved
+# plan names phase deliverables that only exist once their phase lands.
 
 $ErrorActionPreference = "Stop"
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 
 $scanDirs = @("core", "rules", "skills", "connectors", "metrics", "knowledge", "templates", "docs", "install", "hosts")
 $rootFiles = @("README.md", "AGENTS.md")
-$excludeFiles = @("docs/plan/alfred-conceptual-plan.md")
+$excludeFiles = @("docs/plan/alfred-conceptual-plan.md", "docs/plan/context-optimization-progress.md")
 $inlinePathPattern = '^(core|rules|skills|connectors|metrics|knowledge|templates|docs|scripts|examples|install)/[\w./-]+$'
 
 function Test-Reference {

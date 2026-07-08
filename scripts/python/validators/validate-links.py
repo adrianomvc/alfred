@@ -33,8 +33,13 @@ SCAN_DIRS = [
 # docs/plan/alfred-conceptual-plan.md is excluded for the same reason: it is the
 # versioned original design document (D1-D47) whose paths reflect the plan as
 # written, not the as-built tree.
+# docs/plan/context-optimization-progress.md is excluded likewise: its approved
+# plan names phase deliverables that only exist once their phase lands.
 ROOT_FILES = ["README.md", "AGENTS.md"]
-EXCLUDE_FILES = {"docs/plan/alfred-conceptual-plan.md"}
+EXCLUDE_FILES = {
+    "docs/plan/alfred-conceptual-plan.md",
+    "docs/plan/context-optimization-progress.md",
+}
 
 TOP_DIRS = (
     "core", "rules", "skills", "connectors", "metrics", "knowledge",
