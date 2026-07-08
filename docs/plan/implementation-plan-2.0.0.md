@@ -36,6 +36,7 @@ Objetivo: eliminar duplicidade e referência errada.
 - [x] W1.6 ✅ (2026-07-05) Seção "Cumulative threshold" em `rules/common/escalation-triggers.md` — 10 eventos de escalação acumulados por demanda (tunável via `knowledge`) forçam checkpoint humano.
 - [x] W1.7 **Guia agnóstico para agentes que editam o framework** ✅ (2026-07-05): `AGENTS.md` na raiz seguindo o padrão aberto vendor-neutral (Linux Foundation) — invariantes, convenções, comandos de validação, plano ativo. Decisão do dono: **agnóstico de IA** — nenhum arquivo vendor-specific na raiz; shim opcional por host (ex.: `CLAUDE.md` de 1 linha importando o `AGENTS.md`) fica como DH. `validate-links` passou a escanear o `AGENTS.md`.
 - [x] W1.8 **Índice completo do `docs/README.md`** ✅ (2026-07-05): todos os documentos de `docs/` e `docs/plan/` agora aparecem no índice (progressive disclosure sem varrer pasta).
+- [x] W1.9 **Otimização de contexto/tokens** ✅ (2026-07-08): pacote fechado em [`architecture-review-context-2026-07.md`](architecture-review-context-2026-07.md) e handoff em [`context-optimization-progress.md`](context-optimization-progress.md). Reduziu custo fixo planejado de sessão (~8,230 → ~3,300 tk), adicionou registries/manifests gerados, skills enxutas, shims de host por template, ordem cache-friendly e baseline em `metrics/baselines.md`.
 
 Aceite: `validate-framework` + `validate-demand` nos dois exemplos, 0 erros. Não mexer: toolbar, welcome, boot, state.
 
@@ -126,6 +127,7 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa (restam só WARNs históricos) |
 | P2 | Recomendação de próxima ação no boot | W8.4 | ✅ concluído (2026-07-05) |
 | P2 | Retrospectiva com transcripts | W8.7 | pendente |
+| P1 | Otimização de contexto/tokens do framework | W1.9 | ✅ concluído (2026-07-08) |
 | P1 | Template hub/skills.md | W2.3 | ✅ concluído (2026-07-05) |
 | P1 | Compactar implementation-status | W1.3 | ✅ concluído (2026-07-05) |
 | P1 | Papéis SRE/Security/FinOps em `core/squad.md` | — | ✅ concluído (2026-07-05) |
@@ -163,6 +165,8 @@ Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
 
 - [x] Telemetria por e-mail ✅ (2026-07-05, decisão do dono): os logs de observabilidade de **cada pessoa rodando o Alfred** são enviados automaticamente ao destino org (`telemetry_to` em `knowledge/notification.md`, copiado pelo installer para o config de cada máquina) — tool `send_telemetry` no MCP (lote = `{sender, collected_at, source, event}`), disparo na strategic-notification a cada geração de eventos. **Transporte provisório até a API de telemetria existir (D45)** — trocar o transporte não toca as regras. Endereço confirmado pelo dono: `adriano.vilela-costa@itau-unibanco.com.br`.
 - [x] Cadastro do e-mail ✅ (2026-07-05, decisão do dono): acontece **no processo de install** — os instaladores (`install/`, 2 runtimes) perguntam o e-mail (ou `-Email`/`ALFRED_EMAIL`), gravam `~/.alfred-email.json` em dry-run sem sobrescrever config existente, e registram o MCP `alfred-email` no Claude Code quando CLI+Python existem (best-effort; degrada, D3).
+
+- [x] Otimização de contexto/tokens ✅ (2026-07-08, decisões do dono): aprovados e executados os 6 DHs do pacote — split do welcome, Risk Mode JIT na Inception, model-policy JIT na seleção de modelo, toolbar quick, contrato enxuto de skills com frontmatter, e shims de host gerados de template. Relatório final: [`architecture-review-context-2026-07.md`](architecture-review-context-2026-07.md).
 
 Ainda pendentes:
 - [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active` (preencher `smtp{}` no `~/.alfred-email.json`).

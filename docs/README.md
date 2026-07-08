@@ -47,3 +47,4 @@ Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first
 - [`plan/alfred-conceptual-plan.md`](plan/alfred-conceptual-plan.md) is the versioned original design (D1–D47) with an as-built note.
 - [`plan/anthropic-research-notes.md`](plan/anthropic-research-notes.md) maps Anthropic agent research to the plan's decisions.
 - [`plan/context-optimization-progress.md`](plan/context-optimization-progress.md) is the handoff log of the 2026-07 context/token optimization (phase status + how to resume).
+- [`plan/architecture-review-context-2026-07.md`](plan/architecture-review-context-2026-07.md) closes the 2026-07 context/token architecture review with baselines, trade-offs, and final recommendation.
