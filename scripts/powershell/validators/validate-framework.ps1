@@ -194,6 +194,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attributi
 & (Join-Path $rootPath "scripts/powershell/validators/validate-knowledge.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-links.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")
+& (Join-Path $rootPath "scripts/powershell/validators/validate-demand.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2") -Strict
 & (Join-Path $rootPath "scripts/powershell/workflow/alfred-boot.ps1") -Root $rootPath | Out-Null
 & (Join-Path $rootPath "scripts/powershell/validators/validate-reverse-eng-staleness.ps1") -ReverseEngPath (Join-Path $rootPath "examples/staleness-fixtures/reverse-eng-fresh.md") -CurrentCommit "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 & (Join-Path $rootPath "scripts/powershell/validators/validate-sdd-gate.ps1") -HubDemandPath (Join-Path $rootPath "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units")

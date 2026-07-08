@@ -5,7 +5,7 @@
 ## O que é este trabalho
 Revisão de arquitetura aprovada pelo dono em 2026-07-08: reduzir o custo fixo de sessão de ~8,2k para ~3,3k tokens (-60%) e o overhead por demanda em ~53%, sem trocar a estratégia JIT (que está correta). Plano completo com diagnóstico, fases e verificação: seção "Plano aprovado" abaixo.
 
-**Decisões do dono registradas (2026-07-08):** as 6 DHs aprovadas — (1) split do welcome.md, (2) adiar risk-mode.md para a Inception, (3) adiar model-policy.md para a seleção de modelo, (4) cheat-sheet da toolbar, (5) contrato de skills enxuto, (6) shims de host gerados de template. Relatório final vai para `docs/plan/architecture-review-context-2026-07.md`.
+**Decisões do dono registradas (2026-07-08):** as 6 DHs aprovadas — (1) split do welcome.md, (2) adiar risk-mode.md para a Inception, (3) adiar model-policy.md para a seleção de modelo, (4) cheat-sheet da toolbar, (5) contrato de skills enxuto, (6) shims de host gerados de template. Relatório final registrado em `docs/plan/architecture-review-context-2026-07.md`.
 
 ## Status por fase
 | Fase | Status | Commit |
@@ -84,7 +84,7 @@ Parágrafo advisory em `core/boot.md` + notas em `hosts/README.md` (kernel está
 `docs/plan/architecture-review-context-2026-07.md` (pt-BR): resumo executivo, diagnóstico (números acima), comparação de estratégias, rejeitadas (RAG obrigatório, grafo, sumarização LLM, mega-prompt, orquestração adaptativa — e porquês), riscos/trade-offs, arquitetura recomendada, fluxo em níveis 0–7, roadmap, quick wins, recomendação final. Indexar em `docs/README.md`; registrar DHs no `implementation-plan-2.0.0.md`.
 
 ### Verificação (após cada fase)
-- `validate-framework` 0 erros nos 2 runtimes; `validate-demand --strict` 0/0 nos exemplos.
+- `validate-framework` 0 erros nos 2 runtimes; `validate-demand --strict` 0/0 no exemplo de regressão `006-simulado-adocao-v2`. Os exemplos históricos com falha strict seguem como pendência pré-existente registrada acima.
 - Fase 4: fixtures do context-manifest (Standard×product×Design, FAST×operational×Execution, SAFE×engineering×Inception) nos 2 runtimes.
 - Fase 2/5: smoke test de boot num repo de exemplo.
 - Alvo final: cadeia de boot ≤ ~3,5k tk; baseline registrado em `metrics/`.

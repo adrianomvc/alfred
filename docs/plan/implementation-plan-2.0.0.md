@@ -121,8 +121,8 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Eval antes de skill | W5.3 | ✅ concluído (2026-07-05) |
 | P2 | Formato Agent Skills + scripts em skills | W5.4 | ✅ concluído (2026-07-05) |
 | P2 | Descoberta de skills em catálogos externos (ex.: Context7) | W5.5 | ✅ concluído (2026-07-05) |
-| P2 | Connector: response format + error guidance | W7.3 | pendente |
-| P2 | Hooks determinísticos por host (opcional) | W7.4 | pendente |
+| P2 | Connector: response format + error guidance | W7.3 | ✅ concluído (2026-07-05) |
+| P2 | Hooks determinísticos por host (opcional) | W7.4 | ✅ concluído (2026-07-05) |
 | P2 | Rubrica LLM-as-judge para artefatos | W8.6 | pendente |
 | P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa (restam só WARNs históricos) |
 | P2 | Recomendação de próxima ação no boot | W8.4 | ✅ concluído (2026-07-05) |

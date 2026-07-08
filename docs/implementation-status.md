@@ -26,6 +26,7 @@ Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framewor
 - D32/D46: insight examples and model-policy validation exist; tuning needs more real project data.
 - D35/D36: more language/platform skills may be needed as new stacks appear.
 - D44: notification/email is a contract/template plus example handoff, not a working channel.
+- Historical examples still need migration before they can be promoted to `validate-demand --strict` regression fixtures.
 - Real integrated execution depends on environment parameters, credentials, network access, and target-host decisions from the adopting squad.
 - Release tags and adoption cadence need human governance outside the framework.
 

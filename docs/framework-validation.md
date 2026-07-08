@@ -34,6 +34,11 @@ powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-
 python scripts/python/validators/validate-framework.py
 ```
 
+## Example Validation Tiers
+- `validate-framework` is the required framework gate. It validates examples as framework fixtures, including JSONL, links, generated outputs, the canonical demand example, and declared strict regression fixtures wired into the validator.
+- `validate-demand --strict` is required only for examples explicitly declared as strict regression fixtures in `examples/README.md`.
+- Historical or illustrative examples may be partial/in progress. They should pass the framework gate and remain useful as snapshots, but they are not a strict demand-closure guarantee until migrated and declared as strict regression fixtures.
+
 ## JSONL Checks
 Run a JSON parse over all observability logs in examples and active pilots.
 

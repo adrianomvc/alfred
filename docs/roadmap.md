@@ -9,7 +9,7 @@
 - Implementation coverage is tracked in `docs/implementation-status.md`.
 - Units, escalation triggers, execution plan, and validation evidence are now materialized.
 - Layer 1 closure is tracked in `docs/layer-1-framework-closure.md`.
-- SQ9 real HUB/App adoption has been exercised with strict validation.
+- SQ9 simulated HUB/App adoption has been exercised with strict validation.
 - External environment parameters are now tracked with a reusable HUB template.
 - Framework version adoption/freeze rules are documented for HUB/App consumers.
 - Framework release governance and changelog are documented.

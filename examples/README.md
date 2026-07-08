@@ -2,6 +2,11 @@
 
 Examples should stay small and illustrative. They are not part of the framework runtime — but they double as the **regression suite**: validators run against them, so a passing example is proof the framework still behaves.
 
+## Validation tiers
+- **Framework gate:** `validate-framework` must pass. It validates structure, JSONL, links, generated registries/shims/fixtures, connector contracts, model policy, the canonical demand example, and declared strict regression fixtures.
+- **Strict regression examples:** examples explicitly called out as strict regression fixtures must pass `validate-demand --strict` with 0 errors / 0 warnings. Today this is `sq9-pilot/.../006-simulado-adocao-v2`.
+- **Historical/illustrative examples:** older snapshots may remain intentionally partial or in progress. They must keep parsable JSONL and pass the framework gate, but are not a strict closure guarantee until migrated and declared as strict regression fixtures.
+
 ## Available examples
 - `sq9-pilot/`: six end-to-end demands — implantation (Standard), FAST, SAFE, Operational Execution-first with post-mortem, parallel units, and the 2.0.0 adoption rehearsal (`006-simulado-adocao-v2`, passes `validate-demand --strict` 0/0).
 - `fresh-sigla-onboarding/`: minimal new-sigla adoption from empty HUB/App roots.

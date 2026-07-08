@@ -159,6 +159,7 @@ REQUIRED_PATHS = [
 ]
 
 EXAMPLE_DEMAND = "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units"
+STRICT_EXAMPLE_DEMAND = "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2"
 
 
 def assert_path(root, rel):
@@ -214,6 +215,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
+    run_sub(root, "scripts/python/validators/validate-demand.py", "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND), "--strict")
     run_sub(root, "scripts/python/workflow/alfred-boot.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-reverse-eng-staleness.py",
             "-ReverseEngPath", str(root / "examples/staleness-fixtures/reverse-eng-fresh.md"),
