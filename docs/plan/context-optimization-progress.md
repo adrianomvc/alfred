@@ -1,6 +1,6 @@
 # Progresso — Otimização de contexto/tokens (revisão de arquitetura 2026-07)
 
-> Log de handoff (pt-BR). Objetivo: qualquer agente (humano ou IA — Claude, Codex, Copilot, DEVIN) retoma este trabalho lendo **só este arquivo** + o plano aprovado. Atualizar ao fim de cada fase. Branch de trabalho: `alfred/context-optimization`.
+> Log de handoff fechado (pt-BR). Objetivo: qualquer agente (humano ou IA — Claude, Codex, Copilot, DEVIN) audita o que foi feito lendo **só este arquivo** + o plano aprovado. Novas ações entram pelo plano 2.0.0. Branch de trabalho: `alfred/context-optimization`.
 
 ## O que é este trabalho
 Revisão de arquitetura aprovada pelo dono em 2026-07-08: reduzir o custo fixo de sessão de ~8,2k para ~3,3k tokens (-60%) e o overhead por demanda em ~53%, sem trocar a estratégia JIT (que está correta). Plano completo com diagnóstico, fases e verificação: seção "Plano aprovado" abaixo.
@@ -31,12 +31,12 @@ Revisão de arquitetura aprovada pelo dono em 2026-07-08: reduzir o custo fixo d
 2. **Fase 0 — Higiene:** removidos os 2 worktrees git stale (`git worktree remove`, ambos limpos/detached) e os `__pycache__/` locais em `scripts/python/**`. Nenhum `.pyc` estava commitado (`git ls-files`); `.gitignore` já cobre `__pycache__/` e `*.py[cod]` — nada a adicionar. `.claude/`/`.devin/` não são rastreados. Criado este log de handoff (pedido do dono: outra IA pode retomar) e indexado em `docs/README.md`.
 1. **Correção de baseline (pré-fase):** o commit `d2b18b7` ("ajuste d toolbar") aplicou o redesign borderless da toolbar SÓ no `render-toolbar.py`; o espelho PowerShell e os 4 fixtures ficaram para trás, quebrando `validate-toolbar-fixtures`. Portado para `scripts/powershell/workflow/render-toolbar.ps1` (aliases pt-BR das fases, ícones de lane, `forecast_total`, flag `-CostUsd`), fixtures regenerados. Paridade texto/rich/forecast verificada por diff; `validate-framework` 0 erros nos 2 runtimes. **Pendência conhecida:** `core/presentation/toolbar.md` (spec) ainda descreve o formato ANTIGO com bordas — reconciliar na Fase 2 junto com o `toolbar-quick.md`.
 
-## Como retomar (para a próxima IA)
+## Como auditar ou reabrir
 1. Ler este arquivo + a seção "Plano aprovado" abaixo.
 2. Conferir `git log --oneline` na branch `alfred/context-optimization` para ver o que já entrou.
-3. Executar a próxima fase pendente da tabela acima, na ordem.
-4. Após CADA fase: `python scripts/python/validators/validate-framework.py` E `pwsh -File scripts/powershell/validators/validate-framework.ps1` — 0 erros; commit pequeno (1 fase = 1 commit, estilo conventional commits do repo).
-5. Atualizar a tabela de status e a seção "Feito até agora" deste arquivo no mesmo commit.
+3. Para novas ações, abrir item no `docs/plan/implementation-plan-2.0.0.md` em vez de reativar fases já concluídas aqui.
+4. Após qualquer ajuste relacionado: `python scripts/python/validators/validate-framework.py` E `pwsh -File scripts/powershell/validators/validate-framework.ps1` — 0 erros; commit pequeno.
+5. Atualizar este arquivo só se o ajuste mudar o registro histórico do pacote de otimização de contexto.
 
 ## Plano aprovado (íntegra)
 
