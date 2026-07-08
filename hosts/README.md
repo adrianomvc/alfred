@@ -42,6 +42,12 @@ The username is whatever the command prints — taken from the live session, nev
 | GitHub Copilot | repo custom instructions | `github-copilot/copilot-instructions.md` | copy to `.github/copilot-instructions.md` |
 | Codex | `AGENTS.md` | `codex/AGENTS.md` | copy to repo root or `~/.codex/AGENTS.md` |
 
+## Generated shims
+The entry files above are committed for simple copy/install flows, but they are
+generated from `hosts/_template/shim.md` plus host deltas in
+`hosts/_template/hosts.json`. Edit the template or the delta, then run
+`scripts/*/workflow/generate-host-shims`; `validate-framework` checks drift.
+
 ## The one host-specific setting: model (D46/D14)
 The model policy uses abstract tiers (`cheap`/`medium`/`strong`). Each host exposes
 different concrete model names, so the **tier → concrete-model map in

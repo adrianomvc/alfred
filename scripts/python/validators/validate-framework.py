@@ -86,6 +86,8 @@ REQUIRED_PATHS = [
     "install/install.ps1",
     "install/install.sh",
     "hosts/README.md",
+    "hosts/_template/shim.md",
+    "hosts/_template/hosts.json",
     "hosts/devin-cli/SKILL.md",
     "hosts/claude-code/SKILL.md",
     "hosts/github-copilot/copilot-instructions.md",
@@ -100,6 +102,7 @@ REQUIRED_PATHS = [
     "CHANGELOG.md",
     "scripts/powershell/workflow/alfred-boot.ps1",
     "scripts/powershell/workflow/context-manifest.ps1",
+    "scripts/powershell/workflow/generate-host-shims.ps1",
     "scripts/powershell/workflow/generate-registry.ps1",
     "scripts/powershell/workflow/render-toolbar.ps1",
     "docs/skills-activation.md",
@@ -119,6 +122,7 @@ REQUIRED_PATHS = [
     "scripts/powershell/validators/validate-model-policy.ps1",
     "scripts/python/workflow/alfred-boot.py",
     "scripts/python/workflow/context-manifest.py",
+    "scripts/python/workflow/generate-host-shims.py",
     "scripts/python/workflow/generate-registry.py",
     "scripts/python/workflow/render-toolbar.py",
     "scripts/python/metrics/collect-observability.py",
@@ -202,6 +206,7 @@ def main():
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")
+    run_sub(root, "scripts/python/workflow/generate-host-shims.py", "-Root", str(root), "--check")
     run_sub(root, "scripts/python/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))

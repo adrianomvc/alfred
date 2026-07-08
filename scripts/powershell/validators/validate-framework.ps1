@@ -98,6 +98,8 @@ $requiredPaths = @(
   "install/install.ps1",
   "install/install.sh",
   "hosts/README.md"
+  "hosts/_template/shim.md"
+  "hosts/_template/hosts.json"
   "hosts/devin-cli/SKILL.md"
   "hosts/claude-code/SKILL.md"
   "hosts/github-copilot/copilot-instructions.md"
@@ -112,6 +114,7 @@ $requiredPaths = @(
   "CHANGELOG.md"
   "scripts/powershell/workflow/alfred-boot.ps1"
   "scripts/powershell/workflow/context-manifest.ps1"
+  "scripts/powershell/workflow/generate-host-shims.ps1"
   "scripts/powershell/workflow/generate-registry.ps1"
   "scripts/powershell/workflow/render-toolbar.ps1"
   "docs/skills-activation.md"
@@ -133,6 +136,7 @@ $requiredPaths = @(
   "scripts/python/validators/validate-links.py"
   "scripts/python/workflow/alfred-boot.py"
   "scripts/python/workflow/context-manifest.py"
+  "scripts/python/workflow/generate-host-shims.py"
   "scripts/python/workflow/generate-registry.py"
   "scripts/python/workflow/render-toolbar.py"
   "scripts/python/metrics/collect-observability.py"
@@ -182,6 +186,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attributi
 
 & (Join-Path $rootPath "scripts/powershell/validators/validate-toolbar-fixtures.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/workflow/generate-registry.ps1") -Root $rootPath -Check
+& (Join-Path $rootPath "scripts/powershell/workflow/generate-host-shims.ps1") -Root $rootPath -Check
 & (Join-Path $rootPath "scripts/powershell/validators/validate-context-manifest-fixtures.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-skills-registry.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-connectors.ps1") -Root $rootPath
