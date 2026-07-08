@@ -46,3 +46,4 @@ Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first
 - [`plan/implementation-plan-2.0.0.md`](plan/implementation-plan-2.0.0.md) is the active incremental implementation plan; all its work lands under version `2.0.0`.
 - [`plan/alfred-conceptual-plan.md`](plan/alfred-conceptual-plan.md) is the versioned original design (D1–D47) with an as-built note.
 - [`plan/anthropic-research-notes.md`](plan/anthropic-research-notes.md) maps Anthropic agent research to the plan's decisions.
+- [`plan/context-optimization-progress.md`](plan/context-optimization-progress.md) is the handoff log of the 2026-07 context/token optimization (phase status + how to resume).
