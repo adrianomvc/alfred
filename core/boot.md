@@ -3,7 +3,7 @@
 Every session begins with a fixed sequence before any work. The host runs it once per session. Inherits the spirit of `workspace-detection` + `session-continuity` from AI-DLC. The boot **never loads everything** — only index + state + what is needed; the rest is on demand.
 
 ## Sequence
-1. **Welcome** — short opening message in the butler's voice (`welcome.md`), shown once per session.
+1. **Welcome** — short opening message in the butler's voice (`welcome.md` = persona/tone), shown once per session. To render the visual welcome block, load `presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session).
 2. **Detect repo** — identify which repo we are in, to know which artifacts to read and how:
    - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts).
    - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts).
@@ -15,7 +15,7 @@ Every session begins with a fixed sequence before any work. The host runs it onc
 4. **JIT context load (anti-hypercontext):**
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
-   - on resume → **rebuild from the `state`** (show the toolbar + "what's left");
+   - on resume → **rebuild from the `state`** (show the toolbar — formats in `presentation/toolbar-quick.md` — + "what's left");
    - open only the current theme's links + active skills.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 

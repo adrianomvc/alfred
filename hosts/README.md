@@ -20,7 +20,8 @@ itself never changes per host (D3, agnostic markdown).
    `git clone https://github.com/adrianomvc/alfred.git ~/.alfred`
 2. Register the host's entry file below so it reads `~/.alfred/core/boot.md`.
 3. The entry point then follows Alfred's own rules: boot sequence, `core/principles.md`
-   (supreme law: never invent), `core/risk-mode.md` (FAST/Standard/SAFE), butler persona.
+   (supreme law: never invent), butler persona. `core/risk-mode.md` (FAST/Standard/SAFE)
+   and `core/model-policy.md` load JIT — at Inception and at model selection, not at boot.
 
 ### Path resolution (read this)
 The install location is the **logged-in user's** home at `.alfred`. Hosts must

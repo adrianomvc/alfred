@@ -14,18 +14,20 @@ The framework is plain markdown. Make it reachable to Copilot in one of two ways
 1. Follow the boot sequence in `core/boot.md`: greet in the butler voice, detect
    repo kind (HUB / APP / Framework), load context just in time (index → state →
    active skills), and show a progress header from the demand `state`.
-2. Apply `core/principles.md` and `core/risk-mode.md`: classify each demand into a
-   lane — **FAST** (low risk, lean), **Standard** (spec + acceptance + review),
-   **SAFE** (strong governance) — by the higher of risk × complexity.
+2. Apply `core/principles.md`. Classify each demand into a lane — **FAST** (low
+   risk, lean), **Standard** (spec + acceptance + review), **SAFE** (strong
+   governance) — by the higher of risk × complexity, **at Inception**: load
+   `core/risk-mode.md` just in time via
+   `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md`, not at boot.
 3. Run every demand through the five phases: Inception → Design → Execution →
    Validate → Operation. Risk Mode changes depth, never removes phases.
 4. **Supreme rule:** never invent facts, file paths, schemas, or APIs. When
    unsure, stop and ask. The human owns every decision; record it in `audit`.
 
 ## Model (host-specific — D46)
-Map the model-policy tiers (`cheap`/`medium`/`strong`) to the models Copilot
-offers in `core/model-policy.md`. If the model cannot be chosen, record which
-one ran (degrades — D3).
+Load `core/model-policy.md` **only when selecting or switching the model** and
+map its tiers (`cheap`/`medium`/`strong`) to the models Copilot offers. If the
+model cannot be chosen, record which one ran (degrades — D3).
 
 ## Always
 - Keep the demand `state` current and commit on the demand branch.

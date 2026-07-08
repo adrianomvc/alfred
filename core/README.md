@@ -22,13 +22,13 @@ The framework is the **single source, referenced — not copied — into HUBs/ap
 
 ## Map
 - [`principles.md`](principles.md) — supreme law (no hallucination), principles, anti-goals.
-- [`risk-mode.md`](risk-mode.md) — the selector: checklist, scale, hard overrides.
+- [`risk-mode.md`](risk-mode.md) — the selector: checklist, scale, hard overrides. Loaded **JIT at Inception** (via `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md`), not at boot.
 - [`architecture.md`](architecture.md) — the 3 layers (Framework / HUB / App).
 - [`boot.md`](boot.md) — session start: detect HUB/APP → pull → JIT load.
-- [`welcome.md`](welcome.md) — the butler's voice (persona).
-- [`presentation/`](presentation/README.md) — optional rendering layer (profiles + toolbar) over one `state`; degrades to text.
+- [`welcome.md`](welcome.md) — the butler's voice (persona); the rendered screen lives in `presentation/welcome-screen.md` (JIT).
+- [`presentation/`](presentation/README.md) — optional rendering layer (profiles · `toolbar-quick.md` · `toolbar.md` · `welcome-screen.md`) over one `state`; degrades to text.
 - [`squad.md`](squad.md) — human/agent responsibilities and HITL ownership.
-- [`model-policy.md`](model-policy.md) — model per phase/agent/lane (tunable).
+- [`model-policy.md`](model-policy.md) — model per phase/agent/lane (tunable). Loaded **only when selecting/switching the model**, not at boot.
 - [`glossary.md`](glossary.md) — terminology (sigla / initiative / demand / unit / lane).
 - `../rules/` — the customized AI-DLC engine (lanes · demand-types · lifecycle · agents · common).
 - `../skills/`, `../connectors/`, `../metrics/`, `../knowledge/`, `../templates/`, `../examples/`.

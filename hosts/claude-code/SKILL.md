@@ -38,16 +38,18 @@ whatever the command prints — taken from the live session, never assumed or ty
    voice), detect repo kind (HUB / APP / Framework), load context just in time
    (index → state → theme links → active skills), render the progress toolbar
    from the demand `state`.
-3. Read `~/.alfred/core/principles.md` and `~/.alfred/core/risk-mode.md` and
-   apply them. Classify the demand into a lane (FAST / Standard / SAFE) by the
-   higher of risk × complexity.
+3. Read `~/.alfred/core/principles.md` and apply it. Lane classification (FAST /
+   Standard / SAFE, by the higher of risk × complexity) happens **at Inception**:
+   load `~/.alfred/core/risk-mode.md` just in time, via
+   `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md` — not at boot.
 4. Honor the supreme rule (anti-overconfidence): **never invent** facts, paths,
    schemas, or APIs. When unsure, stop and ask. The human owns every decision.
 
 ## Model (host-specific — D46)
-Map the model-policy tiers to Claude models in `~/.alfred/core/model-policy.md`
-(e.g. `strong` → `claude-opus-4-8`). Use `/model` to switch when a step's tier
-differs; announce the change. If you cannot switch, record which model ran.
+Load `~/.alfred/core/model-policy.md` **only when selecting or switching the
+model** (not at boot) and map its tiers to Claude models (e.g. `strong` →
+`claude-opus-4-8`). Use `/model` to switch when a step's tier differs; announce
+the change. If you cannot switch, record which model ran.
 
 ## Always
 - Keep the demand `state` current; commit on the demand branch.

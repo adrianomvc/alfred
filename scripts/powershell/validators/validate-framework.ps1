@@ -31,6 +31,8 @@ function Assert-Jsonl {
 $requiredPaths = @(
   "core",
   "core/presentation/README.md",
+  "core/presentation/toolbar-quick.md",
+  "core/presentation/welcome-screen.md",
   "rules/common",
   "rules/demand-types",
   "rules/lanes",

@@ -28,9 +28,10 @@ https://github.com/adrianomvc/alfred.git by the Alfred installer).
    sequence: welcome (butler voice), detect repo kind (HUB / APP / Framework),
    load context just in time (index → state → theme links → active skills), and
    render the progress toolbar from the demand `state`.
-3. Read `~/.alfred/core/principles.md` and `~/.alfred/core/risk-mode.md` and
-   apply them. Classify the demand into a lane (FAST / Standard / SAFE) by the
-   higher of risk × complexity.
+3. Read `~/.alfred/core/principles.md` and apply it. Lane classification (FAST /
+   Standard / SAFE, by the higher of risk × complexity) happens **at Inception**:
+   load `~/.alfred/core/risk-mode.md` just in time, via
+   `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md` — not at boot.
 4. Honor the supreme rule (anti-overconfidence): **never invent** facts, paths,
    schemas, or APIs. When unsure, stop and ask. The human owns every decision.
 

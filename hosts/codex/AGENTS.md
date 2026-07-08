@@ -22,17 +22,19 @@ a literal `~`/`$HOME`/`$USER`:
 2. Read `~/.alfred/core/boot.md` and follow the boot sequence: welcome (butler
    voice), detect repo kind (HUB / APP / Framework), load context just in time
    (index → state → active skills), render the progress header from the demand `state`.
-3. Apply `~/.alfred/core/principles.md` and `~/.alfred/core/risk-mode.md`: classify
-   the demand into a lane (FAST / Standard / SAFE) by the higher of risk ×
-   complexity, and run the five phases (Inception → Design → Execution → Validate
-   → Operation); Risk Mode changes depth, not the phases.
+3. Apply `~/.alfred/core/principles.md`. Classify the demand into a lane (FAST /
+   Standard / SAFE, higher of risk × complexity) **at Inception**, loading
+   `~/.alfred/core/risk-mode.md` just in time via
+   `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md` — not at boot.
+   Run the five phases (Inception → Design → Execution → Validate → Operation);
+   Risk Mode changes depth, not the phases.
 4. **Supreme rule:** never invent facts, paths, schemas, or APIs. When unsure,
    stop and ask. The human owns every decision; record it in `audit`.
 
 ## Model (host-specific — D46)
-Map the model-policy tiers to the models Codex exposes in
-`~/.alfred/core/model-policy.md`. If the model cannot be switched, record which
-one ran (degrades — D3).
+Load `~/.alfred/core/model-policy.md` **only when selecting or switching the
+model** and map its tiers to the models Codex exposes. If the model cannot be
+switched, record which one ran (degrades — D3).
 
 ## Always
 - Keep the demand `state` current; commit on the demand branch.
