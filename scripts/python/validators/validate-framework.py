@@ -78,6 +78,8 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-knowledge.py",
     "scripts/powershell/validators/validate-links.ps1",
     "scripts/python/validators/validate-links.py",
+    "scripts/powershell/validators/validate-context-manifest-fixtures.ps1",
+    "scripts/python/validators/validate-context-manifest-fixtures.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
@@ -97,6 +99,7 @@ REQUIRED_PATHS = [
     "docs/release-governance.md",
     "CHANGELOG.md",
     "scripts/powershell/workflow/alfred-boot.ps1",
+    "scripts/powershell/workflow/context-manifest.ps1",
     "scripts/powershell/workflow/generate-registry.ps1",
     "scripts/powershell/workflow/render-toolbar.ps1",
     "docs/skills-activation.md",
@@ -115,6 +118,7 @@ REQUIRED_PATHS = [
     "scripts/powershell/validators/validate-connectors.ps1",
     "scripts/powershell/validators/validate-model-policy.ps1",
     "scripts/python/workflow/alfred-boot.py",
+    "scripts/python/workflow/context-manifest.py",
     "scripts/python/workflow/generate-registry.py",
     "scripts/python/workflow/render-toolbar.py",
     "scripts/python/metrics/collect-observability.py",
@@ -142,6 +146,9 @@ REQUIRED_PATHS = [
     "examples/toolbar-fixtures/safe.txt",
     "examples/toolbar-fixtures/execution-first.txt",
     "examples/toolbar-fixtures/standard-parallel-units.txt",
+    "examples/context-manifest-fixtures/standard-product-design.txt",
+    "examples/context-manifest-fixtures/fast-operational-execution.txt",
+    "examples/context-manifest-fixtures/safe-engineering-inception.txt",
     "examples/generated/metrics-rollup.md",
     "examples/generated/insights.md",
     "examples/staleness-fixtures/reverse-eng-fresh.md",
@@ -195,6 +202,7 @@ def main():
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")
+    run_sub(root, "scripts/python/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))

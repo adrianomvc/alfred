@@ -16,6 +16,7 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
    - on resume → **rebuild from the `state`** (show the toolbar — formats in `presentation/toolbar-quick.md` — + "what's left");
+   - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 

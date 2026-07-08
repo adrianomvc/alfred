@@ -90,6 +90,8 @@ $requiredPaths = @(
   "docs/automation-fallback.md",
   "scripts/powershell/validators/validate-knowledge.ps1",
   "scripts/python/validators/validate-knowledge.py",
+  "scripts/powershell/validators/validate-context-manifest-fixtures.ps1",
+  "scripts/python/validators/validate-context-manifest-fixtures.py",
   "rules/demand-types/playbooks/README.md",
   "rules/demand-types/playbooks/migration.md",
   "install/README.md",
@@ -109,6 +111,7 @@ $requiredPaths = @(
   "docs/release-governance.md"
   "CHANGELOG.md"
   "scripts/powershell/workflow/alfred-boot.ps1"
+  "scripts/powershell/workflow/context-manifest.ps1"
   "scripts/powershell/workflow/generate-registry.ps1"
   "scripts/powershell/workflow/render-toolbar.ps1"
   "docs/skills-activation.md"
@@ -129,6 +132,7 @@ $requiredPaths = @(
   "scripts/powershell/validators/validate-links.ps1"
   "scripts/python/validators/validate-links.py"
   "scripts/python/workflow/alfred-boot.py"
+  "scripts/python/workflow/context-manifest.py"
   "scripts/python/workflow/generate-registry.py"
   "scripts/python/workflow/render-toolbar.py"
   "scripts/python/metrics/collect-observability.py"
@@ -156,6 +160,9 @@ $requiredPaths = @(
   "examples/toolbar-fixtures/safe.txt"
   "examples/toolbar-fixtures/execution-first.txt"
   "examples/toolbar-fixtures/standard-parallel-units.txt"
+  "examples/context-manifest-fixtures/standard-product-design.txt"
+  "examples/context-manifest-fixtures/fast-operational-execution.txt"
+  "examples/context-manifest-fixtures/safe-engineering-inception.txt"
   "examples/generated/metrics-rollup.md"
   "examples/generated/insights.md"
   "examples/staleness-fixtures/reverse-eng-fresh.md"
@@ -175,6 +182,7 @@ Assert-Jsonl -FilePath (Join-Path $rootPath "examples/connectors/usage-attributi
 
 & (Join-Path $rootPath "scripts/powershell/validators/validate-toolbar-fixtures.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/workflow/generate-registry.ps1") -Root $rootPath -Check
+& (Join-Path $rootPath "scripts/powershell/validators/validate-context-manifest-fixtures.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-skills-registry.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-connectors.ps1") -Root $rootPath
 & (Join-Path $rootPath "scripts/powershell/validators/validate-model-policy.ps1") -Root $rootPath

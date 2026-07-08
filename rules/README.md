@@ -21,6 +21,7 @@ A demand always combines **one demand type × one lane**, runs through the
 | `common/` | cross-cutting rules, loaded by event (only the supreme law is always in force) | overconfidence · question-format · escalation-triggers · units · session-continuity · content-validation · terminology · workflow-changes |
 
 ## When to load what
+- Helper path: `scripts/*/workflow/context-manifest --phase --lane --demand-type --agent [--sub-activity]` prints the minimal ordered rule files; if it cannot run, use the table below plus `rules-index.md`.
 - Start of a demand → `demand-types/<stream>.md` + `lanes/<mode>.md`.
 - Each phase → `lifecycle/<phase>/` (and only the needed `sub-activities/` file).
 - Always in force → the supreme law (`core/principles.md`, enforced by `common/overconfidence.md`) and the active lane's DoD.
