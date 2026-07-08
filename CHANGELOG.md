@@ -56,6 +56,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `hosts/README.md` — "Optional deterministic enforcement (hooks)" section: wiring existing validators to host hook points (advisory rules vs deterministic hooks, D3-degradable) (W7.4).
 - Example demand `006-simulado-adocao-v2` (sq9-pilot) — offline end-to-end rehearsal of the 2.0.0 line: classify-risk proposal recorded in `004-risk.md`, priority-grouped requirements answered in-file, single decisions format, full app spec (new template sections), 2.0.0 stamps, HUB+App JSONL. Passes `validate-demand --strict` with 0 errors / 0 warnings in both runtimes; serves as a permanent regression eval.
 - `validate-demand` (both runtimes) — optional `-AppRepoPath` / `-AppCurrentCommit` forwarded to the reverse-eng staleness check, so app-side strict validation can resolve the current commit (previously always warned `current_commit_unknown`).
+- `validate-framework` (both runtimes) now runs the declared strict regression fixture (`006-simulado-adocao-v2`) in addition to the canonical non-strict demand example; `examples/README.md` and `docs/framework-validation.md` document strict vs historical example tiers.
 - `alfred-boot` (both runtimes, W8.4): open demands are ordered by resume priority (pending human checkpoint > in progress > blocked, then last activity) and a "Suggested next" hint with the reason is printed; the human still chooses.
 
 ### Compatibility notes
