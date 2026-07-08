@@ -1,22 +1,14 @@
 # Examples
 
-Examples should stay small and illustrative. They are not part of the framework runtime.
-
-## Planned examples
-- SQ9 FAST change with lean state/audit.
-- SQ9 Standard feature with spec and acceptance criteria.
-- SQ9 Operational incident with Execution-first and post-mortem.
-- Multi-app demand with one HUB state in `alfred-docs-hub` linking app folders in `.alfred-docs-app`.
-- Fresh sigla onboarding from empty HUB/App roots.
-- Parallel units inside one governed demand.
+Examples should stay small and illustrative. They are not part of the framework runtime — but they double as the **regression suite**: validators run against them, so a passing example is proof the framework still behaves.
 
 ## Available examples
-- `sq9-pilot/`: pilot with FAST, SAFE, Execution-first, and parallel units.
-- `fresh-sigla-onboarding/`: minimal new-sigla adoption example.
-- `connectors/`: handoff examples for Git/PR, notification, and telemetry.
-- `toolbar-fixtures/`: rendered toolbar examples for FAST, SAFE, Execution-first, and Standard units.
-- `generated-metrics-rollup.md`: example Markdown rollup generated from observability JSONL.
-- `generated-insights.md`: example improvement proposals derived from the metrics rollup.
+- `sq9-pilot/`: six end-to-end demands — implantation (Standard), FAST, SAFE, Operational Execution-first with post-mortem, parallel units, and the 2.0.0 adoption rehearsal (`006-simulado-adocao-v2`, passes `validate-demand --strict` 0/0).
+- `fresh-sigla-onboarding/`: minimal new-sigla adoption from empty HUB/App roots.
+- `connectors/`: handoff examples (Git/PR, notification, telemetry) + sandbox simulator adapters for offline rehearsal.
+- `toolbar-fixtures/`: rendered toolbar outputs for FAST, SAFE, Execution-first, and Standard units (drift-checked against the renderer).
+- `staleness-fixtures/`: reverse-engineering freshness fixture for the staleness validator.
+- `generated/`: outputs the metrics helpers produce — `metrics-rollup.md` (from observability JSONL) and `insights.md` (human-reviewable proposals).
 
 ## Layout
 Examples follow the same demand layout as real work:

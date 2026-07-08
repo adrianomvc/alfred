@@ -63,7 +63,7 @@ The whole classification as one scannable flow (degrades to plain ASCII):
 ## Time axis (Operational stream)
 Risk Mode measures *governance*. For critical Operational (incident/hotfix/rollback) there is an orthogonal axis — **urgency**:
 - **Normal** — full cycle at the mode's depth.
-- **Emergency** — Execution-first flow (`../rules/demand-types/operacional.md`): stabilize with minimal human authorization; Inception/Design/Validate become a mandatory post-mortem afterward. Risk Mode still applies — only the *order* and *timing* change.
+- **Emergency** — Execution-first flow (`../rules/demand-types/operational.md`): stabilize with minimal human authorization; Inception/Design/Validate become a mandatory post-mortem afterward. Risk Mode still applies — only the *order* and *timing* change.
 - Golden rule: emergency **never waives** the record; it only **defers** it. No post-mortem, the demand does not close.
 
 ## Who classifies — AI proposes, human is responsible

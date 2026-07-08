@@ -29,5 +29,8 @@ Observability is append-only and must not wait for a final summary. Append one J
 - **`última atividade`** (last-activity date) in the `state` helps notice long-stalled demands — but the human decides to cancel/resume. No auto-cancellation.
 - **Cancel (explicit):** produces a mini-`summary` (why) + updates the `index` (leaves the active set), then archives. Pausing does not archive.
 
+## Context compaction (mid-demand)
+When the host compacts/summarizes the conversation inside a session, the summary must preserve at minimum: the demand id and the `state` path, the files modified in the current step, the next step, the pending checkpoint and its owner, and any open escalation. After a compaction, re-read `001-state.md` before acting — the state file, not the conversation summary, is the source of truth.
+
 ## Welcome back
 On boot, list the sigla's open demands (in progress / on hold / blocked) with last activity and ask which to resume (`core/boot.md`).

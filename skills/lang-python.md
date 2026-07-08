@@ -1,3 +1,8 @@
+---
+name: lang-python
+description: Python engineering standard; overrides coding-standard where more specific. Load when Python files, tests, Glue jobs, FastAPI, or scripts are touched.
+---
+
 # Skill - Python Standard
 
 ## name

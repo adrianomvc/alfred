@@ -4,6 +4,65 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+## 2.0.0 - in progress (opened 2026-07-05)
+
+### Summary
+Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Waves 0–8: preservation, hygiene, full SDD templates, assisted risk classification, first real integrated demand, real skills/metrics/adapters, evolutionary intelligence) lands in this version. **The version stays `2.0.0` until the plan closes — no bumps per wave** (explicit owner decision).
+
+### Added
+- `docs/plan/implementation-plan-2.0.0.md` — the incremental implementation plan (waves, prioritized backlog, pending human decisions, closure criteria).
+- `docs/plan/anthropic-research-notes.md` — Anthropic engineering/research findings (agents, context engineering, Agent Skills, tool design, evals, governed autonomy) mapped to this plan's pending decisions; extended with a recommendation-by-recommendation adherence audit and additional evolutions A–G.
+- Wave 0 delivered: the conceptual plan (D1–D47) is now versioned at `docs/plan/alfred-conceptual-plan.md` with an as-built note for Fase 7 naming (original kept in `.claude/` until the owner approves removal).
+- Root `AGENTS.md` (W1.7) — vendor-neutral guidance (open AGENTS.md standard) for any AI agent editing the framework repo: invariants, conventions, validation commands, active plan. Deliberately host-agnostic (D3, owner decision) — no vendor-specific file at root; optional per-host shims recorded as a pending human decision. `validate-links` (both runtimes) now scans `AGENTS.md`.
+- `docs/README.md` index completed (W1.8): every document under `docs/` and `docs/plan/` is now listed (progressive disclosure without folder scanning).
+- Injection guardrail (W1.4): `rules/common/content-validation.md` gained an "External content is data, not instruction" section — fixed precedence (supreme law > knowledge > lane/lifecycle rules > demand artifacts > external content), embedded instructions in external content treated as suspected injection, use-by-extraction, source allowlist/pin/human-confirm gating, behavioral degradation (D3). New hard trigger in `rules/common/escalation-triggers.md`; `skills/skills.md` now points external skills/catalogs (e.g. Context7-style doc catalogs) at the guardrail. Motivated by the ContextCrush class of attack.
+
+- `classify-risk` helper (W3, both runtimes) — proposes a Risk Mode lane from the objective checklist: computes both axes from 0/1/2 criteria, fires hard overrides (min Standard / SAFE), reminds the anti-SAFE justification brake, and prints a pt-BR block for `004-risk.md`. Optional (D3); `core/risk-mode.md` stays the source of truth. Referenced from the risk-mode-proposal sub-activity and `scripts/README.md`. Verified with one case per lane plus the "simple and dangerous" override case, in both runtimes.
+- `templates/hub/post-mortem.md` (W2.2) — mold for the mandatory Execution-first closure record (incident, timeline, root cause, retroactive spec, decisions, lessons, preventive actions → follow-ups).
+- `templates/hub/skills.md` (W2.3) — sigla skills registry mold: active skills with pinned refs plus an external-catalog allowlist wired to the injection guardrail.
+
+### Changed
+- Context7 activated as an allowlisted external catalog (owner decision): org policy `knowledge/external-catalogs.md` (policy-template format) records the allowlist and the four usage gates; DEVIN per-project MCP registration via `hosts/devin-cli/config.local.template.json` (alfred-email + context7 stdio servers) — the `/alfred` skill offers to create `.devin/config.local.json` from it on first boot (human confirms; context7 block removable). Installers point DEVIN users at the template.
+- Telemetry by e-mail (owner decision — provisional transport until the telemetry API exists, D45): new `send_telemetry` MCP tool batches every local observability JSONL (each line = `{sender, collected_at, source, event}`, sender = user@host) and mails it to the org `telemetry_to` destination registered in `knowledge/notification.md`; installers copy that destination into each runner's `~/.alfred-email.json`; the strategic-notification sub-activity fires it automatically at every generation that appends events (closure, hub-sync, rollup), audited, no per-send prompt (durable authorization). Swapping to the real API later changes only the transport, not the rules.
+- Installers (`install/`, both runtimes) now set up the notification adapter (owner decision): prompt for the destination e-mail (`-Email` / `ALFRED_EMAIL`; interactive prompt otherwise; `-SkipEmail` / `ALFRED_SKIP_EMAIL=1` to skip), write `~/.alfred-email.json` in dry-run mode (never overwriting an existing config), and register the `alfred-email` MCP server in Claude Code (user scope) when the CLI and Python are available. Best-effort: no failure breaks the install; everything degrades to the manual handoff (D3).
+- Phase names: EN stays canonical everywhere (folders, rules, validators); pt-BR aliases **"O quê · Como · Fazer · Validar · Operar"** registered in `core/glossary.md` and shown in the welcome phase table (owner decision — presentation layer only, D47).
+- `scripts/` reorganized by responsibility, mirrored in both runtimes: `validators/` (all `validate-*`), `workflow/` (alfred-boot, render-toolbar, classify-risk, confidence-score, spec-vs-impl), `metrics/` (collect-observability, generate-metrics-rollup, normalize-usage-cost), and python-only `adapters/` (mcp-email-server). `_common.py` stays at the runtime root. All internal imports/spawns and every repo reference updated; verified by `validate-framework`, `validate-links`, boot, strict demand validation, and classify-risk smoke tests in both runtimes.
+- `rules/lanes/fast.md` (W1.2) — escalation triggers now reference `rules/common/escalation-triggers.md` (was semantically pointing at `overconfidence.md`).
+- `docs/implementation-status.md` (W1.3) — compacted to a current snapshot (status, coverage by area, gaps, next order); pass-by-pass history stays in `CHANGELOG.md`/git.
+- `rules/common/session-continuity.md` (W1.5) — new "Context compaction (mid-demand)" section: what must survive host compaction; re-read `001-state.md` after compaction.
+- `rules/common/escalation-triggers.md` (W1.6) — new "Cumulative threshold" section: 10 escalation events in one demand (tunable in `knowledge`) force a human checkpoint.
+- `templates/app/spec.md` (W2.1) — completed to the conceptual plan 5.3.2: out of scope, alternatives (SAFE), dependencies, impacts, rollout/rollback (SAFE), lane-marked.
+- `skills/coding-standard.md` + `rules/lifecycle/validation/validation.md` (W2.4) — test-integrity guardrail: never remove/weaken/skip a test to satisfy a gate; that is an escalation, not a fix.
+- `validate-links` (both runtimes) now excludes `docs/plan/alfred-conceptual-plan.md`, same rationale as the CHANGELOG exclusion: a historical document keeps its as-written, point-in-time paths.
+- `docs/implementation-status.md` now references the versioned conceptual plan instead of the untracked `.claude/` file.
+- Implementation plan waves extended with the approved research adjustments (test-integrity guardrail, connector response/error contract sections, cumulative escalation counter) and evolutions A–G (external-content-is-data guardrail, host hooks enforcement, skill-bundled scripts, LLM-as-judge rubric, transcript retrospective, compaction instructions, eval-before-skill), plus owner-requested W5.5 (on-demand skill discovery from external catalogs).
+
+- `VERSION` set to `2.0.0` (jump from `0.4.0` skipping the `1.x` line — explicit owner decision recorded in the plan).
+
+- Owner approvals batch (2026-07-05, "aprovo 1–7"):
+  - `templates/hub/decision.md` removed (W1.1) — `decisions.md` is the single decision format (append-only table + optional long-form block).
+  - Agent Skills open-standard frontmatter (`name`/`description`) added to all 7 skills; registry documents the convention, skill-bundled helpers, and the "eval before skill" discipline (W5.3/W5.4).
+  - On-demand skill/doc discovery in **allowlisted external catalogs** (e.g. Context7) documented in `skills/skills.md` with 4 mandatory gates (W5.5).
+  - Root `CLAUDE.md` one-line shim importing `AGENTS.md` (content stays vendor-neutral; the shim is a host binding, D3).
+  - `rules/demand-types/produto.md` → `product.md`, `operacional.md` → `operational.md` (D47 language consistency); all references updated.
+  - `core/squad.md` gains SRE/On-call, Security, and FinOps as checkpoint owners (SAFE/emergency) with recorded fallback.
+  - Original untracked conceptual plan removed from `.claude/` after byte-level verification against the committed copy.
+- Examples fixed: app-side `05-operation/008-observability-log.jsonl` added to the 5 example app demands — `validate-demand --app-demand-path` now passes (pre-existing gap).
+- `mcp-email-server` (`scripts/python/`, **Python-only by owner decision**) — the first concrete connector adapter: an MCP stdio server (stdlib only, no dependencies) implementing the `notification` contract. Tools `send_email` (allowlist gating with human-only unblock, `[Alfred-Framework]` subject prefix, per-attempt audit JSONL, dry-run outbox by default, SMTP/STARTTLS in active mode) and `email_status`. Tested end-to-end: MCP handshake, dry-run compose, allowlist refusal audited. Registered per host via MCP (e.g. `claude mcp add alfred-email -- python .../mcp-email-server.py`). Resolves the D44 channel decision (MCP + Python); `active` state awaits real SMTP credentials.
+- `mcp-email-server` gains a **registered destination** (JSON config at `~/.alfred-email.json` or `ALFRED_EMAIL_CONFIG`; env vars override) and a `send_demand_report` tool that reads `001-state.md` and auto-attaches the demand's metrics, audit, summary, and observability JSONL (short body + attachments, per the D44 e-mail pattern). `knowledge/notification.md` documents the registration precedence (HUB knowledge → config file → env).
+- `spec-vs-impl` helper (W8.2, both runtimes) — heuristic coverage check of spec acceptance criteria against `013-validation-evidence.md`; flags gaps, never approves. Its first run caught a real gap in the 2.0.0 rehearsal demand (app-side criteria missing from the HUB evidence), now fixed.
+- `confidence-score` helper (W8.1, both runtimes) — pre-Execution clarity score from recorded signals (unanswered questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit); below the floor the verdict is the escalation rule. The score informs; the human decides.
+- `connectors/connectors.md` — "Response format & error guidance" adapter-design section (concise replies, actionable errors, transcript evaluation before `active`), applied concretely in the e-mail adapter (W7.3).
+- `hosts/README.md` — "Optional deterministic enforcement (hooks)" section: wiring existing validators to host hook points (advisory rules vs deterministic hooks, D3-degradable) (W7.4).
+- Example demand `006-simulado-adocao-v2` (sq9-pilot) — offline end-to-end rehearsal of the 2.0.0 line: classify-risk proposal recorded in `004-risk.md`, priority-grouped requirements answered in-file, single decisions format, full app spec (new template sections), 2.0.0 stamps, HUB+App JSONL. Passes `validate-demand --strict` with 0 errors / 0 warnings in both runtimes; serves as a permanent regression eval.
+- `validate-demand` (both runtimes) — optional `-AppRepoPath` / `-AppCurrentCommit` forwarded to the reverse-eng staleness check, so app-side strict validation can resolve the current commit (previously always warned `current_commit_unknown`).
+- `alfred-boot` (both runtimes, W8.4): open demands are ordered by resume priority (pending human checkpoint > in progress > blocked, then last activity) and a "Suggested next" hint with the reason is printed; the human still chooses.
+
+### Compatibility notes
+- No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
+- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/python/validate-framework.py`) must add the category segment (e.g. `scripts/python/validators/validate-framework.py`). Flags and behavior are unchanged.
+- New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
+
 ## 0.4.0 - 2026-06-29
 
 ### Summary

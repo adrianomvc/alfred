@@ -8,7 +8,8 @@ Prove the change satisfies the spec and avoids relevant regressions. Owner agent
 3. Run or request the relevant checks; record commands, result, and gaps.
 4. Review implementation against `spec`, SOLID/coding-standard, and acceptance criteria.
 5. Prepare evidence; satisfy **DoD Validate**; request final human acceptance when required.
-6. Treat merge to the protected branch as human acceptance; the AI never merges protected branches.
+6. Never remove, weaken, or skip an existing test to make validation pass — that is a hard escalation, not a fix.
+7. Treat merge to the protected branch as human acceptance; the AI never merges protected branches.
 
 Use `../../../templates/hub/validation-evidence.md` for Standard/SAFE evidence. FAST may inline the same fields in the PR or summary when the change is small.
 

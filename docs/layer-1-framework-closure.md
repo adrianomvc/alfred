@@ -63,7 +63,7 @@ These items are intentionally not closed inside Layer 1 because they need a real
 
 ## Exit Criteria
 Layer 1 can be considered ready to apply to Layer 2 when:
-- `scripts/powershell/validate-framework.ps1` (or `scripts/python/validate-framework.py`) passes;
+- `scripts/powershell/validators/validate-framework.ps1` (or `scripts/python/validators/validate-framework.py`) passes;
 - `docs/implementation-status.md` lists only host/credential/policy-dependent gaps;
 - a pilot example passes `validate-demand -Strict` in either runtime;
 - README and roadmap point the next step to HUB/App adoption.

@@ -19,6 +19,7 @@
 - Releases `0.1.0` through `0.4.0` are shipped (`VERSION`, `CHANGELOG.md`); the v0.2 line added Python helpers, the DEVIN installer, per-type playbooks, the knowledge subsystem, presentation profiles, AI-DLC Design sub-activities, and the `property-based-testing` opt-in skill exercised by dogfooding. `0.3.0` added full lifecycle sub-activity parity, the markdown-SOLID directory pass, the `validate-links` reference checker, and sandbox connector simulators. `0.4.0` added the `hosts/` per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex).
 
 ## Next
+- Execute `docs/plan/implementation-plan-2.0.0.md` wave by wave; all of it lands under version `2.0.0` (no bumps per wave).
 - Complete integrated validation for one real SQ9 demand after required environment parameters are provided.
 - Use `04-validate/014-environment-parameters.md` when real accounts, secrets, endpoints, buckets, schemas, or host access are missing.
 - Sync app-local work back to the HUB using `05-operation/009-hub-sync.md` when running App-only.

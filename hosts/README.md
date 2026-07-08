@@ -9,6 +9,12 @@ itself never changes per host (D3, agnostic markdown).
 > Alfred *access to external systems* (vcs, tracker, notification…). A host
 > integration is about *who runs Alfred*; a connector is about *what Alfred reaches*.
 
+> **Sources vs installation:** this folder holds the versioned *sources* of each
+> entry point. Installation copies them into each host's **native location**
+> (`~/.claude/skills/`, `%APPDATA%\devin\skills\`, a project's `.devin/config.local.json`,
+> a repo's `.github/copilot-instructions.md`). Dot-locations are live, per-machine/project,
+> and may hold secrets — they are never the source of truth.
+
 ## Common bind (every host)
 1. Clone the framework once as a single referenced source (D15):
    `git clone https://github.com/adrianomvc/alfred.git ~/.alfred`
@@ -40,6 +46,18 @@ The model policy uses abstract tiers (`cheap`/`medium`/`strong`). Each host expo
 different concrete model names, so the **tier → concrete-model map in
 `core/model-policy.md`** is the only per-host configuration. If a host cannot
 switch models, Alfred uses the default and records which model ran (degrades, D3).
+
+## Optional deterministic enforcement (hooks)
+Alfred's rules are **advisory** — the host model follows them, but nothing forces it.
+Hosts that support hooks can make the critical gates **deterministic** by wiring the
+existing validators to hook points (optional layer; everything still works without it, D3):
+- run `validate-demand` (or `validate-sdd-gate`) as a *stop/finish* hook so a session
+  cannot end with a broken demand state;
+- block writes outside the active unit's declared write scope with a *pre-write* hook;
+- run `validate-framework` before commits that touch the framework repo.
+Advisory rule vs deterministic hook: instructions can be missed under long context;
+a hook always executes. Configure per host (e.g. Claude Code `.claude/settings.json`
+hooks); record in the demand `audit` which hooks were active.
 
 ## Degradation
 No installer for a host? The integration still works manually: clone the

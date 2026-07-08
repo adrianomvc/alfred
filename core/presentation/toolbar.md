@@ -3,7 +3,7 @@
 The toolbar is the top of every interaction's response, rendered by the
 Orchestrator from `state`. It is never a separate source of truth.
 
-`scripts/powershell/render-toolbar.ps1` (and the Python mirror) is an optional
+`scripts/powershell/workflow/render-toolbar.ps1` (and the Python mirror) is an optional
 helper that renders it from a `001-state.md`. Hosts that cannot run scripts
 render it manually from the same fields.
 

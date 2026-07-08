@@ -75,5 +75,5 @@ The handoff must include demand id, branch, base branch, files expected to chang
 
 ## fixture
 - minimal fixture path: `examples/connectors/git-pr-handoff.md`
-- validation command: `powershell -ExecutionPolicy Bypass -File scripts/powershell/validate-connectors.ps1`
+- validation command: `powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-connectors.ps1`
 - expected result: connector and adapter validation completes

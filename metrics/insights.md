@@ -16,4 +16,4 @@ Insights convert metrics into human-reviewable proposals.
 - Add a skill if repeated review findings share a domain cause.
 
 ## Example artifact
-`examples/generated-insights.md` shows how to convert an observability rollup into human-reviewable improvement proposals.
+`examples/generated/insights.md` shows how to convert an observability rollup into human-reviewable improvement proposals.

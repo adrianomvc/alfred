@@ -111,4 +111,64 @@ else
   info "DEVIN CLI not found on PATH; skill files are installed. Run 'devin skills list' to confirm."
 fi
 
+# 4. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
+# server in Claude Code when available. Best-effort: failures never break the install.
+# Skip entirely with ALFRED_SKIP_EMAIL=1; non-interactive runs skip the prompt.
+if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
+  EMAIL_CONFIG="$HOME/.alfred-email.json"
+  EMAIL="${ALFRED_EMAIL:-}"
+  if [ -f "$EMAIL_CONFIG" ]; then
+    info "E-mail config already registered at $EMAIL_CONFIG (kept as is)."
+  else
+    if [ -z "$EMAIL" ] && [ -t 0 ]; then
+      printf "[alfred] E-mail para notificacoes/relatorios (Enter para pular): "
+      read -r EMAIL || EMAIL=""
+    fi
+    # Org telemetry destination: from ALFRED_TELEMETRY_TO or knowledge/notification.md
+    # (aggregates every runner's observability logs — provisional until the telemetry API, D45).
+    TELEMETRY_TO="${ALFRED_TELEMETRY_TO:-}"
+    if [ -z "$TELEMETRY_TO" ] && [ -f "$INSTALL_DIR/knowledge/notification.md" ]; then
+      TELEMETRY_TO="$(sed -n 's/^- telemetry_to: *`\{0,1\}\([^` ]*\)`\{0,1\}.*/\1/p' "$INSTALL_DIR/knowledge/notification.md" | head -n1)"
+    fi
+    if [ -n "$EMAIL" ] || [ -n "$TELEMETRY_TO" ]; then
+      ALLOW=""
+      [ -n "$EMAIL" ] && ALLOW="\"$EMAIL\""
+      if [ -n "$TELEMETRY_TO" ] && [ "$TELEMETRY_TO" != "$EMAIL" ]; then
+        [ -n "$ALLOW" ] && ALLOW="$ALLOW, "
+        ALLOW="$ALLOW\"$TELEMETRY_TO\""
+      fi
+      cat > "$EMAIL_CONFIG" <<JSON
+{
+  "mode": "dry-run",
+  "default_to": "$EMAIL",
+  "telemetry_to": "$TELEMETRY_TO",
+  "allowlist": [$ALLOW],
+  "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}
+}
+JSON
+      info "E-mail registered at $EMAIL_CONFIG (mode: dry-run — fill smtp{} and set mode: active to really send)."
+      [ -n "$TELEMETRY_TO" ] && info "Telemetry destination: $TELEMETRY_TO (observability batches; provisional e-mail transport, D45)."
+    else
+      info "E-mail setup skipped. Register later: create $EMAIL_CONFIG (see connectors/notification-email.md)."
+    fi
+  fi
+
+  MCP_SERVER="$INSTALL_DIR/scripts/python/adapters/mcp-email-server.py"
+  PYTHON_BIN="$(command -v python3 || command -v python || true)"
+  if command -v claude >/dev/null 2>&1 && [ -n "$PYTHON_BIN" ] && [ -f "$MCP_SERVER" ]; then
+    if claude mcp get alfred-email >/dev/null 2>&1; then
+      info "MCP 'alfred-email' already registered in Claude Code."
+    elif claude mcp add --scope user alfred-email -- "$PYTHON_BIN" "$MCP_SERVER" >/dev/null 2>&1; then
+      info "MCP 'alfred-email' registered in Claude Code (user scope)."
+    else
+      info "Could not register the MCP automatically. Manual: claude mcp add --scope user alfred-email -- $PYTHON_BIN \"$MCP_SERVER\""
+    fi
+  else
+    [ -z "$PYTHON_BIN" ] && info "Python 3 not found; the MCP e-mail server needs it."
+    command -v claude >/dev/null 2>&1 || info "Claude Code CLI not found; for other MCP hosts register: python \"$MCP_SERVER\" (stdio)."
+  fi
+  info "DEVIN projects: MCP servers (alfred-email + Context7) are per-repo — the /alfred skill offers to create .devin/config.local.json from hosts/devin-cli/config.local.template.json on first boot."
+fi
+
 info "Done. Open a repo and type /alfred in the DEVIN CLI."

@@ -10,7 +10,7 @@ so Execution rests on a real problem, not a re-derived one.
 
 ## Inputs
 External `inception-input` (problem, value, target users/journey), the active
-demand type (`../../../demand-types/produto.md`), `knowledge` policies (D42).
+demand type (`../../../demand-types/product.md`), `knowledge` policies (D42).
 
 ## Steps
 1. Load the `inception-input`; do **not** regenerate business discovery.

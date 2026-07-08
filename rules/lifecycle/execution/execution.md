@@ -35,4 +35,4 @@ PR technical review (Standard/SAFE); dependency approvals (SAFE). FAST: only if 
 FAST = self-review + small PR · Standard = PR + technical review · SAFE = + dependency management + approvals + evidence.
 
 ## Special — emergency
-Execution-first: stabilize with minimal authorization; Inception/Design become a post-mortem (`../../demand-types/operacional.md`).
+Execution-first: stabilize with minimal authorization; Inception/Design become a post-mortem (`../../demand-types/operational.md`).

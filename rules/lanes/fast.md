@@ -14,7 +14,7 @@ Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few ch
 | Operation | merge done; optional note |
 
 ## HITL checkpoints
-**Delegated autonomy** — the AI executes and **records in `audit`** (the human stays responsible). Explicit human call **only** when an escalation trigger fires (`../common/overconfidence.md`): scope grew, risk rose, cost over ceiling, destructive op, security, unresolved ambiguity, cross-app effect, repeated failure.
+**Delegated autonomy** — the AI executes and **records in `audit`** (the human stays responsible). Explicit human call **only** when an escalation trigger fires (`../common/escalation-triggers.md`): scope grew, risk rose, cost over ceiling, destructive op, security, unresolved ambiguity, cross-app effect, repeated failure.
 
 ## Minimal artifacts
 `state` (1 entry) + lean `audit` + PR. The spec **is** the PR's title + description. No formal `decisions`.

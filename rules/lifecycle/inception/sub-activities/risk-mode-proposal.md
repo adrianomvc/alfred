@@ -15,6 +15,10 @@ contracts (`../../../lanes/*`), `knowledge` policies that can force a floor.
 1. Pre-fill the **Risk Mode checklist** from intent: scope size, blast radius,
    data sensitivity, reversibility, external dependencies.
 2. Derive a **proposed lane** from the checklist (FAST / Standard / SAFE).
+   Optional helper: `classify-risk` (`scripts/powershell/` · `scripts/python/`)
+   computes the axes, fires the hard overrides, and prints the pt-BR block for
+   `004-risk.md`. `core/risk-mode.md` stays the source of truth; without the
+   helper, apply the same tables manually (D3).
 3. State **why** — the one or two factors that set the lane (transparency, D46).
 4. Present for **human confirmation** in Standard/SAFE; record the decision.
 5. If a later signal (e.g., an NFR) forces a stronger lane, record the override

@@ -26,7 +26,7 @@ Shown once per session, in the butler's voice. Keep it to ~1 screen; clarity abo
   ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
   │     🔍      │     📐      │     🔨      │     ✅      │     🚀      │
   │ 1 Inception │ 2 Design    │ 3 Execution │ 4 Validate  │ 5 Operation │
-  │  Entender   │  Planejar   │  Construir  │  Comprovar  │  Entregar   │
+  │    O quê    │    Como     │    Fazer    │   Validar   │   Operar    │
   └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
 
    O rigor eu proponho pelo risco — o senhor(a) confirma:
