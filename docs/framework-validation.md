@@ -67,6 +67,8 @@ python scripts/python/validators/validate-framework.py
 - `rules/common/prompt-caching-policy.md` keeps stable framework context before volatile demand context without requiring host-specific caching.
 - `rules/common/tool-discovery-policy.md` keeps tool/skill/adapter discovery JIT and avoids loading all tool schemas at boot.
 - `rules/common/context-compression-policy.md` keeps RAG/compressed context as a selector only; original sources remain required for editing, decisions, and validation evidence.
+- `rules/common/token-budget-policy.md` requires a preflight context budget before large loads or token-heavy steps.
+- `rules/common/deferred-work-policy.md` keeps batch/flex/background work off the critical path and out of final decision authority.
 - `core/hooks/rtk.md` scopes automatic RTK setup to DEVIN CLI until another host explicitly supports it.
 - `docs/version-adoption.md` keeps active-demand framework upgrades explicit and human-approved.
 - `docs/release-governance.md` and `CHANGELOG.md` record release intent and compatibility notes.
@@ -75,6 +77,7 @@ python scripts/python/validators/validate-framework.py
 - `validate-email-adapter` checks the Python-only notification adapter dry-run, allowlist refusal, and audit JSONL.
 - `validate-tool-discovery-policy` checks the JIT tool policy, host shims, connector guidance, and MCP tool description size.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
+- `validate-token-economy-policy` checks token-budget and deferred-work guardrails.
 - `validate-model-policy` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
 - `validate-links` checks that internal Markdown references (links and inline framework paths) still resolve after moves/renames.
 - The architecture SOLID **extension checklist** in `core/architecture.md` passes for any added/moved module, file, or artifact (one reason to change; extend by adding; substitutable via contract; loads only what it needs; depends on a role, not a concrete).

@@ -22,6 +22,10 @@ close is evidence-based, not estimated.
 (App-only), the demand `state`, the metrics agent contract
 (`../../../agents/metrics.md`).
 
+If the host supports batch/flex/background execution and the close is not
+waiting on this result, load `../../../common/deferred-work-policy.md` and run
+the rollup as deferred work.
+
 ## Steps
 1. Read the **observability JSONL** for this demand (append-only, never edited).
 2. Aggregate: **elapsed time, time per phase, interactions, retries, defects,

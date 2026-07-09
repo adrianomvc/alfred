@@ -20,6 +20,8 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - open only the current theme's links + active skills.
    - if using RAG, compressed summaries, or codebase-memory output to select
      context, load `rules/common/context-compression-policy.md` first.
+   - before opening large multi-file context, load
+     `rules/common/token-budget-policy.md` and write a short context budget.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
 ## App-only resume
@@ -44,6 +46,13 @@ rules → active skills → demand `state` and current artifacts. This is adviso
 if the host has no cache controls, the same order still keeps the JIT path clear.
 Load `rules/common/prompt-caching-policy.md` when assembling multi-file context
 or when a host exposes prompt caching/persistent context.
+
+## Token budget preflight
+Before loading large source sets, logs, diffs, external catalogs, or multi-repo
+context, Alfred loads `rules/common/token-budget-policy.md`, records the purpose
+and scope, then uses indexes/search/compression to choose which original sources
+to open. This reduces token spend without dropping acceptance criteria or lane
+guardrails.
 
 ## Welcome back (open demands)
 Alfred never declares abandonment by inactivity. On boot it **lists the open demands** of the sigla with their last activity — the butler's welcome-back: *"There are 2 demands on hold: #142 (Design) and #097 (Execution). Resume one?"*. Who decides to cancel/resume is the human.

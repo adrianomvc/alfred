@@ -11,6 +11,7 @@
 | `agent-spec-design` | `agent` | `all` | `all` | `all` | `spec-design` | Agent - Spec/Design | [rules/agents/spec-design.md](rules/agents/spec-design.md) |
 | `common-content-validation` | `event` | `all` | `all` | `all` | `all` | Common rule — content validation (light) | [rules/common/content-validation.md](rules/common/content-validation.md) |
 | `common-context-compression-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - safe RAG/context compression | [rules/common/context-compression-policy.md](rules/common/context-compression-policy.md) |
+| `common-deferred-work-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - deferred and low-priority token work | [rules/common/deferred-work-policy.md](rules/common/deferred-work-policy.md) |
 | `common-escalation-triggers` | `event` | `all` | `all` | `all` | `all` | Common Rule - Escalation Triggers | [rules/common/escalation-triggers.md](rules/common/escalation-triggers.md) |
 | `common-overconfidence` | `always` | `all` | `all` | `all` | `all` | Common rule — overconfidence prevention (supreme law) | [rules/common/overconfidence.md](rules/common/overconfidence.md) |
 | `common-prompt-caching-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - prompt caching and stable context order | [rules/common/prompt-caching-policy.md](rules/common/prompt-caching-policy.md) |
@@ -18,6 +19,7 @@
 | `common-session-continuity` | `event` | `all` | `all` | `all` | `all` | Common rule — session continuity | [rules/common/session-continuity.md](rules/common/session-continuity.md) |
 | `common-terminal-token-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - Terminal Token Policy | [rules/common/terminal-token-policy.md](rules/common/terminal-token-policy.md) |
 | `common-terminology` | `event` | `all` | `all` | `all` | `all` | Common rule — terminology | [rules/common/terminology.md](rules/common/terminology.md) |
+| `common-token-budget-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - token budget preflight | [rules/common/token-budget-policy.md](rules/common/token-budget-policy.md) |
 | `common-tool-discovery-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - tool discovery and JIT tool loading | [rules/common/tool-discovery-policy.md](rules/common/tool-discovery-policy.md) |
 | `common-units` | `event` | `all` | `all` | `all` | `all` | Common Rule - Demand Units | [rules/common/units.md](rules/common/units.md) |
 | `common-workflow-changes` | `event` | `all` | `all` | `all` | `all` | Common Rule - Mid-Workflow Changes | [rules/common/workflow-changes.md](rules/common/workflow-changes.md) |

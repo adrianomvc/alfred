@@ -15,7 +15,7 @@ Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewe
 
 ## Steps
 1. Load `spec` + template + active coding-standard (JIT).
-2. **Planning** — numbered plan with checkboxes (single source) → approval (Standard/SAFE).
+2. **Planning** — numbered plan with checkboxes (single source) → approval (Standard/SAFE); load `../../common/token-budget-policy.md` if the unit needs broad context.
 3. **Generation** — step by step / **loop per unit**; **brownfield in-place** (never `file_v2`); mirror the template + SOLID. Code automation-friendly (`data-testid`, etc.).
 4. Commit on the **demand branch** at each step; update `state` + `audit`; watch the **escalation triggers**.
 5. Technical review (Reviewer); satisfy **DoD Execution** → PR ready.

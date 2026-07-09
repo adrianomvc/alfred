@@ -41,6 +41,8 @@ REQUIRED_PATHS = [
     "rules/common/prompt-caching-policy.md",
     "rules/common/tool-discovery-policy.md",
     "rules/common/context-compression-policy.md",
+    "rules/common/token-budget-policy.md",
+    "rules/common/deferred-work-policy.md",
     "rules/common/workflow-changes.md",
     "rules/lifecycle/design/sub-activities/README.md",
     "rules/lifecycle/design/sub-activities/application-design.md",
@@ -127,6 +129,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-email-adapter.py",
     "scripts/python/validators/validate-tool-discovery-policy.py",
     "scripts/python/validators/validate-context-compression-policy.py",
+    "scripts/python/validators/validate-token-economy-policy.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/adapter-template.md",
@@ -211,6 +214,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-email-adapter.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-tool-discovery-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-context-compression-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))

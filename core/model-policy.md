@@ -60,6 +60,15 @@ Execution is the token-heavy, agentic step. When the host supports it, cap the c
 ## Parallel units — cheaper subagents
 When Design decomposes Execution into **independent, parallelizable units**, a unit that is low-risk on its own may run on the **lane floor tier via a subagent**, keeping the main Execution loop on the step tier. This delegates sub-tasks to a cheaper model without invalidating the main context. A unit's tier never exceeds the demand's lane, and never drops below the Execution `medium` floor; if unsure, keep the unit at the step tier. Record the split in `audit`.
 
+## Deferred work — cheaper latency trade-off
+If the host exposes batch, flex, background, queued, or low-priority execution,
+Alfred may use it only for non-critical-path work: metrics rollups, usage
+normalization, broad read-only scans, stale reverse-engineering refreshes,
+non-urgent summaries, notifications, and follow-up grouping. Load
+`rules/common/deferred-work-policy.md` first. Deferred output is never final
+authority for Design, SAFE decisions, incident stabilization, code edits, merge
+decisions, or validation judgment.
+
 ## Tier → real model (per host)
 The policy uses **abstract tiers** (`cheap` / `medium` / `strong`); this map translates to the concrete model of each host — the main customization point. If the host lacks the tier, fall back (degrade). Any cell may be a **tier** (portable) **or a fixed model** (e.g. `claude-opus-4-8`); for a fixed model, Alfred derives its tier (reverse map) only to check the risk floor.
 
