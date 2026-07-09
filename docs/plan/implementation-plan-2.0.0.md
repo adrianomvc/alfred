@@ -66,7 +66,7 @@ Riscos: bloqueio por credenciais → usar simuladores de `examples/connectors/` 
 
 ### Wave 5 — Skills da casa
 Objetivo: exercitar extensão real do registry.
-- [ ] W5.1 1 skill externa real ativada com **pin** (branch+commit registrados no state/audit — exercita o versionamento de `skills/skills.md`).
+- [x] W5.1 ✅ (2026-07-09) `aws/agent-toolkit-for-aws` registrada como skill externa **available**, **pinada em `main`@`4217c65a`**, no HUB de exemplo `fresh-sigla-onboarding`: `004-skills.md` (tabelas External Skills + External Catalogs), `001-state.md` e audit `007-audit.md`. Exercita o versionamento (pin branch+commit) e os 4 gates (allowlist org já em `knowledge/external-catalogs.md` → pin → confirmação humana → conteúdo=dado). A ativação disparada por **demanda AWS real** fica para uma demanda AWS (Wave 4); aqui a skill fica `available`, não copiada.
 - [ ] W5.2 Novas skills de linguagem/plataforma só quando a stack real pedir (gatilho, não antecipação).
 - [x] W5.3 ✅ (2026-07-05) Disciplina "Eval before skill" documentada em `skills/skills.md`: skill nasce de lacuna observada + 2–3 casos que dobram como aceite.
 - [x] W5.4 ✅ (2026-07-05, aprovado pelo dono) Frontmatter YAML `name`/`description` (padrão aberto Agent Skills) nas 7 skills + convenção no registry; skills podem apontar helpers executáveis próprios (opcional, D3).
