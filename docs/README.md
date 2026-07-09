@@ -34,7 +34,7 @@ Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first
 **Connectors & hosts**
 - [`host-adapter-readiness.md`](host-adapter-readiness.md) defines what is needed before implementing a concrete host adapter.
 - [`adapter-implementation.md`](adapter-implementation.md) defines adapter states and activation rules.
-- [`usage-cost-adoption.md`](usage-cost-adoption.md) designs the Devin-first and ccusage-secondary path for real usage attribution.
+- [`usage-cost-adoption.md`](usage-cost-adoption.md) designs the Devin ACU/API-first and ccusage-secondary path for real usage attribution.
 
 **Changing the framework (governance & state)**
 - [`framework-validation.md`](framework-validation.md) validates changes to Alfred itself.

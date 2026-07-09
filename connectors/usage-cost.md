@@ -4,13 +4,16 @@
 `usage-cost`
 
 ## activation
-Optional adapter for hosts that expose model usage, tokens, or cost by session, interaction, trace, or request.
+Optional adapter for hosts that expose model usage, tokens, ACUs, credits, or
+cost by session, interaction, trace, or request.
 
-This connector is not required for Alfred to run. If the host does not expose usage, the metrics schema keeps `tokens_input`, `tokens_output`, and `cost_usd` empty and records the gap.
+This connector is not required for Alfred to run. If the host does not expose
+usage, the metrics schema keeps `tokens_input`, `tokens_output`, `total_acus`,
+and `cost_usd` empty and records the gap.
 
-Primary corporate path: DEVIN/Devin usage export or billing data, because most
-usage may run through that host. Secondary path: local CLI importers such as
-`ccusage` when the CLI is supported and logs are durable. See
+Primary corporate path: Devin API consumption + Session Insights, because most
+usage may run through Devin and Devin meters work in ACUs. Secondary path: local
+CLI importers such as `ccusage` when the CLI is supported and logs are durable. See
 `docs/usage-cost-adoption.md`.
 
 ## operations
@@ -41,13 +44,18 @@ usage may run through that host. Secondary path: local CLI importers such as
 - `tokens_output`
 - `tokens_cache_creation`
 - `tokens_cache_read`
+- `total_acus`
+- `acus_by_product`
+- `acu_confidence`
 - `cost_usd`
 - `cost_confidence`
 - `source`
 - `source_record_id`
 
 ## source kinds
-- `devin_export`: preferred for DEVIN CLI/Devin-hosted executions.
+- `devin_api`: preferred for DEVIN CLI/Devin-hosted executions, using Session
+  Insights and Consumption endpoints.
+- `devin_export`: saved Devin API/admin export file.
 - `enterprise_billing`: approved billing export or admin report.
 - `ccusage`: local CLI usage parsed from a supported tool's durable logs.
 - `manual_allocation`: human/FinOps-approved allocation from aggregate cost.
@@ -64,7 +72,10 @@ skipped, missing identifiers, confidence, output JSONL path.
 
 ## confidence
 Use explicit confidence labels:
-- `exact`: source provides exact tokens/cost for the correlated session.
-- `estimated`: source provides tokens and Alfred applies an approved rate table.
-- `allocated`: source provides aggregate cost and an approved allocation rule.
+- `exact`: source provides exact tokens, ACUs, credits, or cost for the
+  correlated session.
+- `estimated`: source provides tokens/ACUs and Alfred applies an approved rate
+  table.
+- `allocated`: source provides aggregate usage/cost and an approved allocation
+  rule.
 - `unavailable`: source did not provide the field.

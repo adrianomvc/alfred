@@ -9,8 +9,9 @@ Attribute AI usage to Alfred demands without making the framework depend on one
 vendor, one CLI, or one billing source.
 
 Primary path:
-- **DEVIN CLI / Devin usage export** because most corporate usage is expected to
-  run through Devin.
+- **Devin API consumption + Session Insights** because most corporate usage is
+  expected to run through Devin and Devin meters work in Agent Compute Units
+  (ACUs).
 
 Secondary path:
 - **ccusage** for local CLIs it supports, such as Claude Code, Codex, Copilot
@@ -22,11 +23,12 @@ Fallback:
 
 ## Principles
 - Usage import is optional; Alfred runs without it.
-- Token/cost records are append-only observability events.
+- Usage/cost records are append-only observability events.
 - Do not estimate USD cost unless the human provides an approved rate table or
   the source export already includes cost.
-- Token counts may be exact while USD cost may be estimated; record that
-  distinction.
+- Devin ACU counts may be exact while USD cost may be estimated or allocated;
+  record that distinction. Token counts remain optional for hosts that expose
+  them.
 - Every attributed record needs correlation evidence: demand, repo, time window,
   host, and source.
 - Never send secrets, prompts, source code, or billing exports to an unapproved
@@ -55,33 +57,48 @@ If the host cannot receive environment variables, record the run id in
 ## Source Priority
 Use the most authoritative source available:
 
-1. Devin official export/API/admin report with session or task ids.
-2. Enterprise billing export that includes user, workspace, repo, or time
+1. Devin Consumption API by session, plus Session Insights for correlation.
+2. Devin organization/user/service-user consumption API.
+3. Enterprise billing export that includes user, workspace, repo, or time
    windows.
-3. ccusage JSON for supported local CLIs.
-4. Manual allocation approved by the human/FinOps owner.
+4. ccusage JSON for supported local CLIs.
+5. Manual allocation approved by the human/FinOps owner.
 
 If sources conflict, keep both records with their source and mark the conflict
 in metrics; do not silently reconcile.
 
 ## Devin-First Design
-The first active implementation should discover what Devin exposes:
+The first active implementation should use Devin's ACU sources:
 
-- Does Devin provide API/export for usage by session, task, repo, user, or
-  workspace?
-- Does it expose input/output/cache tokens, credits, or only USD/billing units?
-- Can a Devin task/session be tagged with `ALFRED_RUN_ID`?
-- Does the CLI expose start/end/session metadata locally?
-- What is the enterprise-approved way to retrieve that data?
+- Session Insights identifies the session, title, tags, PRs, user,
+  parent/child sessions, messages, category, and `acus_consumed` when available.
+- Consumption by session is the preferred authoritative ACU source:
+  `/v3/organizations/{org_id}/consumption/daily/sessions/{session_id}`.
+- Organization, user, and service-user consumption endpoints support rollups and
+  reconciliation.
+- USD cost is derived only from the enterprise contract/order form or an
+  approved FinOps allocation table.
 
 Implementation target:
 - future Python metric helper named `import-devin-usage`;
-- input: export/API file or approved local metadata;
+- input: saved Devin API JSON or approved local metadata;
 - output: `usage_attributed` JSONL events using `connectors/usage-cost.md`.
 
-If Devin only exposes aggregate cost, attribute by approved allocation rule
-(for example by task id, time window, user, or workspace) and mark
-`cost_confidence = allocated`.
+Minimum mapped fields:
+- `source_kind = devin_api`;
+- `session_id = devin-...`;
+- `total_acus`;
+- `acus_by_product.devin`;
+- `acus_by_product.terminal`;
+- `acus_by_product.review`;
+- `acus_by_product.cascade`;
+- `acu_confidence = exact`;
+- `cost_usd = null` until a contract/rate table is approved;
+- `cost_confidence = unavailable`, `estimated`, or `allocated`.
+
+If only aggregate ACU or cost is available, attribute by approved allocation rule
+(for example by session id, time window, user, service user, or workspace) and
+mark `acu_confidence` or `cost_confidence` as `allocated`.
 
 ## ccusage Secondary Design
 Use `ccusage` only when the host is supported and local logs are available.
@@ -107,34 +124,38 @@ Run one corporate pilot before implementing automatic policy suggestions:
 1. Pick one Standard or SAFE brownfield demand, preferably multi-repo.
 2. Record `ALFRED_RUN_ID`, repo, branch, start commit, and host at start.
 3. Run the demand normally with Alfred token-economy policies enabled.
-4. Export or collect usage from Devin after the run.
+4. Capture the Devin session id (`devin-...`) and collect Session Insights plus
+   session daily consumption after the run.
 5. Normalize usage into `usage_attributed` events.
-6. Close Operation with cost/tokens in metrics.
+6. Close Operation with ACU, optional tokens, and optional USD cost in metrics.
 7. Compare:
    - actual spend vs baseline;
-   - cache/token savings when available;
+   - ACU consumption and product breakdown;
+   - cache/token savings when a non-Devin source exposes them;
    - rework/interactions;
    - acceptance on first review;
    - time blocked waiting for human.
 
 Acceptance for the pilot:
-- at least one real usage source imported;
+- at least one real Devin usage source imported;
 - no invented cost;
 - demand can still validate without the cost source;
 - metrics clearly mark exact, estimated, allocated, or unavailable fields.
 
 ## Implementation Order
 1. Extend `connectors/usage-cost.md` with the correlation and confidence fields.
-2. Add example input fixtures for Devin-like export and ccusage-like export.
+2. Add example input fixtures for Devin Session Insights, Devin session
+   consumption, and ccusage-like export.
 3. Add import scripts for one source at a time.
 4. Add validation for normalized usage events.
 5. Add docs for corporate setup and privacy boundaries.
 6. After 5+ real demands, evaluate model-policy suggestions from metrics.
 
 ## Open Decisions
-- Which Devin usage source is available in the corporate environment?
+- Which Devin API scope/permission is available in the corporate environment?
 - Can Devin sessions/tasks be tagged with `ALFRED_RUN_ID`?
+- How do we reliably capture the Devin `session_id` from CLI/cloud sessions?
 - Is ccusage approved for corporate use, or must it be mirrored through
   Artifactory?
 - Where should billing exports be stored while being normalized?
-- Who ratifies USD rate tables and allocation rules?
+- Who ratifies ACU-to-USD contract rates and allocation rules?

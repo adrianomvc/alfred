@@ -76,8 +76,10 @@ During Design, create an execution plan when the demand has multiple repos, unit
 
 Before starting a real execution window, create an `ALFRED_RUN_ID` when the host
 allows environment variables, or record a run id in `001-state.md` and the first
-observability event. Record host, repo, branch, start commit, and start time so
-`usage-cost` can later correlate Devin/ccusage/billing exports without guessing.
+observability event. Record host, repo, branch, start commit, and start time. If
+the host is Devin, also capture the `devin-...` session id when available so
+`usage-cost` can later correlate Session Insights, session consumption, ccusage,
+or billing exports without guessing.
 
 Before running commands against real infrastructure or external hosts, confirm `04-validate/014-environment-parameters.md` when it exists. A command that depends on an unconfirmed account, secret, endpoint, network path, bucket, table, role, or scheduler must be blocked and recorded instead of executed with assumed values.
 
@@ -89,9 +91,10 @@ python scripts/python/validators/validate-sdd-gate.py -HubDemandPath <alfred-doc
 
 Keep `001-state.md` current. A demand is only closed when the checklist is complete and `05-operation/009-summary.md`/`05-operation/008-metrics.md` are updated from `05-operation/011-observability-log.jsonl`.
 
-If a host usage export is available, normalize it before closure using the
-`usage-cost` connector contract. If it is not available, mark tokens/cost as not
-collected instead of estimating.
+If a host usage source is available, normalize it before closure using the
+`usage-cost` connector contract. For Devin, prefer ACU/session consumption first;
+tokens are optional and may be unavailable. If no source is available, mark
+usage/cost as not collected instead of estimating.
 
 On closure, update:
 - HUB `index.md`: move demand from open to closed and link `05-operation/009-summary.md`;

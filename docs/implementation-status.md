@@ -20,7 +20,7 @@ All D1–D47 decisions are materialized. Highlights by area:
 Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framework-closure.md`.
 
 ## Still incomplete
-- D10/D43: cost/tokens attributable from host exports, but no automatic collection without a real host usage source.
+- D10/D43: usage/cost attributable from host exports or APIs, but no automatic collection without a real host usage source.
 - D14: host-specific execution adapters not implemented; readiness checklist, adapter states, template, validation, and handoff examples exist.
 - D20/D23: tracker/PR integration is a connector contract plus readiness checklist/example handoff, not a working adapter.
 - D32/D46: insight examples and model-policy validation exist; tuning needs more real project data.
