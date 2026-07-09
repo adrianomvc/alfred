@@ -77,5 +77,5 @@ to act on. Swapping in a real tracker adapter is a connector change, not a rule 
 
 ## fixture
 - minimal fixture path: `examples/connectors/tracker-sim-demand.md`
-- validation command: `powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-connectors.ps1`
+- validation command: `python scripts/python/validators/validate-connectors.py`
 - expected result: connector and adapter validation completes

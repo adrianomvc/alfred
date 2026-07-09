@@ -1,3 +1,14 @@
+---
+name: sub-activity-security-testing
+description: Validate sub-activity — Security Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Security Testing
 
 > Trigger: **sensitive data** or a changed **attack surface** (auth, input,

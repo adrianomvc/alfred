@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Pre-Execution confidence score for a demand (W8.1).
 
-Python mirror of ``scripts/powershell/workflow/confidence-score.ps1``. Optional helper (D3).
-Composes signals Alfred already records into one number the SDD gate can read:
+Optional helper (D3). Composes signals Alfred already records into one number the SDD gate can read:
 below the floor, the recommendation is the escalation rule (stop and ask), never
 "proceed anyway". The score informs; the human decides.
 

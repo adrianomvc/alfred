@@ -1,3 +1,14 @@
+---
+name: sub-activity-technical-inception
+description: Inception sub-activity — Technical Inception
+load: sub-activity
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Inception sub-activity — Technical Inception
 
 > Trigger: **always** — Alfred performs the technical lens for every demand

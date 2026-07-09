@@ -29,6 +29,11 @@ The Orchestrator picks the highest profile the host declares it can render and
 format). The host's capability is a hint recorded in `state`/host adapters, not a
 hard dependency — nothing in the framework requires a non-text profile (D3).
 
+## Files here (all JIT — load only when rendering that thing)
+- `toolbar-quick.md` — the day-to-day cheat-sheet: exact toolbar shapes + markers.
+- `toolbar.md` — full toolbar spec (layers, profiles, rules); for edge cases and renderer changes.
+- `welcome-screen.md` — the rendered welcome block + degradation rules (persona stays in `core/welcome.md`).
+
 ## Rules
 - `text` is the spec; `rich-cli` and `web` are optional layers that must never
   become the source of truth.

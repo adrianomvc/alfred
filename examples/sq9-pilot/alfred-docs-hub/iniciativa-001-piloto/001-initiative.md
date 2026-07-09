@@ -1,7 +1,7 @@
 # Iniciativa - iniciativa-001-piloto
 
 ## Objetivo
-Validar o Alfred com simulados cobrindo Standard, FAST, SAFE e Operational Execution-first.
+Validar a linha 2.0.0 do Alfred com um simulado ponta a ponta mantido como regressao estrita.
 
 ## Repositorios envolvidos
 - HUB: `alfred-docs-hub`
@@ -10,14 +10,10 @@ Validar o Alfred com simulados cobrindo Standard, FAST, SAFE e Operational Execu
 ## Demandas
 | Demanda | Status |
 |---|---|
-| 001-implantacao-alfred | Fechada |
-| 002-simulado-fast | Fechada - simulado FAST |
-| 003-simulado-safe | Fechada - simulado SAFE |
-| 004-execution-first | Fechada - simulado Operational Execution-first |
-| 005-parallel-units | Aberta - exemplo de units paralelas |
+| 006-simulado-adocao-v2 | Concluida - strict 0/0 |
 
 ## Riscos ativos
 - Nome final da iniciativa pode ser ajustado se o piloto receber outro slug.
 
 ## Resultado
-Iniciativa de exemplo cobre Standard, FAST, SAFE, Operational Execution-first e units paralelas. A demanda `005-parallel-units` permanece aberta para demonstrar consolidacao pendente em Validate.
+Iniciativa de exemplo cobre uma demanda Standard completa na linha 2.0.0. Cenários isolados de toolbar usam `examples/toolbar-states/`; os snapshots históricos incompletos foram removidos.

@@ -10,7 +10,7 @@ Connector contract: `connectors/notification-email.md`
 ## Handoff
 ```markdown
 ## Notification
-- subject: `[Alfred-Framework][SQ9][005-parallel-units] Checkpoint Validate`
+- subject: `[Alfred-Framework][SQ9][006-simulado-adocao-v2] Checkpoint Validate`
 - to: configured in knowledge
 - attachments:
   - `001-state.md`
@@ -22,4 +22,3 @@ Connector contract: `connectors/notification-email.md`
 
 ## Degradation
 If no email connector is configured, Alfred records a manual reminder in `audit` and shows the subject/attachments to the human.
-

@@ -1,3 +1,14 @@
+---
+name: common-units
+description: Common Rule - Demand Units
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common Rule - Demand Units
 
 Demand is the governance unit. Units are execution slices inside one demand.

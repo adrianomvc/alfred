@@ -1,3 +1,14 @@
+---
+name: sub-activity-user-stories
+description: Design sub-activity — User Stories
+load: sub-activity
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Design sub-activity — User Stories
 
 > Trigger: **Produto** stream — new feature, journey, UX, or experiment. Optional,

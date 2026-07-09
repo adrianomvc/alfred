@@ -1,3 +1,14 @@
+---
+name: sub-activity-requirements-elicitation
+description: Inception sub-activity — Requirements Elicitation
+load: sub-activity
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Inception sub-activity — Requirements Elicitation
 
 > Trigger: clarity is **vague or incomplete** (from intent analysis). Optional,

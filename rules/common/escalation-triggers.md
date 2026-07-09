@@ -1,13 +1,26 @@
+---
+name: common-escalation-triggers
+description: Common Rule - Escalation Triggers
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common Rule - Escalation Triggers
 
-Escalation protects the human decision boundary. It applies in all lanes. FAST can move quickly, but it still stops when a hard trigger fires.
+Escalation protects the human decision boundary. It applies in all lanes. FAST can move quickly, but it still stops when a hard trigger fires. The supreme-law gate is always the first trigger: unresolvable doubt or ambiguity → stop and ask (`core/principles.md`).
 
 ## Hard Triggers
 Stop and ask the responsible human when any of these occur:
 - scope changes after Inception;
 - a new repo, system, provider, or data domain enters the demand;
-- sensitive data is discovered or classification changes;
+- risk rises — sensitive data, direct customer impact, or a classification change appears → reclassify the lane;
+- a destructive/irreversible operation is requested (delete data, `drop`, schema migration, `force push`, touching production);
 - rollback is unclear for an irreversible or hard-to-reverse action;
+- cost/tokens pass the ceiling defined for the demand;
 - a required connector/credential/log is missing and cannot be inferred safely;
 - validation fails twice for the same reason;
 - a unit wants to write outside its declared write scope;

@@ -1,9 +1,7 @@
 """Shared helpers for the Alfred Python helper scripts.
 
-These mirror the PowerShell helpers under ``scripts/powershell``. They are
-optional: Alfred still works manually through Markdown if no helper runs.
-The Python set exists so the framework can be validated on machines without
-PowerShell (D3 portability).
+They are optional: Alfred still works manually through Markdown if no helper
+runs. The Python set is the canonical helper runtime (D3 portability).
 """
 
 import json
@@ -23,8 +21,7 @@ def read_text(path):
 def get_field(lines, names):
     """Return the first ``- name: value`` match for any name in ``names``.
 
-    Mirrors the PowerShell ``Get-Field``/``Get-StateField`` helpers: matches a
-    markdown list field, trims whitespace and surrounding backticks.
+    Matches a markdown list field, trims whitespace and surrounding backticks.
     """
     if isinstance(names, str):
         names = [names]

@@ -1,0 +1,36 @@
+# Connector - Codebase Memory
+
+## type
+`codebase-memory`
+
+## activation
+Optional connector for hosts that can run a local or remote MCP/indexer that
+answers structural codebase questions. This is a contract only until a specific
+company-approved implementation, package source, and install path are selected.
+
+Use it for brownfield, incident, or multi-repo work where Alfred needs symbol,
+reference, call graph, impact, or related-test discovery before reading files.
+
+## operations
+- `find_symbol(name, filters)` returns likely definitions with file, line, and
+  symbol kind.
+- `find_references(symbol_or_path, depth)` returns callers/usages/imports.
+- `call_graph(symbol, depth)` returns direct or bounded transitive call paths.
+- `impact_analysis(files_or_symbols)` returns likely affected modules, APIs, and
+  data contracts.
+- `related_tests(symbol_or_file)` returns likely test files or suites.
+- `summarize_module(path)` returns a short structural summary of a module.
+
+## degradation
+If the connector is unavailable, stale, or not approved for the machine, Alfred
+falls back to `rg`, bounded file reads, existing tests, and human-provided
+architecture context. The fallback must record that no structural index was
+available.
+
+MCP output is evidence, not authority. Before editing, Alfred opens the relevant
+source files directly and validates with tests or review evidence.
+
+## audit fields
+adapter name, adapter state, index timestamp/version, repo root, query, result
+count, files/symbols returned, stale-index warning, fallback used, validation
+evidence path.

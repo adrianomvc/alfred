@@ -3,7 +3,7 @@
 This file tracks implementation coverage against the conceptual plan (D1–D47), versioned at `docs/plan/alfred-conceptual-plan.md`. It is a **current snapshot**: pass-by-pass history lives in `CHANGELOG.md` (releases 0.1.0–0.4.0 and the 2.0.0 line) and in git history.
 
 ## Status
-Alfred Framework Layer 1 is **operational** and has been applied to a real SQ9 HUB/App pilot. Current work follows `docs/plan/implementation-plan-2.0.0.md`: integrated execution with real host credentials, environment parameters, and external adapters — plus the 2.0.0 hardening waves.
+Alfred Framework Layer 1 is **operational** and has validated HUB/App pilot examples, including the strict 2.0.0 adoption rehearsal. Current work follows `docs/plan/implementation-plan-2.0.0.md`: integrated execution with real host credentials, environment parameters, and external adapters — plus the 2.0.0 hardening waves.
 
 Alfred is not a full hosted product. Remaining gaps are host-, credential-, policy-, or real-data-dependent. See `docs/layer-1-framework-closure.md`.
 
@@ -20,12 +20,13 @@ All D1–D47 decisions are materialized. Highlights by area:
 Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framework-closure.md`.
 
 ## Still incomplete
-- D10/D43: cost/tokens attributable from host exports, but no automatic collection without a real host usage source.
+- D10/D43: usage/cost attributable from host exports or APIs, but no automatic collection without a real host usage source.
 - D14: host-specific execution adapters not implemented; readiness checklist, adapter states, template, validation, and handoff examples exist.
 - D20/D23: tracker/PR integration is a connector contract plus readiness checklist/example handoff, not a working adapter.
 - D32/D46: insight examples and model-policy validation exist; tuning needs more real project data.
 - D35/D36: more language/platform skills may be needed as new stacks appear.
 - D44: notification/email is a contract/template plus example handoff, not a working channel.
+- Historical examples still need migration before they can be promoted to `validate-demand --strict` regression fixtures.
 - Real integrated execution depends on environment parameters, credentials, network access, and target-host decisions from the adopting squad.
 - Release tags and adoption cadence need human governance outside the framework.
 

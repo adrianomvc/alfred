@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Alfred knowledge files, the policy template, and example policies.
-
-Python mirror of ``scripts/powershell/validators/validate-knowledge.ps1``.
-"""
+"""Validate Alfred knowledge files, the policy template, and example policies."""
 
 import argparse
 import re
@@ -56,6 +53,7 @@ def main():
 
     for label in (
         "knowledge/README.md",
+        "knowledge/knowledge.md",
         "knowledge/notification.md",
         "knowledge/policy-template.md",
         "docs/knowledge-governance.md",
@@ -65,6 +63,10 @@ def main():
     readme = read_text(root / "knowledge/README.md")
     assert_section(readme, "Scopes", "knowledge/README.md")
     assert_section(readme, "Rule", "knowledge/README.md")
+
+    registry = read_text(root / "knowledge/knowledge.md")
+    assert_section(registry, "Registry", "knowledge/knowledge.md")
+    assert_section(registry, "Rule", "knowledge/knowledge.md")
 
     notification = read_text(root / "knowledge/notification.md")
     assert_section(notification, "destination", "knowledge/notification.md")

@@ -24,24 +24,24 @@ Alfred operates across three distinct repositories. **Compliance is not part of 
 - **App-only session:** if only the app repo is writable, Alfred does not attempt to write the HUB. It writes only under `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`, including `05-operation/008-observability-log.jsonl` and `05-operation/009-hub-sync.md`. The HUB remains the source of truth, but it is marked **pending sync** until a HUB session imports the app handoff.
 - **No hidden cross-repo writes:** writing outside the detected repo requires an explicit mounted path, connector, or human-approved sync step.
 
-## Demand artifact layout
-Artifacts are grouped by lifecycle phase inside each demand folder. Keep only the boot/resume file at the demand root.
+## Demand artifact layout (canonical — single source)
+Artifacts are grouped by lifecycle phase inside each demand folder. Keep only the boot/resume file at the demand root. Filenames use `<sequencia>-<nomeartefato>` (reading order stays stable across hosts).
 
 HUB:
 - root: `001-state.md`
-- `01-inception/`: problem, requirements, risk, technical inception
-- `02-design/`: decisions
-- `03-execution/`: execution notes when needed
+- `01-inception/`: `002-problem.md`, `003-requirements.md`, `004-risk.md`, `005-tech-inception.md`
+- `02-design/`: `006-decisions.md`
+- `03-execution/`: execution plans/notes when needed
 - `04-validate/`: validation evidence when needed
-- `05-operation/`: audit, metrics, summary, post-mortem, observability log
+- `05-operation/`: `007-audit.md`, `008-metrics.md`, `009-summary.md`, `010-post-mortem.md`, `011-observability-log.jsonl`
 
 App:
 - root: `001-index.md`
-- `01-inception/`: reverse engineering and operational investigation
-- `02-design/`: technical spec
+- `01-inception/`: `002-reverse-eng.md`, `004-investigation.md` (operational demands)
+- `02-design/`: `003-spec.md`
 - `03-execution/`: implementation notes when needed
-- `04-validate/`: evidence
-- `05-operation/`: technical audit, metrics, local observability log, HUB sync handoff
+- `04-validate/`: `007-evidence.md`
+- `05-operation/`: `005-audit.md`, `006-metrics.md`, `008-observability-log.jsonl`, `009-hub-sync.md`
 
 ## Distribution & evolution (hard separation)
 - The HUB holds **only artifacts**. **Nothing from the framework** is copied into HUB or app repos.
@@ -61,7 +61,7 @@ Version adoption is governed by `docs/version-adoption.md`: active demands freez
 Each pluggable family declares a **contract** in its registry (`connectors/connectors.md`, `skills/skills.md`, `rules/lanes/*`, `rules/agents/*`, `rules/demand-types/*`). Rules reference the contract/role, never the concrete — swapping CloudWatch for Datadog is swapping the connector, with no rule change.
 
 ### Extension checklist (the guardrail)
-Code SOLID has an owner (Execution applies `skills/coding-standard.md`; the Reviewer validates it). Architecture SOLID has the same shape: this checklist is the standard, and `docs/framework-validation.md` is where it is enforced when Alfred itself changes. Run it before adding or moving any module/file/artifact:
+Code SOLID has an owner (Execution applies `skills/coding-standard/SKILL.md`; the Reviewer validates it). Architecture SOLID has the same shape: this checklist is the standard, and `docs/framework-validation.md` is where it is enforced when Alfred itself changes. Run it before adding or moving any module/file/artifact:
 - **S** — does it have one reason to change? If it serves two concerns, split it (do not grow a "drawer" folder).
 - **O** — can the need be met by **adding** a skill/connector/demand-type/lane/sub-activity instead of editing the core or adding a phase?
 - **L** — if it joins a pluggable family, is it substitutable through the family contract (no consumer special-casing the concrete)?

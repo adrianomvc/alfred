@@ -1,3 +1,14 @@
+---
+name: lane-safe
+description: Lane — SAFE
+load: lane
+triggers:
+  phase: all
+  lane: safe
+  demand-type: all
+  agent: all
+---
+
 # Lane — SAFE
 
 High risk/impact. More governance, dependency management, risk analysis, rollout/rollback, formal acceptance, traceability. **Not** a clone of any heavy methodology — just the strong-governance mode.

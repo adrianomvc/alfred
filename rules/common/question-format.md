@@ -1,3 +1,14 @@
+---
+name: common-question-format
+description: Common rule — question format
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — question format
 
 How Alfred asks humans. Inherited from AI-DLC `question-format-guide`. Used in Inception requirements and in unit decomposition. Questions go to people in **pt-BR** (language policy).

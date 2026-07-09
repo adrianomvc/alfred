@@ -1,3 +1,14 @@
+---
+name: agent-spec-design
+description: Agent - Spec/Design
+load: agent
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: spec-design
+---
+
 # Agent - Spec/Design
 
 ## Contract

@@ -1,3 +1,14 @@
+---
+name: agent-metrics
+description: Agent - Metrics
+load: agent
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: metrics
+---
+
 # Agent - Metrics
 
 ## Contract

@@ -1,8 +1,4 @@
-+-- ALFRED ------------------------------- SIGLA:SQ9 | #004-execution-first --+
-| Lane: SAFE | Model: GPT-5 | Progress: 100% |
-| Cost: n/a |
-| Execution-first stabilization [x] -> Inception posterior [x] -> Design posterior [x] -> Validate posterior [x] -> Operation / post-mortem [x] |
-| Step : incidente simulado fechado com post-mortem |
-| HITL : concluido com estabilizacao + post-mortem |
-| Next : usar os aprendizados para demanda real piloto quando houver app real |
-+-----------------------------------------------------------------------------+
+ALFRED | TST | #toolbar-execution-first | SAFE
+[############........] 60% | Execution-first stabilization[x] -> Inception posterior[x] -> Design posterior[x] -> Validate posterior[>] -> Operation / post-mortem[ ]
+HITL: Incident commander + SRE | model: GPT-5 | cost: n/a
+Next: finish post-mortem before closure

@@ -157,6 +157,8 @@ def tool_send_email(cfg, args):
     if not destination:
         return err("No destination: pass `to` or set ALFRED_EMAIL_DEFAULT_TO. "
                    "The destination must come from configuration, not from guessed values.")
+    if not subject.startswith(SUBJECT_PREFIX):
+        subject = f"{SUBJECT_PREFIX} {subject}"
     if destination.lower() not in cfg["allowlist"]:
         audit_event(cfg, destination, subject, attachments, "refused",
                     "destination not in allowlist", trigger)
@@ -167,8 +169,6 @@ def tool_send_email(cfg, args):
     if missing:
         return err("Attachment(s) not found: " + ", ".join(missing) +
                    ". Pass existing file paths (e.g. the demand's metrics/audit files).")
-    if not subject.startswith(SUBJECT_PREFIX):
-        subject = f"{SUBJECT_PREFIX} {subject}"
 
     if cfg["mode"] == "dry-run":
         cfg["outbox"].mkdir(parents=True, exist_ok=True)

@@ -1,3 +1,14 @@
+---
+name: sub-activity-integration-testing
+description: Validate sub-activity — Integration Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Integration Testing
 
 > Trigger: the change **crosses a component or service boundary** (DB, queue,

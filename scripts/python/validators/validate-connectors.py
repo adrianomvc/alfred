@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Alfred connector contracts and adapter-shaped examples.
-
-Python mirror of ``scripts/powershell/validators/validate-connectors.ps1``.
-"""
+"""Validate Alfred connector contracts and adapter-shaped examples."""
 
 import argparse
 import re

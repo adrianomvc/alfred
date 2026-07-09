@@ -1,3 +1,14 @@
+---
+name: sub-activity-closure-summary
+description: Operation sub-activity — Closure Summary
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Closure Summary
 
 > Trigger: **always**. Optional only in depth. The artifact future sessions load

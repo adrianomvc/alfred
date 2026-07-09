@@ -44,7 +44,7 @@ Terminology of the framework. Keeps the EN↔pt-BR mapping consistent across fra
 - **Engineering** — refactor · tech debt · upgrade · migration · observability · performance · security · FinOps · internal automation · architecture · provider change.
 
 ## id-demanda
-Inherited from the existing tracker when available, but the Alfred artifact id does not include the sigla: `<sequencia>-<nome-demanda>` (e.g. `001-implantacao-alfred`). No tracker -> use the next sequence in the initiative. The same id correlates the HUB folder in `alfred-docs-hub` with the app folder in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
+Inherited from the existing tracker when available, but the Alfred artifact id does not include the sigla: `<sequencia>-<nome-demanda>` (e.g. `001-ajuste-cache`). No tracker -> use the next sequence in the initiative. The same id correlates the HUB folder in `alfred-docs-hub` with the app folder in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
 
 ## id-iniciativa
 Initiatives always use `iniciativa-<sequencia>-<iniciativa>` (e.g. `iniciativa-001-piloto`). The sequence is numeric; the final segment is a short lowercase slug for the solution/iniciativa.
@@ -56,23 +56,7 @@ Generated artifacts use `<sequencia>-<nomeartefato>` with the extension required
 Deliberate asymmetry — visibility follows role. In the HUB repo the artifacts ARE the main content, so the folder is visible. In an app repo the main content is the application code; the Alfred folder is guest metadata, so it is dot-hidden like `.github/`/`.vscode/` and stays out of the code tree, searches, and file pickers. The distinct names are also load-bearing: boot detects the repo kind (HUB / APP / HUB+APP) by exactly these folder names.
 
 ## artifact phase folders
-Inside each demand folder, keep the resume artifact at the root and place the remaining artifacts under the phase that owns them.
-
-HUB demand layout:
-- root: `001-state.md`
-- `01-inception/`: `002-problem.md`, `003-requirements.md`, `004-risk.md`, `005-tech-inception.md`
-- `02-design/`: `006-decisions.md`
-- `03-execution/`: execution plans or generated work notes when needed
-- `04-validate/`: validation evidence when needed
-- `05-operation/`: `007-audit.md`, `008-metrics.md`, `009-summary.md`, `010-post-mortem.md`, `011-observability-log.jsonl`
-
-App demand layout:
-- root: `001-index.md`
-- `01-inception/`: `002-reverse-eng.md`, `004-investigation.md` when the demand is operational
-- `02-design/`: `003-spec.md`
-- `03-execution/`: implementation notes when needed
-- `04-validate/`: `007-evidence.md`
-- `05-operation/`: `005-audit.md`, `006-metrics.md`, `008-observability-log.jsonl`, `009-hub-sync.md`
+The canonical demand layout (HUB and App, with exact filenames) lives in `core/architecture.md` §"Demand artifact layout" — single source; do not restate it.
 
 ## observability log vs audit
 `05-operation/007-audit.md` records responsibility and traceability. In the HUB, `05-operation/011-observability-log.jsonl` records structured events used to calculate `05-operation/008-metrics.md`. In an App-only session, `.alfred-docs-app/<id-iniciativa>/<id-demanda>/05-operation/008-observability-log.jsonl` records local events until they are synchronized into the HUB.

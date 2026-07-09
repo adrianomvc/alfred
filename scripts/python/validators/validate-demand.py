@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Validate one Alfred demand across HUB (and optional App) artifacts.
-
-Python mirror of ``scripts/powershell/validators/validate-demand.ps1``.
-"""
+"""Validate one Alfred demand across HUB (and optional App) artifacts."""
 
 import argparse
 import importlib.util

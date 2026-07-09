@@ -1,3 +1,14 @@
+---
+name: sub-activity-metrics-collection
+description: Operation sub-activity — Metrics Collection
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Metrics Collection
 
 > Trigger: **always**. Optional only in depth. Owner: **Metrics** agent.
@@ -10,6 +21,10 @@ close is evidence-based, not estimated.
 `05-operation/011-observability-log.jsonl` (HUB) or `008-observability-log.jsonl`
 (App-only), the demand `state`, the metrics agent contract
 (`../../../agents/metrics.md`).
+
+If the host supports batch/flex/background execution and the close is not
+waiting on this result, load `../../../common/deferred-work-policy.md` and run
+the rollup as deferred work.
 
 ## Steps
 1. Read the **observability JSONL** for this demand (append-only, never edited).

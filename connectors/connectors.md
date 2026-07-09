@@ -2,6 +2,17 @@
 
 Connectors are optional adapters. Alfred rules depend on the **role contract**, not a concrete tool. Without a connector, Alfred degrades to markdown and asks the human for the missing input/action.
 
+## Tool discovery / JIT tools
+Load this registry and the connector contract first. Load the concrete adapter
+description, MCP tool schema, or host command only after the current action needs
+that connector type and the demand `state` says the adapter is configured and
+allowed.
+
+Do not place every available tool schema in boot context. MCP/tool descriptions
+must stay short; detailed manuals live in referenced docs loaded after the
+adapter is selected. If a required adapter is not active, write a handoff instead
+of calling the host.
+
 ## Required sections per connector
 - `type`
 - `activation`
@@ -20,6 +31,7 @@ Concrete host adapters must also follow `connectors/adapter-template.md` and `do
 | notification | `send(destination, subject, attachments)` |
 | telemetry | `send_events(batch)` |
 | usage-cost | `read_usage(window, filters)`, `map_usage(record)`, `append_usage_event(event)` |
+| codebase-memory | `find_symbol(name)`, `find_references(symbol)`, `impact_analysis(files_or_symbols)`, `related_tests(symbol_or_file)` |
 
 ## Adapter states
 | State | Meaning |

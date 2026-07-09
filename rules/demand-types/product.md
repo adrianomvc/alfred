@@ -1,3 +1,14 @@
+---
+name: demand-type-product
+description: Demand-type — Produto (Product)
+load: demand-type
+triggers:
+  phase: all
+  lane: all
+  demand-type: product
+  agent: all
+---
+
 # Demand-type — Produto (Product)
 
 > Contract: `types covered` · `phase emphasis` · `typical sub-activities` · `mode tendency` · `special path`. References connectors/skills by **role**, not name.

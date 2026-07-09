@@ -43,17 +43,22 @@ Record mandatory policies that Alfred must always respect:
 
 Knowledge is a guardrail, not an optional skill.
 
-## 5. Configure Skills
+## 5. Reference / Template Repos (optional)
+Ask explicitly — but never block: **"Are there template/reference repos that show how this squad/stack builds (structure, conventions, scaffolding)?"**
+- Record each as a **pointer** (repo URL/path + what it exemplifies: API, front, lib, IaC) in the HUB `001-index.md` — a pointer, not a copy (D3), resolved JIT (D35).
+- **None is a valid answer.** Record "no template" so Design/Execution knowingly fall back to the conventions inferred from the app's reverse engineering.
+- A template is **code to mirror**, not a skill — that is why it lives here, not under Configure Skills.
+
+## 6. Configure Skills
 Record active optional skills for the sigla:
 - language-specific coding standards;
 - security review;
 - observability/log investigation;
-- cloud/provider-specific practices;
-- template/reference repos.
+- cloud/provider-specific practices.
 
 Skills are opt-in and loaded JIT.
 
-## 6. Run First Demand
+## 7. Run First Demand
 Use `docs/quickstart-real-demand.md`.
 
 The first demand should prove:
@@ -65,7 +70,7 @@ The first demand should prove:
 - JSONL observability append discipline;
 - metrics/audit update.
 
-## 7. Acceptance
+## 8. Acceptance
 Onboarding is accepted when:
 - one demand runs through all five phases or reaches a documented blocker;
 - HUB and app artifacts are committed;

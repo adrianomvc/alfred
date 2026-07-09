@@ -24,7 +24,14 @@ Every script must satisfy:
 - clear manual fallback;
 - no required host, shell, CI, IDE, or model runtime.
 
-PowerShell and Python helpers may coexist. They are parallel conveniences, not competing sources of truth. Each helper ships as `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py` with the same flags (the Python set shares small helpers in `scripts/python/_common.py`).
+Python is the canonical helper runtime. New helper logic and documented helper commands live under `scripts/python/`; do not add another helper runtime unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
+
+## Terminal Tooling
+RTK is a local terminal hook, not an Alfred runtime. When installed in a DEVIN
+CLI environment, Alfred may prefer `rtk cat`, `rtk grep`, `rtk diff`, and
+`rtk test` to keep command output bounded. Without RTK, use the manual fallback:
+native commands with explicit limits (`tail`, `head`, `Select-Object -First`,
+`git diff --stat`, scoped diffs, targeted searches).
 
 ## Manual Fallback Matrix
 | Helper (`<name>`) | Script output | Manual Markdown/JSONL fallback |

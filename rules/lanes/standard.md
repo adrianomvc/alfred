@@ -1,3 +1,14 @@
+---
+name: lane-standard
+description: Lane — Standard
+load: lane
+triggers:
+  phase: all
+  lane: standard
+  demand-type: all
+  agent: all
+---
+
 # Lane — Standard
 
 Medium risk/complexity. Basic discovery, clear spec, acceptance criteria, technical review, one human checkpoint, validation before release.

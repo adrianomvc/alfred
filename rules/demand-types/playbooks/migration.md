@@ -1,3 +1,14 @@
+---
+name: playbook-migration
+description: Playbook — Migration
+load: playbook
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Playbook — Migration
 
 > Operational roteiro for Engineering / **migration** (tech, platform, provider,

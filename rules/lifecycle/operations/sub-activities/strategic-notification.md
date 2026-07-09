@@ -1,3 +1,14 @@
+---
+name: sub-activity-strategic-notification
+description: Operation sub-activity — Strategic Notification
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Strategic Notification
 
 > Trigger: a **notification channel is configured** in `knowledge/notification.md`.

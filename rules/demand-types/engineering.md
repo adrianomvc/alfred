@@ -1,3 +1,14 @@
+---
+name: demand-type-engineering
+description: Demand-type — Engineering
+load: demand-type
+triggers:
+  phase: all
+  lane: all
+  demand-type: engineering
+  agent: all
+---
+
 # Demand-type — Engineering
 
 > Contract: `types covered` · `phase emphasis` · `typical sub-activities` · `mode tendency` · `special path`. References connectors/skills by **role**, not name.

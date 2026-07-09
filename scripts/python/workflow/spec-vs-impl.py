@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Compare spec acceptance criteria against validation evidence (W8.2).
 
-Python mirror of ``scripts/powershell/workflow/spec-vs-impl.ps1``. Optional helper (D3).
-Heuristic, not a judge: it flags acceptance criteria that have no textual echo in
+Optional helper (D3). Heuristic, not a judge: it flags acceptance criteria that have no textual echo in
 the validation evidence so the Reviewer/human looks at them — it never approves.
 
 Sources:
