@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Render the Alfred process toolbar from a demand state file.
-
-Python mirror of ``scripts/powershell/workflow/render-toolbar.ps1``.
-"""
+"""Render the Alfred process toolbar from a demand state file."""
 
 import argparse
 import re

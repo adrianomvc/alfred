@@ -3,11 +3,11 @@
 Derived from `examples/generated/metrics-rollup.md`.
 
 ## Insight 1 - Observability Coverage
-- observation: example events cover six demands across FAST, Standard, SAFE, and Execution-first flows.
-- evidence: rollup has 16 events, 6 demands, 3 FAST events, 6 Standard events, and 7 SAFE events.
-- likely cause: examples now exercise lane differences and phase-folder lifecycle consistently.
-- proposed adjustment: keep new examples tied to observability JSONL instead of static-only Markdown.
-- expected effect: future framework changes can be checked against realistic telemetry shape.
+- observation: maintained demand events now cover the strict 2.0.0 regression and the onboarding fixture.
+- evidence: rollup has 8 events, 2 demands, and all maintained demand events are Standard.
+- likely cause: stale historical lane snapshots were removed; lane-specific rendering now lives in `examples/toolbar-states/`.
+- proposed adjustment: add future FAST/SAFE demand coverage only as strict fixtures, not partial snapshots.
+- expected effect: examples remain smaller and every maintained demand can be validated intentionally.
 - human decision: pending.
 
 ## Insight 2 - Cost And Token Gap
@@ -19,17 +19,17 @@ Derived from `examples/generated/metrics-rollup.md`.
 - human decision: pending.
 
 ## Insight 3 - Model Attribution Gap
-- observation: most events do not identify the model used.
-- evidence: rollup reports `events without model: 14`.
-- likely cause: examples were written before model attribution became mandatory operational context.
+- observation: most maintained events now identify the model used.
+- evidence: rollup reports `events without model: 1`.
+- likely cause: the 2.0.0 regression fixture records model attribution; the onboarding fixture remains minimal.
 - proposed adjustment: future sample and real events should include `model` whenever the host exposes it.
 - expected effect: investigation can correlate output quality and cost with Alfred version/model.
 - human decision: pending.
 
-## Insight 4 - Parallel Unit Validation
-- observation: the parallel-units example stops at Design.
-- evidence: demand `005-parallel-units` has last phase `design` and status `completed`.
-- likely cause: the example currently demonstrates decomposition but not full unit validation.
-- proposed adjustment: add a follow-up example that completes Execution and Validate for multiple units.
-- expected effect: stronger evidence for D13/D24 parallel execution behavior.
+## Insight 4 - Lane Coverage Gap
+- observation: maintained end-to-end demand examples currently cover Standard only.
+- evidence: FAST, SAFE, and Execution-first are covered by toolbar fixtures and Risk Mode helper probes, not strict demands.
+- likely cause: partial historical snapshots were removed instead of being treated as closure evidence.
+- proposed adjustment: when a FAST/SAFE/Execution-first scenario is needed, add a complete strict fixture with HUB+App artifacts.
+- expected effect: lane evidence stays trustworthy without reintroducing partial demand snapshots.
 - human decision: pending.

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Turn observability JSONL into a Markdown metrics rollup.
-
-Python mirror of ``scripts/powershell/metrics/generate-metrics-rollup.ps1``.
-"""
+"""Turn observability JSONL into a Markdown metrics rollup."""
 
 import argparse
 import json

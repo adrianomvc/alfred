@@ -16,8 +16,9 @@ itself never changes per host (D3, agnostic markdown).
 > and may hold secrets — they are never the source of truth.
 
 ## Common bind (every host)
-1. Clone the framework once as a single referenced source (D15):
-   `git clone https://github.com/adrianomvc/alfred.git ~/.alfred`
+1. Clone the framework once as a single referenced source (D15), using the
+   configured Alfred repository URL from `install/README.md`:
+   `git clone <alfred-framework-repo-url> ~/.alfred`
 2. Register the host's entry file below so it reads `~/.alfred/core/boot.md`.
 3. The entry point then follows Alfred's own rules: boot sequence, `core/principles.md`
    (supreme law: never invent), butler persona. `core/risk-mode.md` (FAST/Standard/SAFE)
@@ -53,8 +54,9 @@ Hosts that expose prompt caching or persistent context should keep Alfred's
 stable kernel before volatile demand state: framework principles/boot/indexes
 first, generated registries/manifests next, active rules/skills after that, and
 the current demand `state` plus working artifacts last. Hosts without cache
-controls still follow the same order as a plain JIT discipline; no feature may
-require host-specific caching (D3).
+controls still follow the same order as a plain JIT discipline. The portable
+rule is `rules/common/prompt-caching-policy.md`; no feature may require
+host-specific caching (D3).
 
 ## The one host-specific setting: model (D46/D14)
 The model policy uses abstract tiers (`cheap`/`medium`/`strong`). Each host exposes
@@ -69,6 +71,8 @@ existing validators to hook points (optional layer; everything still works witho
 - run `validate-demand` (or `validate-sdd-gate`) as a *stop/finish* hook so a session
   cannot end with a broken demand state;
 - block writes outside the active unit's declared write scope with a *pre-write* hook;
+- initialize RTK for DEVIN CLI terminal sessions so large command output is filtered
+  before it enters model context (`core/hooks/rtk.md`);
 - run `validate-framework` before commits that touch the framework repo.
 Advisory rule vs deterministic hook: instructions can be missed under long context;
 a hook always executes. Configure per host (e.g. Claude Code `.claude/settings.json`

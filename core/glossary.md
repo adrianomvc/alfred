@@ -44,7 +44,7 @@ Terminology of the framework. Keeps the EN↔pt-BR mapping consistent across fra
 - **Engineering** — refactor · tech debt · upgrade · migration · observability · performance · security · FinOps · internal automation · architecture · provider change.
 
 ## id-demanda
-Inherited from the existing tracker when available, but the Alfred artifact id does not include the sigla: `<sequencia>-<nome-demanda>` (e.g. `001-implantacao-alfred`). No tracker -> use the next sequence in the initiative. The same id correlates the HUB folder in `alfred-docs-hub` with the app folder in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
+Inherited from the existing tracker when available, but the Alfred artifact id does not include the sigla: `<sequencia>-<nome-demanda>` (e.g. `001-ajuste-cache`). No tracker -> use the next sequence in the initiative. The same id correlates the HUB folder in `alfred-docs-hub` with the app folder in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
 
 ## id-iniciativa
 Initiatives always use `iniciativa-<sequencia>-<iniciativa>` (e.g. `iniciativa-001-piloto`). The sequence is numeric; the final segment is a short lowercase slug for the solution/iniciativa.

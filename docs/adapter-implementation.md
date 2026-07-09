@@ -42,9 +42,9 @@ If any of these is unavailable, the adapter remains `handoff` or `dry-run`, not 
 2. Create an adapter file from `connectors/adapter-template.md`.
 3. Fill readiness using `docs/host-adapter-readiness.md`.
 4. Add a minimal fixture or dry-run example.
-5. Run `scripts/powershell/validators/validate-connectors.ps1` and add deterministic checks when the adapter has local behavior.
+5. Run `python scripts/python/validators/validate-connectors.py` and add deterministic checks when the adapter has local behavior.
 6. Record active status in the HUB/App `state`.
-7. Run `scripts/powershell/validators/validate-framework.ps1` for framework changes.
+7. Run `python scripts/python/validators/validate-framework.py` for framework changes.
 
 ## Human Decisions
 Humans decide:

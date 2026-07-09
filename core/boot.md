@@ -18,6 +18,8 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - on resume → **rebuild from the `state`** (show the toolbar — formats in `presentation/toolbar-quick.md` — + "what's left");
    - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
+   - if using RAG, compressed summaries, or codebase-memory output to select
+     context, load `rules/common/context-compression-policy.md` first.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
 ## App-only resume
@@ -40,6 +42,8 @@ context first and the volatile demand context last: kernel (`core/principles.md`
 `core/boot.md`, indexes) → generated registries/manifests → phase/lane/type
 rules → active skills → demand `state` and current artifacts. This is advisory:
 if the host has no cache controls, the same order still keeps the JIT path clear.
+Load `rules/common/prompt-caching-policy.md` when assembling multi-file context
+or when a host exposes prompt caching/persistent context.
 
 ## Welcome back (open demands)
 Alfred never declares abandonment by inactivity. On boot it **lists the open demands** of the sigla with their last activity — the butler's welcome-back: *"There are 2 demands on hold: #142 (Design) and #097 (Execution). Resume one?"*. Who decides to cancel/resume is the human.

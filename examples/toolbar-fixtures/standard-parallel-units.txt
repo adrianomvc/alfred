@@ -1,4 +1,4 @@
-ALFRED | SQ9 | #005-parallel-units | STANDARD
-[############........] 60% | O que[x] -> Como[x] -> Fazer[x] -> Validar[ ] -> Operar[ ]
+ALFRED | TST | #toolbar-standard | STANDARD
+[########............] 40% | O que[x] -> Como[x] -> Fazer[>] -> Validar[ ] -> Operar[ ]
 HITL: Tech Lead | model: GPT-5 | cost: n/a
-Next: serializar resultado no state e validar evidencias
+Next: finish implementation unit and update evidence

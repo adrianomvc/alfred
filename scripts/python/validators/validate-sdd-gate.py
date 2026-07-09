@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the minimum SDD clarity gate before Execution.
-
-Python mirror of ``scripts/powershell/validators/validate-sdd-gate.ps1``.
-"""
+"""Validate the minimum SDD clarity gate before Execution."""
 
 import argparse
 import re

@@ -14,9 +14,9 @@
 
 ## JIT Loading
 For a Python execution unit, load:
-- `skills/coding-standard.md`
-- `skills/lang-python.md#rules`
-- `skills/lang-python.md#testing`
+- `skills/coding-standard/SKILL.md`
+- `skills/lang-python/SKILL.md#rules`
+- `skills/lang-python/SKILL.md#testing`
 
 Do not load the whole skill catalog.
 

@@ -45,6 +45,13 @@ CASES = [
     ),
 ]
 
+STABLE_PREFIX = [
+    "core/principles.md",
+    "rules/README.md",
+    "rules/rules-index.md",
+    "rules/common/overconfidence.md",
+]
+
 
 def load_manifest():
     script = Path(__file__).resolve().parent.parent / "workflow" / "context-manifest.py"
@@ -67,7 +74,13 @@ def main():
         if not fixture_path.exists():
             raise SystemExit(f"Missing context-manifest fixture for {name}: {fixture_path}")
 
-        actual = "\n".join(build_manifest(root, **params))
+        actual_lines = build_manifest(root, **params)
+        if actual_lines[:len(STABLE_PREFIX)] != STABLE_PREFIX:
+            raise SystemExit(
+                f"Context manifest cache-friendly prefix drift: {name}. "
+                "Stable framework context must remain first."
+            )
+        actual = "\n".join(actual_lines)
         expected = read_text(fixture_path)
         if actual.replace("\r\n", "\n").rstrip() != expected.replace("\r\n", "\n").rstrip():
             raise SystemExit(

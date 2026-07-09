@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Check that the toolbar renderer does not drift from saved fixtures.
-
-Python mirror of ``scripts/powershell/validators/validate-toolbar-fixtures.ps1``.
-"""
+"""Check that the toolbar renderer does not drift from saved fixtures."""
 
 import argparse
 import importlib.util
@@ -14,16 +11,16 @@ from _common import read_text  # noqa: E402
 
 CASES = [
     ("fast",
-     "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/002-simulado-fast/001-state.md",
+     "examples/toolbar-states/fast.md",
      "examples/toolbar-fixtures/fast.txt"),
     ("safe",
-     "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/003-simulado-safe/001-state.md",
+     "examples/toolbar-states/safe.md",
      "examples/toolbar-fixtures/safe.txt"),
     ("execution-first",
-     "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/004-execution-first/001-state.md",
+     "examples/toolbar-states/execution-first.md",
      "examples/toolbar-fixtures/execution-first.txt"),
     ("standard-parallel-units",
-     "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units/001-state.md",
+     "examples/toolbar-states/standard.md",
      "examples/toolbar-fixtures/standard-parallel-units.txt"),
 ]
 

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Check reverse-engineering staleness against the current app commit.
-
-Python mirror of ``scripts/powershell/validators/validate-reverse-eng-staleness.ps1``.
-"""
+"""Check reverse-engineering staleness against the current app commit."""
 
 import argparse
 import re

@@ -16,7 +16,7 @@ Use the canonical terms from `core/glossary.md` consistently. This keeps artifac
 ## Rules
 - **One name per concept** — `sigla`, `initiative`, `demand`, `unit`, `lane`, `stream`, `demand-type`. Do not introduce synonyms.
 - **id-iniciativa** — always `iniciativa-<sequencia>-<iniciativa>` (example: `iniciativa-001-piloto`).
-- **id-demanda** — always `<sequencia>-<nome-demanda>` (example: `001-implantacao-alfred`). The same id correlates HUB artifacts in `alfred-docs-hub` with app artifacts in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
+- **id-demanda** — always `<sequencia>-<nome-demanda>` (example: `001-ajuste-cache`). The same id correlates HUB artifacts in `alfred-docs-hub` with app artifacts in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/`.
 - **Lanes** are the three modes: FAST / Standard / SAFE — never "level," "tier" (tier is the model-policy concept), or "profile."
 - **Streams** are Produto / Operacional / Engineering; **demand-types** are the specific types within a stream.
 - **Artifact roots** are canonical: HUB artifacts live under `alfred-docs-hub`; app artifacts live under `.alfred-docs-app`.

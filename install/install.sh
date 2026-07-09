@@ -10,11 +10,32 @@
 #   curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/main/install/install.sh | bash
 set -euo pipefail
 
-FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-https://github.com/adrianomvc/alfred.git}"
+# ============================================================================
+# COMPANY SETTINGS - edit these defaults when preparing the installer for a
+# corporate machine/image.
+#
+# 1) Alfred framework repository:
+#    Replace DEFAULT_FRAMEWORK_URL when the company uses an internal Git mirror.
+#
+# 2) RTK package URL:
+#    Paste the corporate Artifactory URL in DEFAULT_RTK_URL when it is known.
+#    The default is the public Windows zip placeholder because most company
+#    usage is Windows/Git Bash and the future Artifactory package is also zip.
+#    Replace it with the internal Artifactory zip when available.
+#
+# Temporary alternative:
+#    Keep this file unchanged and pass ALFRED_FRAMEWORK_URL / ALFRED_RTK_URL.
+# ============================================================================
+DEFAULT_FRAMEWORK_URL="https://github.com/adrianomvc/alfred.git"
+DEFAULT_RTK_URL="https://github.com/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
+
+FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-$DEFAULT_FRAMEWORK_URL}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
 BRANCH="${ALFRED_BRANCH:-}"
 VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
 SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.agents/skills}"
+RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # public zip placeholder; replace with corporate Artifactory URL
+SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
 
 info() { echo "[alfred] $*"; }
 
@@ -111,7 +132,61 @@ else
   info "DEVIN CLI not found on PATH; skill files are installed. Run 'devin skills list' to confirm."
 fi
 
-# 4. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# 4. RTK terminal hook (DEVIN CLI only) — optional token-control layer.
+# No URL means no download; Alfred falls back to bounded native commands.
+if [ "$SKIP_RTK" != "1" ]; then
+  if ! command -v rtk >/dev/null 2>&1 && [ -n "$RTK_URL" ]; then
+    RTK_DIR="$HOME/.local/bin"
+    RTK_TMP="$(mktemp -d)"
+    mkdir -p "$RTK_DIR"
+    info "Downloading RTK from configured RTK URL..."
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL "$RTK_URL" -o "$RTK_TMP/rtk-download"
+    else
+      info "curl not found; install RTK manually, then run 'rtk init -g'."
+    fi
+
+    if [ -f "$RTK_TMP/rtk-download" ]; then
+      case "$RTK_URL" in
+        *.zip)
+          if command -v unzip >/dev/null 2>&1; then
+            unzip -q "$RTK_TMP/rtk-download" -d "$RTK_TMP/unpacked"
+            # Artifactory zip may name the binary rtk or rtk.exe; accept either.
+            CANDIDATE="$(find "$RTK_TMP/unpacked" -type f \( -name rtk -o -name rtk.exe \) -perm -u+x 2>/dev/null | head -n1)"
+            [ -n "$CANDIDATE" ] || CANDIDATE="$(find "$RTK_TMP/unpacked" -type f \( -name rtk -o -name rtk.exe \) 2>/dev/null | head -n1)"
+            [ -n "$CANDIDATE" ] && cp "$CANDIDATE" "$RTK_DIR/rtk"
+          else
+            info "unzip not found; install RTK manually, then run 'rtk init -g'."
+          fi
+          ;;
+        *.tar.gz|*.tgz)
+          tar -xzf "$RTK_TMP/rtk-download" -C "$RTK_TMP"
+          CANDIDATE="$(find "$RTK_TMP" -type f -name rtk -perm -u+x 2>/dev/null | head -n1)"
+          [ -n "$CANDIDATE" ] || CANDIDATE="$(find "$RTK_TMP" -type f -name rtk 2>/dev/null | head -n1)"
+          [ -n "$CANDIDATE" ] && cp "$CANDIDATE" "$RTK_DIR/rtk"
+          ;;
+        *)
+          cp "$RTK_TMP/rtk-download" "$RTK_DIR/rtk"
+          ;;
+      esac
+      [ -f "$RTK_DIR/rtk" ] && chmod +x "$RTK_DIR/rtk"
+      export PATH="$RTK_DIR:$PATH"
+    fi
+    rm -rf "$RTK_TMP"
+  fi
+
+  if command -v rtk >/dev/null 2>&1; then
+    if rtk init -g >/dev/null 2>&1; then
+      info "RTK initialized globally for DEVIN CLI terminal sessions."
+    else
+      info "RTK found, but 'rtk init -g' did not complete. Run it manually when ready."
+    fi
+  else
+    info "RTK setup skipped: configure ALFRED_RTK_URL if the default is unavailable."
+  fi
+fi
+
+# 5. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
 # Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
 # server in Claude Code when available. Best-effort: failures never break the install.
 # Skip entirely with ALFRED_SKIP_EMAIL=1; non-interactive runs skip the prompt.

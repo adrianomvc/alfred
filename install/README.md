@@ -14,6 +14,11 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
    observability logs are batched and e-mailed there automatically (provisional
    transport until the telemetry API exists, D45) so the org can aggregate metrics.
    Existing config is never overwritten; every part degrades gracefully (D3).
+4. Optionally set up **RTK** for DEVIN CLI terminal sessions. RTK is a local
+   tool/hook that bounds large command output. Alfred downloads the configured
+   RTK URL when RTK is not already on `PATH`. The default URL is a public GitHub
+   Windows zip placeholder that should be replaced by the corporate Artifactory
+   zip when available.
 
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
@@ -44,6 +49,44 @@ curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/main/install/inst
 Installs the skill to `~/.agents/skills/alfred/SKILL.md` (a user skill path the
 DEVIN CLI reads on every platform).
 
+## Corporate Machine Setup
+When preparing this installer for a company computer, there are only two links
+you normally need to replace:
+
+1. **Alfred framework repo**
+   - PowerShell: edit the `-FrameworkUrl` default in the `COMPANY SETTINGS`
+     block at the top of `install/install.ps1`.
+   - bash: edit `DEFAULT_FRAMEWORK_URL` in the `COMPANY SETTINGS` block at the
+     top of `install/install.sh`.
+   - Temporary alternative:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File install/install.ps1 -FrameworkUrl "<internal-alfred-git-url>"
+     ```
+     ```bash
+     ALFRED_FRAMEWORK_URL="<internal-alfred-git-url>" bash install/install.sh
+     ```
+
+2. **RTK download URL**
+   - PowerShell: edit the `-RtkUrl` default in the same `COMPANY SETTINGS`
+     block at the top of `install/install.ps1`.
+   - bash: edit `DEFAULT_RTK_URL` in the `COMPANY SETTINGS` block at the top of
+     `install/install.sh`.
+   - The default RTK URL is intentionally the public Windows zip placeholder
+     because the primary company path is Windows/Git Bash and the Artifactory
+     package will also be a zip. Replace it with the internal Artifactory zip
+     when available.
+   - Temporary alternative:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-rtk-url>"
+     ```
+     ```bash
+     ALFRED_RTK_URL="<artifactory-rtk-url>" bash install/install.sh
+     ```
+
+If the one-line install command is used inside the company network, replace the
+`raw.githubusercontent.com/.../install/install.ps1` or `install/install.sh` URL
+with the internal raw-file URL from the company mirror.
+
 ## Options
 | Setting | PowerShell flag | bash env var | Default |
 |---|---|---|---|
@@ -54,6 +97,30 @@ DEVIN CLI reads on every platform).
 | Skills dir | `-SkillsDir` | `ALFRED_SKILLS_DIR` | `%APPDATA%\devin\skills` / `~/.agents/skills` |
 | Notification e-mail | `-Email` | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `-SkipEmail` | `ALFRED_SKIP_EMAIL=1` | setup runs |
+| RTK package URL | `-RtkUrl` | `ALFRED_RTK_URL` | public Windows zip placeholder |
+| Skip RTK setup | `-SkipRtk` | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
+
+## RTK terminal hook (DEVIN CLI only)
+RTK setup is optional and currently scoped to the DEVIN CLI install path.
+
+PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-url>"
+```
+
+bash:
+```bash
+ALFRED_RTK_URL="<artifactory-url>" bash install/install.sh
+```
+
+If `rtk` is already on `PATH`, the installer only runs:
+```bash
+rtk init -g
+```
+
+If the URL is removed or RTK cannot be downloaded, Alfred then follows
+`rules/common/terminal-token-policy.md`: prefer bounded native commands and
+load `core/hooks/rtk.md` only as guidance.
 
 ## Versions
 Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).

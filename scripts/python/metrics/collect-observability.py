@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Collect Alfred observability JSONL events from a tree.
-
-Python mirror of ``scripts/powershell/metrics/collect-observability.ps1``.
-"""
+"""Collect Alfred observability JSONL events from a tree."""
 
 import argparse
 import json

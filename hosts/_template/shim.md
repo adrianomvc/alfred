@@ -13,6 +13,18 @@
 ## Model (host-specific — D46)
 {{model_policy}}
 
+## Prompt caching
+If this host exposes prompt caching or persistent context, follow
+`rules/common/prompt-caching-policy.md`: stable framework context first,
+volatile demand state/artifacts last. If the host has no cache controls, keep
+the same order as JIT loading.
+
+## JIT tools
+Before using optional tools, MCP servers, connector adapters, external catalogs,
+or specialty skills, follow `rules/common/tool-discovery-policy.md`: select the
+needed capability from the registry first, then load/call only that tool. Do not
+load every available tool schema at boot.
+
 {{host_extra}}
 ## Always
 - Keep the demand `state` current; commit on the demand branch.

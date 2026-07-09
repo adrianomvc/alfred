@@ -35,7 +35,7 @@ Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few ch
 
 ## Toolbar (single line)
 ```
-ALFRED | SIGLA:SQ9 | #001-implantacao-alfred | FAST | Execution (3/5) | falta: PR + merge
+ALFRED | SIGLA:ABC | #001-ajuste-cache | FAST | Execution (3/5) | missing: PR + merge
 ```
 Includes compact cost. FAST does not render the full ASCII block.
 

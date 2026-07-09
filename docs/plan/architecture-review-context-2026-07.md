@@ -94,7 +94,7 @@ o host não oferece nada especial.
 Cada fase foi validada com:
 
 - `python scripts/python/validators/validate-framework.py -Root .`
-- `pwsh -NoProfile -File scripts/powershell/validators/validate-framework.ps1 -Root .`
+- `python scripts/python/validators/validate-framework.py -Root .`
 
 O fechamento também preserva:
 - link validation limpo dentro de `validate-framework`;

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Validate internal Markdown references in the Alfred framework.
 
-Python mirror of ``scripts/powershell/validators/validate-links.ps1``. Optional helper
-(D3): Alfred still works manually through Markdown if it cannot run. It catches
+Optional helper (D3): Alfred still works manually through Markdown if it cannot run. It catches
 broken cross-references after files are moved or renamed.
 
 It checks two reference styles used across the framework:

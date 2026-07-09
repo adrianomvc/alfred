@@ -1,4 +1,4 @@
-ALFRED | SQ9 | #003-simulado-safe | SAFE
-[####################] 100% | O que[x] -> Como[x] -> Fazer[x] -> Validar[x] -> Operar[x]
-HITL: concluido com evidencias formais | model: GPT-5 | cost: n/a
-Next: executar simulado operacional Execution-first quando aprovado
+ALFRED | TST | #toolbar-safe | SAFE
+[############........] 60% | O que[x] -> Como[x] -> Fazer[x] -> Validar[>] -> Operar[ ]
+HITL: Product Owner + Tech Lead + Security | model: GPT-5 | cost: n/a
+Next: collect final evidence and human acceptance

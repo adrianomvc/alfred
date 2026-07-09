@@ -61,7 +61,7 @@ Version adoption is governed by `docs/version-adoption.md`: active demands freez
 Each pluggable family declares a **contract** in its registry (`connectors/connectors.md`, `skills/skills.md`, `rules/lanes/*`, `rules/agents/*`, `rules/demand-types/*`). Rules reference the contract/role, never the concrete — swapping CloudWatch for Datadog is swapping the connector, with no rule change.
 
 ### Extension checklist (the guardrail)
-Code SOLID has an owner (Execution applies `skills/coding-standard.md`; the Reviewer validates it). Architecture SOLID has the same shape: this checklist is the standard, and `docs/framework-validation.md` is where it is enforced when Alfred itself changes. Run it before adding or moving any module/file/artifact:
+Code SOLID has an owner (Execution applies `skills/coding-standard/SKILL.md`; the Reviewer validates it). Architecture SOLID has the same shape: this checklist is the standard, and `docs/framework-validation.md` is where it is enforced when Alfred itself changes. Run it before adding or moving any module/file/artifact:
 - **S** — does it have one reason to change? If it serves two concerns, split it (do not grow a "drawer" folder).
 - **O** — can the need be met by **adding** a skill/connector/demand-type/lane/sub-activity instead of editing the core or adding a phase?
 - **L** — if it joins a pluggable family, is it substitutable through the family contract (no consumer special-casing the concrete)?

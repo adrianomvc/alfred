@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the minimal ordered Alfred context for a phase/lane/type/agent."""
+"""Print minimal Alfred context in stable-to-volatile order."""
 
 import argparse
 import re
@@ -94,6 +94,8 @@ def build_manifest(root, phase, lane, demand_type, agent, sub_activity=None):
     agent = normalize_slug(agent)
     rows = parse_rules_index(root)
 
+    # Stable prefix first: keeps prompt caching effective when the host supports
+    # it, and remains a plain JIT loading order everywhere else.
     ordered = [
         "core/principles.md",
         "rules/README.md",

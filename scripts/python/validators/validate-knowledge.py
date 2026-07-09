@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Alfred knowledge files, the policy template, and example policies.
-
-Python mirror of ``scripts/powershell/validators/validate-knowledge.ps1``.
-"""
+"""Validate Alfred knowledge files, the policy template, and example policies."""
 
 import argparse
 import re

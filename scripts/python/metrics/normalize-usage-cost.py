@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Map host usage exports into append-only Alfred observability events.
-
-Python mirror of ``scripts/powershell/metrics/normalize-usage-cost.ps1``.
-"""
+"""Map host usage exports into append-only Alfred observability events."""
 
 import argparse
 import json

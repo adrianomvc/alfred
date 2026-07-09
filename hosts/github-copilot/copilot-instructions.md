@@ -17,6 +17,18 @@ Make the framework reachable to Copilot in one of two ways:
 ## Model (host-specific — D46)
 Load `core/model-policy.md` only when selecting or switching the model and map its tiers (`cheap`/`medium`/`strong`) to the models Copilot offers. If the model cannot be chosen, record which one ran (D3).
 
+## Prompt caching
+If this host exposes prompt caching or persistent context, follow
+`rules/common/prompt-caching-policy.md`: stable framework context first,
+volatile demand state/artifacts last. If the host has no cache controls, keep
+the same order as JIT loading.
+
+## JIT tools
+Before using optional tools, MCP servers, connector adapters, external catalogs,
+or specialty skills, follow `rules/common/tool-discovery-policy.md`: select the
+needed capability from the registry first, then load/call only that tool. Do not
+load every available tool schema at boot.
+
 ## Always
 - Keep the demand `state` current; commit on the demand branch.
 - Stamp the framework version in the demand `state` (D26).

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Validate the Alfred framework structure and run the sub-validators.
 
-Python mirror of ``scripts/powershell/validators/validate-framework.ps1``. Runs the
-Python sub-validators so the framework can be checked without PowerShell.
+Python is the canonical helper runtime. The PowerShell validator remains a
+compatibility entry point for Windows-first host flows.
 """
 
 import argparse
@@ -16,6 +16,8 @@ from _common import find_observability_logs, iter_jsonl  # noqa: E402
 
 REQUIRED_PATHS = [
     "core",
+    "core/hooks/README.md",
+    "core/hooks/rtk.md",
     "core/presentation/README.md",
     "core/presentation/toolbar-quick.md",
     "core/presentation/welcome-screen.md",
@@ -32,8 +34,13 @@ REQUIRED_PATHS = [
     "templates/app",
     "docs",
     "examples",
+    "examples/examples.md",
     "rules/common/units.md",
     "rules/common/escalation-triggers.md",
+    "rules/common/terminal-token-policy.md",
+    "rules/common/prompt-caching-policy.md",
+    "rules/common/tool-discovery-policy.md",
+    "rules/common/context-compression-policy.md",
     "rules/common/workflow-changes.md",
     "rules/lifecycle/design/sub-activities/README.md",
     "rules/lifecycle/design/sub-activities/application-design.md",
@@ -74,11 +81,8 @@ REQUIRED_PATHS = [
     "knowledge/policy-template.md",
     "docs/knowledge-governance.md",
     "docs/automation-fallback.md",
-    "scripts/powershell/validators/validate-knowledge.ps1",
     "scripts/python/validators/validate-knowledge.py",
-    "scripts/powershell/validators/validate-links.ps1",
     "scripts/python/validators/validate-links.py",
-    "scripts/powershell/validators/validate-context-manifest-fixtures.ps1",
     "scripts/python/validators/validate-context-manifest-fixtures.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
@@ -100,26 +104,11 @@ REQUIRED_PATHS = [
     "docs/version-adoption.md",
     "docs/release-governance.md",
     "CHANGELOG.md",
-    "scripts/powershell/workflow/alfred-boot.ps1",
-    "scripts/powershell/workflow/context-manifest.ps1",
-    "scripts/powershell/workflow/generate-host-shims.ps1",
-    "scripts/powershell/workflow/generate-registry.ps1",
-    "scripts/powershell/workflow/render-toolbar.ps1",
     "docs/skills-activation.md",
-    "skills/lang-python.md",
-    "skills/lang-sql.md",
-    "skills/lang-terraform.md",
-    "skills/platform-aws-data.md",
-    "scripts/powershell/metrics/collect-observability.ps1",
-    "scripts/powershell/metrics/generate-metrics-rollup.ps1",
-    "scripts/powershell/metrics/normalize-usage-cost.ps1",
-    "scripts/powershell/validators/validate-demand.ps1",
-    "scripts/powershell/validators/validate-reverse-eng-staleness.ps1",
-    "scripts/powershell/validators/validate-sdd-gate.ps1",
-    "scripts/powershell/validators/validate-toolbar-fixtures.ps1",
-    "scripts/powershell/validators/validate-skills-registry.ps1",
-    "scripts/powershell/validators/validate-connectors.ps1",
-    "scripts/powershell/validators/validate-model-policy.ps1",
+    "skills/lang-python/SKILL.md",
+    "skills/lang-sql/SKILL.md",
+    "skills/lang-terraform/SKILL.md",
+    "skills/platform-aws-data/SKILL.md",
     "scripts/python/workflow/alfred-boot.py",
     "scripts/python/workflow/context-manifest.py",
     "scripts/python/workflow/generate-host-shims.py",
@@ -135,6 +124,9 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-toolbar-fixtures.py",
     "scripts/python/validators/validate-skills-registry.py",
     "scripts/python/validators/validate-connectors.py",
+    "scripts/python/validators/validate-email-adapter.py",
+    "scripts/python/validators/validate-tool-discovery-policy.py",
+    "scripts/python/validators/validate-context-compression-policy.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/adapter-template.md",
@@ -150,6 +142,10 @@ REQUIRED_PATHS = [
     "examples/toolbar-fixtures/safe.txt",
     "examples/toolbar-fixtures/execution-first.txt",
     "examples/toolbar-fixtures/standard-parallel-units.txt",
+    "examples/toolbar-states/fast.md",
+    "examples/toolbar-states/safe.md",
+    "examples/toolbar-states/execution-first.md",
+    "examples/toolbar-states/standard.md",
     "examples/context-manifest-fixtures/standard-product-design.txt",
     "examples/context-manifest-fixtures/fast-operational-execution.txt",
     "examples/context-manifest-fixtures/safe-engineering-inception.txt",
@@ -158,8 +154,9 @@ REQUIRED_PATHS = [
     "examples/staleness-fixtures/reverse-eng-fresh.md",
 ]
 
-EXAMPLE_DEMAND = "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/005-parallel-units"
 STRICT_EXAMPLE_DEMAND = "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2"
+STRICT_EXAMPLE_APP_DEMAND = "examples/sq9-pilot/.alfred-docs-app/iniciativa-001-piloto/006-simulado-adocao-v2"
+STRICT_EXAMPLE_APP_COMMIT = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 
 
 def assert_path(root, rel):
@@ -211,16 +208,22 @@ def main():
     run_sub(root, "scripts/python/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-email-adapter.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-tool-discovery-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-context-compression-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-demand.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
-    run_sub(root, "scripts/python/validators/validate-demand.py", "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND), "--strict")
+    run_sub(root, "scripts/python/validators/validate-demand.py",
+            "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND),
+            "-AppDemandPath", str(root / STRICT_EXAMPLE_APP_DEMAND),
+            "-AppCurrentCommit", STRICT_EXAMPLE_APP_COMMIT,
+            "--strict")
     run_sub(root, "scripts/python/workflow/alfred-boot.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-reverse-eng-staleness.py",
             "-ReverseEngPath", str(root / "examples/staleness-fixtures/reverse-eng-fresh.md"),
             "-CurrentCommit", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    run_sub(root, "scripts/python/validators/validate-sdd-gate.py", "-HubDemandPath", str(root / EXAMPLE_DEMAND))
+    run_sub(root, "scripts/python/validators/validate-sdd-gate.py", "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND))
 
     print("Framework validation completed.")
 

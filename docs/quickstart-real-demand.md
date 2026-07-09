@@ -42,9 +42,6 @@ Keep `001-index.md` as the app-local context index. It should point to reverse e
 
 When creating `01-inception/002-reverse-eng.md`, record the app commit used for the analysis. Before code changes, recheck staleness:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-reverse-eng-staleness.ps1 -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
-```
 ```bash
 python scripts/python/validators/validate-reverse-eng-staleness.py -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
 ```
@@ -81,9 +78,6 @@ Before running commands against real infrastructure or external hosts, confirm `
 
 Before entering Execution for Standard/SAFE, run the optional SDD gate:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-sdd-gate.ps1 -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
-```
 ```bash
 python scripts/python/validators/validate-sdd-gate.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```
@@ -99,9 +93,6 @@ Stamp the active Alfred version in `001-state.md`, `05-operation/008-metrics.md`
 
 Before advancing to a major checkpoint or closing a demand, run the optional demand validator:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-demand.ps1 -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
-```
 ```bash
 python scripts/python/validators/validate-demand.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```

@@ -21,17 +21,21 @@ template and coding-standard — brownfield in place.
 ## Inputs
 `spec` + execution plan step, applicable **template** repo (load only relevant
 sections, JIT), active **coding-standard / language skill** (override: most
-specific wins, else `../../../../skills/coding-standard.md`).
+specific wins, else `../../../../skills/coding-standard/SKILL.md`). If a
+compressed summary selected the context, also load the original source/spec
+excerpts it points to.
 
 ## Steps
 1. Load the template section and coding-standard for this step (JIT).
-2. Implement the change **in place** — modify existing files; never create
+2. Open the original files and original spec/decision excerpts for this unit;
+   compressed context may point to them, but cannot replace them.
+3. Implement the change **in place** — modify existing files; never create
    `arquivo_v2`.
-3. Apply **SOLID** and mirror the template's structure and conventions.
-4. Make the code **automation-friendly** (`data-testid`, stable selectors, clear
+4. Apply **SOLID** and mirror the template's structure and conventions.
+5. Make the code **automation-friendly** (`data-testid`, stable selectors, clear
    seams for tests).
-5. Keep each step **small and traceable**; commit per step on the demand branch.
-6. Record any **deviation** from the spec/standard with its reason.
+6. Keep each step **small and traceable**; commit per step on the demand branch.
+7. Record any **deviation** from the spec/standard with its reason.
 
 ## Output
 The implemented change for the step, committed on the demand branch, with

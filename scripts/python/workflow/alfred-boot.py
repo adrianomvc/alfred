@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Boot helper: detect the Alfred context and list resumable demands.
-
-Python mirror of ``scripts/powershell/workflow/alfred-boot.ps1``.
-"""
+"""Boot helper: detect the Alfred context and list resumable demands."""
 
 import argparse
 import importlib.util

@@ -14,7 +14,7 @@ The framework is plain markdown at `~/.alfred`. Resolve the logged-in user's pat
 - macOS/Linux: `echo "$HOME/.alfred/core/boot.md"`.
 - Real cmd.exe/PowerShell only: `echo %USERPROFILE%\.alfred\core\boot.md`.
 
-Resolve other framework files the same way. If `.alfred` is missing, tell the user to clone `https://github.com/adrianomvc/alfred.git` and stop.
+Resolve other framework files the same way. If `.alfred` is missing, tell the user to install Alfred from the configured framework repository and stop.
 
 ## On start
 1. **Update (version-aware):** on the default branch, git -C ~/.alfred pull --ff-only; if pinned or an active demand exists, keep the stamped version frozen and only note an update is available (~/.alfred/docs/version-adoption.md).
@@ -24,6 +24,18 @@ Resolve other framework files the same way. If `.alfred` is missing, tell the us
 
 ## Model (host-specific — D46)
 Load `~/.alfred/core/model-policy.md` only when selecting or switching the model, then map its tiers to Claude models (for example `strong` -> `claude-opus-4-8`). Use `/model` when a step requires a different tier; if switching is unavailable, record the model that ran.
+
+## Prompt caching
+If this host exposes prompt caching or persistent context, follow
+`rules/common/prompt-caching-policy.md`: stable framework context first,
+volatile demand state/artifacts last. If the host has no cache controls, keep
+the same order as JIT loading.
+
+## JIT tools
+Before using optional tools, MCP servers, connector adapters, external catalogs,
+or specialty skills, follow `rules/common/tool-discovery-policy.md`: select the
+needed capability from the registry first, then load/call only that tool. Do not
+load every available tool schema at boot.
 
 ## Always
 - Keep the demand `state` current; commit on the demand branch.

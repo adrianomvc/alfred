@@ -7,12 +7,12 @@ text is the floor — nothing to misalign. Full spec (layers, profiles, rules):
 
 ## FAST — one line
 ```text
-ALFRED | SQ9 | #002-simulado-fast | FAST | Execution | model: <current> | cost: <compact> | next: <short>
+ALFRED | TST | #toolbar-fast | FAST | Execution | model: <current> | cost: <compact> | next: <short>
 ```
 
 ## Standard/SAFE — four lines
 ```text
-ALFRED | SQ9 | #005-parallel-units | STANDARD
+ALFRED | TST | #toolbar-standard | STANDARD
 [############........] 60% | O que[x] -> Como[x] -> Fazer[>] -> Validar[ ] -> Operar[ ]
 HITL: Tech Lead | model: <current> | cost: <compact>
 Next: <next step from state>
@@ -22,4 +22,4 @@ Next: <next step from state>
 - Phase aliases (pt-BR): O que · Como · Fazer · Validar · Operar.
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
 - With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
-- Helper (optional): `render-toolbar` in `scripts/powershell/workflow/` · `scripts/python/workflow/`.
+- Helper (optional): `render-toolbar` in `scripts/python/workflow/`.

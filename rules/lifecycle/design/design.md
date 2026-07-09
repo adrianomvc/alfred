@@ -18,8 +18,14 @@ Define how to solve before executing. Owner agent: **Spec/Design**. SDD is the c
 2. **Solution shaping** + alternatives (SAFE) → `spec` (SDD) + acceptance criteria.
 3. Sub-activities **by trigger**: application-design (new component) / units-generation (decompose) / functional-design (new logic) / NFR (perf/security/scale) / infrastructure (deploy) / user-stories (Produto). These are sub-activities **inside Design**, not new phases. Each rung has concise JIT guidance in `sub-activities/` — load only what the demand triggers.
 4. **Execution plan** — impact analysis, skip/execute with justification, sequence, parallelization + test plan.
-5. Confirm applicable **template** and **SOLID/language** standard to mirror in Execution.
+5. Confirm applicable **template** (optional — may be none) and **SOLID/language** standard to mirror in Execution. If no template was registered for the sigla, mirror the conventions from the app's reverse engineering and record that none applied.
 6. Record `decisions`; **revalidate Risk Mode**; satisfy **DoD Design** → checkpoint (spec approval).
+
+## Context compression
+RAG/compressed context may help find relevant requirements, code areas, logs, and
+design inputs. It must not replace a detailed `spec`, decisions, execution plan,
+or original source pointers. Apply `../../common/context-compression-policy.md`
+when compression is used.
 
 ## Inherited from AI-DLC
 - **Conditional stages → sub-activities** (application-design, units-generation, functional-design, NFR, infrastructure) — by trigger and mode, never new phases.
