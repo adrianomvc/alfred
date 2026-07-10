@@ -50,7 +50,7 @@ def main():
         if not expected_path.exists():
             raise SystemExit(f"Missing toolbar fixture expected output for {name}: {expected_path}")
 
-        actual = "\n".join(render(str(state_path), "GPT-5", "n/a"))
+        actual = "\n".join(render(str(state_path), "GPT-5", "n/a", profile="text"))
         expected = read_text(expected_path)
 
         # Normalize line endings before comparing (fixtures use CRLF).

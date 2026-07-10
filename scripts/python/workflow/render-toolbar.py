@@ -31,7 +31,7 @@ def shorten(value, maximum=64):
     return value[: maximum - 3] + "..."
 
 
-# --- shared vocabulary (borderless design, owner-approved 2026-07-07) ---
+# --- shared vocabulary ---
 _ESC = "\033"
 _LANE_COLOR = {"fast": "32", "standard": "33", "safe": "31"}   # green / amber / red
 _LANE_ICON = {"fast": "🟢", "standard": "🟡", "safe": "🔴"}
@@ -40,10 +40,35 @@ _ALIAS_TEXT = {"Inception": "O que", "Design": "Como", "Execution": "Fazer",
 _ALIAS_RICH = {"Inception": "O quê", "Design": "Como", "Execution": "Fazer",
                "Validate": "Validar", "Operation": "Operar"}
 _STATUS_TEXT = {"x": "ok", ">": "agora", " ": "pendente"}
+_STATUS_RICH = {"x": "✓", ">": "▶", " ": "○"}
+_RICH_WIDTH = 72
 
 
 def _c(code, s):
     return f"{_ESC}[{code}m{s}{_ESC}[0m"
+
+
+def _box_top(width=_RICH_WIDTH):
+    return "╭" + "─" * (width - 2) + "╮"
+
+
+def _box_sep(width=_RICH_WIDTH):
+    return "├" + "─" * (width - 2) + "┤"
+
+
+def _box_bottom(width=_RICH_WIDTH):
+    return "╰" + "─" * (width - 2) + "╯"
+
+
+def _box_line(text="", width=_RICH_WIDTH):
+    inner = width - 4
+    text = shorten(str(text), inner)
+    return "│ " + text.ljust(inner) + " │"
+
+
+def _rich_bar(progress):
+    filled = round(progress / 10)
+    return "█" * filled + "░" * (10 - filled)
 
 
 def forecast_total(cost_usd, progress):
@@ -89,26 +114,30 @@ def normalize_cost(cost, cost_usd="", usage_cost=""):
 
 def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
                  model, cost, progress, markers, forecast):
-    color = _LANE_COLOR.get(lane.lower(), "36")
     icon = _LANE_ICON.get(lane.lower(), "⚪")
-    cost_part = f"custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
-    head = f"🎩 {_c('1', 'ALFRED')} · {sigla} · #{demand_id} · {icon} {_c(color, lane.upper())} · {progress}% · {cost_part}"
-    if lane.lower() == "fast":
-        alias = _ALIAS_RICH.get(phase, phase)
-        return [f"{head} · {alias} ▶ · {_c('2', '→')} {shorten(nxt, 56)}"]
-
-    filled = round(progress / 10)
-    bar = _c(color, "▰" * filled) + _c("2", "▱" * (10 - filled))
     track = " · ".join(
         _ALIAS_RICH.get(name, name)
-        + (" " + (_c("32", "✓") if m == "x" else _c("36", "▶") if m == ">" else _c("2", "◻")))
+        + " " + _STATUS_RICH.get(m, "·")
         for name, m in markers[:5]
     )
+    cost_part = f"Custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
+    lines = [
+        _box_top(),
+        _box_line(f"🎩  A L F R E D · {sigla} · #{demand_id} · {icon} {lane.upper()}"),
+        _box_sep(),
+        _box_line(f"Progresso: {progress}%  {_rich_bar(progress)}"),
+        _box_line(cost_part),
+    ]
+    if lane.lower() != "fast":
+        lines.append(_box_line(f"Fases: {track}"))
+        lines.append(_box_line(f"HITL: {shorten(checkpoint, 36)} · Modelo: {model}"))
+    else:
+        alias = _ALIAS_RICH.get(phase, phase)
+        lines.append(_box_line(f"Fase: {alias} · Modelo: {model}"))
     return [
-        f"{head}",
-        f"{bar} {progress}% {_c('2', '│')} {track}",
-        f"⏸ HITL: {shorten(checkpoint, 44)} {_c('2', '│')} modelo: {model}",
-        f"{_c('2', '→')} Próximo: {shorten(nxt, 76)}",
+        *lines,
+        _box_line(f"Próximo: {nxt}"),
+        _box_bottom(),
     ]
 
 
@@ -161,7 +190,7 @@ def _render_web(sigla, demand_id, lane, nxt, step, progress, markers):
             '</svg>']
 
 
-def render(state_path, model="default", cost="n/a", profile="text", cost_usd=""):
+def render(state_path, model="default", cost="n/a", profile="rich", cost_usd=""):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
 
@@ -222,7 +251,7 @@ def render(state_path, model="default", cost="n/a", profile="text", cost_usd="")
     if profile == "web":
         return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
-    # text floor: borderless ASCII (no box = nothing to misalign; degrades anywhere)
+    # text floor: ASCII fallback (no Unicode dependency; degrades anywhere)
     forecast_part = f" | est. total: {forecast}" if forecast else ""
     cost_part = f"custo: {cost_display}{forecast_part}"
     if lane.lower() == "fast":
@@ -244,14 +273,14 @@ def render(state_path, model="default", cost="n/a", profile="text", cost_usd="")
 
 def main():
     try:
-        sys.stdout.reconfigure(encoding="utf-8")   # rich profile uses unicode/ANSI
+        sys.stdout.reconfigure(encoding="utf-8")   # rich profile uses Unicode
     except Exception:
         pass
     parser = argparse.ArgumentParser(description="Render the Alfred process toolbar.")
     parser.add_argument("--state-path", "-StatePath", dest="state_path", required=True)
     parser.add_argument("--model", "-Model", dest="model", default="default")
     parser.add_argument("--cost", "-Cost", dest="cost", default="n/a")
-    parser.add_argument("--profile", "-Profile", dest="profile", default="text",
+    parser.add_argument("--profile", "-Profile", dest="profile", default="rich",
                         choices=["text", "rich", "web"])
     parser.add_argument("--cost-usd", "-CostUsd", dest="cost_usd", default="",
                         help="numeric cost so far (USD); enables the linear total-cost forecast")

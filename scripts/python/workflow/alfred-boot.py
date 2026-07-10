@@ -77,6 +77,11 @@ def priority_reason(state):
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", "-Root", dest="root", default=".")
     parser.add_argument("--model", "-Model", dest="model", default="default")

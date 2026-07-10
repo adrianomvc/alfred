@@ -2,16 +2,30 @@
 
 Emit the toolbar at the top of every response, from the demand `state` fields
 (sigla, id, lane, phase checklist, checkpoint, current step, next step, model,
-cost). Borderless text is the floor — nothing to misalign. Full spec (layers,
-profiles, rules):
+cost). Prefer the rich Unicode block, visually aligned with `welcome-screen.md`;
+use the borderless text floor only when the host cannot render Unicode. Full
+spec (layers, profiles, rules):
 `core/presentation/toolbar.md` — load it only when a case is not covered here.
 
-## FAST — one line
+## Preferred rich block
+```text
+╭──────────────────────────────────────────────────────────────────────╮
+│ 🎩  A L F R E D · TST · #toolbar-standard · 🟡 STANDARD                │
+├──────────────────────────────────────────────────────────────────────┤
+│ Progresso: 40%  ████░░░░░░                                           │
+│ Custo: US$ 1.20 · previsão total: ~US$ 3.00                          │
+│ Fases: O quê ✓ · Como ✓ · Fazer ▶ · Validar ○ · Operar ○             │
+│ HITL: Tech Lead · Modelo: claude-opus-4-8                            │
+│ Próximo: finish implementation unit and update evidence              │
+╰──────────────────────────────────────────────────────────────────────╯
+```
+
+## Text fallback — FAST one line
 ```text
 ALFRED | TST | #toolbar-fast | FAST | Execution | 80% | custo: <compact> | modelo: <current> | proximo: <short>
 ```
 
-## Standard/SAFE — four lines
+## Text fallback — Standard/SAFE four lines
 ```text
 ALFRED | TST | #toolbar-standard | STANDARD | 60% | custo: <compact>
 Fases: O que:ok | Como:ok | Fazer:agora | Validar:pendente | Operar:pendente
@@ -19,10 +33,10 @@ HITL: Tech Lead | modelo: <current> | etapa: <current step>
 Proximo: <next step from state>
 ```
 
-- Progress = completed phases / 5; phase statuses: `ok` done · `agora` current · `pendente` not done.
+- Progress = completed phases / 5; rich markers: `✓` done · `▶` current · `○` pending. Text fallback statuses: `ok` · `agora` · `pendente`.
 - Phase aliases (pt-BR): O que · Como · Fazer · Validar · Operar.
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
-- Cost is shown in the first line. If no host usage source exists, write
+- Cost is shown prominently in the top block. If no host usage source exists, write
   `custo: nao coletado` (or include the `usage-cost` state note); never hide it.
 - With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
 - Helper (optional): `render-toolbar` in `scripts/python/workflow/`.

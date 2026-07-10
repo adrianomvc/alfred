@@ -37,7 +37,8 @@ Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few ch
 ```
 ALFRED | SIGLA:ABC | #001-ajuste-cache | FAST | Execution (3/5) | missing: PR + merge
 ```
-Includes compact cost. FAST does not render the full ASCII block.
+Includes compact cost. In rich-capable hosts, FAST renders as a compact rich
+block; in text fallback, it stays a single line.
 
 ## Anti-degeneration
 A critical thing must not be treated as FAST: hard overrides (`core/risk-mode.md`) force the mode up; on detecting a trigger, reclassification is mandatory.
