@@ -48,8 +48,9 @@ emergency sequence with posterior phases. Cost is prominent top-block
 information: show the compact cost when collected, otherwise show
 `custo: nao coletado` and, when available, the `usage-cost` state note. A
 numeric cost (helper flag `-CostUsd`) adds `est. total: ~US$ <linear forecast>`
-while 0 < progress < 100 — an estimate, labeled `~`, omitted otherwise (never
-invent). Traceability appears in the same block: `Framework: v<version>
+while 0 < progress < 100 — an estimate, labeled `~`. When numeric cost exists
+but progress is 0% or 100%, the toolbar shows the forecast as unavailable with
+the reason instead of hiding it or inventing a total. Traceability appears in the same block: `Framework: v<version>
 (<commit>)` and `App: <commit>`.
 
 ## Text floor (fallback)

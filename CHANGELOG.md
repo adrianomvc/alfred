@@ -5,6 +5,9 @@ All notable Alfred framework changes should be recorded here.
 ## Unreleased
 
 ### Changed
+- Toolbar forecast display now explains why the total estimate is unavailable
+  when cost exists but progress is still 0% or already 100%, instead of hiding
+  the forecast line.
 - Alfred's butler persona now uses gender-neutral address for people: rendered
   welcome/UI text avoids `senhor`, `senhora`, and `senhor(a)`, and validation
   guards the neutral-address rule.

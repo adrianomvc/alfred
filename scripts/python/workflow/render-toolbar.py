@@ -112,14 +112,19 @@ def _rich_bar(progress):
 def forecast_total(cost_usd, progress):
     """Linear extrapolation of the total demand cost from recorded cost + progress.
 
-    Estimate, never a fact: labeled with '~' and omitted whenever the recorded
-    cost is not numeric or progress is 0/100 (no inventing — supreme law)."""
+    Estimate, never a fact: labeled with '~' when computable. When cost exists
+    but progress is 0/100, return an explicit unavailable reason instead of
+    hiding the forecast or inventing a value."""
     try:
         value = float(str(cost_usd).replace(",", "."))
     except (TypeError, ValueError):
         return ""
-    if value <= 0 or progress <= 0 or progress >= 100:
+    if value <= 0:
         return ""
+    if progress <= 0:
+        return "indisponível (0% concluído)"
+    if progress >= 100:
+        return "indisponível (demanda concluída)"
     return f"~US$ {value * 100.0 / progress:.2f}"
 
 
