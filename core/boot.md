@@ -11,6 +11,7 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - **Framework** if it finds `core/principles.md` / `rules/agents/` (editing Alfred itself).
    - Not identified → ask the human.
    - **Sigla (auto-label):** derive the sigla from the repo name — pattern `itau-<sigla>-<...>` → the segment right after `itau-` (from the app repo a demand targets, or the current repo). Fallback: the repo/folder name; else `unknown`. It is a **display label only** — no logic depends on it, so **never ask the human** for it. The pattern is configurable per org.
+   - **Empty/new HUB → provision, don't interrogate:** on a HUB with no Alfred structure, create the `alfred-docs-hub/` skeleton with defaults per `docs/onboarding-sigla.md`; write owner/apps/tracker as `pending`, read notification from `knowledge/notification.md`, and **never present a scope menu** — then offer one next step in a line.
 3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified."
    - **Safeguard (active demand):** if there is an update **and** an active demand, Alfred **warns and asks** — apply now or only on the next demand. The demand records the framework version used and keeps it frozen until it closes, unless a human decides otherwise.
 4. **JIT context load (anti-hypercontext):**
