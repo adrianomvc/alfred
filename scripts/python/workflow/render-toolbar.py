@@ -4,6 +4,7 @@
 import argparse
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -40,16 +41,51 @@ _ALIAS_TEXT = {"Inception": "O que", "Design": "Como", "Execution": "Fazer",
 _ALIAS_RICH = {"Inception": "O quê", "Design": "Como", "Execution": "Fazer",
                "Validate": "Validar", "Operation": "Operar"}
 _STATUS_TEXT = {"x": "ok", ">": "agora", " ": "pendente"}
-_STATUS_RICH = {"x": "✓", ">": "▶", " ": "○"}
-_RICH_WIDTH = 72
+_STATUS_RICH = {"x": "✅", ">": "▶", " ": "○"}
+_RICH_WIDTH = 78
 
 
 def _c(code, s):
     return f"{_ESC}[{code}m{s}{_ESC}[0m"
 
 
-def _box_top(width=_RICH_WIDTH):
-    return "╭" + "─" * (width - 2) + "╮"
+def _display_width(text):
+    width = 0
+    for char in str(text):
+        code = ord(char)
+        if unicodedata.combining(char) or 0xFE00 <= code <= 0xFE0F:
+            continue
+        if unicodedata.east_asian_width(char) in ("F", "W") or 0x1F000 <= code <= 0x1FAFF:
+            width += 2
+        else:
+            width += 1
+    return width
+
+
+def _shorten_display(text, maximum):
+    text = str(text)
+    if _display_width(text) <= maximum:
+        return text
+    result = ""
+    for char in text:
+        next_result = result + char
+        if _display_width(next_result + "...") > maximum:
+            break
+        result = next_result
+    return result + "..."
+
+
+def _pad_display(text, width):
+    text = _shorten_display(text, width)
+    return text + " " * max(0, width - _display_width(text))
+
+
+def _box_top(title="", width=_RICH_WIDTH):
+    if not title:
+        return "╭" + "─" * (width - 2) + "╮"
+    prefix = f"╭─ {title} "
+    fill = max(0, width - _display_width(prefix) - 1)
+    return prefix + "─" * fill + "╮"
 
 
 def _box_sep(width=_RICH_WIDTH):
@@ -62,13 +98,12 @@ def _box_bottom(width=_RICH_WIDTH):
 
 def _box_line(text="", width=_RICH_WIDTH):
     inner = width - 4
-    text = shorten(str(text), inner)
-    return "│ " + text.ljust(inner) + " │"
+    return "│ " + _pad_display(str(text), inner) + " │"
 
 
 def _rich_bar(progress):
     filled = round(progress / 10)
-    return "█" * filled + "░" * (10 - filled)
+    return "▰" * filled + "▱" * (10 - filled)
 
 
 def forecast_total(cost_usd, progress):
@@ -120,17 +155,20 @@ def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
         + " " + _STATUS_RICH.get(m, "·")
         for name, m in markers[:5]
     )
-    cost_part = f"Custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
+    title = f"🎩 ALFRED · {sigla} · #{demand_id}"
+    summary = f"Modo: {icon} {lane.upper()}   Progresso: {progress}%  {_rich_bar(progress)}   Custo: {cost}"
     lines = [
-        _box_top(),
-        _box_line(f"🎩  A L F R E D · {sigla} · #{demand_id} · {icon} {lane.upper()}"),
-        _box_sep(),
-        _box_line(f"Progresso: {progress}%  {_rich_bar(progress)}"),
-        _box_line(cost_part),
+        _box_top(title),
+        _box_line(summary),
     ]
+    if forecast:
+        lines.append(_box_line(f"Previsão: {forecast}"))
+    lines.append(
+        _box_sep(),
+    )
     if lane.lower() != "fast":
-        lines.append(_box_line(f"Fases: {track}"))
-        lines.append(_box_line(f"HITL: {shorten(checkpoint, 36)} · Modelo: {model}"))
+        lines.append(_box_line(track))
+        lines.append(_box_line(f"HITL: {shorten(checkpoint, 30)}       Modelo: {model}"))
     else:
         alias = _ALIAS_RICH.get(phase, phase)
         lines.append(_box_line(f"Fase: {alias} · Modelo: {model}"))

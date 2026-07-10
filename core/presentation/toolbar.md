@@ -31,19 +31,18 @@ The normal human-facing toolbar is a compact Unicode block, visually aligned
 with `welcome-screen.md`:
 
 ```text
-╭──────────────────────────────────────────────────────────────────────╮
-│ 🎩  A L F R E D · TST · #toolbar-standard · 🟡 STANDARD                │
-├──────────────────────────────────────────────────────────────────────┤
-│ Progresso: 40%  ████░░░░░░                                           │
-│ Custo: US$ 1.20 · previsão total: ~US$ 3.00                          │
-│ Fases: O quê ✓ · Como ✓ · Fazer ▶ · Validar ○ · Operar ○             │
-│ HITL: Tech Lead · Modelo: claude-opus-4-8                            │
-│ Próximo: finish implementation unit and update evidence              │
-╰──────────────────────────────────────────────────────────────────────╯
+╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
+│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
+│ Previsão: ~US$ 3.00                                                        │
+├────────────────────────────────────────────────────────────────────────────┤
+│ O quê ✅ · Como ✅ · Fazer ▶ · Validar ○ · Operar ○                        │
+│ HITL: Tech Lead       Modelo: claude-opus-4-8                              │
+│ Próximo: finish implementation unit and update evidence                    │
+╰────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Progress = completed phases / 5. The phase track uses pt-BR aliases with
-`✓` / `▶` / `○` statuses; Execution-first swaps the track for the
+`✅` / `▶` / `○` statuses; Execution-first swaps the track for the
 emergency sequence with posterior phases. Cost is prominent top-block information:
 show the compact cost when collected, otherwise show `custo: nao coletado`
 and, when available, the `usage-cost` state note. A numeric cost (helper flag

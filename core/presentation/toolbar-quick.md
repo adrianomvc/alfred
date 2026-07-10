@@ -9,15 +9,14 @@ spec (layers, profiles, rules):
 
 ## Preferred rich block
 ```text
-╭──────────────────────────────────────────────────────────────────────╮
-│ 🎩  A L F R E D · TST · #toolbar-standard · 🟡 STANDARD                │
-├──────────────────────────────────────────────────────────────────────┤
-│ Progresso: 40%  ████░░░░░░                                           │
-│ Custo: US$ 1.20 · previsão total: ~US$ 3.00                          │
-│ Fases: O quê ✓ · Como ✓ · Fazer ▶ · Validar ○ · Operar ○             │
-│ HITL: Tech Lead · Modelo: claude-opus-4-8                            │
-│ Próximo: finish implementation unit and update evidence              │
-╰──────────────────────────────────────────────────────────────────────╯
+╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
+│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
+│ Previsão: ~US$ 3.00                                                        │
+├────────────────────────────────────────────────────────────────────────────┤
+│ O quê ✅ · Como ✅ · Fazer ▶ · Validar ○ · Operar ○                        │
+│ HITL: Tech Lead       Modelo: claude-opus-4-8                              │
+│ Próximo: finish implementation unit and update evidence                    │
+╰────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Text fallback — FAST one line
@@ -33,7 +32,7 @@ HITL: Tech Lead | modelo: <current> | etapa: <current step>
 Proximo: <next step from state>
 ```
 
-- Progress = completed phases / 5; rich markers: `✓` done · `▶` current · `○` pending. Text fallback statuses: `ok` · `agora` · `pendente`.
+- Progress = completed phases / 5; rich markers: `✅` done · `▶` current · `○` pending. Text fallback statuses: `ok` · `agora` · `pendente`.
 - Phase aliases (pt-BR): O que · Como · Fazer · Validar · Operar.
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
 - Cost is shown prominently in the top block. If no host usage source exists, write
