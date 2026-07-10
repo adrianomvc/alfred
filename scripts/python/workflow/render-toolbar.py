@@ -424,6 +424,9 @@ def main():
     parser.add_argument("--cost", "-Cost", dest="cost", default="n/a")
     parser.add_argument("--profile", "-Profile", dest="profile", default="rich",
                         choices=["text", "rich", "web"])
+    parser.add_argument("--allow-text-fallback", "-AllowTextFallback",
+                        dest="allow_text_fallback", action="store_true",
+                        help="permit --profile text when the host cannot render Unicode/emoji")
     parser.add_argument("--cost-usd", "-CostUsd", dest="cost_usd", default="",
                         help="numeric cost so far (USD); enables the linear total-cost forecast")
     parser.add_argument("--app-commit", "-AppCommit", dest="app_commit", default="",
@@ -431,6 +434,13 @@ def main():
     parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="",
                         help="optional app demand artifact path used to read current/captured app commit")
     args = parser.parse_args()
+
+    if args.profile == "text" and not args.allow_text_fallback:
+        raise SystemExit(
+            "--profile text is the degraded fallback. In capable hosts, omit "
+            "--profile or use --profile rich. If the host cannot render "
+            "Unicode/emoji, rerun with --profile text --allow-text-fallback."
+        )
 
     for line in render(args.state_path, args.model, args.cost, args.profile,
                        args.cost_usd, args.app_commit, args.app_demand_path):

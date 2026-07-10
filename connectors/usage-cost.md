@@ -16,6 +16,10 @@ usage may run through Devin and Devin meters work in ACUs. Secondary path: local
 CLI importers such as `ccusage` when the CLI is supported and logs are durable. See
 `docs/usage-cost-adoption.md`.
 
+The installer can best-effort install `ccusage` from the configured npm registry
+(`ALFRED_NPM_REGISTRY` / `-NpmRegistry`), with package override
+`ALFRED_CCUSAGE_PACKAGE` / `-CcusagePackage`.
+
 ## operations
 - `read_usage(window, filters)` reads usage records from the host or an exported file.
 - `map_usage(record)` maps one host usage record to Alfred observability fields.

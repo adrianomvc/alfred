@@ -60,7 +60,9 @@ text fallback uses `ok` / `agora` / `pendente` instead of the rich markers.
 ## Rich renderer
 Produced by the helper (`--profile rich`, default). The model should not
 hand-draw the block when the helper is available; it should render from `state`.
-If the host cannot render Unicode boxes or icons, fall back to `--profile text`.
+In capable hosts, omit `--profile` or use `--profile rich`; do not force
+`--profile text`. If the host cannot render Unicode boxes or icons, fall back
+with `--profile text --allow-text-fallback` and record that degradation.
 
 ## Web (optional)
 Self-contained SVG card of the same `state` (helper `--profile web`), rendered
