@@ -2,16 +2,32 @@
 
 Use this when starting the first real demand after the SQ9 pilot.
 
-## 1. Choose identifiers
-- Sigla: `SQ9`
-- Initiative id: `iniciativa-<sequencia>-<iniciativa>`
-- Demand id: `<sequencia>-<nome-demanda>`
+## 0. Opening framing checkpoint
+Before any clone/fetch, id stamping, `state` write, or HUB/App scaffolding,
+propose the framing and wait for explicit human confirmation:
+- target app source/path and where it will live in the workspace;
+- initiative id and demand id;
+- initial scope/out-of-scope;
+- proposed lane (FAST/Standard/SAFE);
+- artifacts Alfred will create in HUB/App.
+
+Deterministic labels may be inferred (for example sigla from repo name).
+Material decisions are never inferred from "start a demand".
+
+After confirmation, record it in `001-state.md` (`Opening Framing`) and in
+`05-operation/007-audit.md`. Without that record, `validate-demand --strict`
+must fail before the demand is treated as governed.
+
+## 1. Confirm identifiers
+- Sigla: auto-label only, derived by `core/boot.md`.
+- Initiative id: `iniciativa-<sequencia>-<iniciativa>` (human-confirmed).
+- Demand id: `<sequencia>-<nome-demanda>` (human-confirmed).
 
 Example:
 - initiative: `iniciativa-005-primeira-entrega`
 - demand: `005-primeira-demanda`
 
-## 2. Create HUB artifacts
+## 2. Create HUB artifacts after confirmation
 Create:
 - `alfred-docs-hub/001-index.md` if this is the first demand for the sigla.
 - `alfred-docs-hub/<id-iniciativa>/001-initiative.md`
@@ -28,7 +44,7 @@ Update `alfred-docs-hub/001-index.md` with the open demand row so future boot ca
 
 If real environment parameters are missing, create `04-validate/014-environment-parameters.md` from `templates/hub/environment-parameters.md`. Keep the demand status as `bloqueada` or `em espera` until the missing values are confirmed. Do not invent account ids, secrets, endpoints, bucket names, schemas, table volumes, schedules, alarms, or rollback parameters.
 
-## 3. Create App artifacts
+## 3. Create App artifacts after confirmation
 Create:
 - `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md`
 - `.alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md`

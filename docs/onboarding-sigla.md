@@ -5,11 +5,17 @@ Use this checklist when adopting Alfred for a new sigla/system.
 ## How to onboard — confirm repo kind, then provision
 On an empty or new HUB, first confirm that the current repo is the HUB when no
 Alfred marker exists. A repo name like `*-hub` is a hint only, not evidence.
-After HUB intent is confirmed, **act first, ask later** (avoid bureaucracy):
+After HUB intent is confirmed, **act first, ask later** applies only to the
+empty-HUB skeleton listed below (avoid bureaucracy):
 1. **Sigla** — auto-derived from the repo name (`core/boot.md`); never asked.
 2. **Create the HUB skeleton immediately** — `alfred-docs-hub/` with `001-index.md`, `002-metrics-rollup.md`, `003-insights.md` (+ `knowledge/` if sigla policies exist). Do **not** present a "how far to provision" scope menu, and do **not** interrogate for owner/apps/tracker first.
 3. **Defer the rest as `pending`** in the index — owner, apps, and tracker are written as `pending` (they never block). Notification is **read** from `knowledge/notification.md` when configured, not asked. Apps and template repos resolve **per demand**, not at setup.
 4. **Then offer one next step** in a single line — e.g. *"Casa pronta (sigla `sq9`; owner/apps pendentes). Quer iniciar uma demanda?"*.
+
+This shortcut never authorizes starting a demand, cloning/fetching app code,
+choosing initiative/demand identifiers, classifying a lane as accepted, or
+creating demand artifacts. Those require the opening framing checkpoint in
+`core/boot.md` and `docs/quickstart-real-demand.md`.
 
 The numbered sections below describe **what** a HUB holds over time — a reference, **not a form to fill before creating the HUB**.
 

@@ -14,6 +14,9 @@ triggers:
 Understand the demand before designing a solution. Owner agent: **Discovery**. Subject to the supreme law and scaled by the active lane.
 
 ## Steps
+0. **Opening framing checkpoint (new demand)** — before any clone, id stamping,
+   state write, or scaffolding, propose target app/source, initiative id, demand
+   id, scope, lane, and artifact set; wait for explicit human confirmation.
 1. Detect **stream/type** and, if **Produto**, ingest the external `inception-input` — do not redo business discovery.
 2. **Intent analysis** — classify clarity (clear/vague/incomplete), type (mapped to streams), scope (1 file → cross-app), complexity. This output **pre-fills the Risk Mode checklist**.
 3. Produce **`tech-inception`** (technical lens: affected systems/apps via reverse-eng, integration points, technical risks).
@@ -35,7 +38,8 @@ problem statement · objective · scope/out-of-scope · initial risks · **propo
 PM (scope/value), Domain Expert (context). Sponsor only in SAFE.
 
 ## Checkpoint
-Confirm Risk Mode (Std/SAFE); confirm scope (SAFE).
+Confirm the opening framing before creating a new demand. Later, confirm Risk
+Mode (Std/SAFE); confirm scope again for SAFE.
 
 ## Depth by mode
 FAST = 1 paragraph in the state · Standard = problem statement + risks · SAFE = + stakeholders + risk analysis.

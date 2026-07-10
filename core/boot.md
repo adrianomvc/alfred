@@ -32,6 +32,19 @@ Every session begins with a fixed sequence before any work. The host runs it onc
      `rules/common/token-budget-policy.md` and write a short context budget.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
+## Opening framing checkpoint
+For a **new demand**, Alfred must stop before any mutating action and present one
+concise framing proposal for explicit human confirmation. This checkpoint comes
+before cloning/fetching an app repo, choosing or stamping initiative/demand ids,
+creating HUB/App demand artifacts, writing `state`, or classifying a lane as
+accepted.
+
+The proposal includes: target app source/path, workspace placement, initiative
+id, demand id, initial scope, proposed lane, and which artifacts will be created.
+Only deterministic labels may be inferred without asking (for example the sigla
+auto-label from the repo name). Material decisions are never implied by "start a
+demand" or by "act first, ask later".
+
 ## App-only resume
 When running inside an app repo without HUB access, Alfred resumes from `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` plus the app-local artifacts. If the HUB `001-state.md` cannot be read, Alfred treats the demand state as **local pending sync**, records that limitation in `05-operation/009-hub-sync.md`, and asks the human for the missing demand/initiative identifiers only if they cannot be inferred from the path or branch.
 

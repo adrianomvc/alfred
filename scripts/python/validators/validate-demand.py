@@ -179,6 +179,9 @@ def main():
     status = get_field(state_lines, ["status"])
     framework_version = get_field(state_lines, ["framework version", "versao framework", "versão framework"])
     observability_schema = get_field(state_lines, ["observability schema", "schema observability"])
+    framing_status = get_field(state_lines, ["framing status", "status enquadramento"])
+    framing_confirmed_by = get_field(state_lines, ["framing confirmed by", "enquadramento confirmado por"])
+    framing_confirmed_at = get_field(state_lines, ["framing confirmed at", "enquadramento confirmado em"])
 
     v.test_state_field(demand_id, "id", "ERROR")
     v.test_state_field(initiative_id, "initiative id", "WARN")
@@ -187,6 +190,15 @@ def main():
     v.test_state_field(phase, "current phase/fase atual", "ERROR")
     v.test_state_field(status, "status", "WARN")
     v.test_state_field(framework_version, "framework version", "WARN")
+    v.test_state_field(framing_status, "framing status", "WARN")
+    v.test_state_field(framing_confirmed_by, "framing confirmed by", "WARN")
+    v.test_state_field(framing_confirmed_at, "framing confirmed at", "WARN")
+
+    if framing_status and framing_status.lower() not in (
+        "confirmed", "confirmado", "not applicable", "n/a", "nao aplicavel", "não aplicável",
+    ):
+        v.add("WARN", "opening_framing_not_confirmed",
+              f"Opening framing status is not confirmed: {framing_status}")
 
     pnum = phase_number(phase)
     if pnum == 0:

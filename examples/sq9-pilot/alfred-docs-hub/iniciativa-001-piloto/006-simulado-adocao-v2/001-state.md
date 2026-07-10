@@ -13,6 +13,14 @@
 - branch: `alfred/006-simulado-adocao-v2`
 - status: concluida
 
+## Opening Framing
+- framing status: confirmed
+- framing confirmed by: Squad ABC
+- framing confirmed at: 2026-07-05
+- target app/source: `examples/sq9-pilot/`
+- workspace path: `examples/sq9-pilot/`
+- artifact set: HUB + App pilot artifacts
+
 ## Progresso
 - current phase: Operation
 - current step: fechamento concluido

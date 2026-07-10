@@ -16,6 +16,14 @@
 - observability schema:
 - branch:
 
+## Opening Framing
+- framing status: pending
+- framing confirmed by:
+- framing confirmed at:
+- target app/source:
+- workspace path:
+- artifact set:
+
 ## Progress
 - current phase:
 - current step:
