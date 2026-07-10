@@ -1,4 +1,4 @@
-ALFRED | TST | #toolbar-execution-first | SAFE
-[############........] 60% | Execution-first stabilization[x] -> Inception posterior[x] -> Design posterior[x] -> Validate posterior[>] -> Operation / post-mortem[ ]
-HITL: Incident commander + SRE | model: GPT-5 | cost: n/a
-Next: finish post-mortem before closure
+ALFRED | TST | #toolbar-execution-first | SAFE | 60% | custo: nao coletado
+Fases: Execution-first stabilization:ok | Inception posterior:ok | Design posterior:ok | Validate posterior:agora | Operation / post-mortem:pendente
+HITL: Incident commander + SRE | modelo: GPT-5 | etapa: post-stabilization evidence
+Proximo: finish post-mortem before closure

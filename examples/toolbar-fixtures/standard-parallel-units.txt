@@ -1,4 +1,4 @@
-ALFRED | TST | #toolbar-standard | STANDARD
-[########............] 40% | O que[x] -> Como[x] -> Fazer[>] -> Validar[ ] -> Operar[ ]
-HITL: Tech Lead | model: GPT-5 | cost: n/a
-Next: finish implementation unit and update evidence
+ALFRED | TST | #toolbar-standard | STANDARD | 40% | custo: nao coletado
+Fases: O que:ok | Como:ok | Fazer:agora | Validar:pendente | Operar:pendente
+HITL: Tech Lead | modelo: GPT-5 | etapa: unit loop
+Proximo: finish implementation unit and update evidence

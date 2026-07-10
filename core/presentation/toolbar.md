@@ -31,24 +31,26 @@ No box: nothing to misalign, degrades anywhere. **FAST** is one line;
 **Standard/SAFE** is four lines (see `toolbar-quick.md` for the exact shapes):
 
 ```text
-ALFRED | TST | #toolbar-standard | STANDARD
-[############........] 60% | O que[x] -> Como[x] -> Fazer[>] -> Validar[ ] -> Operar[ ]
-HITL: Tech Lead | model: GPT-5 | cost: n/a
-Next: serializar resultado no state e validar evidencias
+ALFRED | TST | #toolbar-standard | STANDARD | 60% | custo: nao coletado
+Fases: O que:ok | Como:ok | Fazer:agora | Validar:pendente | Operar:pendente
+HITL: Tech Lead | modelo: GPT-5 | etapa: unit loop
+Proximo: serializar resultado no state e validar evidencias
 ```
 
-Progress bar = 20 chars of `#`/`.`; phase track uses the pt-BR aliases with
-`[x]`/`[>]`/`[ ]` markers; Execution-first swaps the track for the emergency
-sequence with posterior phases. A numeric cost (helper flag `-CostUsd`) adds
-`est. total: ~US$ <linear forecast>` while 0 < progress < 100 — an estimate,
-labeled `~`, omitted otherwise (never invent).
+Progress = completed phases / 5. The phase track uses pt-BR aliases with
+`ok` / `agora` / `pendente` statuses; Execution-first swaps the track for the
+emergency sequence with posterior phases. Cost is first-line information:
+show the compact cost when collected, otherwise show `custo: nao coletado`
+and, when available, the `usage-cost` state note. A numeric cost (helper flag
+`-CostUsd`) adds `est. total: ~US$ <linear forecast>` while 0 < progress < 100
+— an estimate, labeled `~`, omitted otherwise (never invent).
 
 ## Rich-cli (optional)
 Same fields and line count, rendered with the fixed icon vocabulary
 (🎩 header · 🔍 📐 🔨 ✅ 🚀 phases · 🟢🟡🔴 lane) + ANSI color per lane +
 `▰▱` progress bar, in pt-BR (`Modo`, `⏸ HITL`, `→ Próximo`, `previsão total`).
-FAST stays one line. Produced only by the helper (`--profile rich`) — the model
-never hand-draws it.
+Cost remains in the header. FAST stays one line. Produced only by the helper
+(`--profile rich`) — the model never hand-draws it.
 
 ## Web (optional)
 Self-contained SVG card of the same `state` (helper `--profile web`), rendered

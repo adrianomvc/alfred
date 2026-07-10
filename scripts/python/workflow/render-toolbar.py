@@ -39,6 +39,7 @@ _ALIAS_TEXT = {"Inception": "O que", "Design": "Como", "Execution": "Fazer",
                "Validate": "Validar", "Operation": "Operar"}
 _ALIAS_RICH = {"Inception": "O quê", "Design": "Como", "Execution": "Fazer",
                "Validate": "Validar", "Operation": "Operar"}
+_STATUS_TEXT = {"x": "ok", ">": "agora", " ": "pendente"}
 
 
 def _c(code, s):
@@ -59,14 +60,42 @@ def forecast_total(cost_usd, progress):
     return f"~US$ {value * 100.0 / progress:.2f}"
 
 
+def format_cost_usd(cost_usd):
+    try:
+        value = float(str(cost_usd).replace(",", "."))
+    except (TypeError, ValueError):
+        return ""
+    if value <= 0:
+        return ""
+    return f"US$ {value:.2f}"
+
+
+def normalize_cost(cost, cost_usd="", usage_cost=""):
+    cost_text = str(cost or "").strip()
+    missing = {"", "n/a", "na", "none", "unknown", "not collected",
+               "nao coletado", "não coletado", "not available"}
+    if cost_text.lower() not in missing:
+        return cost_text
+
+    numeric = format_cost_usd(cost_usd)
+    if numeric:
+        return numeric
+
+    usage = str(usage_cost or "").strip()
+    if usage:
+        return shorten(f"nao coletado ({usage})", 42)
+    return "nao coletado"
+
+
 def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
                  model, cost, progress, markers, forecast):
     color = _LANE_COLOR.get(lane.lower(), "36")
     icon = _LANE_ICON.get(lane.lower(), "⚪")
-    head = f"🎩 {_c('1', 'ALFRED')} · {sigla} · #{demand_id} · {icon} {_c(color, lane.upper())}"
+    cost_part = f"custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
+    head = f"🎩 {_c('1', 'ALFRED')} · {sigla} · #{demand_id} · {icon} {_c(color, lane.upper())} · {progress}% · {cost_part}"
     if lane.lower() == "fast":
         alias = _ALIAS_RICH.get(phase, phase)
-        return [f"{head} · {alias} ▶ · custo: {cost} · {_c('2', '→')} {shorten(nxt, 56)}"]
+        return [f"{head} · {alias} ▶ · {_c('2', '→')} {shorten(nxt, 56)}"]
 
     filled = round(progress / 10)
     bar = _c(color, "▰" * filled) + _c("2", "▱" * (10 - filled))
@@ -75,11 +104,10 @@ def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
         + (" " + (_c("32", "✓") if m == "x" else _c("36", "▶") if m == ">" else _c("2", "◻")))
         for name, m in markers[:5]
     )
-    cost_part = f"custo: {cost}" + (f" · previsão total: {forecast}" if forecast else "")
     return [
         f"{head}",
         f"{bar} {progress}% {_c('2', '│')} {track}",
-        f"⏸ HITL: {shorten(checkpoint, 44)} {_c('2', '│')} modelo: {model} {_c('2', '│')} {cost_part}",
+        f"⏸ HITL: {shorten(checkpoint, 44)} {_c('2', '│')} modelo: {model}",
         f"{_c('2', '→')} Próximo: {shorten(nxt, 76)}",
     ]
 
@@ -146,6 +174,7 @@ def render(state_path, model="default", cost="n/a", profile="text", cost_usd="")
     step = get_first_field(content, ["current step", "etapa atual"]) or "unknown"
     nxt = get_first_field(content, ["next step", "proximo passo", "próximo passo"]) or "unknown"
     checkpoint = get_field(content, "checkpoint") or "n/a"
+    usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
 
     time_mode = get_first_field(content, ["tempo", "time mode"])
     checklist_text = "\n".join(
@@ -185,31 +214,31 @@ def render(state_path, model="default", cost="n/a", profile="text", cost_usd="")
 
     progress = min(100, round((completed / 5) * 100))
     forecast = forecast_total(cost_usd, progress)
+    cost_display = normalize_cost(cost, cost_usd, usage_cost)
 
     if profile == "rich":
         return _render_rich(sigla, demand_id, lane, phase, nxt,
-                            checkpoint, model, cost, progress, markers, forecast)
+                            checkpoint, model, cost_display, progress, markers, forecast)
     if profile == "web":
         return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
     # text floor: borderless ASCII (no box = nothing to misalign; degrades anywhere)
     forecast_part = f" | est. total: {forecast}" if forecast else ""
+    cost_part = f"custo: {cost_display}{forecast_part}"
     if lane.lower() == "fast":
         return [
-            f"ALFRED | {sigla} | #{demand_id} | FAST | {phase} | "
-            f"model: {model} | cost: {cost}{forecast_part} | next: {shorten(nxt, 48)}"
+            f"ALFRED | {sigla} | #{demand_id} | FAST | {phase} | {progress}% | "
+            f"{cost_part} | modelo: {model} | proximo: {shorten(nxt, 48)}"
         ]
 
-    bar_filled = round(progress / 5)
-    bar = "[" + "#" * bar_filled + "." * (20 - bar_filled) + "]"
-    track = " -> ".join(
-        f"{_ALIAS_TEXT.get(name, name)}[{m if m.strip() else ' '}]" for name, m in markers[:5]
+    track = " | ".join(
+        f"{_ALIAS_TEXT.get(name, name)}:{_STATUS_TEXT.get(m, 'pendente')}" for name, m in markers[:5]
     )
     return [
-        f"ALFRED | {sigla} | #{demand_id} | {lane.upper()}",
-        f"{bar} {progress}% | {track}",
-        f"HITL: {shorten(checkpoint, 52)} | model: {model} | cost: {cost}{forecast_part}",
-        f"Next: {shorten(nxt, 76)}",
+        f"ALFRED | {sigla} | #{demand_id} | {lane.upper()} | {progress}% | {cost_part}",
+        f"Fases: {track}",
+        f"HITL: {shorten(checkpoint, 52)} | modelo: {model} | etapa: {shorten(step, 44)}",
+        f"Proximo: {shorten(nxt, 76)}",
     ]
 
 

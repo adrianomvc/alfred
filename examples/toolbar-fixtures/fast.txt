@@ -1,1 +1,1 @@
-ALFRED | TST | #toolbar-fast | FAST | Operation | model: GPT-5 | cost: n/a | next: close lightweight demand
+ALFRED | TST | #toolbar-fast | FAST | Operation | 80% | custo: nao coletado | modelo: GPT-5 | proximo: close lightweight demand
