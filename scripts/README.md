@@ -23,7 +23,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 - summarize metrics rollups
 - check links between HUB state and app artifacts
 - parse example observability JSONL and verify required framework paths
-- render an ASCII toolbar from a demand `001-state.md`
+- render the demand toolbar from a demand `001-state.md`
 - collect local observability JSONL into a telemetry-style batch
 - generate a Markdown metrics rollup from local observability JSONL
 - normalize host usage/cost exports into append-only observability events
@@ -41,7 +41,7 @@ Any script output must degrade to a manual markdown checklist when the host cann
 ## Available
 Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/` folder contains concrete local adapters.
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
-- `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile text` (default, ASCII) · `rich` (ANSI color/icons) · `web` (self-contained SVG). See `core/presentation/README.md`.
+- `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile rich` (default, Unicode block) · `text` (ASCII fallback) · `web` (self-contained SVG). See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.

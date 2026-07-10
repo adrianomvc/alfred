@@ -19,7 +19,7 @@ Terminology of the framework. Keeps the EN↔pt-BR mapping consistent across fra
 | HUB | HUB | The sigla's repo; source of truth for `state`. |
 | app | app / aplicação | An application repo of the sigla. |
 | Risk Mode | Risk Mode | The governance selector (risk × complexity → lane). |
-| Process Toolbar | toolbar / barra de progresso | ASCII progress header shown each interaction. |
+| Process Toolbar | toolbar / barra de progresso | Progress header shown each interaction; rich Unicode block when supported, ASCII/text fallback otherwise. |
 | reverse-eng | engenharia reversa | Deep brownfield understanding before acting. |
 | spec | spec | SDD artifact: problem, solution, acceptance criteria. |
 | state | state | Live source of truth: phase, mode, progress, next step. |

@@ -1,4 +1,4 @@
-ALFRED | TST | #toolbar-safe | SAFE
-[############........] 60% | O que[x] -> Como[x] -> Fazer[x] -> Validar[>] -> Operar[ ]
-HITL: Product Owner + Tech Lead + Security | model: GPT-5 | cost: n/a
-Next: collect final evidence and human acceptance
+ALFRED | TST | #toolbar-safe | SAFE | 60% | custo: nao coletado
+Fases: O que:ok | Como:ok | Fazer:ok | Validar:agora | Operar:pendente
+HITL: Product Owner + Tech Lead + Security | modelo: GPT-5 | etapa: evidence review
+Proximo: collect final evidence and human acceptance

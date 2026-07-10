@@ -20,7 +20,7 @@ toolbar is one line in FAST, a small block otherwise.
 | Profile | Host | Output |
 |---|---|---|
 | `text` (floor, always) | any terminal/host | plain ASCII/markdown — the spec |
-| `rich-cli` (optional) | capable terminals | ANSI color + box-drawing + unicode icons, with plain-ASCII fallback |
+| `rich` (preferred) | capable terminals/chat | Unicode box-drawing + compact icons, visually aligned with `welcome-screen.md` |
 | `web` (optional) | graphical hosts | HTML card / SVG, rendered out-of-band by a helper |
 
 ## Selection
@@ -35,7 +35,8 @@ hard dependency — nothing in the framework requires a non-text profile (D3).
 - `welcome-screen.md` — the rendered welcome block + degradation rules (persona stays in `core/welcome.md`).
 
 ## Rules
-- `text` is the spec; `rich-cli` and `web` are optional layers that must never
+- `rich` is the preferred human-facing profile; `text` is the portable fallback.
+- `text`, `rich`, and `web` must never
   become the source of truth.
 - A renderer is pure: same `state` in → same output out; no hidden state.
 - Keep views compact; richness is color/shape, not more words.
