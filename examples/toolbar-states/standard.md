@@ -6,6 +6,9 @@
 - id: toolbar-standard
 - sigla: TST
 - lane: Standard
+- framework version: 2.0.0
+- framework commit: fixture
+- app commit: f9a3739
 
 ## Progress
 - current phase: Execution

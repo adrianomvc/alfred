@@ -13,6 +13,7 @@
 - framework version:
 - framework ref:
 - framework commit:
+- app commit:
 - observability schema:
 - branch:
 

@@ -12,8 +12,9 @@ spec (layers, profiles, rules):
 ╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
 │ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
 │ Previsão: ~US$ 3.00                                                        │
+│ Framework: v2.0.0 (a289a26)        App: f9a3739                            │
 ├────────────────────────────────────────────────────────────────────────────┤
-│ O quê ✅ · Como ✅ · Fazer ▶ · Validar ○ · Operar ○                        │
+│ 1 Inception ✅ · 2 Design ✅ · 3 Execution ▶ · 4 Validate ○ · 5 Operation ○ │
 │ HITL: Tech Lead       Modelo: claude-opus-4-8                              │
 │ Próximo: finish implementation unit and update evidence                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
@@ -27,15 +28,19 @@ ALFRED | TST | #toolbar-fast | FAST | Execution | 80% | custo: <compact> | model
 ## Text fallback — Standard/SAFE four lines
 ```text
 ALFRED | TST | #toolbar-standard | STANDARD | 60% | custo: <compact>
-Fases: O que:ok | Como:ok | Fazer:agora | Validar:pendente | Operar:pendente
+Framework: v2.0.0 (<commit>) | App: <app-commit>
+Fases: 1 Inception:ok | 2 Design:ok | 3 Execution:agora | 4 Validate:pendente | 5 Operation:pendente
 HITL: Tech Lead | modelo: <current> | etapa: <current step>
 Proximo: <next step from state>
 ```
 
 - Progress = completed phases / 5; rich markers: `✅` done · `▶` current · `○` pending. Text fallback statuses: `ok` · `agora` · `pendente`.
-- Phase aliases (pt-BR): O que · Como · Fazer · Validar · Operar.
+- Phase labels stay numbered and canonical: `1 Inception` · `2 Design` · `3 Execution` · `4 Validate` · `5 Operation`.
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
 - Cost is shown prominently in the top block. If no host usage source exists, write
   `custo: nao coletado` (or include the `usage-cost` state note); never hide it.
 - With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
+- Show traceability next to cost: `Framework: v<version> (<commit>)` and
+  `App: <commit>`. Prefer stamped state fields; otherwise the helper may read
+  the current framework clone and app artifacts.
 - Helper (optional): `render-toolbar` in `scripts/python/workflow/`.

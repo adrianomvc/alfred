@@ -1,1 +1,2 @@
 ALFRED | TST | #toolbar-fast | FAST | Operation | 80% | custo: nao coletado | modelo: GPT-5 | proximo: close lightweight demand
+Framework: v2.0.0 (fixture) | App: f9a3739

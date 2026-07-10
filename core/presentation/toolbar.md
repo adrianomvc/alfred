@@ -34,20 +34,23 @@ with `welcome-screen.md`:
 ╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
 │ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
 │ Previsão: ~US$ 3.00                                                        │
+│ Framework: v2.0.0 (a289a26)        App: f9a3739                            │
 ├────────────────────────────────────────────────────────────────────────────┤
-│ O quê ✅ · Como ✅ · Fazer ▶ · Validar ○ · Operar ○                        │
+│ 1 Inception ✅ · 2 Design ✅ · 3 Execution ▶ · 4 Validate ○ · 5 Operation ○ │
 │ HITL: Tech Lead       Modelo: claude-opus-4-8                              │
 │ Próximo: finish implementation unit and update evidence                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Progress = completed phases / 5. The phase track uses pt-BR aliases with
-`✅` / `▶` / `○` statuses; Execution-first swaps the track for the
-emergency sequence with posterior phases. Cost is prominent top-block information:
-show the compact cost when collected, otherwise show `custo: nao coletado`
-and, when available, the `usage-cost` state note. A numeric cost (helper flag
-`-CostUsd`) adds `est. total: ~US$ <linear forecast>` while 0 < progress < 100
-— an estimate, labeled `~`, omitted otherwise (never invent).
+Progress = completed phases / 5. The phase track uses numbered canonical phase
+names with `✅` / `▶` / `○` statuses; Execution-first swaps the track for the
+emergency sequence with posterior phases. Cost is prominent top-block
+information: show the compact cost when collected, otherwise show
+`custo: nao coletado` and, when available, the `usage-cost` state note. A
+numeric cost (helper flag `-CostUsd`) adds `est. total: ~US$ <linear forecast>`
+while 0 < progress < 100 — an estimate, labeled `~`, omitted otherwise (never
+invent). Traceability appears in the same block: `Framework: v<version>
+(<commit>)` and `App: <commit>`.
 
 ## Text floor (fallback)
 No Unicode dependency; degrades anywhere. **FAST** is one line;
