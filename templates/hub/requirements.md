@@ -6,7 +6,7 @@
 
 Sigla: <sigla> · Iniciativa: <id-iniciativa> · Modo proposto: <FAST | Standard | SAFE>
 Progresso: <respondidas>/<total> respondidas · <n> bloqueiam o avanço para Design
-Como responder: edite a linha `[Resposta]:` de cada pergunta (ou responda no chat que eu registro aqui).
+Como responder: edite a linha `[Resposta]:` de cada pergunta neste arquivo. Depois de salvar, avise no chat com `pronto` ou `terminei` para eu continuar.
 
 ## Requisitos funcionais
 - <...>

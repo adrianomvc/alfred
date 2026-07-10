@@ -18,8 +18,8 @@ render it manually from the same fields.
 3. **Human interaction, when needed** — a **pointer** to the open question/decision
    in its artifact, never embedded as the source of truth (D18): `requirements`
    for Inception clarifications, `decisions` for design choices, a checkpoint
-   approval recorded in `audit`. The person may answer in chat; Alfred then
-   persists the answer into the artifact.
+   approval recorded in `audit`. For requirements, the person edits the artifact
+   and uses chat only to say `pronto`/`terminei`.
 4. **Continuity footer** — next step, next checkpoint, and "recorded in state/audit".
    Model-change (D46) and escalation (D27) notices appear only when they occur.
 

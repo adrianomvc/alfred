@@ -20,7 +20,6 @@ for hosts without Unicode/emoji/color.
 
    O ciclo, da intenção à entrega:
   ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
-  │     🔍      │     📐      │     🔨      │     ✅      │     🚀      │
   │ 1 Inception │ 2 Design    │ 3 Execution │ 4 Validate  │ 5 Operation │
   │    O quê    │    Como     │    Fazer    │   Validar   │   Operar    │
   └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
@@ -51,12 +50,13 @@ for hosts without Unicode/emoji/color.
    ↳ responda com o número, senhor(a), ou descreva uma nova demanda.
 ```
 
-The five phase icons are a fixed visual vocabulary reused in the toolbar: 🔍 Inception · 📐 Design · 🔨 Execution · ✅ Validate · 🚀 Operation.
+The welcome never marks a current phase. Phase status belongs only to the
+demand toolbar rendered from `001-state.md`.
 
 ## Degradação (D3 — piso portável)
 Nothing here may be required. The rich block degrades by rules, not by a second copy:
 - **No color (ANSI):** the rich-cli profile adds color; without it the same text reads fine (the mode names carry the meaning). Color never affects alignment (ANSI has zero display width).
-- **No emoji / narrow terminal:** drop the icon row of the phases table and the icon column of the modes table; replace `🎩`→`[Alfred]`, the mode dots → the `FAST/Standard/SAFE` text already in the row, callout box → a `>` line.
+- **No emoji / narrow terminal:** drop the icon column of the modes table; replace `🎩`→`[Alfred]`, the mode dots → the `FAST/Standard/SAFE` text already in the row, callout box → a `>` line.
 - **No Unicode box-drawing:** swap `┌─┐│` for ASCII `+-|`. Alignment holds because every in-border glyph is width 1.
 - **Alignment rule (so tables never break):** never place an emoji inside a bordered cell except in a dedicated single-emoji column padded for double width; everything else stays width-1 ASCII + accents.
 

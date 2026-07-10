@@ -24,17 +24,23 @@ Intent analysis (clarity class), `tech-inception` unknowns, business gaps from
 
 ## Steps
 1. Collect open points from the business and technical lenses.
-2. Write them as **multiple-choice questions** with an explicit `[Answer]:` slot
+2. Write them as **multiple-choice questions** with an explicit `[Resposta]:` slot
    (see question-format), grouped by topic.
-3. Open the **gate**: do not advance to Design until the required answers land.
-4. On answers, **detect contradictions** against earlier inputs; re-ask if needed.
-5. Consolidate answers into `requirements`; record the gate in `audit`.
+3. Tell the human exactly what to do: open the `003-requirements.md` path, fill
+   each required `[Resposta]:`, save the file, then say `pronto`/`terminei` in
+   chat.
+4. Open the **gate**: do not advance to Design until the required answers land
+   in the file. Host-native question widgets may point to the file, but do not
+   collect answers or replace it.
+5. After the human confirms completion, read the file and **detect
+   contradictions** against earlier inputs; re-ask in the same file if needed.
+6. Consolidate answers into `requirements`; record the gate in `audit`.
 
 ## Output
 A requirements-questions file, gate status, contradiction checks, and a
 consolidated `requirements` artifact.
 
 ## Depth by mode
-FAST = skipped when the problem is clear; otherwise one or two inline questions ·
-Standard = grouped questions + gate · SAFE = + traceability of each answer to a
-requirement and explicit sign-off.
+FAST = skipped when the problem is clear; otherwise one or two questions in the
+requirements artifact · Standard = grouped questions + gate · SAFE = +
+traceability of each answer to a requirement and explicit sign-off.

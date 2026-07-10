@@ -27,7 +27,7 @@ Use the canonical terms from `core/glossary.md` consistently. This keeps artifac
 - **App-only session** records local measurement events in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/05-operation/008-observability-log.jsonl`. The HUB consolidates them into `alfred-docs-hub/<id-iniciativa>/<id-demanda>/05-operation/011-observability-log.jsonl` during sync.
 
 ## Language policy (D47)
-- **Interactions with people → pt-BR:** prompts, questions (`[Answer]:`), toolbar, butler voice, checkpoints.
+- **Interactions with people → pt-BR:** prompts, questions (`[Resposta]:`), toolbar, butler voice, checkpoints.
 - **Framework files → English:** `core/`, `rules/`, `skills/`, `connectors/`, `metrics/`, templates.
 - **User docs + generated artifacts → pt-BR:** everything the squad reads/produces in HUB/App.
 - Templates **live in English** (framework labels), but Alfred **generates the artifact content in pt-BR**. Established technical terms may stay in English.

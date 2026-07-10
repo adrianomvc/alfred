@@ -62,7 +62,7 @@ python scripts/python/validators/validate-framework.py
 - `rules/common/overconfidence.md` still requires grounding before action.
 - `rules/common/escalation-triggers.md` stops hard-trigger cases.
 - `rules/common/units.md` keeps units inside one demand state.
-- `rules/common/question-format.md` keeps pt-BR `[Resposta]:` with 2-5 options.
+- `rules/common/question-format.md` keeps pt-BR `[Resposta]:` with 2-5 options and requires answers to be filled in the artifact, not collected in chat.
 - `rules/common/terminal-token-policy.md` keeps terminal output bounded and RTK optional/degradable.
 - `rules/common/prompt-caching-policy.md` keeps stable framework context before volatile demand context without requiring host-specific caching.
 - `rules/common/tool-discovery-policy.md` keeps tool/skill/adapter discovery JIT and avoids loading all tool schemas at boot.
