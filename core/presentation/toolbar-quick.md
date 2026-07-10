@@ -51,6 +51,7 @@ Proximo: <next step from state>
 - If `state` has `cost usd:` from an approved export, `ccusage`, or a
   host-native cost command such as Claude Code `/cost`, render that value.
 - With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
+- With a numeric cost and progress at 0% or 100%, show the forecast as unavailable with the reason; do not hide it and do not invent a total.
 - Show traceability next to cost: `Framework: v<version> (<commit>)` and
   `App: <commit>`. Prefer stamped state fields; otherwise the helper may read
   the current framework clone and app artifacts.

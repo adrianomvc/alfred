@@ -316,6 +316,15 @@ def assert_toolbar_rendering_policy(root):
             "Do not pass `-Profile text` in a host that renders Unicode/emoji",
             "-AllowTextFallback",
             "Never hand-draw the rich block from memory",
+            "progress at 0% or 100%",
+        ],
+        "core/presentation/toolbar.md": [
+            "progress is 0% or 100%",
+            "forecast as unavailable",
+        ],
+        "docs/framework-validation.md": [
+            "Toolbar forecast display shows a reason",
+            "0<progress<100",
         ],
         "docs/automation-fallback.md": [
             "--allow-text-fallback",
@@ -326,6 +335,7 @@ def assert_toolbar_rendering_policy(root):
             "allow_text_fallback",
             "--profile text is the degraded fallback",
             "--allow-text-fallback",
+            "indisponível (0% concluído)",
         ],
         "hosts/_template/shim.md": [
             "default rich profile",
@@ -337,6 +347,26 @@ def assert_toolbar_rendering_policy(root):
         for phrase in phrases:
             if phrase not in text:
                 raise SystemExit(f"Toolbar rendering policy missing in {rel}: {phrase}")
+    zero_state = root / "examples/fresh-sigla-onboarding/alfred-docs-hub/iniciativa-001-onboarding-alfred/001-preparar-alfred/001-state.md"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(root / "scripts/python/workflow/render-toolbar.py"),
+            "-StatePath",
+            str(zero_state),
+            "-CostUsd",
+            "1.23",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        raise SystemExit("Toolbar zero-progress forecast smoke failed")
+    if "Previs" not in result.stdout or "indisponível (0% concluído)" not in result.stdout:
+        raise SystemExit("Toolbar must explain unavailable forecast at 0% progress with numeric cost.")
     print("OK toolbar rendering policy")
 
 
