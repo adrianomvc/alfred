@@ -175,6 +175,102 @@ def assert_jsonl(file_path):
     print(f"OK jsonl {file_path}")
 
 
+def assert_question_format_policy(root):
+    text = (root / "rules/common/question-format.md").read_text(encoding="utf-8")
+    required = [
+        "No host-native question widgets for requirements",
+        "must not be used to ask or collect requirements answers",
+        "Do not duplicate the question text/options in chat",
+        "if a material question is needed, it still goes in the requirements artifact",
+    ]
+    for phrase in required:
+        if phrase not in text:
+            raise SystemExit(f"Question-format policy missing: {phrase}")
+    forbidden = [
+        "question widgets may point",
+        "few or no questions, inline",
+    ]
+    lowered = text.lower()
+    for phrase in forbidden:
+        if phrase in lowered:
+            raise SystemExit(f"Question-format policy still allows deprecated behavior: {phrase}")
+    elicitation = (root / "rules/lifecycle/inception/sub-activities/requirements-elicitation.md").read_text(encoding="utf-8")
+    if "Do not open host-native question widgets for requirements" not in elicitation:
+        raise SystemExit("Requirements elicitation must forbid host-native question widgets.")
+    print("OK question-format requirements-file-only policy")
+
+
+def assert_toolbar_rendering_policy(root):
+    checks = {
+        "core/boot.md": [
+            "scripts/python/workflow/render-toolbar.py",
+            "load `presentation/toolbar-quick.md`",
+            "do not hand-draw a rich toolbar from memory",
+        ],
+        "rules/agents/orchestrator.md": [
+            "scripts/python/workflow/render-toolbar.py",
+            "load `core/presentation/toolbar-quick.md` first",
+            "Do not improvise a rich toolbar",
+        ],
+        "core/presentation/README.md": [
+            "The model never produces the rich visual",
+            "Do not hand-draw rich toolbar blocks",
+            "manual fallback is the documented `text` profile only",
+        ],
+        "core/presentation/toolbar-quick.md": [
+            "## Rendering procedure",
+            "Prefer the helper",
+            "Never hand-draw the rich block from memory",
+        ],
+        "docs/automation-fallback.md": [
+            "load `core/presentation/toolbar-quick.md`",
+            "do not hand-draw the rich block",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"Toolbar rendering policy missing in {rel}: {phrase}")
+    print("OK toolbar rendering policy")
+
+
+def assert_usage_cost_policy(root):
+    checks = {
+        "connectors/usage-cost.md": [
+            "host_cost_command",
+            "Claude Code `/cost`",
+            "cost source: host_cost_command",
+            "cost usd: <value>",
+        ],
+        "docs/usage-cost-adoption.md": [
+            "## Claude Code Manual Cost Capture",
+            "Ask the human to run `/cost`",
+            "cost usd: <numeric USD value>",
+        ],
+        "hosts/claude-code/SKILL.md": [
+            "## Cost (host-specific",
+            "Claude Code may expose the current session cost through `/cost`",
+            "renderer reads `cost usd`",
+        ],
+        "templates/hub/state.md": [
+            "- cost source:",
+            "- cost usd:",
+            "- cost confidence:",
+        ],
+        "core/presentation/toolbar-quick.md": [
+            "If `state` has `cost usd:`",
+            "Claude Code `/cost`",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"Usage-cost policy missing in {rel}: {phrase}")
+    print("OK usage-cost policy")
+
+
 def run_sub(root, rel_script, *script_args):
     script = root / rel_script
     result = subprocess.run(
@@ -204,6 +300,9 @@ def main():
 
     assert_jsonl(root / "examples/connectors/usage-export.jsonl")
     assert_jsonl(root / "examples/connectors/usage-attribution-events.jsonl")
+    assert_question_format_policy(root)
+    assert_toolbar_rendering_policy(root)
+    assert_usage_cost_policy(root)
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")

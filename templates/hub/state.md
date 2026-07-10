@@ -44,6 +44,9 @@
 - notification:
 - telemetry:
 - usage-cost:
+- cost source:
+- cost usd:
+- cost confidence:
 - status values: contract | handoff | dry-run | active | disabled | not configured
 - readiness:
 - adapter notes:

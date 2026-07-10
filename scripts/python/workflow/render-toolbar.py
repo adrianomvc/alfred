@@ -329,6 +329,8 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
     nxt = get_first_field(content, ["next step", "proximo passo", "próximo passo"]) or "unknown"
     checkpoint = get_field(content, "checkpoint") or "n/a"
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
+    state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
+    effective_cost_usd = cost_usd or state_cost_usd or ""
     stamped_framework_version = get_first_field(
         content, ["framework version", "versao framework", "versão framework"]
     )
@@ -379,8 +381,8 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
         markers.append((item, marker))
 
     progress = min(100, round((completed / 5) * 100))
-    forecast = forecast_total(cost_usd, progress)
-    cost_display = normalize_cost(cost, cost_usd, usage_cost)
+    forecast = forecast_total(effective_cost_usd, progress)
+    cost_display = normalize_cost(cost, effective_cost_usd, usage_cost)
 
     if profile == "rich":
         return _render_rich(sigla, demand_id, lane, phase, nxt,

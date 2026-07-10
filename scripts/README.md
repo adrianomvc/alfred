@@ -41,7 +41,7 @@ Any script output must degrade to a manual markdown checklist when the host cann
 ## Available
 Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/` folder contains concrete local adapters.
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
-- `render-toolbar` - optional toolbar renderer derived from `001-state.md`; `-Profile rich` (default, Unicode block) · `text` (ASCII fallback) · `web` (self-contained SVG). See `core/presentation/README.md`.
+- `render-toolbar` - optional but preferred toolbar renderer derived from `001-state.md`; use it whenever available instead of hand-drawing. Profiles: `-Profile rich` (default, Unicode block) · `text` (ASCII fallback) · `web` (self-contained SVG). See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
