@@ -13,7 +13,7 @@ Example:
 
 ## 2. Create HUB artifacts
 Create:
-- `alfred-docs-hub/index.md` if this is the first demand for the sigla.
+- `alfred-docs-hub/001-index.md` if this is the first demand for the sigla.
 - `alfred-docs-hub/<id-iniciativa>/001-initiative.md`
 - `alfred-docs-hub/<id-iniciativa>/<id-demanda>/001-state.md`
 - `alfred-docs-hub/<id-iniciativa>/<id-demanda>/01-inception/002-problem.md`
@@ -24,7 +24,7 @@ Create:
 
 Add `01-inception/003-requirements.md`, `02-design/006-decisions.md`, `03-execution/012-execution-plan.md`, `04-validate/013-validation-evidence.md`, `05-operation/009-summary.md`, and `01-inception/005-tech-inception.md` as required by the lane.
 
-Update `alfred-docs-hub/index.md` with the open demand row so future boot can resume from the index before reading details.
+Update `alfred-docs-hub/001-index.md` with the open demand row so future boot can resume from the index before reading details.
 
 If real environment parameters are missing, create `04-validate/014-environment-parameters.md` from `templates/hub/environment-parameters.md`. Keep the demand status as `bloqueada` or `em espera` until the missing values are confirmed. Do not invent account ids, secrets, endpoints, bucket names, schemas, table volumes, schedules, alarms, or rollback parameters.
 
@@ -97,7 +97,7 @@ tokens are optional and may be unavailable. If no source is available, mark
 usage/cost as not collected instead of estimating.
 
 On closure, update:
-- HUB `index.md`: move demand from open to closed and link `05-operation/009-summary.md`;
+- HUB `001-index.md`: move demand from open to closed and link `05-operation/009-summary.md`;
 - app `001-index.md`: update evidence and HUB sync state;
 - `05-operation/009-summary.md`: include the resume note and follow-ups.
 
