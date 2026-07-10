@@ -1,8 +1,9 @@
 # Usage Cost Adoption Plan
 
-This plan defines how Alfred should move from planned token/cost governance to
-real usage attribution. It is a design for the next implementation wave, not an
-active adapter yet.
+This plan defines how Alfred moves from planned token/cost governance to real
+usage attribution. `ccusage` import is active for supported local CLIs; Devin
+API import remains the primary corporate target and still depends on approved
+API/export access.
 
 ## Goal
 Attribute AI usage to Alfred demands without making the framework depend on one
@@ -83,7 +84,7 @@ The first active implementation should use Devin's ACU sources:
   approved FinOps allocation table.
 
 Implementation target:
-- future Python metric helper named `import-devin-usage`;
+- Python metric helper named `import-devin-usage`;
 - input: saved Devin API JSON or approved local metadata;
 - output: `usage_attributed` JSONL events using `connectors/usage-cost.md`.
 
@@ -113,18 +114,32 @@ Requirements:
   ccusage JSON during teardown;
 - import JSON into Alfred instead of treating the terminal report as evidence.
 
-Implementation target:
-- future Python metric helper named `import-ccusage`;
-- input: `ccusage ... --json` output saved to a file;
-- output: normalized `usage_attributed` JSONL events.
+Active helper:
+- `scripts/python/metrics/import-ccusage.py`;
+- input: `ccusage session --json` output or a saved JSON file;
+- output: normalized `usage_attributed` JSONL events and optional
+  `001-state.md` cost fields.
+
+Claude Code automatic path:
+
+```bash
+python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+```
+
+Set `usage session id:` in `001-state.md` when the host exposes it. If it is
+missing, the helper uses the latest `claude` session and records
+`selection_method: latest_agent_session` in the event so the attribution remains
+auditable instead of silent.
 
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.
 
 ## Claude Code Manual Cost Capture
 Claude Code may expose session cost through `/cost` in the interactive UI.
-Alfred cannot assume that value or call it as a normal shell command. When a
-demand runs in Claude Code and no durable usage export is configured:
+Alfred cannot assume that value or call it as a normal shell command. Use this
+only when `ccusage` is unavailable, logs are not durable, or session correlation
+is ambiguous. When a demand runs in Claude Code and no durable usage export is
+configured:
 
 1. Ask the human to run `/cost` at a natural checkpoint (resume, before Design
    approval, before close, or when the toolbar still says `nao coletado`).
@@ -166,7 +181,8 @@ Acceptance for the pilot:
 1. Extend `connectors/usage-cost.md` with the correlation and confidence fields.
 2. Add example input fixtures for Devin Session Insights, Devin session
    consumption, and ccusage-like export.
-3. Add import scripts for one source at a time.
+3. Add import scripts for one source at a time. `import-ccusage.py` is active;
+   Devin API import is next.
 4. Add validation for normalized usage events.
 5. Add docs for corporate setup and privacy boundaries.
 6. After 5+ real demands, evaluate model-policy suggestions from metrics.

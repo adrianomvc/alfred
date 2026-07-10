@@ -85,7 +85,7 @@ Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar
 Objetivo: provar valor da squad híbrida com dados.
 - [x] W6.0 ✅ (2026-07-05) **Simulado de adoção 2.0.0** (`006-simulado-adocao-v2` no exemplo sq9-pilot): ensaio ponta a ponta offline da linha 2.0.0 exercitando classify-risk, requirements por prioridade, formato único de decisions, spec completa (lado app), carimbo 2.0.0 e JSONL HUB+App — **`validate-demand --strict` 0 erros / 0 avisos nos 2 runtimes**. Vira eval de regressão permanente. De quebra, `validate-demand` ganhou `--app-repo-path`/`--app-current-commit` (encaminhados ao staleness check — lacuna real de uso).
 - [ ] W6.1 Medir em ≥5 demandas reais: retrabalho, aceite de 1ª, % aguardando humano, custo (campos D43 já definidos em `metrics/metrics.md`).
-- [ ] W6.2 `normalize-usage-cost` com fonte real do host. Desenho aprovado em `docs/usage-cost-adoption.md`: caminho primario Devin Session Insights + Consumption API por sessao (ACU); caminho secundario `ccusage` para CLIs locais suportadas; correlacao por `ALFRED_RUN_ID`, `devin-...` session id, repo, branch, commit e janela de tempo; USD somente via contrato/rate table aprovado.
+- [ ] W6.2 parcial: `import-ccusage.py` ativo para Claude/Codex local CLI com logs duraveis; gera `usage_attributed` e atualiza `001-state.md` com `cost source: ccusage` / `cost confidence: estimated`. Devin Session Insights + Consumption API segue pendente de acesso/export aprovado; `normalize-usage-cost` continua para exports genericos.
 - [ ] W6.3 1 relatório de insights comparado com `metrics/baselines.md`, ratificado por humano.
 
 Não mexer: baselines sem dados reais.
@@ -153,7 +153,7 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | spec-vs-impl | W8.2 | ✅ concluído (2026-07-05) |
 | P2 | Memória de decisões | W8.3 | pendente |
 | P2 | Métricas de retrabalho/intervenção | W6 | pendente |
-| P2 | Usage-cost real: desenho Devin-first + ccusage secundário | W6.2 | desenho pronto; implementação pendente |
+| P2 | Usage-cost real: desenho Devin-first + ccusage secundário | W6.2 | parcial: ccusage ativo; Devin API pendente |
 | P3 | Adapter real (MCP candidato) | W7 | pendente (DH) |
 | P3 | Avaliar Codebase Memory MCP para instalação corporativa + integração opcional no install do Alfred | W7.5 | pendente (DH: fonte aprovada, segurança, empacotamento, DEVIN CLI) |
 | P3 | Sugestão de model-policy | W8.5 | pendente |

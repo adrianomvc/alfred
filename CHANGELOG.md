@@ -5,6 +5,10 @@ All notable Alfred framework changes should be recorded here.
 ## Unreleased
 
 ### Changed
+- `ccusage` session import is now an active automatic usage-cost path for local
+  CLI hosts: `scripts/python/metrics/import-ccusage.py` maps `ccusage session
+  --json` into `usage_attributed` events and updates `001-state.md` cost fields
+  with estimated confidence and auditable session-selection metadata.
 - Requirements questions are file-only: `003-requirements.md` is the single answer channel, chat/UI may only point to it, host-native question popups are forbidden for requirements, and FAST material questions still go to the artifact. The framework validator now guards this rule.
 - Toolbar rendering is now explicitly grounded: boot/orchestrator prefer `render-toolbar`; if the helper is unavailable, agents must load `toolbar-quick.md` and use only the documented text fallback instead of hand-drawing rich blocks.
 - Claude Code cost capture is now an explicit manual usage-cost path: humans can run `/cost`, record `cost usd`/source/confidence in `001-state.md`, and the toolbar renderer reads that state value for display and forecast.

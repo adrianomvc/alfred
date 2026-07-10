@@ -76,6 +76,7 @@ python scripts/python/validators/validate-framework.py
 - `validate-connectors` checks connector contracts and adapter-shaped examples.
 - `validate-email-adapter` checks the Python-only notification adapter dry-run, allowlist refusal, and audit JSONL.
 - `validate-tool-discovery-policy` checks the JIT tool policy, host shims, connector guidance, and MCP tool description size.
+- `import-ccusage.py` keeps Claude/Codex local CLI cost attribution automatic when `ccusage` is available, while recording estimated confidence and session selection evidence.
 - Installers keep optional npm tools degradable: Artifactory registry/package knobs for `ccusage` and `codebase-memory`, skip flags, and no hard dependency on npm.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
 - `validate-token-economy-policy` checks token-budget and deferred-work guardrails.

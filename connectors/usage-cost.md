@@ -20,6 +20,12 @@ The installer can best-effort install `ccusage` from the configured npm registry
 (`ALFRED_NPM_REGISTRY` / `-NpmRegistry`), with package override
 `ALFRED_CCUSAGE_PACKAGE` / `-CcusagePackage`.
 
+When `ccusage` is installed and local logs are durable, Alfred can import the
+current host session with `scripts/python/metrics/import-ccusage.py`. The helper
+maps `ccusage session --json` into a `usage_attributed` event, updates
+`001-state.md` with `cost source: ccusage`, and keeps `cost confidence:
+estimated` unless an approved billing source confirms the USD value.
+
 ## operations
 - `read_usage(window, filters)` reads usage records from the host or an exported file.
 - `map_usage(record)` maps one host usage record to Alfred observability fields.
@@ -72,6 +78,18 @@ When host usage cannot be read:
 - keep original events append-only;
 - do not estimate cost unless the human provides an approved rate table;
 - record the missing source in metrics gaps or validation evidence.
+
+For Claude Code/Codex-like local CLIs, prefer `ccusage` before asking for a
+manual `/cost` value:
+
+```bash
+python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+```
+
+If the state contains `usage session id`, the helper imports that exact session.
+Otherwise it selects the latest session for the configured agent and records the
+selection method in the event validation metadata. Humans may still provide
+`/cost` when `ccusage` is unavailable or the session correlation is ambiguous.
 
 When a host exposes cost only through an interactive command (for example
 Claude Code `/cost`), Alfred may ask the human to run it at start/end or before

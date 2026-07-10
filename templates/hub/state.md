@@ -39,6 +39,12 @@
 - loaded sections:
 
 ## Host Adapters
+- alfred run id:
+- host:
+- usage session id:
+- usage window started at:
+- usage window ended at:
+- usage imported at:
 - vcs:
 - tracker:
 - notification:
