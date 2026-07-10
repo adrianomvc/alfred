@@ -6,6 +6,7 @@ compatibility entry point for Windows-first host flows.
 """
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -118,6 +119,7 @@ REQUIRED_PATHS = [
     "scripts/python/workflow/render-toolbar.py",
     "scripts/python/metrics/collect-observability.py",
     "scripts/python/metrics/generate-metrics-rollup.py",
+    "scripts/python/metrics/import-ccusage.py",
     "scripts/python/metrics/normalize-usage-cost.py",
     "scripts/python/validators/validate-framework.py",
     "scripts/python/validators/validate-demand.py",
@@ -139,6 +141,7 @@ REQUIRED_PATHS = [
     "examples/connectors/tracker-sim-adapter.md",
     "examples/connectors/tracker-sim-demand.md",
     "examples/connectors/notification-sim-adapter.md",
+    "examples/connectors/ccusage-session.json",
     "examples/connectors/usage-export.jsonl",
     "examples/connectors/usage-attribution-events.jsonl",
     "examples/toolbar-fixtures/fast.txt",
@@ -262,7 +265,8 @@ def assert_usage_cost_policy(root):
         ],
         "hosts/claude-code/SKILL.md": [
             "## Cost (host-specific",
-            "Claude Code may expose the current session cost through `/cost`",
+            "automatically import the current local CLI session",
+            "Claude Code may also expose the current session cost through `/cost`",
             "renderer reads `cost usd`",
         ],
         "templates/hub/state.md": [
@@ -325,6 +329,70 @@ def assert_optional_npm_tools_policy(root):
     print("OK optional npm tools policy")
 
 
+def assert_ccusage_import_policy(root):
+    checks = {
+        "connectors/usage-cost.md": [
+            "scripts/python/metrics/import-ccusage.py",
+            "ccusage session --json",
+            "cost source: ccusage",
+            "cost confidence:",
+            "estimated",
+        ],
+        "docs/usage-cost-adoption.md": [
+            "ccusage` import is active",
+            "Claude Code automatic path",
+            "selection_method: latest_agent_session",
+            "API import remains",
+        ],
+        "hosts/_template/hosts.json": [
+            "automatically import the current local CLI session",
+            "For Devin, automatic usage attribution requires",
+        ],
+        "templates/hub/state.md": [
+            "- alfred run id:",
+            "- host:",
+            "- usage session id:",
+            "- usage imported at:",
+        ],
+        "scripts/README.md": [
+            "import-ccusage",
+            "ccusage session --json",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"ccusage import policy missing in {rel}: {phrase}")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(root / "scripts/python/metrics/import-ccusage.py"),
+            "-InputPath",
+            str(root / "examples/connectors/ccusage-session.json"),
+            "-Host",
+            "claude-code",
+            "-NoAppend",
+            "-NoStateUpdate",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        raise SystemExit("ccusage import fixture failed")
+    event = json.loads(result.stdout.strip().splitlines()[-1])
+    if event.get("event_type") != "usage_attributed":
+        raise SystemExit("ccusage import fixture did not emit usage_attributed")
+    if event.get("cost_usd") != 1.23:
+        raise SystemExit("ccusage import fixture did not map totalCost")
+    if event.get("metadata", {}).get("source_kind") != "ccusage":
+        raise SystemExit("ccusage import fixture did not mark source_kind")
+    print("OK ccusage import policy")
+
+
 def run_sub(root, rel_script, *script_args):
     script = root / rel_script
     result = subprocess.run(
@@ -358,6 +426,7 @@ def main():
     assert_toolbar_rendering_policy(root)
     assert_usage_cost_policy(root)
     assert_optional_npm_tools_policy(root)
+    assert_ccusage_import_policy(root)
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")

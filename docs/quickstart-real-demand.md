@@ -115,8 +115,10 @@ Keep `001-state.md` current. A demand is only closed when the checklist is compl
 
 If a host usage source is available, normalize it before closure using the
 `usage-cost` connector contract. For Devin, prefer ACU/session consumption first;
-tokens are optional and may be unavailable. If no source is available, mark
-usage/cost as not collected instead of estimating.
+tokens are optional and may be unavailable. For Claude Code/Codex local CLI
+sessions with durable logs, run `scripts/python/metrics/import-ccusage.py`
+against the demand state before the manual cost fallback. If no source is
+available, mark usage/cost as not collected instead of estimating.
 
 On closure, update:
 - HUB `001-index.md`: move demand from open to closed and link `05-operation/009-summary.md`;

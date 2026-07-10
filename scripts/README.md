@@ -13,7 +13,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 |---|---|---|
 | `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
 | `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` |
-| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` |
+| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` · `import-ccusage` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
 `scripts/python/_common.py` stays at the runtime root (shared by all categories).
@@ -45,6 +45,7 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
+- `import-ccusage` - optional automatic importer for `ccusage session --json`; updates demand cost state and appends `usage_attributed` events.
 - `validate-toolbar-fixtures` - optional drift check for toolbar examples.
 - `validate-skills-registry` - optional consistency check for `skills/skills.md`.
 - `validate-email-adapter` - optional behavior check for the Python-only notification adapter: dry-run report generation, allowlist refusal, and audit subject prefix.
@@ -88,6 +89,10 @@ python scripts/python/metrics/generate-metrics-rollup.py -Root examples
 
 ```bash
 python scripts/python/metrics/normalize-usage-cost.py -InputPath examples/connectors/usage-export.jsonl
+```
+
+```bash
+python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
 ```bash
