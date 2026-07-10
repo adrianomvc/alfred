@@ -2,6 +2,7 @@
 """Sync generated Alfred host entry files into native host locations."""
 
 import argparse
+import json
 import os
 import shutil
 from pathlib import Path
@@ -63,6 +64,53 @@ def sync_one(host, alfred_home, target, create, force, dry_run):
     return 1
 
 
+def command_exists_in_hooks(settings, command):
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return False
+    for entries in hooks.values():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            for hook in entry.get("hooks", []) if isinstance(entry, dict) else []:
+                if isinstance(hook, dict) and hook.get("command") == command:
+                    return True
+    return False
+
+
+def install_claude_code_usage_hook(alfred_home, settings_path, dry_run):
+    settings_path = settings_path or (Path.home() / ".claude" / "settings.json")
+    hook_script = alfred_home / "scripts" / "python" / "metrics" / "claude-code-usage-hook.py"
+    if not hook_script.exists():
+        raise SystemExit(f"Claude Code usage hook script not found: {hook_script}")
+
+    command = f'python "{hook_script}"'
+    if not settings_path.exists():
+        settings = {}
+    else:
+        try:
+            settings = json.loads(settings_path.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError as error:
+            raise SystemExit(f"Invalid Claude Code settings JSON at {settings_path}: {error}") from error
+
+    if command_exists_in_hooks(settings, command):
+        print(f"OK claude-code hook: already installed in {settings_path}")
+        return 0
+
+    hooks = settings.setdefault("hooks", {})
+    stop_hooks = hooks.setdefault("Stop", [])
+    stop_hooks.append({"hooks": [{"type": "command", "command": command}]})
+
+    if dry_run:
+        print(f"DRY-RUN claude-code hook: would add Stop hook to {settings_path}")
+        return 1
+
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+    print(f"SYNC claude-code hook: installed Stop hook in {settings_path}")
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", "-Host", dest="host", choices=sorted(HOST_SOURCES), default="")
@@ -72,6 +120,10 @@ def main():
     parser.add_argument("--create", "-Create", dest="create", action="store_true")
     parser.add_argument("--force", "-Force", dest="force", action="store_true")
     parser.add_argument("--dry-run", "-DryRun", dest="dry_run", action="store_true")
+    parser.add_argument("--install-hooks", "-InstallHooks", dest="install_hooks", action="store_true",
+                        help="also install host runtime hooks when supported")
+    parser.add_argument("--claude-settings-path", "-ClaudeSettingsPath", dest="claude_settings_path", default="",
+                        help="override Claude Code settings path (useful for validation/dry-run)")
     args = parser.parse_args()
 
     if not args.host and not args.all_hosts:
@@ -85,9 +137,14 @@ def main():
         targets = [Path(item).expanduser() for item in args.targets] if args.targets else default_targets(host)
         if not targets:
             print(f"SKIP {host}: no default native target; pass -Target explicitly.")
-            continue
-        for target in targets:
-            synced += sync_one(host, alfred_home, target, args.create, args.force, args.dry_run)
+        else:
+            for target in targets:
+                synced += sync_one(host, alfred_home, target, args.create, args.force, args.dry_run)
+        if args.install_hooks and host == "claude-code":
+            settings_path = Path(args.claude_settings_path).expanduser() if args.claude_settings_path else None
+            synced += install_claude_code_usage_hook(alfred_home, settings_path, args.dry_run)
+        elif args.install_hooks:
+            print(f"SKIP {host} hooks: no runtime hook installer.")
 
     print(f"Host shim sync completed. synced={synced}")
 

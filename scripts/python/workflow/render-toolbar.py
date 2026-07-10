@@ -2,16 +2,23 @@
 """Render the Alfred process toolbar from a demand state file."""
 
 import argparse
+import json
+import os
 import re
 import subprocess
 import sys
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import get_field, read_lines  # noqa: E402
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
+
+
+def now_iso():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def get_first_field(lines, names):
@@ -237,6 +244,31 @@ def read_app_commit(state_path, content, explicit_app_commit="", app_demand_path
     return "unknown"
 
 
+def active_demand_path():
+    runtime_dir = os.environ.get("ALFRED_RUNTIME_DIR")
+    base = Path(runtime_dir).expanduser() if runtime_dir else Path.home() / ".alfred" / "runtime"
+    return base / "active-demand.json"
+
+
+def register_active_demand(state_path, content):
+    state = Path(state_path).resolve()
+    obs_log = state.parent / "05-operation" / "011-observability-log.jsonl"
+    payload = {
+        "schema_version": "alfred.runtime.active-demand.v1",
+        "updated_at": now_iso(),
+        "state_path": str(state),
+        "observability_log": str(obs_log),
+        "alfred_run_id": get_first_field(content, ["alfred run id", "trace id"]),
+        "initiative_id": get_first_field(content, ["initiative id", "id iniciativa"]),
+        "demand_id": get_first_field(content, ["id", "demand id"]),
+        "host": os.environ.get("ALFRED_HOST", ""),
+    }
+    target = active_demand_path()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return target
+
+
 def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
                  model, cost, progress, markers, forecast, framework, app_commit):
     icon = _LANE_ICON.get(lane.lower(), "⚪")
@@ -438,6 +470,8 @@ def main():
                         help="current or recorded app commit to show in the toolbar")
     parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="",
                         help="optional app demand artifact path used to read current/captured app commit")
+    parser.add_argument("--register-active", "-RegisterActive", dest="register_active", action="store_true",
+                        help="record this state as the active demand for host hooks")
     args = parser.parse_args()
 
     if args.profile == "text" and not args.allow_text_fallback:
@@ -446,6 +480,9 @@ def main():
             "--profile or use --profile rich. If the host cannot render "
             "Unicode/emoji, rerun with --profile text --allow-text-fallback."
         )
+
+    if args.register_active:
+        register_active_demand(args.state_path, read_lines(args.state_path))
 
     for line in render(args.state_path, args.model, args.cost, args.profile,
                        args.cost_usd, args.app_commit, args.app_demand_path):

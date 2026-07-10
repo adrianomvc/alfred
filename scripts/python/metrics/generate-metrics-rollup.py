@@ -18,6 +18,25 @@ def group_by(events, key):
     return groups
 
 
+def effective_events(events):
+    """Return the last occurrence of each event_id, preserving append-only history.
+
+    Session-level usage imports may append refreshed snapshots with the same
+    event_id. Metrics must count the latest snapshot once, not sum every
+    historical copy.
+    """
+    keyed = {}
+    unkeyed = []
+    for index, event in enumerate(events):
+        event_id = event.get("event_id")
+        if event_id:
+            keyed[event_id] = (index, event)
+        else:
+            unkeyed.append((index, event))
+    merged = [*keyed.values(), *unkeyed]
+    return [event for _, event in sorted(merged, key=lambda item: item[0])]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", "-Root", dest="root", default="examples")
@@ -38,13 +57,14 @@ def main():
             event["_source_line"] = line_number
             events.append(event)
 
-    by_demand = group_by(events, "demand_id")
-    by_lane = group_by(events, "lane")
-    by_phase = group_by(events, "phase")
+    metric_events = effective_events(events)
+    by_demand = group_by(metric_events, "demand_id")
+    by_lane = group_by(metric_events, "lane")
+    by_phase = group_by(metric_events, "phase")
 
-    total_tokens_input = sum(e["tokens_input"] for e in events if e.get("tokens_input") is not None)
-    total_tokens_output = sum(e["tokens_output"] for e in events if e.get("tokens_output") is not None)
-    total_cost = sum(e["cost_usd"] for e in events if e.get("cost_usd") is not None)
+    total_tokens_input = sum(e["tokens_input"] for e in metric_events if e.get("tokens_input") is not None)
+    total_tokens_output = sum(e["tokens_output"] for e in metric_events if e.get("tokens_output") is not None)
+    total_cost = sum(e["cost_usd"] for e in metric_events if e.get("cost_usd") is not None)
 
     lines = []
     lines.append("# Generated Metrics Rollup")
@@ -52,7 +72,7 @@ def main():
     lines.append(f"Generated from observability JSONL under `{args.root}` = `{root}`.")
     lines.append("")
     lines.append("## Summary")
-    lines.append(f"- events: {len(events)}")
+    lines.append(f"- events: {len(metric_events)} effective / {len(events)} raw")
     lines.append(f"- demands: {len(by_demand)}")
     lines.append(f"- tokens input: {total_tokens_input}")
     lines.append(f"- tokens output: {total_tokens_output}")
