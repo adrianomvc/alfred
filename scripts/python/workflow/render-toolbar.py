@@ -3,12 +3,15 @@
 
 import argparse
 import re
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import get_field, read_lines  # noqa: E402
+
+FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
 
 
 def get_first_field(lines, names):
@@ -36,13 +39,13 @@ def shorten(value, maximum=64):
 _ESC = "\033"
 _LANE_COLOR = {"fast": "32", "standard": "33", "safe": "31"}   # green / amber / red
 _LANE_ICON = {"fast": "🟢", "standard": "🟡", "safe": "🔴"}
-_ALIAS_TEXT = {"Inception": "O que", "Design": "Como", "Execution": "Fazer",
-               "Validate": "Validar", "Operation": "Operar"}
-_ALIAS_RICH = {"Inception": "O quê", "Design": "Como", "Execution": "Fazer",
-               "Validate": "Validar", "Operation": "Operar"}
+_ALIAS_TEXT = {"Inception": "1 Inception", "Design": "2 Design", "Execution": "3 Execution",
+               "Validate": "4 Validate", "Operation": "5 Operation"}
+_ALIAS_RICH = {"Inception": "1 Inception", "Design": "2 Design", "Execution": "3 Execution",
+               "Validate": "4 Validate", "Operation": "5 Operation"}
 _STATUS_TEXT = {"x": "ok", ">": "agora", " ": "pendente"}
 _STATUS_RICH = {"x": "✅", ">": "▶", " ": "○"}
-_RICH_WIDTH = 78
+_RICH_WIDTH = 92
 
 
 def _c(code, s):
@@ -147,8 +150,90 @@ def normalize_cost(cost, cost_usd="", usage_cost=""):
     return "nao coletado"
 
 
+def short_commit(value):
+    value = str(value or "").strip().strip("`")
+    if value == "" or value.lower() in {"unknown", "not-git", "a confirmar", "n/a"}:
+        return "unknown"
+    return value[:7]
+
+
+def format_framework(version, commit):
+    version = str(version or "unknown").strip().strip("`")
+    if version and version != "unknown" and not version.lower().startswith("v"):
+        version = f"v{version}"
+    return f"{version} ({short_commit(commit)})"
+
+
+def local_framework_value(kind):
+    if kind == "version":
+        version_path = FRAMEWORK_ROOT / "VERSION"
+        if version_path.exists():
+            return version_path.read_text(encoding="utf-8-sig").splitlines()[0].strip()
+        return "unknown"
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(FRAMEWORK_ROOT), "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return "unknown"
+    if result.returncode != 0:
+        return "unknown"
+    return result.stdout.strip() or "unknown"
+
+
+def resolve_path(raw, state_path):
+    raw = str(raw or "").strip().strip("`")
+    if raw == "":
+        return None
+    candidate = Path(raw)
+    if candidate.is_absolute():
+        return candidate
+    bases = [Path.cwd(), Path(state_path).resolve().parent]
+    bases.extend(Path(state_path).resolve().parents)
+    for base in bases:
+        resolved = (base / raw).resolve()
+        if resolved.exists():
+            return resolved
+    return (Path.cwd() / raw).resolve()
+
+
+def read_app_commit(state_path, content, explicit_app_commit="", app_demand_path=""):
+    if explicit_app_commit:
+        return short_commit(explicit_app_commit)
+
+    state_value = get_first_field(content, ["app commit", "current app commit", "captured app commit"])
+    if state_value:
+        return short_commit(state_value)
+
+    paths = []
+    if app_demand_path:
+        paths.append(resolve_path(app_demand_path, state_path))
+    app_artifacts = get_first_field(content, ["app artifacts"])
+    if app_artifacts:
+        paths.append(resolve_path(app_artifacts, state_path))
+
+    for app_path in (p for p in paths if p):
+        candidates = [
+            app_path / "001-index.md",
+            app_path / "01-inception" / "002-reverse-eng.md",
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                lines = read_lines(candidate)
+                value = get_first_field(lines, [
+                    "current commit", "captured commit", "app commit", "commit",
+                ])
+                if value:
+                    return short_commit(value)
+
+    return "unknown"
+
+
 def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
-                 model, cost, progress, markers, forecast):
+                 model, cost, progress, markers, forecast, framework, app_commit):
     icon = _LANE_ICON.get(lane.lower(), "⚪")
     track = " · ".join(
         _ALIAS_RICH.get(name, name)
@@ -163,6 +248,7 @@ def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
     ]
     if forecast:
         lines.append(_box_line(f"Previsão: {forecast}"))
+    lines.append(_box_line(f"Framework: {framework}        App: {app_commit}"))
     lines.append(
         _box_sep(),
     )
@@ -228,7 +314,8 @@ def _render_web(sigla, demand_id, lane, nxt, step, progress, markers):
             '</svg>']
 
 
-def render(state_path, model="default", cost="n/a", profile="rich", cost_usd=""):
+def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
+           app_commit="", app_demand_path=""):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
 
@@ -242,6 +329,18 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="")
     nxt = get_first_field(content, ["next step", "proximo passo", "próximo passo"]) or "unknown"
     checkpoint = get_field(content, "checkpoint") or "n/a"
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
+    stamped_framework_version = get_first_field(
+        content, ["framework version", "versao framework", "versão framework"]
+    )
+    stamped_framework_commit = get_first_field(content, ["framework commit"])
+    if stamped_framework_version or stamped_framework_commit:
+        framework_version = stamped_framework_version or "unknown"
+        framework_commit = stamped_framework_commit or "unknown"
+    else:
+        framework_version = local_framework_value("version")
+        framework_commit = local_framework_value("commit")
+    framework = format_framework(framework_version, framework_commit)
+    app_commit_display = read_app_commit(state_path, content, app_commit, app_demand_path)
 
     time_mode = get_first_field(content, ["tempo", "time mode"])
     checklist_text = "\n".join(
@@ -285,7 +384,8 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="")
 
     if profile == "rich":
         return _render_rich(sigla, demand_id, lane, phase, nxt,
-                            checkpoint, model, cost_display, progress, markers, forecast)
+                            checkpoint, model, cost_display, progress, markers, forecast,
+                            framework, app_commit_display)
     if profile == "web":
         return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
@@ -295,7 +395,8 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="")
     if lane.lower() == "fast":
         return [
             f"ALFRED | {sigla} | #{demand_id} | FAST | {phase} | {progress}% | "
-            f"{cost_part} | modelo: {model} | proximo: {shorten(nxt, 48)}"
+            f"{cost_part} | modelo: {model} | proximo: {shorten(nxt, 48)}",
+            f"Framework: {framework} | App: {app_commit_display}",
         ]
 
     track = " | ".join(
@@ -303,6 +404,7 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="")
     )
     return [
         f"ALFRED | {sigla} | #{demand_id} | {lane.upper()} | {progress}% | {cost_part}",
+        f"Framework: {framework} | App: {app_commit_display}",
         f"Fases: {track}",
         f"HITL: {shorten(checkpoint, 52)} | modelo: {model} | etapa: {shorten(step, 44)}",
         f"Proximo: {shorten(nxt, 76)}",
@@ -322,9 +424,14 @@ def main():
                         choices=["text", "rich", "web"])
     parser.add_argument("--cost-usd", "-CostUsd", dest="cost_usd", default="",
                         help="numeric cost so far (USD); enables the linear total-cost forecast")
+    parser.add_argument("--app-commit", "-AppCommit", dest="app_commit", default="",
+                        help="current or recorded app commit to show in the toolbar")
+    parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="",
+                        help="optional app demand artifact path used to read current/captured app commit")
     args = parser.parse_args()
 
-    for line in render(args.state_path, args.model, args.cost, args.profile, args.cost_usd):
+    for line in render(args.state_path, args.model, args.cost, args.profile,
+                       args.cost_usd, args.app_commit, args.app_demand_path):
         print(line)
 
 
