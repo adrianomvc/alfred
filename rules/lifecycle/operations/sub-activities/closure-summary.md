@@ -26,7 +26,7 @@ HUB/App index templates.
 1. Write the `summary`: outcome, what changed, evidence/PR link, residual risks.
 2. Add a short **resume note** — where future work should start.
 3. Refresh the **index**:
-   - HUB: `alfred-docs-hub/index.md` open/closed rows, metrics/insights links,
+   - HUB: `alfred-docs-hub/001-index.md` open/closed rows, metrics/insights links,
      follow-ups.
    - App: `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md`
      reverse-eng status, evidence links, HUB sync status.

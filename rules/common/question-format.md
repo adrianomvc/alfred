@@ -16,12 +16,13 @@ How Alfred asks humans. Inherited from AI-DLC `question-format-guide`. Used in I
 ## Principles
 - **All questions live in the `requirements` artifact** — the **question list is worked in the file**, not the chat: portable across hosts and resilient (survives context loss). **Always state the file path** so the person knows where to answer (see `## Where the questions live`).
   - *Only exception:* a **single, one-off clarification** the model needs right now may be asked inline in chat. The moment it becomes a list, or the answer is material (scope, risk, a decision), it goes to the file.
-- **Multiple choice + free-text answer** — offer 2 to 5 options (`A` to `E`) so the human answers fast; free text goes directly in `[Resposta]:`.
+- **AI-DLC-compatible default: single choice + free text** — offer 2 to 5 meaningful options using `A` to `E`, with `Outra / A confirmar` as the last option when the listed options may not cover the answer. The human answers with one letter in `[Resposta]:`.
+- **Alfred extension: multiple selection** — only when the question explicitly says `selecione uma ou mais`, use checkbox options (`[ ]` / `[x]`) with no `A)`/`B)` labels. Use `[Resposta]:` only for extra detail.
 - **Recommended option** — when there is a safer/default path, mark one option with `(Recomendado)`. For unknown SAFE facts, recommend confirming before execution instead of guessing.
 - **Never pre-fill `[Resposta]:`** — the tag only orients; the human always answers (D7). No auto-confirm, not even for low-risk.
 - **Layout by priority** — group blocking questions (`🔴 bloqueiam o avanço`) before optional ones (`🟡 podem responder depois`), each with a one-line "Por quê" and a status marker (`◻ aberta` · `✓ respondida` · `⚠ contradição`). See `templates/hub/requirements.md`.
 - **`[Resposta]:` tag** — each question is followed by a `[Resposta]:` line the human fills.
-- **One decision per question** — do not bundle several decisions into one item.
+- **One decision per question** — do not bundle several decisions into one item. If more than one option can be selected independently, prefer splitting the question; otherwise label it explicitly as `selecione uma ou mais` and present each option as a checkbox.
 - **Option limit** — use the fewest useful options. Minimum 2, maximum 5. Do not add filler options just to reach 5.
 - **No emergent behavior** — do not invent options the context does not support; if you do not know, ask, do not guess (supreme law).
 
@@ -30,9 +31,21 @@ How Alfred asks humans. Inherited from AI-DLC `question-format-guide`. Used in I
 ### Q1 — <clear, specific question?>
 - A) <opcao recomendada> (Recomendado)
 - B) <opcao alternativa>
-- C) A confirmar
+- C) Outra / A confirmar
 - D) <opcional, se necessario>
 - E) <opcional, se necessario>
+
+[Resposta]:
+```
+
+For explicit multiple selection (Alfred extension, not AI-DLC stock):
+
+```markdown
+### Q2 — <pergunta com selecao multipla?> (selecione uma ou mais)
+Por quê: <impacto>.
+- [ ] <opcao>
+- [ ] <opcao>
+- [ ] Outra / A confirmar
 
 [Resposta]:
 ```

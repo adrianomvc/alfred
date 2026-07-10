@@ -29,6 +29,14 @@ Minimum files:
 - `003-insights.md`
 - `knowledge/` when sigla-specific policies exist
 
+Template filenames are source names, not output names. When creating the HUB
+root, write the canonical artifact names:
+- `templates/hub/index.md` -> `alfred-docs-hub/001-index.md`
+- `templates/hub/skills.md` -> `alfred-docs-hub/004-skills.md` when skills are registered
+
+Do not create unnumbered HUB aliases such as `index.md`, `skills.md`, or
+`metrics-rollup.md`.
+
 The HUB must reference this framework repo/version. Do not copy framework files into the HUB.
 Choose the reference mode using `docs/version-adoption.md` and record the selected version/ref/commit in the HUB index before the first demand.
 

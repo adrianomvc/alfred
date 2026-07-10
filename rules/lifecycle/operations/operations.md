@@ -21,7 +21,7 @@ Close the demand after release/merge with traceability, metrics, and a resumable
      may use `../../common/deferred-work-policy.md`.
 3. Check baselines and flag drift: too much SAFE, excessive cost, repeated rework, missing post-mortem.
 4. Write `summary` and refresh `index` so future sessions load the result without re-reading all artifacts.
-   - HUB: update `alfred-docs-hub/index.md` open/closed demand rows, metrics/insights links, and follow-ups.
+   - HUB: update `alfred-docs-hub/001-index.md` open/closed demand rows, metrics/insights links, and follow-ups.
    - App: update `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` reverse-eng status, evidence links, and HUB sync status.
    - Summary: include a short resume note that explains the outcome and where future work should start.
 5. If Execution-first was used, complete post-mortem before closure.
