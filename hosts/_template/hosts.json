@@ -10,7 +10,7 @@
       "boot_path": "~/.alfred/core/boot.md",
       "principles_path": "~/.alfred/core/principles.md",
       "model_policy": "Load `~/.alfred/core/model-policy.md` only when selecting or switching the model, then map its tiers to Claude models (for example `strong` -> `claude-opus-4-8`). Use `/model` when a step requires a different tier; if switching is unavailable, record the model that ran.",
-      "host_extra": "",
+      "host_extra": "## Cost (host-specific — D10)\nClaude Code may expose the current session cost through `/cost`. Alfred cannot invent or scrape this value. When no `usage-cost` adapter/export is configured, ask the human at natural checkpoints to run `/cost` and provide the displayed total; record it in `001-state.md` as `usage-cost: host cost command (/cost)`, `cost source: host_cost_command`, `cost usd: <value>`, and `cost confidence: exact` when it is the current session total. The toolbar renderer reads `cost usd`; if the value is absent, it must show `custo: nao coletado`.\n\n",
       "always_extra": "",
       "missing_framework": "",
       "update_policy": "on the default branch, git -C ~/.alfred pull --ff-only; if pinned or an active demand exists, keep the stamped version frozen and only note an update is available (~/.alfred/docs/version-adoption.md)."

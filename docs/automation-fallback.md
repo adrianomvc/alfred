@@ -37,7 +37,7 @@ native commands with explicit limits (`tail`, `head`, `Select-Object -First`,
 | Helper (`<name>`) | Script output | Manual Markdown/JSONL fallback |
 |---|---|---|
 | `alfred-boot` | terminal context summary | read HUB `001-index.md` and demand `001-state.md`; list open demands manually |
-| `render-toolbar` | terminal toolbar | render the toolbar text from `001-state.md` using `core/presentation/toolbar.md` |
+| `render-toolbar` | terminal toolbar | load `core/presentation/toolbar-quick.md` and render only the documented text fallback from `001-state.md`; do not hand-draw the rich block |
 | `validate-framework` | terminal validation result | execute `docs/framework-validation.md` checklist manually |
 | `validate-demand` | terminal validation result | review required HUB/App artifacts, links, JSONL, audit, metrics, skills, and adapters manually |
 | `validate-sdd-gate` | terminal validation result | review problem, requirements, risk, decisions, spec, and execution plan manually before Execution |

@@ -20,6 +20,8 @@ Secondary path:
 Fallback:
 - manual allocation from approved billing reports or invoices, explicitly
   marked as manual.
+- host-native interactive cost command (for example Claude Code `/cost`) when
+  the human records the displayed total into the demand state.
 
 ## Principles
 - Usage import is optional; Alfred runs without it.
@@ -62,7 +64,8 @@ Use the most authoritative source available:
 3. Enterprise billing export that includes user, workspace, repo, or time
    windows.
 4. ccusage JSON for supported local CLIs.
-5. Manual allocation approved by the human/FinOps owner.
+5. Host-native interactive cost command manually recorded by the human.
+6. Manual allocation approved by the human/FinOps owner.
 
 If sources conflict, keep both records with their source and mark the conflict
 in metrics; do not silently reconcile.
@@ -117,6 +120,23 @@ Implementation target:
 
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.
+
+## Claude Code Manual Cost Capture
+Claude Code may expose session cost through `/cost` in the interactive UI.
+Alfred cannot assume that value or call it as a normal shell command. When a
+demand runs in Claude Code and no durable usage export is configured:
+
+1. Ask the human to run `/cost` at a natural checkpoint (resume, before Design
+   approval, before close, or when the toolbar still says `nao coletado`).
+2. Record the displayed value in `001-state.md`:
+   - `usage-cost: host cost command (/cost)`
+   - `cost source: host_cost_command`
+   - `cost usd: <numeric USD value>`
+   - `cost confidence: exact` when `/cost` reports the current session total.
+3. Render the toolbar from `state`; the renderer reads `cost usd` and can show
+   the linear `Previsao`/`est. total` when progress is between 0 and 100.
+4. If the value is not provided, keep `custo: nao coletado`; never invent a
+   dollar amount.
 
 ## Pilot Checklist
 Run one corporate pilot before implementing automatic policy suggestions:

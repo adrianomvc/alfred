@@ -58,6 +58,9 @@ CLI importers such as `ccusage` when the CLI is supported and logs are durable. 
 - `devin_export`: saved Devin API/admin export file.
 - `enterprise_billing`: approved billing export or admin report.
 - `ccusage`: local CLI usage parsed from a supported tool's durable logs.
+- `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
+  recorded by the human or by a supported host export. It is valid only as a
+  session/window total, with source and timestamp.
 - `manual_allocation`: human/FinOps-approved allocation from aggregate cost.
 
 ## degradation
@@ -65,6 +68,13 @@ When host usage cannot be read:
 - keep original events append-only;
 - do not estimate cost unless the human provides an approved rate table;
 - record the missing source in metrics gaps or validation evidence.
+
+When a host exposes cost only through an interactive command (for example
+Claude Code `/cost`), Alfred may ask the human to run it at start/end or before
+closing the demand, then record the exact displayed value in `001-state.md` as
+`cost source: host_cost_command`, `cost usd: <value>`, and
+`cost confidence: exact` if the command reports the current session total. Do
+not scrape prompts or infer missing token details.
 
 ## audit fields
 source, source kind, usage window, records read, records attributed, records

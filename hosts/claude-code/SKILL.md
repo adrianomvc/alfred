@@ -37,6 +37,9 @@ or specialty skills, follow `rules/common/tool-discovery-policy.md`: select the
 needed capability from the registry first, then load/call only that tool. Do not
 load every available tool schema at boot.
 
+## Cost (host-specific — D10)
+Claude Code may expose the current session cost through `/cost`. Alfred cannot invent or scrape this value. When no `usage-cost` adapter/export is configured, ask the human at natural checkpoints to run `/cost` and provide the displayed total; record it in `001-state.md` as `usage-cost: host cost command (/cost)`, `cost source: host_cost_command`, `cost usd: <value>`, and `cost confidence: exact` when it is the current session total. The toolbar renderer reads `cost usd`; if the value is absent, it must show `custo: nao coletado`.
+
 ## Always
 - Keep the demand `state` current; commit on the demand branch.
 - Stamp the framework version in the demand `state` (D26).

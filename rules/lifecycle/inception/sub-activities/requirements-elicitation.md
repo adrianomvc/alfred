@@ -30,8 +30,8 @@ Intent analysis (clarity class), `tech-inception` unknowns, business gaps from
    each required `[Resposta]:`, save the file, then say `pronto`/`terminei` in
    chat.
 4. Open the **gate**: do not advance to Design until the required answers land
-   in the file. Host-native question widgets may point to the file, but do not
-   collect answers or replace it.
+   in the file. Do not open host-native question widgets for requirements; chat
+   or UI may only say that the file is waiting for answers and provide the path.
 5. After the human confirms completion, read the file and **detect
    contradictions** against earlier inputs; re-ask in the same file if needed.
 6. Consolidate answers into `requirements`; record the gate in `audit`.
