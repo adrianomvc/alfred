@@ -8,6 +8,7 @@ to the matching Markdown rule.
 | Hook | Purpose |
 |---|---|
 | [`rtk.md`](rtk.md) | Terminal token control for DEVIN CLI sessions |
+| [`usage-attribution.md`](usage-attribution.md) | Stamp exact per-turn token usage from the Claude Code transcript |
 
 ## Rule
 Hook setup is host-specific and must not change Alfred's core lifecycle. If a

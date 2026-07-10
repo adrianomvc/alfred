@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import value_or  # noqa: E402
+from _common import read_state_fields, value_or  # noqa: E402
 
 
 HOST_AGENT = {
@@ -24,19 +24,6 @@ HOST_AGENT = {
 
 def now_iso():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def read_state(path):
-    fields = {}
-    if not path or not path.exists():
-        return fields
-    for line in path.read_text(encoding="utf-8-sig").splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("- ") or ":" not in stripped:
-            continue
-        key, value = stripped[2:].split(":", 1)
-        fields[key.strip().lower()] = value.strip()
-    return fields
 
 
 def update_state(path, updates):
@@ -275,7 +262,7 @@ def main():
     args = parser.parse_args()
 
     state_path = Path(args.state_path).resolve() if args.state_path else None
-    state_fields = read_state(state_path) if state_path else {}
+    state_fields = read_state_fields(state_path) if state_path else {}
     if not args.agent:
         args.agent = HOST_AGENT.get(args.host, args.host)
     if not args.session_id:

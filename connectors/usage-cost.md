@@ -68,6 +68,10 @@ estimated` unless an approved billing source confirms the USD value.
 - `devin_export`: saved Devin API/admin export file.
 - `enterprise_billing`: approved billing export or admin report.
 - `ccusage`: local CLI usage parsed from a supported tool's durable logs.
+- `host_transcript`: exact per-request token usage parsed from a host transcript
+  (for example the Claude Code session JSONL), attributed to Alfred event windows
+  or turns. Tokens are exact; cost is `null` unless allocated from a session
+  total. See the layered attribution below.
 - `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
   recorded by the human or by a supported host export. It is valid only as a
   session/window total, with source and timestamp.
@@ -96,6 +100,25 @@ stays current. Each run appends a new `usage_attributed` event (append-only) and
 refreshes the `001-state.md` cost fields; it never edits prior events. On
 Windows the helper resolves the `ccusage` npm shim via `PATHEXT`; if it is
 unreachable, dump `ccusage session --json` to a file and pass `-InputPath`.
+
+### Layered transcript attribution (finer than the session total)
+When the host keeps a durable transcript with per-request usage (Claude Code),
+`scripts/python/metrics/attribute-usage-transcript.py` recovers finer
+granularity from the `host_transcript` source. Usage is de-duplicated by
+`requestId` (a request spans several transcript lines that repeat the same
+usage), so tokens are exact. Cost is not in the transcript: it stays `null`
+unless `--allocate-cost` allocates the session total across buckets
+(`allocated`); the session total stays owned by the ccusage event or `/cost`.
+
+- `--granularity window`: sum requests into windows bounded by consecutive Alfred
+  event timestamps (needs real, distinct event `ts`). One-shot, run at close.
+- `--granularity turn`: one event per request (`usage-turn-<requestId>`), tagged
+  with the enclosing event. Idempotent — re-runs skip already-attributed
+  requests, so it is safe to append every checkpoint.
+
+The Claude Code Stop hook (`core/hooks/usage-attribution.md`) runs the turn mode
+automatically and out-of-band, since the host — not the in-band agent — owns the
+usage object. Hooks do not receive usage inline; they receive `transcript_path`.
 
 When a host exposes cost only through an interactive command (for example
 Claude Code `/cost`), Alfred may ask the human to run it at start/end or before

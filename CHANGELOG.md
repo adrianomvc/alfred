@@ -4,6 +4,22 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+### Added
+- Layered transcript usage attribution (usage-cost Layers 1-3):
+  `scripts/python/metrics/attribute-usage-transcript.py` maps a durable host
+  transcript (Claude Code) into per-window or per-turn `usage_attributed` events.
+  Tokens are exact — de-duplicated by `requestId`, since one request spans
+  several transcript lines that repeat the same usage. Cost stays `null` unless
+  `--allocate-cost` allocates the session total across buckets (`allocated`).
+  Turn mode is idempotent (stable `usage-turn-<requestId>` ids, skips
+  already-attributed requests). `claude-code-usage-hook.py` plus
+  `core/hooks/usage-attribution.md` run turn mode from a Claude Code Stop hook,
+  out-of-band: hooks receive `transcript_path`, not usage, so the host that owns
+  the usage object stamps it instead of the in-band agent.
+- `validate-observability-hygiene` validator: example event logs must use real,
+  distinct ISO-8601 timestamps (no placeholders, not all-identical), guarding the
+  Layer 0 hygiene contract that later attribution depends on.
+
 ### Fixed
 - `import-ccusage.py` now resolves the `ccusage` executable via `shutil.which`
   before spawning it, so Windows npm shims (`ccusage.cmd`) are found instead of
