@@ -49,6 +49,21 @@ Point the hook at the active demand log via environment:
 - `ALFRED_OBS_LOG` — an explicit observability JSONL path.
 - Optional `ALFRED_ALLOCATE_COST=1`, `ALFRED_RUN_ID=<id>`.
 
+If the environment is not set, render the toolbar with `-RegisterActive` first:
+
+```bash
+python ~/.alfred/scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md -RegisterActive
+```
+
+That writes `~/.alfred/runtime/active-demand.json`, which the Stop hook reads as
+the fallback target.
+
+To install the hook while refreshing the Claude Code host entry:
+
+```bash
+python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
+```
+
 ## Behavior
 - Idempotent: re-runs every Stop but skips `requestId`s already attributed, so no
   duplicates accumulate.

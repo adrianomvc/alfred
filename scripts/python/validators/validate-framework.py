@@ -239,14 +239,17 @@ def assert_host_shim_sync_policy(root):
             "devin-cli",
             "codex",
             "Host shim sync completed",
+            "InstallHooks",
+            "claude-code-usage-hook.py",
         ],
         "hosts/_template/hosts.json": [
-            "sync-host-shims.py -Host claude-code",
+            "sync-host-shims.py -Host claude-code -Create -InstallHooks",
             "sync-host-shims.py -Host devin-cli",
             "sync-host-shims.py -Host codex",
         ],
         "hosts/claude-code/SKILL.md": [
-            "sync-host-shims.py -Host claude-code",
+            "sync-host-shims.py -Host claude-code -Create -InstallHooks",
+            "-RegisterActive",
         ],
         "hosts/devin-cli/SKILL.md": [
             "sync-host-shims.py -Host devin-cli",
@@ -280,6 +283,9 @@ def assert_host_shim_sync_policy(root):
             "-Target",
             str(root / ".tmp-sync-check" / "SKILL.md"),
             "-Create",
+            "-InstallHooks",
+            "-ClaudeSettingsPath",
+            str(root / ".tmp-sync-check" / "settings.json"),
             "-DryRun",
         ],
         capture_output=True,
@@ -291,6 +297,8 @@ def assert_host_shim_sync_policy(root):
         raise SystemExit("Host shim sync dry-run failed")
     if "DRY-RUN claude-code" not in result.stdout:
         raise SystemExit("Host shim sync dry-run did not report expected action")
+    if "DRY-RUN claude-code hook" not in result.stdout:
+        raise SystemExit("Host shim sync dry-run did not report Claude Code hook action")
     print("OK host shim sync policy")
 
 
@@ -298,6 +306,7 @@ def assert_toolbar_rendering_policy(root):
     checks = {
         "core/boot.md": [
             "scripts/python/workflow/render-toolbar.py",
+            "-RegisterActive",
             "load `presentation/toolbar-quick.md`",
             "do not hand-draw a rich toolbar from memory",
         ],
@@ -318,6 +327,7 @@ def assert_toolbar_rendering_policy(root):
             "-AllowTextFallback",
             "Never hand-draw the rich block from memory",
             "progress at 0% or 100%",
+            "-RegisterActive",
         ],
         "core/presentation/toolbar.md": [
             "progress is 0% or 100%",
@@ -337,6 +347,12 @@ def assert_toolbar_rendering_policy(root):
             "--profile text is the degraded fallback",
             "--allow-text-fallback",
             "indisponível (0% concluído)",
+            "RegisterActive",
+            "active-demand.json",
+        ],
+        "scripts/python/metrics/claude-code-usage-hook.py": [
+            "active-demand.json",
+            "render-toolbar.py -RegisterActive",
         ],
         "hosts/_template/shim.md": [
             "default rich profile",

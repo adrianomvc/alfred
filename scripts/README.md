@@ -41,7 +41,7 @@ Any script output must degrade to a manual markdown checklist when the host cann
 ## Available
 Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/` folder contains concrete local adapters.
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
-- `render-toolbar` - optional but preferred toolbar renderer derived from `001-state.md`; use it whenever available instead of hand-drawing. Profiles: `-Profile rich` (default, Unicode block) · `text` (ASCII fallback, CLI requires `-AllowTextFallback`) · `web` (self-contained SVG). See `core/presentation/README.md`.
+- `render-toolbar` - optional but preferred toolbar renderer derived from `001-state.md`; use it whenever available instead of hand-drawing. Profiles: `-Profile rich` (default, Unicode block) · `text` (ASCII fallback, CLI requires `-AllowTextFallback`) · `web` (self-contained SVG). On Claude Code, pass `-RegisterActive` so the Stop hook can target the active demand log. See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
@@ -59,7 +59,7 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `mcp-email-server` - Python MCP stdio server implementing the `notification` connector: `send_email` (allowlist, `[Alfred-Framework]` prefix, audit JSONL, dry-run outbox by default, SMTP in active mode), `send_demand_report` (auto-attaches the demand's metrics/audit/summary/observability JSONL from `001-state.md` context), `send_telemetry` (batches every local observability JSONL to the org `telemetry_to` — provisional transport until the telemetry API, D45), and `email_status`. Destinations are **registered** in `~/.alfred-email.json` (or `ALFRED_EMAIL_CONFIG`), overridable by env vars. See `connectors/notification-email.md`.
 - `spec-vs-impl` - optional heuristic comparison of spec acceptance criteria vs validation evidence: flags criteria with no textual echo in `013-validation-evidence.md` so the Reviewer/human looks at them. Informative by default; `-Strict` fails on gaps. It never approves.
 - `confidence-score` - optional pre-Execution clarity score (0-100) composed from signals Alfred already records: unanswered `[Resposta]:` questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit. >=80 proceed · 50-79 review with human · <50 stop and escalate. The score informs; the human decides.
-- `sync-host-shims` - refreshes copied native host entry files after `~/.alfred` updates, so Claude Code/DEVIN/Codex do not keep running stale host instructions.
+- `sync-host-shims` - refreshes copied native host entry files after `~/.alfred` updates, so Claude Code/DEVIN/Codex do not keep running stale host instructions. Use `-InstallHooks` with `-Host claude-code` to install the usage attribution Stop hook.
 
 ## Python
 

@@ -93,6 +93,9 @@ Do not batch observability in memory. Alfred appends events as soon as they happ
 If a later schema adds fields, do not rewrite old JSONL lines. Append a new event that records the schema/version change or backfill summary.
 
 If cost or token usage arrives after the original interaction, append a `usage_attributed` event instead of editing the original line.
+When a connector refreshes the same session snapshot, it may reuse the same
+`event_id`; rollups count the latest occurrence per `event_id` so append-only
+history does not double-count tokens or cost.
 
 ## Event hygiene (enables attribution)
 Per-event `tokens_input`, `tokens_output`, and `cost_usd` stay `null` on hosts

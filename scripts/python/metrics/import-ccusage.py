@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import read_state_fields, value_or  # noqa: E402
+from _common import iter_jsonl, read_state_fields, value_or  # noqa: E402
 
 
 HOST_AGENT = {
@@ -244,6 +244,31 @@ def default_output_path(state_path):
     return candidate if candidate.exists() else None
 
 
+def same_usage_snapshot(left, right):
+    left_output = left.get("output") or {}
+    right_output = right.get("output") or {}
+    fields = [
+        "tokens_input",
+        "tokens_output",
+        "tokens_cache_creation",
+        "tokens_cache_read",
+        "total_tokens",
+        "cost_usd",
+    ]
+    return all(left_output.get(field) == right_output.get(field) for field in fields)
+
+
+def already_has_same_snapshot(output_path, event):
+    if not output_path or not output_path.exists():
+        return False
+    for _, parsed, _ in iter_jsonl(output_path):
+        if parsed is None:
+            continue
+        if parsed.get("event_id") == event.get("event_id") and same_usage_snapshot(parsed, event):
+            return True
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state-path", "-StatePath", dest="state_path", default="")
@@ -275,10 +300,13 @@ def main():
 
     output_path = Path(args.output_path).resolve() if args.output_path else default_output_path(state_path)
     if output_path and args.append:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("a", encoding="utf-8") as handle:
-            handle.write(event_line + "\n")
-        print(f"Appended ccusage event to {output_path}")
+        if already_has_same_snapshot(output_path, event):
+            print(f"Skipped unchanged ccusage event in {output_path}")
+        else:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with output_path.open("a", encoding="utf-8") as handle:
+                handle.write(event_line + "\n")
+            print(f"Appended ccusage event to {output_path}")
     else:
         print(event_line)
 

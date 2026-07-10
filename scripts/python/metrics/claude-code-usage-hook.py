@@ -10,6 +10,8 @@ Wire it in Claude Code ``settings.json`` under ``hooks.Stop``. It reads the hook
 JSON from stdin and targets the demand log via env:
 - ``ALFRED_STATE_PATH``  — demand ``001-state.md`` (log derived next to it), or
 - ``ALFRED_OBS_LOG``     — explicit observability JSONL path.
+If neither is set, it reads ``~/.alfred/runtime/active-demand.json`` written by
+``render-toolbar.py -RegisterActive``.
 Optional: ``ALFRED_ALLOCATE_COST=1`` allocates the session cost across turns.
 
 Safety: this hook must never block the session. It exits 0 on every path; a
@@ -27,6 +29,18 @@ from pathlib import Path
 ENGINE = Path(__file__).resolve().parent / "attribute-usage-transcript.py"
 
 
+def active_demand():
+    runtime_dir = os.environ.get("ALFRED_RUNTIME_DIR")
+    base = Path(runtime_dir).expanduser() if runtime_dir else Path.home() / ".alfred" / "runtime"
+    active_path = base / "active-demand.json"
+    if not active_path.exists():
+        return {}
+    try:
+        return json.loads(active_path.read_text(encoding="utf-8-sig"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def main():
     try:
         raw = sys.stdin.read()
@@ -39,10 +53,14 @@ def main():
         print("alfred-usage-hook: no transcript_path; skipping", file=sys.stderr)
         return
 
-    state_path = os.environ.get("ALFRED_STATE_PATH", "")
-    obs_log = os.environ.get("ALFRED_OBS_LOG", "")
+    active = active_demand()
+    state_path = os.environ.get("ALFRED_STATE_PATH", "") or active.get("state_path", "")
+    obs_log = os.environ.get("ALFRED_OBS_LOG", "") or active.get("observability_log", "")
     if not state_path and not obs_log:
-        print("alfred-usage-hook: set ALFRED_STATE_PATH or ALFRED_OBS_LOG; skipping", file=sys.stderr)
+        print(
+            "alfred-usage-hook: set ALFRED_STATE_PATH/ALFRED_OBS_LOG or render toolbar with -RegisterActive; skipping",
+            file=sys.stderr,
+        )
         return
 
     command = [
@@ -59,8 +77,9 @@ def main():
         command += ["--output-path", obs_log]
     if payload.get("session_id"):
         command += ["--session-id", str(payload["session_id"])]
-    if os.environ.get("ALFRED_RUN_ID"):
-        command += ["--run-id", os.environ["ALFRED_RUN_ID"]]
+    run_id = os.environ.get("ALFRED_RUN_ID") or active.get("alfred_run_id")
+    if run_id:
+        command += ["--run-id", run_id]
     if os.environ.get("ALFRED_ALLOCATE_COST"):
         command += ["--allocate-cost"]
 

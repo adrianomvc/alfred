@@ -21,6 +21,13 @@ All notable Alfred framework changes should be recorded here.
   Layer 0 hygiene contract that later attribution depends on.
 
 ### Fixed
+- Claude Code usage attribution is now wired into the runtime path:
+  `render-toolbar` can register the active demand (`-RegisterActive`), the Stop
+  hook falls back to `~/.alfred/runtime/active-demand.json` when no
+  `ALFRED_STATE_PATH` is set, and `sync-host-shims.py -Host claude-code -Create
+  -InstallHooks` installs the hook while preserving existing settings. Metrics
+  rollup counts the latest event per `event_id`, so repeated session snapshots do
+  not double-count tokens/cost.
 - `import-ccusage.py` now resolves the `ccusage` executable via `shutil.which`
   before spawning it, so Windows npm shims (`ccusage.cmd`) are found instead of
   failing with `WinError 2`. When it is still unreachable, the helper exits with
