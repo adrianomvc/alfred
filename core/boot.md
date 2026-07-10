@@ -5,12 +5,18 @@ Every session begins with a fixed sequence before any work. The host runs it onc
 ## Sequence
 1. **Welcome** — short opening message in the butler's voice (`welcome.md` = persona/tone), shown once per session. To render the visual welcome block, load `presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session).
 2. **Detect repo** — identify which repo we are in, to know which artifacts to read and how:
-   - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts).
-   - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts).
+   - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts). The HUB is the sigla workspace: it holds the demand truth (`state`), problem/scope, decisions, audit, metrics, summary, knowledge, and links to the apps touched.
+   - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts). The APP is a product/application repository: it holds the source code plus app-local Alfred artifacts such as reverse engineering, technical spec, evidence, local audit/metrics, and HUB sync notes.
    - **APP-only** if it finds `.alfred-docs-app/` but no writable HUB path. In this mode, write only app-local artifacts and create/update `05-operation/009-hub-sync.md` for later HUB import.
    - **Framework** if it finds `core/principles.md` / `rules/agents/` (editing Alfred itself).
    - Not identified → ask the human before writing anything. Repository names
      such as `*-hub` are only hints; they do not prove the repo is a HUB.
+     Before asking, explain the difference in the human interaction language
+     (pt-BR by default for squads): **HUB = governance/source of truth for a
+     sigla and demand; APP = code repo with technical evidence for one
+     application**. Then ask whether the current workspace should be treated as
+     HUB, APP, both, or neither, and whether a missing path should be
+     mounted/provided.
    - **Sigla (auto-label):** derive the sigla from the repo name — pattern `itau-<sigla>-<...>` → the segment right after `itau-` (from the app repo a demand targets, or the current repo). Fallback: the repo/folder name; else `unknown`. It is a **display label only** — no logic depends on it, so **never ask the human** for it. The pattern is configurable per org.
    - **Confirmed empty/new HUB → provision, don't interrogate:** after the repo
      is already identified as a HUB (by existing marker or explicit human
