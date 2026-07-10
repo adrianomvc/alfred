@@ -5,6 +5,7 @@ Use this when starting the first real demand after the SQ9 pilot.
 ## 0. Opening framing checkpoint
 Before any clone/fetch, id stamping, `state` write, or HUB/App scaffolding,
 propose the framing and wait for explicit human confirmation:
+- detected workspace role: HUB, APP, HUB+APP, or unknown;
 - target app source/path and where it will live in the workspace;
 - initiative id and demand id;
 - initial scope/out-of-scope;
@@ -13,6 +14,11 @@ propose the framing and wait for explicit human confirmation:
 
 Deterministic labels may be inferred (for example sigla from repo name).
 Material decisions are never inferred from "start a demand".
+
+If the workspace role is unknown or ambiguous, explain first: the HUB is the
+sigla's source of truth for `state`, decisions, audit, metrics, summary, and
+links to apps; the APP is the application/code repo with technical artifacts
+under `.alfred-docs-app`. Then ask which role applies before writing anything.
 
 After confirmation, record it in `001-state.md` (`Opening Framing`) and in
 `05-operation/007-audit.md`. Without that record, `validate-demand --strict`

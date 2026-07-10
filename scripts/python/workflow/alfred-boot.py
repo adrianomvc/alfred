@@ -40,6 +40,17 @@ def get_repo_kind(path):
     return "Unknown"
 
 
+def print_repo_role_help():
+    print("")
+    print("HUB vs APP")
+    print("- HUB: repositorio da sigla. Guarda o alfred-docs-hub, o state da demanda,")
+    print("  problema/escopo, decisoes, audit, metricas, resumo, knowledge e links para os apps.")
+    print("- APP: repositorio da aplicacao/codigo. Guarda o codigo-fonte e a .alfred-docs-app")
+    print("  com reverse engineering, spec tecnica, evidencias, audit/metricas locais e hub-sync.")
+    print("- Com HUB+APP disponiveis, Alfred grava os artefatos tecnicos no APP e atualiza o state no HUB.")
+    print("- Com apenas APP disponivel, Alfred nao grava arquivos de HUB; deixa um handoff de hub-sync pendente.")
+
+
 def state_summary(state_file):
     lines = read_lines(state_file)
     return {
@@ -106,7 +117,8 @@ def main():
 
     if not search_roots:
         print("- open demands: not detected")
-        print("- next: ask the human for HUB/App path or start a new demand")
+        print_repo_role_help()
+        print("- next: pergunte se este workspace e HUB, APP, ambos ou nenhum antes de escrever")
         return
 
     states = []
