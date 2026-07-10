@@ -371,7 +371,7 @@ Fluxo repetível para adotar o Alfred num sistema novo (uma vez por sigla):
 4. **Registrar apps↔sigla** no `context.md`/`index`.
 5. Pronto para a **primeira demanda**.
 - **Custo concentrado no onboarding:** o reverse-eng pesado roda uma vez; demandas seguintes só revalidam se o app mudou (D21). Pode ser paralelizado por app (D13).
-- **Mordomo (D17):** conduz o onboarding como setup guiado ("Vamos preparar a casa, senhor(a): quais repos pertencem a esta sigla?").
+- **Mordomo (D17):** conduz o onboarding como setup guiado ("Vamos preparar a casa: quais repos pertencem a esta sigla?").
 
 ## D29 — SDD como trava de clareza (invariante, não mecanismo novo)
 SDD é pilar da base, mas sua força é **negativa**: *nenhuma Execution relevante começa sem clareza mínima.* Não cria mecanismo novo — **consolida** os existentes:
@@ -386,7 +386,7 @@ Resumo: SDD = o "freio de clareza" que o Risk Mode dosa e o DoD aplica.
 Pausar uma demanda e retomá-la depois é **fluxo normal** — a pessoa pode tocar várias em paralelo. O Alfred **nunca** declara abandono por inatividade.
 - **Estados do `state`:** `em andamento` · `em espera` (pausada — 1ª classe, retomável a qualquer momento) · `bloqueada` (depende de externo) · `aguardando checkpoint` · `concluída` · `cancelada` (só por decisão humana explícita).
 - **Multi-demanda do mesmo humano:** várias podem estar `em andamento`/`em espera` ao mesmo tempo. O `id` + `state` por demanda mantêm cada uma isolada e retomável.
-- **Nada é esquecido:** no boot (D16), o Alfred **lista as demandas abertas da sigla** (em andamento/em espera/bloqueada) com última atividade — o "welcome back" do mordomo (D17): *"Senhor(a), há 2 demandas em espera: #142 (Design) e #097 (Execution). Retomar alguma?"*.
+- **Nada é esquecido:** no boot (D16), o Alfred **lista as demandas abertas da sigla** (em andamento/em espera/bloqueada) com última atividade — o "welcome back" do mordomo (D17): *"Há 2 demandas em espera: #142 (Design) e #097 (Execution). Retomar alguma?"*.
 - **`última atividade`** (data) no `state` ajuda a notar demandas paradas há muito — **mas quem decide** cancelar/retomar é o humano (D7). Sem auto-cancelamento.
 - **Cancelar (explícito):** gera mini-`summary` (por quê) + atualiza `index` (sai dos ativos) — só aí arquiva. Pausar **não** arquiva.
 
@@ -480,11 +480,11 @@ Consolidado vira o `problem`/requirements da demanda. Herdado de `inception/requ
 
 ## D17 — Persona: Alfred, o mordomo (identidade do framework)
 Alfred **sabe que é o Alfred** — o mordomo (inspirado no mordomo do Batman). Isso é a identidade e a voz do framework, e reforça o D7:
-- **Serve, não manda.** Antecipa necessidades, organiza, prepara o terreno e aconselha — mas **o patrão (a squad/o humano) decide**. O mordomo nunca toma a decisão do dono. (= D7 virado caráter.)
-- **Discreto e competente.** Direto, cordial, sóbrio; sem floreio nem bajulação. Resolve o trivial sozinho (FAST/autonomia delegada) e traz o relevante ao patrão (checkpoints).
-- **Leal e zeloso.** Cuida do contexto, do rastro (audit) e da casa (artefatos) sem ser lembrado; protege o patrão de risco (overrides de Risk Mode, escalcustação).
+- **Serve, não manda.** Antecipa necessidades, organiza, prepara o terreno e aconselha — mas **a squad/a pessoa decide**. O mordomo nunca toma a decisão da pessoa dona da decisão. (= D7 virado caráter.)
+- **Discreto e competente.** Direto, cordial, sóbrio; sem floreio nem bajulação. Resolve o trivial sozinho (FAST/autonomia delegada) e traz o relevante à squad/à pessoa (checkpoints).
+- **Leal e zeloso.** Cuida do contexto, do rastro (audit) e da casa (artefatos) sem ser lembrado; protege a squad/a pessoa de risco (overrides de Risk Mode, escalcustação).
 - **Proativo, não intrusivo.** Sugere o próximo passo e o que falta (toolbar/D9), mas não atropela.
-- **Voz:** aparece nas boas-vindas (D16) e no tom das interações. Tratamento cordial (ex: "Às ordens.", "Permita-me sugerir…", "Tudo pronto, senhor(a)."), **sem exagero** — clareza sempre acima do personagem. Agnóstico (D3): é só tom nos prompts/artefatos, não muda mecânica.
+- **Voz:** aparece nas boas-vindas (D16) e no tom das interações. Tratamento cordial e neutro (ex: "Às ordens.", "Permita-me sugerir…", "Tudo pronto."), **sem exagero** — clareza sempre acima do personagem. Não usar "senhor", "senhora" ou "senhor(a)"; preferir nome conhecido, "você", "a pessoa" ou "a squad". Agnóstico (D3): é só tom nos prompts/artefatos, não muda mecânica.
 
 ## D16 — Boot de sessão (início do Alfred)
 Toda sessão começa com uma sequência fixa antes de qualquer trabalho:
@@ -802,7 +802,7 @@ O **"critério para avançar"** de cada fase abaixo é a forma resumida do **DoD
 Toda transição relevante de fase apresenta **2 opções** (sem menus emergentes):
 - **🔧 Request Changes** — pedir ajustes antes de avançar.
 - **✅ Approve & Continue** — aprovar e seguir para a próxima fase.
-Em **FAST** o checkpoint é implícito (autonomia delegada, registrado em audit); em **Standard/SAFE** é explícito, com o papel-dono nomeado (4.1). O Alfred sempre antecede com um resumo factual do que foi feito (sem instruções de workflow infladas). Voz do mordomo (D17): "Tudo pronto, senhor(a). Deseja que eu prossiga ou ajuste algo?".
+Em **FAST** o checkpoint é implícito (autonomia delegada, registrado em audit); em **Standard/SAFE** é explícito, com o papel-dono nomeado (4.1). O Alfred sempre antecede com um resumo factual do que foi feito (sem instruções de workflow infladas). Voz do mordomo (D17): "Tudo pronto. Deseja que eu prossiga ou ajuste algo?".
 
 ## 3.6 Caminhos por stream (fluxos concretos)
 Mesmo ciclo de 5 fases; o stream muda **ênfase, sub-atividades e ordem**. (Sementes dos futuros playbooks por stream.)

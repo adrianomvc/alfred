@@ -49,6 +49,17 @@ generated from `hosts/_template/shim.md` plus host deltas in
 `hosts/_template/hosts.json`. Edit the template or the delta, then run
 `scripts/*/workflow/generate-host-shims`; `validate-framework` checks drift.
 
+## Syncing installed host entries
+Updating `~/.alfred` is not enough when a host reads a copied native entry file.
+After a framework pull, refresh the host entry with:
+
+```bash
+python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code
+```
+
+Use `-Host devin-cli` or `-Host codex` for those hosts. Missing targets are
+skipped by default; pass `-Create` only during installation or explicit setup.
+
 ## Cache-friendly loading
 Hosts that expose prompt caching or persistent context should keep Alfred's
 stable kernel before volatile demand state: framework principles/boot/indexes

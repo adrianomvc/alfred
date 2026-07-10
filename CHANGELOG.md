@@ -5,6 +5,12 @@ All notable Alfred framework changes should be recorded here.
 ## Unreleased
 
 ### Changed
+- Alfred's butler persona now uses gender-neutral address for people: rendered
+  welcome/UI text avoids `senhor`, `senhora`, and `senhor(a)`, and validation
+  guards the neutral-address rule.
+- Host entry updates now include `sync-host-shims.py`, so pulling `~/.alfred`
+  can refresh copied Claude Code/DEVIN/Codex entry files instead of leaving
+  stale host instructions active.
 - `ccusage` session import is now an active automatic usage-cost path for local
   CLI hosts: `scripts/python/metrics/import-ccusage.py` maps `ccusage session
   --json` into `usage_attributed` events and updates `001-state.md` cost fields

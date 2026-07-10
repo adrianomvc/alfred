@@ -202,6 +202,18 @@ version breaks something). Re-running the installer without `-Rollback` returns
 to the latest. A demand records the version it ran on (D26), so you know which
 tag to roll back to.
 
+## Refresh copied host entries
+Host entry files are copied into native locations during setup. After pulling a
+new Alfred version, refresh the copied entry so the host does not keep old boot
+instructions:
+
+```bash
+python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host devin-cli
+```
+
+For Claude Code use `-Host claude-code`; for Codex use `-Host codex`. Missing
+targets are skipped unless `-Create` is passed.
+
 ## Uninstall
 - Delete the skill folder (`%APPDATA%\devin\skills\alfred` or `~/.agents/skills/alfred`); optionally remove `~/.alfred`.
 
