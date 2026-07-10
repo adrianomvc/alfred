@@ -76,10 +76,11 @@ python scripts/python/validators/validate-framework.py
 - `validate-connectors` checks connector contracts and adapter-shaped examples.
 - `validate-email-adapter` checks the Python-only notification adapter dry-run, allowlist refusal, and audit JSONL.
 - `validate-tool-discovery-policy` checks the JIT tool policy, host shims, connector guidance, and MCP tool description size.
+- Installers keep optional npm tools degradable: Artifactory registry/package knobs for `ccusage` and `codebase-memory`, skip flags, and no hard dependency on npm.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
 - `validate-token-economy-policy` checks token-budget and deferred-work guardrails.
 - `validate-model-policy` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
-- Toolbar rendering remains grounded: boot/orchestrator prefer `render-toolbar`, manual fallback loads `core/presentation/toolbar-quick.md`, and rich blocks are not hand-drawn.
+- Toolbar rendering remains grounded: boot/orchestrator prefer `render-toolbar`, capable hosts use default/rich profile, CLI `text` requires an explicit fallback flag, manual fallback loads `core/presentation/toolbar-quick.md`, and rich blocks are not hand-drawn.
 - `validate-links` checks that internal Markdown references (links and inline framework paths) still resolve after moves/renames.
 - The architecture SOLID **extension checklist** in `core/architecture.md` passes for any added/moved module, file, or artifact (one reason to change; extend by adding; substitutable via contract; loads only what it needs; depends on a role, not a concrete).
 

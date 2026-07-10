@@ -8,6 +8,8 @@ All notable Alfred framework changes should be recorded here.
 - Requirements questions are file-only: `003-requirements.md` is the single answer channel, chat/UI may only point to it, host-native question popups are forbidden for requirements, and FAST material questions still go to the artifact. The framework validator now guards this rule.
 - Toolbar rendering is now explicitly grounded: boot/orchestrator prefer `render-toolbar`; if the helper is unavailable, agents must load `toolbar-quick.md` and use only the documented text fallback instead of hand-drawing rich blocks.
 - Claude Code cost capture is now an explicit manual usage-cost path: humans can run `/cost`, record `cost usd`/source/confidence in `001-state.md`, and the toolbar renderer reads that state value for display and forecast.
+- Toolbar CLI now guards against accidental ASCII fallback: `--profile text` requires `--allow-text-fallback`; capable hosts should omit `--profile` or use `--profile rich`.
+- Installers can now best-effort install optional npm tools from a corporate registry / Artifactory: `ccusage` and `codebase-memory`, with package-name overrides and skip flags.
 
 ## 2.0.0 - in progress (opened 2026-07-05)
 

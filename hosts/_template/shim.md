@@ -6,7 +6,7 @@
 
 ## On start
 1. **Update (version-aware):** {{update_policy}}
-2. Read `{{boot_path}}` and follow the boot sequence: welcome, detect repo kind, resume from state, use `context-manifest`/indexes for JIT context, and render the progress toolbar/header.
+2. Read `{{boot_path}}` and follow the boot sequence: welcome, detect repo kind, resume from state, use `context-manifest`/indexes for JIT context, and render the progress toolbar/header with the default rich profile. Do not force `--profile text` unless the host cannot render Unicode/emoji and the fallback is explicit.
 3. Apply `{{principles_path}}`. Classify the lane (FAST / Standard / SAFE) **at Inception**, loading `core/risk-mode.md` just in time via `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md`.
 4. **Supreme rule:** never invent facts, paths, schemas, APIs, or tool behavior. When unsure, stop and ask. The human owns every material decision; record it in `audit`.
 

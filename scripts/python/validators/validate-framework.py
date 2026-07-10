@@ -220,11 +220,23 @@ def assert_toolbar_rendering_policy(root):
         "core/presentation/toolbar-quick.md": [
             "## Rendering procedure",
             "Prefer the helper",
+            "Do not pass `-Profile text` in a host that renders Unicode/emoji",
+            "-AllowTextFallback",
             "Never hand-draw the rich block from memory",
         ],
         "docs/automation-fallback.md": [
+            "--allow-text-fallback",
             "load `core/presentation/toolbar-quick.md`",
             "do not hand-draw the rich block",
+        ],
+        "scripts/python/workflow/render-toolbar.py": [
+            "allow_text_fallback",
+            "--profile text is the degraded fallback",
+            "--allow-text-fallback",
+        ],
+        "hosts/_template/shim.md": [
+            "default rich profile",
+            "Do not force `--profile text`",
         ],
     }
     for rel, phrases in checks.items():
@@ -271,6 +283,48 @@ def assert_usage_cost_policy(root):
     print("OK usage-cost policy")
 
 
+def assert_optional_npm_tools_policy(root):
+    checks = {
+        "install/install.ps1": [
+            "NpmRegistry",
+            "CcusagePackage",
+            "CodebaseMemoryPackage",
+            "SkipNpmTools",
+            "npm tool installed/updated",
+            "Alfred works without it",
+        ],
+        "install/install.sh": [
+            "ALFRED_NPM_REGISTRY",
+            "ALFRED_CCUSAGE_PACKAGE",
+            "ALFRED_CODEBASE_MEMORY_PACKAGE",
+            "ALFRED_SKIP_NPM_TOOLS",
+            "install_npm_tool",
+            "Alfred will degrade",
+        ],
+        "install/README.md": [
+            "npm registry / Artifactory",
+            "ALFRED_NPM_REGISTRY",
+            "ALFRED_CCUSAGE_PACKAGE",
+            "ALFRED_CODEBASE_MEMORY_PACKAGE",
+            "Skip npm tools",
+        ],
+        "connectors/codebase-memory.md": [
+            "ALFRED_CODEBASE_MEMORY_PACKAGE",
+            "MCP registration remains host-specific",
+        ],
+        "connectors/usage-cost.md": [
+            "ALFRED_CCUSAGE_PACKAGE",
+            "ALFRED_NPM_REGISTRY",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"Optional npm tools policy missing in {rel}: {phrase}")
+    print("OK optional npm tools policy")
+
+
 def run_sub(root, rel_script, *script_args):
     script = root / rel_script
     result = subprocess.run(
@@ -303,6 +357,7 @@ def main():
     assert_question_format_policy(root)
     assert_toolbar_rendering_policy(root)
     assert_usage_cost_policy(root)
+    assert_optional_npm_tools_policy(root)
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")

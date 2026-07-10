@@ -8,10 +8,13 @@ spec (layers, profiles, rules):
 `core/presentation/toolbar.md` — load it only when a case is not covered here.
 
 ## Rendering procedure
-1. Prefer the helper: `python scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md -Profile rich`.
+1. Prefer the helper with the default rich profile: `python scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md` (or `-Profile rich` explicitly).
 2. If the helper cannot run, use this file as the loaded source and emit the
    documented text fallback from `state`.
-3. Never hand-draw the rich block from memory or paste an older toolbar shape.
+3. Do not pass `-Profile text` in a host that renders Unicode/emoji. Text is a
+   degraded fallback only: use `-Profile text -AllowTextFallback` after the host
+   has proven it cannot render rich output.
+4. Never hand-draw the rich block from memory or paste an older toolbar shape.
 
 ## Preferred rich block
 ```text

@@ -8,6 +8,12 @@ Optional connector for hosts that can run a local or remote MCP/indexer that
 answers structural codebase questions. This is a contract only until a specific
 company-approved implementation, package source, and install path are selected.
 
+The installer can best-effort install an approved npm package named
+`codebase-memory` by default, or a corporate package override supplied through
+`ALFRED_CODEBASE_MEMORY_PACKAGE` / `-CodebaseMemoryPackage` and
+`ALFRED_NPM_REGISTRY` / `-NpmRegistry`. MCP registration remains host-specific
+until the approved package's command and tool schema are confirmed.
+
 Use it for brownfield, incident, or multi-repo work where Alfred needs symbol,
 reference, call graph, impact, or related-test discovery before reading files.
 

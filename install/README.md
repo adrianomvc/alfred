@@ -19,6 +19,10 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
    RTK URL when RTK is not already on `PATH`. The default URL is a public GitHub
    Windows zip placeholder that should be replaced by the corporate Artifactory
    zip when available.
+5. Optionally install approved npm tools from the corporate npm registry /
+   Artifactory: `ccusage` for local Claude/Codex usage attribution and
+   `codebase-memory` for brownfield structural discovery. This is best-effort:
+   missing npm, registry access, or packages never break the Alfred install.
 
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
@@ -50,7 +54,8 @@ Installs the skill to `~/.agents/skills/alfred/SKILL.md` (a user skill path the
 DEVIN CLI reads on every platform).
 
 ## Corporate Machine Setup
-When preparing this installer for a company computer, there are only two links
+When preparing this installer for a company computer, there are three external
+locations
 you normally need to replace:
 
 1. **Alfred framework repo**
@@ -83,6 +88,13 @@ you normally need to replace:
      ALFRED_RTK_URL="<artifactory-rtk-url>" bash install/install.sh
      ```
 
+3. **npm registry / Artifactory**
+   - PowerShell: pass `-NpmRegistry "<artifactory-npm-registry>"`.
+   - bash: set `ALFRED_NPM_REGISTRY="<artifactory-npm-registry>"`.
+   - If the corporate packages have scoped/internal names, override them:
+     `ALFRED_CCUSAGE_PACKAGE` and `ALFRED_CODEBASE_MEMORY_PACKAGE` (bash) or
+     `-CcusagePackage` and `-CodebaseMemoryPackage` (PowerShell).
+
 If the one-line install command is used inside the company network, replace the
 `raw.githubusercontent.com/.../install/install.ps1` or `install/install.sh` URL
 with the internal raw-file URL from the company mirror.
@@ -99,6 +111,10 @@ with the internal raw-file URL from the company mirror.
 | Skip e-mail/MCP setup | `-SkipEmail` | `ALFRED_SKIP_EMAIL=1` | setup runs |
 | RTK package URL | `-RtkUrl` | `ALFRED_RTK_URL` | public Windows zip placeholder |
 | Skip RTK setup | `-SkipRtk` | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
+| npm registry / Artifactory | `-NpmRegistry` | `ALFRED_NPM_REGISTRY` | current npm config |
+| ccusage npm package | `-CcusagePackage` | `ALFRED_CCUSAGE_PACKAGE` | `ccusage` |
+| codebase-memory npm package | `-CodebaseMemoryPackage` | `ALFRED_CODEBASE_MEMORY_PACKAGE` | `codebase-memory` |
+| Skip npm tools | `-SkipNpmTools` | `ALFRED_SKIP_NPM_TOOLS=1` | setup runs if `npm` exists |
 
 ## RTK terminal hook (DEVIN CLI only)
 RTK setup is optional and currently scoped to the DEVIN CLI install path.
@@ -121,6 +137,29 @@ rtk init -g
 If the URL is removed or RTK cannot be downloaded, Alfred then follows
 `rules/common/terminal-token-policy.md`: prefer bounded native commands and
 load `core/hooks/rtk.md` only as guidance.
+
+## npm tools (optional)
+The installer can install the approved npm packages used by optional connectors:
+
+PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File install/install.ps1 `
+  -NpmRegistry "<artifactory-npm-registry>" `
+  -CcusagePackage "ccusage" `
+  -CodebaseMemoryPackage "codebase-memory"
+```
+
+bash:
+```bash
+ALFRED_NPM_REGISTRY="<artifactory-npm-registry>" \
+ALFRED_CCUSAGE_PACKAGE="ccusage" \
+ALFRED_CODEBASE_MEMORY_PACKAGE="codebase-memory" \
+bash install/install.sh
+```
+
+If npm is already configured with the corporate registry, omit the registry
+flag/env var. If a package cannot be installed, Alfred records the degraded
+state and keeps working through `rg`, bounded file reads, and manual cost input.
 
 ## Versions
 Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).

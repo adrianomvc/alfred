@@ -42,6 +42,10 @@ param(
   [switch]$SkipEmail,          # skip the e-mail/MCP notification setup entirely
   [string]$RtkUrl = "https://github.com/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip",        # public zip placeholder; replace with corporate Artifactory URL
   [switch]$SkipRtk,             # skip RTK terminal hook setup entirely
+  [string]$NpmRegistry = "",    # optional corporate npm registry / Artifactory URL
+  [string]$CcusagePackage = "ccusage",
+  [string]$CodebaseMemoryPackage = "codebase-memory",
+  [switch]$SkipNpmTools,        # skip npm tool setup entirely
   [switch]$List,
   [switch]$Rollback
 )
@@ -201,7 +205,34 @@ if (-not $SkipRtk) {
   }
 }
 
-# 6. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# 6. Optional npm tools (corporate Artifactory path): ccusage + codebase-memory.
+# Best-effort: these tools improve usage attribution and brownfield discovery,
+# but Alfred still works without them.
+if (-not $SkipNpmTools) {
+  try {
+    if ($NpmRegistry -eq "" -and $env:ALFRED_NPM_REGISTRY) { $NpmRegistry = $env:ALFRED_NPM_REGISTRY }
+    if ($env:ALFRED_CCUSAGE_PACKAGE) { $CcusagePackage = $env:ALFRED_CCUSAGE_PACKAGE }
+    if ($env:ALFRED_CODEBASE_MEMORY_PACKAGE) { $CodebaseMemoryPackage = $env:ALFRED_CODEBASE_MEMORY_PACKAGE }
+
+    $npm = Get-Command npm -ErrorAction SilentlyContinue
+    if (-not $npm) {
+      Info "npm not found; skipping optional npm tools (ccusage/codebase-memory)."
+    } else {
+      foreach ($pkg in @($CcusagePackage, $CodebaseMemoryPackage)) {
+        if ($pkg -eq "") { continue }
+        $args = @("install", "-g", $pkg)
+        if ($NpmRegistry -ne "") { $args += @("--registry", $NpmRegistry) }
+        & $npm.Source @args *> $null
+        if ($LASTEXITCODE -eq 0) { Info "npm tool installed/updated: $pkg" }
+        else { Info "Could not install npm tool '$pkg'. Check Artifactory/npm access; Alfred will degrade." }
+      }
+    }
+  } catch {
+    Info "npm tool setup skipped ($($_.Exception.Message)). Alfred works without it."
+  }
+}
+
+# 7. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
 # Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
 # server in Claude Code when available. Best-effort: failures never break the install.
 if (-not $SkipEmail) {

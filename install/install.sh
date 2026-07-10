@@ -28,6 +28,9 @@ set -euo pipefail
 # ============================================================================
 DEFAULT_FRAMEWORK_URL="https://github.com/adrianomvc/alfred.git"
 DEFAULT_RTK_URL="https://github.com/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
+DEFAULT_NPM_REGISTRY=""
+DEFAULT_CCUSAGE_PACKAGE="ccusage"
+DEFAULT_CODEBASE_MEMORY_PACKAGE="codebase-memory"
 
 FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-$DEFAULT_FRAMEWORK_URL}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
@@ -36,6 +39,10 @@ VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
 SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.agents/skills}"
 RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # public zip placeholder; replace with corporate Artifactory URL
 SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
+NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
+CCUSAGE_PACKAGE="${ALFRED_CCUSAGE_PACKAGE:-$DEFAULT_CCUSAGE_PACKAGE}"
+CODEBASE_MEMORY_PACKAGE="${ALFRED_CODEBASE_MEMORY_PACKAGE:-$DEFAULT_CODEBASE_MEMORY_PACKAGE}"
+SKIP_NPM_TOOLS="${ALFRED_SKIP_NPM_TOOLS:-0}"
 
 info() { echo "[alfred] $*"; }
 
@@ -186,7 +193,37 @@ if [ "$SKIP_RTK" != "1" ]; then
   fi
 fi
 
-# 5. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# 5. Optional npm tools (corporate Artifactory path): ccusage + codebase-memory.
+# Best-effort: these tools improve usage attribution and brownfield discovery,
+# but Alfred still works without them.
+install_npm_tool() {
+  local pkg="$1"
+  [ -n "$pkg" ] || return 0
+  if [ -n "$NPM_REGISTRY" ]; then
+    if npm install -g "$pkg" --registry "$NPM_REGISTRY" >/dev/null 2>&1; then
+      info "npm tool installed/updated: $pkg"
+    else
+      info "Could not install npm tool '$pkg'. Check Artifactory/npm access; Alfred will degrade."
+    fi
+  else
+    if npm install -g "$pkg" >/dev/null 2>&1; then
+      info "npm tool installed/updated: $pkg"
+    else
+      info "Could not install npm tool '$pkg'. Check npm access; Alfred will degrade."
+    fi
+  fi
+}
+
+if [ "$SKIP_NPM_TOOLS" != "1" ]; then
+  if command -v npm >/dev/null 2>&1; then
+    install_npm_tool "$CCUSAGE_PACKAGE"
+    install_npm_tool "$CODEBASE_MEMORY_PACKAGE"
+  else
+    info "npm not found; skipping optional npm tools (ccusage/codebase-memory)."
+  fi
+fi
+
+# 6. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
 # Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
 # server in Claude Code when available. Best-effort: failures never break the install.
 # Skip entirely with ALFRED_SKIP_EMAIL=1; non-interactive runs skip the prompt.
