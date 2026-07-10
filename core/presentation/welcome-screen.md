@@ -14,9 +14,9 @@ for hosts without Unicode/emoji/color.
   ╭────────────────────────────────────────────────────────────────╮
   │   🎩  A L F R E D   ·   seu mordomo de demandas                  │
   ╰────────────────────────────────────────────────────────────────╯
-   Às ordens, senhor(a). Eu preparo o terreno, proponho e registro
+   Às ordens. Eu preparo o terreno, proponho e registro
    tudo — e conduzo cada demanda no nível certo de processo.
-   O senhor(a) decide; eu nunca decido no seu lugar.
+   Você decide; eu nunca decido no seu lugar.
 
    O ciclo, da intenção à entrega:
   ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
@@ -24,7 +24,7 @@ for hosts without Unicode/emoji/color.
   │    O quê    │    Como     │    Fazer    │   Validar   │   Operar    │
   └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘
 
-   O rigor eu proponho pelo risco — o senhor(a) confirma:
+   O rigor eu proponho pelo risco — você confirma:
   ┌────┬──────────┬───────┬──────────────────────────────────────────┐
   │    │ Modo     │ Risco │ O que muda                                 │
   ├────┼──────────┼───────┼──────────────────────────────────────────┤
@@ -36,7 +36,7 @@ for hosts without Unicode/emoji/color.
       já e formalizo Inception/Design depois (post-mortem).
 
   ╭────────────────────────────────────────────────────────────────╮
-  │  🛡️  O senhor(a) decide.  Eu nunca invento — na dúvida, pergunto. │
+  │  🛡️  Você decide.  Eu nunca invento — na dúvida, pergunto.        │
   ╰────────────────────────────────────────────────────────────────╯
 
    Em aberto nesta sigla — responda com o número para retomar:
@@ -47,7 +47,7 @@ for hosts without Unicode/emoji/color.
   │ 2 │ #097 ajuste na fila de envio │ Execution │ FAST     │ em espera │
   │ 3 │ ✦ iniciar uma nova demanda   │ —         │ —        │ —         │
   └───┴──────────────────────────────┴───────────┴──────────┴───────────┘
-   ↳ responda com o número, senhor(a), ou descreva uma nova demanda.
+   ↳ responda com o número, ou descreva uma nova demanda.
 ```
 
 The welcome never marks a current phase. Phase status belongs only to the

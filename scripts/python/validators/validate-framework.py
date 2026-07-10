@@ -117,6 +117,7 @@ REQUIRED_PATHS = [
     "scripts/python/workflow/generate-host-shims.py",
     "scripts/python/workflow/generate-registry.py",
     "scripts/python/workflow/render-toolbar.py",
+    "scripts/python/workflow/sync-host-shims.py",
     "scripts/python/metrics/collect-observability.py",
     "scripts/python/metrics/generate-metrics-rollup.py",
     "scripts/python/metrics/import-ccusage.py",
@@ -201,6 +202,95 @@ def assert_question_format_policy(root):
     if "Do not open host-native question widgets for requirements" not in elicitation:
         raise SystemExit("Requirements elicitation must forbid host-native question widgets.")
     print("OK question-format requirements-file-only policy")
+
+
+def assert_gender_neutral_persona_policy(root):
+    welcome = (root / "core/welcome.md").read_text(encoding="utf-8")
+    required = [
+        "gender-neutral address",
+        "Do not use gendered honorifics",
+        "senhor",
+        "senhora",
+        "senhor(a)",
+    ]
+    for phrase in required:
+        if phrase not in welcome:
+            raise SystemExit(f"Gender-neutral persona policy missing: {phrase}")
+
+    forbidden_rendered = ["senhor(a)", "senhor", "senhora", "sir/ma'am", "sir,", "sir.", "ma'am"]
+    for rel in ["core/presentation/welcome-screen.md", "docs/assets/alfred-fluxo.svg"]:
+        text = (root / rel).read_text(encoding="utf-8").lower()
+        for phrase in forbidden_rendered:
+            if phrase in text:
+                raise SystemExit(f"Rendered persona still uses gendered address in {rel}: {phrase}")
+
+    concept = (root / "docs/plan/alfred-conceptual-plan.md").read_text(encoding="utf-8")
+    if "Tratamento cordial e neutro" not in concept or "Não usar \"senhor\"" not in concept:
+        raise SystemExit("Conceptual persona plan must record neutral-address guidance.")
+    print("OK gender-neutral persona policy")
+
+
+def assert_host_shim_sync_policy(root):
+    checks = {
+        "scripts/python/workflow/sync-host-shims.py": [
+            "HOST_SOURCES",
+            "claude-code",
+            "devin-cli",
+            "codex",
+            "Host shim sync completed",
+        ],
+        "hosts/_template/hosts.json": [
+            "sync-host-shims.py -Host claude-code",
+            "sync-host-shims.py -Host devin-cli",
+            "sync-host-shims.py -Host codex",
+        ],
+        "hosts/claude-code/SKILL.md": [
+            "sync-host-shims.py -Host claude-code",
+        ],
+        "hosts/devin-cli/SKILL.md": [
+            "sync-host-shims.py -Host devin-cli",
+        ],
+        "hosts/codex/AGENTS.md": [
+            "sync-host-shims.py -Host codex",
+        ],
+        "hosts/README.md": [
+            "Syncing installed host entries",
+            "sync-host-shims.py",
+        ],
+        "install/README.md": [
+            "Refresh copied host entries",
+            "sync-host-shims.py",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"Host shim sync policy missing in {rel}: {phrase}")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(root / "scripts/python/workflow/sync-host-shims.py"),
+            "-Host",
+            "claude-code",
+            "-AlfredHome",
+            str(root),
+            "-Target",
+            str(root / ".tmp-sync-check" / "SKILL.md"),
+            "-Create",
+            "-DryRun",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        raise SystemExit("Host shim sync dry-run failed")
+    if "DRY-RUN claude-code" not in result.stdout:
+        raise SystemExit("Host shim sync dry-run did not report expected action")
+    print("OK host shim sync policy")
 
 
 def assert_toolbar_rendering_policy(root):
@@ -423,6 +513,8 @@ def main():
     assert_jsonl(root / "examples/connectors/usage-export.jsonl")
     assert_jsonl(root / "examples/connectors/usage-attribution-events.jsonl")
     assert_question_format_policy(root)
+    assert_gender_neutral_persona_policy(root)
+    assert_host_shim_sync_policy(root)
     assert_toolbar_rendering_policy(root)
     assert_usage_cost_policy(root)
     assert_optional_npm_tools_policy(root)

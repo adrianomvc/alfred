@@ -12,7 +12,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 | Folder | Holds | Members |
 |---|---|---|
 | `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
-| `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` |
+| `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `sync-host-shims` |
 | `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` · `import-ccusage` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
@@ -58,6 +58,7 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `mcp-email-server` - Python MCP stdio server implementing the `notification` connector: `send_email` (allowlist, `[Alfred-Framework]` prefix, audit JSONL, dry-run outbox by default, SMTP in active mode), `send_demand_report` (auto-attaches the demand's metrics/audit/summary/observability JSONL from `001-state.md` context), `send_telemetry` (batches every local observability JSONL to the org `telemetry_to` — provisional transport until the telemetry API, D45), and `email_status`. Destinations are **registered** in `~/.alfred-email.json` (or `ALFRED_EMAIL_CONFIG`), overridable by env vars. See `connectors/notification-email.md`.
 - `spec-vs-impl` - optional heuristic comparison of spec acceptance criteria vs validation evidence: flags criteria with no textual echo in `013-validation-evidence.md` so the Reviewer/human looks at them. Informative by default; `-Strict` fails on gaps. It never approves.
 - `confidence-score` - optional pre-Execution clarity score (0-100) composed from signals Alfred already records: unanswered `[Resposta]:` questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit. >=80 proceed · 50-79 review with human · <50 stop and escalate. The score informs; the human decides.
+- `sync-host-shims` - refreshes copied native host entry files after `~/.alfred` updates, so Claude Code/DEVIN/Codex do not keep running stale host instructions.
 
 ## Python
 
@@ -93,6 +94,10 @@ python scripts/python/metrics/normalize-usage-cost.py -InputPath examples/connec
 
 ```bash
 python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+```
+
+```bash
+python scripts/python/workflow/sync-host-shims.py -Host claude-code
 ```
 
 ```bash
