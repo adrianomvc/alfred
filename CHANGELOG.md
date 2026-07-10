@@ -4,7 +4,21 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+### Fixed
+- `import-ccusage.py` now resolves the `ccusage` executable via `shutil.which`
+  before spawning it, so Windows npm shims (`ccusage.cmd`) are found instead of
+  failing with `WinError 2`. When it is still unreachable, the helper exits with
+  a clear message pointing to the `-InputPath` fallback instead of a raw
+  traceback.
+
 ### Changed
+- Observability event hygiene is now an explicit contract (Layer 0): events must
+  carry a real ISO-8601 `ts` from the system clock (never a placeholder), a real
+  host `session_id`, stable `trace_id`/`ALFRED_RUN_ID`, and the Execution commit,
+  so later usage attribution has precise window boundaries. `metrics/metrics.md`
+  documents why per-event tokens/cost stay `null` on hosts without per-interaction
+  usage (the real number arrives session-level as `usage_attributed`) and directs
+  running the `usage-cost` import at each checkpoint, not only at close.
 - Toolbar forecast display now explains why the total estimate is unavailable
   when cost exists but progress is still 0% or already 100%, instead of hiding
   the forecast line.

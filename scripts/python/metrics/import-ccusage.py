@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -85,7 +86,24 @@ def load_ccusage(args):
     if args.session_id:
         command.extend(["--id", args.session_id])
 
-    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    # Resolve the executable via PATHEXT so Windows npm shims (ccusage.cmd)
+    # are found. subprocess/CreateProcess only appends .exe, so a bare
+    # "ccusage" name raises WinError 2 even when the shim is on PATH.
+    resolved = shutil.which(command[0])
+    if resolved is None:
+        raise SystemExit(
+            "ccusage not found on PATH. Install it (see connectors/usage-cost.md) "
+            "or dump `ccusage session --json` to a file and pass it with -InputPath."
+        )
+    command[0] = resolved
+
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+    except OSError as error:
+        raise SystemExit(
+            f"Could not run ccusage ({error}). Dump `ccusage session --json` to a "
+            "file and pass it with -InputPath."
+        )
     if result.returncode != 0:
         if result.stderr:
             print(result.stderr, file=sys.stderr)

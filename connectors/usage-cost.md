@@ -91,6 +91,12 @@ Otherwise it selects the latest session for the configured agent and records the
 selection method in the event validation metadata. Humans may still provide
 `/cost` when `ccusage` is unavailable or the session correlation is ambiguous.
 
+Run the import at each checkpoint, not only at demand close, so the session cost
+stays current. Each run appends a new `usage_attributed` event (append-only) and
+refreshes the `001-state.md` cost fields; it never edits prior events. On
+Windows the helper resolves the `ccusage` npm shim via `PATHEXT`; if it is
+unreachable, dump `ccusage session --json` to a file and pass `-InputPath`.
+
 When a host exposes cost only through an interactive command (for example
 Claude Code `/cost`), Alfred may ask the human to run it at start/end or before
 closing the demand, then record the exact displayed value in `001-state.md` as
