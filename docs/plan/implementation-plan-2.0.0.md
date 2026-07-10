@@ -146,6 +146,7 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Model-policy eixo 2 (`effort` por fase×lane) + task budget na Execution + subagent barato p/ units paralelas (práticas Anthropic) | — | ✅ concluído (2026-07-09) |
 | P2 | Model-policy: Inception FAST/Std → medium·high (effort compensa; SAFE segue strong) + mapa tier→modelo Claude preenchido (Haiku/Sonnet/Opus) | — | ✅ concluído (2026-07-09) |
 | P2 | Model-policy refino: Inception FAST=strong (sem gate de Design), Validate nunca `cheap` (mín. medium), Operate=exceção documentada ao piso SAFE (medium) — decisão do dono | — | ✅ concluído (2026-07-09) |
+| P2 | Sigla **auto-derivada** do nome do repo (`itau-<sigla>-...`), nunca perguntada — rótulo de exibição only (regra em `core/boot.md`); decisão do dono, nasceu do teste real | — | ✅ concluído (2026-07-09) |
 | P2 | Helper classify-risk | W3 | ✅ concluído (2026-07-05) |
 | P2 | Score de confiança pré-Execution | W8.1 | ✅ concluído (2026-07-05) |
 | P2 | spec-vs-impl | W8.2 | ✅ concluído (2026-07-05) |

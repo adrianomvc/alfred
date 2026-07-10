@@ -3,7 +3,7 @@
 Use this checklist when adopting Alfred for a new sigla/system.
 
 ## 1. Identify Scope
-- sigla:
+- sigla: *auto-derived from the repo name (`itau-<sigla>-...`) — never asked; a display label only (rule in `core/boot.md`).*
 - HUB repo:
 - app repos:
 - squad owners:
