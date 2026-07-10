@@ -94,5 +94,23 @@ If a later schema adds fields, do not rewrite old JSONL lines. Append a new even
 
 If cost or token usage arrives after the original interaction, append a `usage_attributed` event instead of editing the original line.
 
+## Event hygiene (enables attribution)
+Per-event `tokens_input`, `tokens_output`, and `cost_usd` stay `null` on hosts
+that do not expose per-interaction usage (for example Claude Code): the real
+number arrives session-level as `usage_attributed`, and the rollup sums across
+events skipping the nulls. That is expected, not a gap. Even so, these fields
+make later fine-grained attribution possible only if the event metadata is real:
+- **Real `ts`.** Stamp a real ISO-8601 timestamp from the system clock at write
+  time. Never a placeholder, rounded, or duplicated value — the `ts` sequence is
+  the window boundary any later usage attribution relies on.
+- **Real `session_id`.** Use the host's session id when the host exposes one, so
+  `usage_attributed` events correlate to the same session. Keep `trace_id` /
+  `ALFRED_RUN_ID` stable across the whole demand, and record the git commit at
+  Execution step boundaries so a window maps to a diff.
+- **Import at checkpoints, not only at close.** Run the `usage-cost` source
+  (`import-ccusage.py`, Devin Insights) at each checkpoint so the session cost
+  stays current; each import is an append-only `usage_attributed` event, never an
+  edit to prior lines.
+
 ## Rollup
 Roll demand -> initiative -> org. Insights suggest policy changes; humans ratify them in commits.

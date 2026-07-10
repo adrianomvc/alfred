@@ -133,6 +133,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-tool-discovery-policy.py",
     "scripts/python/validators/validate-context-compression-policy.py",
     "scripts/python/validators/validate-token-economy-policy.py",
+    "scripts/python/validators/validate-observability-hygiene.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/adapter-template.md",
@@ -560,6 +561,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-tool-discovery-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-context-compression-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-observability-hygiene.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))

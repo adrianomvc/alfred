@@ -82,6 +82,7 @@ python scripts/python/validators/validate-framework.py
 - Installers keep optional npm tools degradable: Artifactory registry/package knobs for `ccusage` and `codebase-memory`, skip flags, and no hard dependency on npm.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
 - `validate-token-economy-policy` checks token-budget and deferred-work guardrails.
+- `validate-observability-hygiene` checks example event logs for real, distinct ISO-8601 timestamps (no placeholders) and the Layer 0 hygiene wiring.
 - `validate-model-policy` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
 - Toolbar rendering remains grounded: boot/orchestrator prefer `render-toolbar`, capable hosts use default/rich profile, CLI `text` requires an explicit fallback flag, manual fallback loads `core/presentation/toolbar-quick.md`, and rich blocks are not hand-drawn.
 - Toolbar forecast display shows a reason when cost exists but progress is 0% or 100%; only 0<progress<100 may show a linear `~US$` total.

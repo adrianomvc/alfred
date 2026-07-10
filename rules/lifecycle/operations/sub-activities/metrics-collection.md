@@ -30,8 +30,12 @@ the rollup as deferred work.
 1. Read the **observability JSONL** for this demand (append-only, never edited).
 2. Aggregate: **elapsed time, time per phase, interactions, retries, defects,
    blockers**, and the acceptance result.
-3. Add **model/tokens/cost** when a host usage source provided them; otherwise
-   mark as not collected (do not invent).
+3. Add **model/tokens/cost**: first run the `usage-cost` import (ccusage / Devin
+   Insights) so the session number is current — at each checkpoint, not only at
+   close — then aggregate. Keep `cost_confidence` honest (`estimated` for table
+   pricing, `exact` only from an approved billing source or the host cost
+   command). If no usage source is available, mark as not collected (do not
+   invent). See `../../../../connectors/usage-cost.md`.
 4. In **App-only** mode, gather local metrics and leave HUB rollup changes for
    `hub-sync`.
 5. Write the aggregated metrics into `metrics` for the summary.

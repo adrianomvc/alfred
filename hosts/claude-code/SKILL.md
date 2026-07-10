@@ -40,6 +40,8 @@ load every available tool schema at boot.
 ## Cost (host-specific — D10)
 When `ccusage` is installed and local logs are durable, automatically import the current local CLI session at resume/checkpoints before rendering the toolbar: `python ~/.alfred/scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code`. If `usage session id` is present in state, the helper imports that exact session; otherwise it records latest-session selection metadata. Claude Code may also expose the current session cost through `/cost`. Alfred cannot invent or scrape this value. Use `/cost` only when `ccusage` is unavailable or ambiguous; record it in `001-state.md` as `usage-cost: host cost command (/cost)`, `cost source: host_cost_command`, `cost usd: <value>`, and `cost confidence: exact` when it is the current session total. The toolbar renderer reads `cost usd`; if the value is absent, it must show `custo: nao coletado`.
 
+For finer granularity than the session total, `scripts/python/metrics/attribute-usage-transcript.py` maps the durable Claude Code transcript into per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`; cost only when allocated from the session total). The optional Stop hook `core/hooks/usage-attribution.md` runs this out-of-band, since the host owns the usage object and hooks receive `transcript_path`, not usage.
+
 ## Always
 - Keep the demand `state` current; commit on the demand branch.
 - Stamp the framework version in the demand `state` (D26).

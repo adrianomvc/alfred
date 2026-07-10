@@ -4,13 +4,14 @@
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import value_or  # noqa: E402
+from _common import read_state_fields, value_or  # noqa: E402
 
 
 HOST_AGENT = {
@@ -23,19 +24,6 @@ HOST_AGENT = {
 
 def now_iso():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def read_state(path):
-    fields = {}
-    if not path or not path.exists():
-        return fields
-    for line in path.read_text(encoding="utf-8-sig").splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("- ") or ":" not in stripped:
-            continue
-        key, value = stripped[2:].split(":", 1)
-        fields[key.strip().lower()] = value.strip()
-    return fields
 
 
 def update_state(path, updates):
@@ -85,7 +73,24 @@ def load_ccusage(args):
     if args.session_id:
         command.extend(["--id", args.session_id])
 
-    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    # Resolve the executable via PATHEXT so Windows npm shims (ccusage.cmd)
+    # are found. subprocess/CreateProcess only appends .exe, so a bare
+    # "ccusage" name raises WinError 2 even when the shim is on PATH.
+    resolved = shutil.which(command[0])
+    if resolved is None:
+        raise SystemExit(
+            "ccusage not found on PATH. Install it (see connectors/usage-cost.md) "
+            "or dump `ccusage session --json` to a file and pass it with -InputPath."
+        )
+    command[0] = resolved
+
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+    except OSError as error:
+        raise SystemExit(
+            f"Could not run ccusage ({error}). Dump `ccusage session --json` to a "
+            "file and pass it with -InputPath."
+        )
     if result.returncode != 0:
         if result.stderr:
             print(result.stderr, file=sys.stderr)
@@ -257,7 +262,7 @@ def main():
     args = parser.parse_args()
 
     state_path = Path(args.state_path).resolve() if args.state_path else None
-    state_fields = read_state(state_path) if state_path else {}
+    state_fields = read_state_fields(state_path) if state_path else {}
     if not args.agent:
         args.agent = HOST_AGENT.get(args.host, args.host)
     if not args.session_id:

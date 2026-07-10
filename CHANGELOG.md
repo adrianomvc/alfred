@@ -4,7 +4,37 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+### Added
+- Layered transcript usage attribution (usage-cost Layers 1-3):
+  `scripts/python/metrics/attribute-usage-transcript.py` maps a durable host
+  transcript (Claude Code) into per-window or per-turn `usage_attributed` events.
+  Tokens are exact — de-duplicated by `requestId`, since one request spans
+  several transcript lines that repeat the same usage. Cost stays `null` unless
+  `--allocate-cost` allocates the session total across buckets (`allocated`).
+  Turn mode is idempotent (stable `usage-turn-<requestId>` ids, skips
+  already-attributed requests). `claude-code-usage-hook.py` plus
+  `core/hooks/usage-attribution.md` run turn mode from a Claude Code Stop hook,
+  out-of-band: hooks receive `transcript_path`, not usage, so the host that owns
+  the usage object stamps it instead of the in-band agent.
+- `validate-observability-hygiene` validator: example event logs must use real,
+  distinct ISO-8601 timestamps (no placeholders, not all-identical), guarding the
+  Layer 0 hygiene contract that later attribution depends on.
+
+### Fixed
+- `import-ccusage.py` now resolves the `ccusage` executable via `shutil.which`
+  before spawning it, so Windows npm shims (`ccusage.cmd`) are found instead of
+  failing with `WinError 2`. When it is still unreachable, the helper exits with
+  a clear message pointing to the `-InputPath` fallback instead of a raw
+  traceback.
+
 ### Changed
+- Observability event hygiene is now an explicit contract (Layer 0): events must
+  carry a real ISO-8601 `ts` from the system clock (never a placeholder), a real
+  host `session_id`, stable `trace_id`/`ALFRED_RUN_ID`, and the Execution commit,
+  so later usage attribution has precise window boundaries. `metrics/metrics.md`
+  documents why per-event tokens/cost stay `null` on hosts without per-interaction
+  usage (the real number arrives session-level as `usage_attributed`) and directs
+  running the `usage-cost` import at each checkpoint, not only at close.
 - Toolbar forecast display now explains why the total estimate is unavailable
   when cost exists but progress is still 0% or already 100%, instead of hiding
   the forecast line.
