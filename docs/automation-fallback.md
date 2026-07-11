@@ -50,6 +50,7 @@ native commands with explicit limits (`tail`, `head`, `Select-Object -First`,
 | `collect-observability` | JSONL batch | concatenate relevant `observability-log.jsonl` files preserving source path and line references |
 | `generate-metrics-rollup` | Markdown rollup | summarize JSONL events manually into `metrics-rollup.md` or `05-operation/008-metrics.md` |
 | `normalize-usage-cost` | normalized usage JSONL events | manually append `usage_attributed` events only from approved host export data |
+| `apply-usage-rate-card` | `usage_cost_attributed` interaction cost events | manually append a cost event only from exact usage plus an approved rate card; never allocate a session total |
 
 ## Generated Artifacts
 Generated outputs should live in normal Alfred artifact locations:

@@ -121,6 +121,7 @@ REQUIRED_PATHS = [
     "scripts/python/metrics/collect-observability.py",
     "scripts/python/metrics/generate-metrics-rollup.py",
     "scripts/python/metrics/import-ccusage.py",
+    "scripts/python/metrics/apply-usage-rate-card.py",
     "scripts/python/metrics/normalize-usage-cost.py",
     "scripts/python/validators/validate-framework.py",
     "scripts/python/validators/validate-demand.py",
@@ -136,6 +137,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-observability-hygiene.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
+    "connectors/usage-rate-card.md",
     "connectors/adapter-template.md",
     "docs/adapter-implementation.md",
     "examples/connectors",
@@ -144,8 +146,10 @@ REQUIRED_PATHS = [
     "examples/connectors/tracker-sim-demand.md",
     "examples/connectors/notification-sim-adapter.md",
     "examples/connectors/ccusage-session.json",
+    "examples/connectors/usage-rate-card.json",
     "examples/connectors/usage-export.jsonl",
     "examples/connectors/usage-attribution-events.jsonl",
+    "examples/connectors/usage-attribution-tokens-only.jsonl",
     "examples/toolbar-fixtures/fast.txt",
     "examples/toolbar-fixtures/safe.txt",
     "examples/toolbar-fixtures/execution-first.txt",
@@ -394,9 +398,18 @@ def assert_usage_cost_policy(root):
             "Claude Code `/cost`",
             "cost source: host_cost_command",
             "cost usd: <value>",
+            "usage_rate_card",
+            "Do not allocate a ccusage session total",
+        ],
+        "connectors/usage-rate-card.md": [
+            "usage-rate-card",
+            "append_cost_event",
+            "usage_cost_attributed",
+            "ccusage session totals",
         ],
         "docs/usage-cost-adoption.md": [
             "## Claude Code Manual Cost Capture",
+            "## Interaction Cost from Rate Cards",
             "Ask the human to run `/cost`",
             "cost usd: <numeric USD value>",
         ],
@@ -405,15 +418,18 @@ def assert_usage_cost_policy(root):
             "automatically import the current local CLI session",
             "Claude Code may also expose the current session cost through `/cost`",
             "renderer reads `cost usd`",
+            "apply-usage-rate-card.py",
         ],
         "templates/hub/state.md": [
             "- cost source:",
             "- cost usd:",
             "- cost confidence:",
+            "- cost granularity:",
         ],
         "core/presentation/toolbar-quick.md": [
-            "If `state` has `cost usd:`",
+            "If `state` has session-level `cost usd:`",
             "Claude Code `/cost`",
+            "Do not read ccusage session totals from observability JSONL",
         ],
     }
     for rel, phrases in checks.items():
@@ -472,6 +488,8 @@ def assert_ccusage_import_policy(root):
             "scripts/python/metrics/import-ccusage.py",
             "ccusage session --json",
             "cost source: ccusage",
+            "cost granularity: session",
+            "must not be appended",
             "cost confidence:",
             "estimated",
         ],
@@ -480,10 +498,13 @@ def assert_ccusage_import_policy(root):
             "Claude Code automatic path",
             "selection_method: latest_agent_session",
             "API import remains",
+            "Session totals are state fields",
         ],
         "hosts/_template/hosts.json": [
             "automatically import the current local CLI session",
+            "do not append the ccusage session total",
             "For Devin, automatic usage attribution requires",
+            "append JSONL only when the export provides interaction/request-granular usage",
         ],
         "templates/hub/state.md": [
             "- alfred run id:",
@@ -494,6 +515,7 @@ def assert_ccusage_import_policy(root):
         "scripts/README.md": [
             "import-ccusage",
             "ccusage session --json",
+            "does not append session totals to observability JSONL",
         ],
     }
     for rel, phrases in checks.items():
@@ -510,7 +532,7 @@ def assert_ccusage_import_policy(root):
             str(root / "examples/connectors/ccusage-session.json"),
             "-Host",
             "claude-code",
-            "-NoAppend",
+            "-EmitJson",
             "-NoStateUpdate",
         ],
         capture_output=True,
@@ -521,13 +543,83 @@ def assert_ccusage_import_policy(root):
             print(result.stderr, file=sys.stderr)
         raise SystemExit("ccusage import fixture failed")
     event = json.loads(result.stdout.strip().splitlines()[-1])
-    if event.get("event_type") != "usage_attributed":
-        raise SystemExit("ccusage import fixture did not emit usage_attributed")
-    if event.get("cost_usd") != 1.23:
+    if event.get("event_type") == "usage_attributed":
+        raise SystemExit("ccusage session totals must not emit usage_attributed")
+    if event.get("record_type") != "session_usage_snapshot":
+        raise SystemExit("ccusage import fixture did not emit a session snapshot")
+    if event.get("output", {}).get("cost_usd") != 1.23:
         raise SystemExit("ccusage import fixture did not map totalCost")
-    if event.get("metadata", {}).get("source_kind") != "ccusage":
-        raise SystemExit("ccusage import fixture did not mark source_kind")
+    metadata = event.get("metadata", {})
+    if metadata.get("source_kind") != "ccusage" or metadata.get("granularity") != "session":
+        raise SystemExit("ccusage import fixture did not mark source kind and session granularity")
     print("OK ccusage import policy")
+
+
+def assert_usage_rate_card_policy(root):
+    checks = {
+        "metrics/metrics.md": [
+            "usage_cost_attributed",
+            "approved `usage-rate-card`",
+            "Session totals",
+            "allocated into interaction cost",
+        ],
+        "core/hooks/usage-attribution.md": [
+            "usage-rate-card",
+            "usage_cost_attributed",
+            "not in the interaction JSONL log",
+        ],
+        "scripts/README.md": [
+            "apply-usage-rate-card",
+            "never allocates `ccusage` session totals",
+        ],
+        "hosts/_template/hosts.json": [
+            "apply-usage-rate-card.py",
+            "do not allocate session ACU/USD totals",
+        ],
+        "scripts/python/metrics/attribute-usage-transcript.py": [
+            "--rate-card-path",
+            "--allocate-cost/--session-cost-usd are deprecated",
+            "ccusage/session totals are not allocated",
+        ],
+        "scripts/python/metrics/apply-usage-rate-card.py": [
+            "usage_cost_attributed",
+            "rate_card_hash",
+            "no session-total allocation",
+        ],
+    }
+    for rel, phrases in checks.items():
+        text = (root / rel).read_text(encoding="utf-8")
+        for phrase in phrases:
+            if phrase not in text:
+                raise SystemExit(f"Usage rate card policy missing in {rel}: {phrase}")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(root / "scripts/python/metrics/apply-usage-rate-card.py"),
+            "-InputPath",
+            str(root / "examples/connectors/usage-attribution-tokens-only.jsonl"),
+            "-RateCardPath",
+            str(root / "examples/connectors/usage-rate-card.json"),
+            "-NoAppend",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        raise SystemExit("usage rate card fixture failed")
+    event = json.loads(result.stdout.strip().splitlines()[-1])
+    if event.get("event_type") != "usage_cost_attributed":
+        raise SystemExit("rate card helper must emit usage_cost_attributed")
+    if event.get("parent_event_id") != "usage-example-tokens-001":
+        raise SystemExit("rate card helper did not reference the parent usage event")
+    if event.get("output", {}).get("cost_usd", 0) <= 0:
+        raise SystemExit("rate card helper did not compute a positive cost")
+    if event.get("output", {}).get("cost_confidence") != "rated":
+        raise SystemExit("rate card helper did not preserve rated confidence")
+    print("OK usage rate card policy")
 
 
 def run_sub(root, rel_script, *script_args):
@@ -566,6 +658,7 @@ def main():
     assert_usage_cost_policy(root)
     assert_optional_npm_tools_policy(root)
     assert_ccusage_import_policy(root)
+    assert_usage_rate_card_policy(root)
 
     run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")

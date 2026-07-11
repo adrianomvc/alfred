@@ -48,8 +48,9 @@ Proximo: <next step from state>
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
 - Cost is shown prominently in the top block. If no host usage source exists, write
   `custo: nao coletado` (or include the `usage-cost` state note); never hide it.
-- If `state` has `cost usd:` from an approved export, `ccusage`, or a
-  host-native cost command such as Claude Code `/cost`, render that value.
+- If `state` has session-level `cost usd:` from an approved export, `ccusage`,
+  or a host-native cost command such as Claude Code `/cost`, render that value.
+  Do not read ccusage session totals from observability JSONL.
 - With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
 - With a numeric cost and progress at 0% or 100%, show the forecast as unavailable with the reason; do not hide it and do not invent a total.
 - Show traceability next to cost: `Framework: v<version> (<commit>)` and

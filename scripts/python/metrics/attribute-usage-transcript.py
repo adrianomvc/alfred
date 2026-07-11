@@ -14,13 +14,13 @@ request, and emits append-only ``usage_attributed`` events:
   Alfred event whose window encloses it, carrying the exact ``requestId``/``uuid``.
 
 Tokens are exact (from the transcript). Cost is NOT in the transcript: it stays
-``null`` (``cost_confidence: unavailable``) unless ``--allocate-cost`` is given
-and a session total is available, in which case cost is a coarse proportional
-allocation (``cost_confidence: allocated``). The session total remains owned by
-the ccusage ``usage_attributed`` event; this helper never invents a rate table.
+``null`` (``cost_confidence: unavailable``) unless an approved interaction
+rate card is supplied with ``--rate-card-path``. A ccusage session total belongs
+in ``001-state.md`` for toolbar display, not in interaction JSONL events.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -168,6 +168,36 @@ def empty_tokens():
     }
 
 
+def load_rate_card(path):
+    if not path:
+        return None
+    rate_card_path = Path(path).resolve()
+    payload = json.loads(rate_card_path.read_text(encoding="utf-8-sig"))
+    if payload.get("schema_version") != "alfred.usage-rate-card.v1":
+        raise SystemExit("Unsupported rate card schema_version.")
+    if not payload.get("models"):
+        raise SystemExit("Rate card has no models.")
+    payload["_path"] = str(rate_card_path)
+    payload["_hash"] = hashlib.sha256(rate_card_path.read_bytes()).hexdigest()
+    return payload
+
+
+def rate_for_model(model, rate_card):
+    if not rate_card:
+        return None
+    return (rate_card.get("models") or {}).get(model)
+
+
+def calculate_cost(bucket, rates):
+    total = (
+        bucket["tokens_input"] * float(rates.get("input_per_1m") or 0)
+        + bucket["tokens_output"] * float(rates.get("output_per_1m") or 0)
+        + bucket["tokens_cache_creation"] * float(rates.get("cache_creation_per_1m") or 0)
+        + bucket["tokens_cache_read"] * float(rates.get("cache_read_per_1m") or 0)
+    )
+    return round(total / 1_000_000, 8)
+
+
 def add_tokens(target, request):
     for key in empty_tokens():
         target[key] += request[key]
@@ -181,10 +211,11 @@ def assign_windows(requests, events):
     """
     if not events:
         # No boundaries: one window over the whole transcript.
-        bucket = {"anchor": None, "start": None, "end": None, **empty_tokens(), "request_ids": []}
+        bucket = {"anchor": None, "start": None, "end": None, "model": None, **empty_tokens(), "request_ids": []}
         for request in requests:
             add_tokens(bucket, request)
             bucket["request_ids"].append(request["request_id"])
+            bucket["model"] = request["model"] if bucket["model"] in (None, request["model"]) else "__mixed__"
         return [bucket] if requests else []
 
     buckets = []
@@ -196,6 +227,7 @@ def assign_windows(requests, events):
                 "anchor": event,
                 "start": lower,
                 "end": upper,
+                "model": None,
                 **empty_tokens(),
                 "request_ids": [],
             }
@@ -212,6 +244,7 @@ def assign_windows(requests, events):
                 break
         add_tokens(target, request)
         target["request_ids"].append(request["request_id"])
+        target["model"] = request["model"] if target["model"] in (None, request["model"]) else "__mixed__"
 
     return [b for b in buckets if b["request_ids"]]
 
@@ -227,15 +260,21 @@ def enclosing_event(request_ts, events):
     return anchor
 
 
-def make_event(bucket, args, state_fields, granularity, session_cost, grand_total, sequence):
+def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
     anchor = bucket.get("anchor")
     tokens = total_tokens(bucket)
 
     cost = None
     confidence = "unavailable"
-    if args.allocate_cost and session_cost is not None and grand_total > 0:
-        cost = round(session_cost * tokens / grand_total, 6)
-        confidence = "allocated"
+    cost_source = None
+    model = bucket.get("model")
+    rates = rate_for_model(model, rate_card)
+    if rate_card and not rates:
+        raise SystemExit(f"Rate card has no rates for model: {model or 'unknown'}")
+    if rates:
+        cost = calculate_cost(bucket, rates)
+        confidence = value_or(rate_card.get("confidence"), "rated")
+        cost_source = "usage_rate_card"
 
     method = f"{granularity}-attribution"
     if granularity == "turn":
@@ -303,23 +342,24 @@ def make_event(bucket, args, state_fields, granularity, session_cost, grand_tota
             "rules_applied": ["connectors/usage-cost.md", "metrics/metrics.md"],
             "method": (
                 f"{method}: tokens summed from transcript requests de-duplicated by requestId; "
-                "cost is a coarse proportional allocation from the session total (allocated) "
-                "only with --allocate-cost, otherwise null (session total owns cost)"
+                "cost is null unless --rate-card-path supplies an approved interaction rate card; "
+                "ccusage/session totals are not allocated into interaction events"
             ),
             "attribution": "derived",
         },
         "output": {
-            "model": bucket.get("model"),
+            "model": model,
             "tokens_input": bucket["tokens_input"],
             "tokens_output": bucket["tokens_output"],
             "tokens_cache_creation": bucket["tokens_cache_creation"],
             "tokens_cache_read": bucket["tokens_cache_read"],
             "total_tokens": tokens,
             "cost_usd": cost,
+            "currency": (rate_card or {}).get("currency"),
             "cost_confidence": confidence,
             "token_confidence": "exact",
         },
-        "model": bucket.get("model"),
+        "model": model,
         "tool": "scripts/python/metrics/attribute-usage-transcript.py",
         "parent_event_id": anchor_ref,
         "artifacts": [],
@@ -338,6 +378,11 @@ def make_event(bucket, args, state_fields, granularity, session_cost, grand_tota
             "connector_type": "usage-cost",
             "source_kind": "host_transcript",
             "granularity": granularity,
+            "cost_source_kind": cost_source,
+            "rate_card_source": (rate_card or {}).get("source"),
+            "rate_card_effective_from": (rate_card or {}).get("effective_from"),
+            "rate_card_approved_by": (rate_card or {}).get("approved_by"),
+            "rate_card_hash": (rate_card or {}).get("_hash"),
         },
     }
 
@@ -355,21 +400,6 @@ def default_output_path(state_path):
     return candidate if candidate.exists() else None
 
 
-def resolve_session_cost(args, state_fields):
-    if args.session_cost_usd:
-        try:
-            return float(args.session_cost_usd)
-        except ValueError:
-            return None
-    raw = state_fields.get("cost usd")
-    if raw:
-        try:
-            return float(str(raw).replace("US$", "").replace("$", "").strip())
-        except ValueError:
-            return None
-    return None
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--transcript-path", "-TranscriptPath", dest="transcript_path", required=True)
@@ -379,6 +409,7 @@ def main():
     parser.add_argument("--granularity", "-Granularity", dest="granularity", choices=["window", "turn"], default="window")
     parser.add_argument("--allocate-cost", "-AllocateCost", dest="allocate_cost", action="store_true", default=False)
     parser.add_argument("--session-cost-usd", "-SessionCostUsd", dest="session_cost_usd", default="")
+    parser.add_argument("--rate-card-path", "-RateCardPath", dest="rate_card_path", default="")
     parser.add_argument("--session-id", "-SessionId", dest="session_id", default="")
     parser.add_argument("--since", "-Since", dest="since", default="")
     parser.add_argument("--append", "-Append", dest="append", action="store_true", default=True)
@@ -387,8 +418,16 @@ def main():
     parser.add_argument("--phase", "-Phase", dest="phase", default="")
     args = parser.parse_args()
 
+    if args.allocate_cost or args.session_cost_usd:
+        raise SystemExit(
+            "--allocate-cost/--session-cost-usd are deprecated for interaction JSONL. "
+            "Do not allocate ccusage/session totals into interactions; use --rate-card-path "
+            "with exact transcript tokens or a host export that already has interaction cost."
+        )
+
     state_path = Path(args.state_path).resolve() if args.state_path else None
     state_fields = read_state_fields(state_path) if state_path else {}
+    rate_card = load_rate_card(args.rate_card_path)
 
     requests = load_transcript_requests(args.transcript_path)
     if not requests:
@@ -434,12 +473,9 @@ def main():
                 }
             )
 
-    session_cost = resolve_session_cost(args, state_fields)
-    grand_total = sum(total_tokens(b) for b in buckets)
-
     lines = []
     for index, bucket in enumerate(buckets, start=1):
-        event = make_event(bucket, args, state_fields, args.granularity, session_cost, grand_total, index)
+        event = make_event(bucket, args, state_fields, args.granularity, rate_card, index)
         lines.append(json.dumps(event, separators=(",", ":")))
 
     if output_path and args.append:

@@ -45,7 +45,15 @@ Metric fields:
 - `cost_usd`
 - `retry_count`
 
-Usage and cost may also arrive later as append-only `usage_attributed` events produced by a `usage-cost` connector. These events should reference the original session, interaction, trace, or parent event when the host exposes those identifiers.
+Usage may also arrive later as append-only `usage_attributed` events produced by
+a `usage-cost` connector when the source has interaction/request granularity.
+Interaction cost may be appended later as separate `usage_cost_attributed`
+events when exact usage is combined with an approved `usage-rate-card`
+connector. These events should reference the original session, interaction,
+trace, or parent event when the host exposes those identifiers. Session totals
+such as `ccusage session --json` belong in `001-state.md` for toolbar display;
+they are not interaction events and must not be appended to the observability
+JSONL log or allocated into interaction cost.
 
 Detail fields:
 - `input`
@@ -92,17 +100,20 @@ Do not batch observability in memory. Alfred appends events as soon as they happ
 
 If a later schema adds fields, do not rewrite old JSONL lines. Append a new event that records the schema/version change or backfill summary.
 
-If cost or token usage arrives after the original interaction, append a `usage_attributed` event instead of editing the original line.
-When a connector refreshes the same session snapshot, it may reuse the same
-`event_id`; rollups count the latest occurrence per `event_id` so append-only
-history does not double-count tokens or cost.
+If interaction/request token usage arrives after the original interaction,
+append a `usage_attributed` event instead of editing the original line. If
+interaction cost is computed later from an approved rate card, append a
+`usage_cost_attributed` event that references the usage event. If only a session
+total cost arrives, refresh the state fields used by the toolbar instead of
+appending a JSONL event.
 
 ## Event hygiene (enables attribution)
 Per-event `tokens_input`, `tokens_output`, and `cost_usd` stay `null` on hosts
-that do not expose per-interaction usage (for example Claude Code): the real
-number arrives session-level as `usage_attributed`, and the rollup sums across
-events skipping the nulls. That is expected, not a gap. Even so, these fields
-make later fine-grained attribution possible only if the event metadata is real:
+that do not expose per-interaction usage/cost (for example Claude Code). Exact
+tokens may be recovered later from a host transcript as `usage_attributed`;
+session total cost from ccusage remains in state for toolbar display. That is
+expected, not a gap. Even so, these fields make later fine-grained attribution
+possible only if the event metadata is real:
 - **Real `ts`.** Stamp a real ISO-8601 timestamp from the system clock at write
   time. Never a placeholder, rounded, or duplicated value — the `ts` sequence is
   the window boundary any later usage attribution relies on.
@@ -110,10 +121,12 @@ make later fine-grained attribution possible only if the event metadata is real:
   `usage_attributed` events correlate to the same session. Keep `trace_id` /
   `ALFRED_RUN_ID` stable across the whole demand, and record the git commit at
   Execution step boundaries so a window maps to a diff.
-- **Import at checkpoints, not only at close.** Run the `usage-cost` source
-  (`import-ccusage.py`, Devin Insights) at each checkpoint so the session cost
-  stays current; each import is an append-only `usage_attributed` event, never an
-  edit to prior lines.
+- **Refresh session totals at checkpoints.** Run the session-total source
+  (`import-ccusage.py`, Devin session/consumption summary) at each checkpoint so
+  the toolbar stays current. Do not append those session totals to JSONL. Append
+  JSONL only from interaction/request-granular sources. Append interaction cost
+  only from a source that already has interaction cost or from exact usage plus
+  an approved rate card.
 
 ## Rollup
 Roll demand -> initiative -> org. Insights suggest policy changes; humans ratify them in commits.

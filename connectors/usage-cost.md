@@ -22,14 +22,20 @@ The installer can best-effort install `ccusage` from the configured npm registry
 
 When `ccusage` is installed and local logs are durable, Alfred can import the
 current host session with `scripts/python/metrics/import-ccusage.py`. The helper
-maps `ccusage session --json` into a `usage_attributed` event, updates
-`001-state.md` with `cost source: ccusage`, and keeps `cost confidence:
-estimated` unless an approved billing source confirms the USD value.
+maps `ccusage session --json` into session-level state fields for toolbar
+display (`cost source: ccusage`, `cost usd`, `cost granularity: session`) and
+keeps `cost confidence: estimated` unless an approved billing source confirms
+the USD value. A ccusage session total is not an interaction-level
+observability event and must not be appended to the demand JSONL log as
+`usage_attributed`.
 
 ## operations
 - `read_usage(window, filters)` reads usage records from the host or an exported file.
 - `map_usage(record)` maps one host usage record to Alfred observability fields.
 - `append_usage_event(event)` appends a `usage_attributed` event to the demand JSONL log.
+- `append_cost_event(event)` appends a separate `usage_cost_attributed` event
+  only when an interaction/request source already has cost or exact usage is
+  priced through `connectors/usage-rate-card.md`.
 
 ## input fields
 - `ts`
@@ -67,11 +73,14 @@ estimated` unless an approved billing source confirms the USD value.
   Insights and Consumption endpoints.
 - `devin_export`: saved Devin API/admin export file.
 - `enterprise_billing`: approved billing export or admin report.
-- `ccusage`: local CLI usage parsed from a supported tool's durable logs.
+- `ccusage`: local CLI session total parsed from a supported tool's durable logs;
+  valid for toolbar/state session display, not for interaction JSONL events.
 - `host_transcript`: exact per-request token usage parsed from a host transcript
   (for example the Claude Code session JSONL), attributed to Alfred event windows
-  or turns. Tokens are exact; cost is `null` unless allocated from a session
-  total. See the layered attribution below.
+  or turns. Tokens are exact; cost is `null` unless an approved interaction cost
+  source or rate card is applied. See the layered attribution below.
+- `usage_rate_card`: approved per-model/per-unit table applied to exact
+  interaction usage; confidence `rated` or `estimated` depending on approval.
 - `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
   recorded by the human or by a supported host export. It is valid only as a
   session/window total, with source and timestamp.
@@ -92,14 +101,14 @@ python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-stat
 
 If the state contains `usage session id`, the helper imports that exact session.
 Otherwise it selects the latest session for the configured agent and records the
-selection method in the event validation metadata. Humans may still provide
+selection method in the state/session snapshot metadata. Humans may still provide
 `/cost` when `ccusage` is unavailable or the session correlation is ambiguous.
 
 Run the import at each checkpoint, not only at demand close, so the session cost
-stays current. Each run appends a new `usage_attributed` event (append-only) and
-refreshes the `001-state.md` cost fields; it never edits prior events. On
-Windows the helper resolves the `ccusage` npm shim via `PATHEXT`; if it is
-unreachable, dump `ccusage session --json` to a file and pass `-InputPath`.
+stays current in the toolbar. Each run refreshes the `001-state.md` cost fields;
+it does not append to `05-operation/011-observability-log.jsonl`. On Windows the
+helper resolves the `ccusage` npm shim via `PATHEXT`; if it is unreachable, dump
+`ccusage session --json` to a file and pass `-InputPath`.
 
 ### Layered transcript attribution (finer than the session total)
 When the host keeps a durable transcript with per-request usage (Claude Code),
@@ -107,14 +116,17 @@ When the host keeps a durable transcript with per-request usage (Claude Code),
 granularity from the `host_transcript` source. Usage is de-duplicated by
 `requestId` (a request spans several transcript lines that repeat the same
 usage), so tokens are exact. Cost is not in the transcript: it stays `null`
-unless `--allocate-cost` allocates the session total across buckets
-(`allocated`); the session total stays owned by the ccusage event or `/cost`.
+unless an approved interaction-level cost source or `usage-rate-card` is
+provided. Do not allocate a ccusage session total into interaction events.
 
 - `--granularity window`: sum requests into windows bounded by consecutive Alfred
   event timestamps (needs real, distinct event `ts`). One-shot, run at close.
 - `--granularity turn`: one event per request (`usage-turn-<requestId>`), tagged
   with the enclosing event. Idempotent — re-runs skip already-attributed
   requests, so it is safe to append every checkpoint.
+- `--rate-card-path`: optional approved `usage-rate-card` JSON. When supplied,
+  transcript attribution can compute interaction cost from exact tokens. Without
+  it, cost stays `null`.
 
 The Claude Code Stop hook (`core/hooks/usage-attribution.md`) runs the turn mode
 automatically and out-of-band, since the host — not the in-band agent — owns the
@@ -135,8 +147,9 @@ skipped, missing identifiers, confidence, output JSONL path.
 Use explicit confidence labels:
 - `exact`: source provides exact tokens, ACUs, credits, or cost for the
   correlated session.
-- `estimated`: source provides tokens/ACUs and Alfred applies an approved rate
-  table.
+- `rated`: exact interaction usage priced by an approved rate card.
+- `estimated`: source provides tokens/ACUs and Alfred applies an approved but
+  approximate/public rate table.
 - `allocated`: source provides aggregate usage/cost and an approved allocation
   rule.
 - `unavailable`: source did not provide the field.
