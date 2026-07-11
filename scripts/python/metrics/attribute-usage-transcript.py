@@ -14,10 +14,9 @@ request, and emits append-only ``usage_attributed`` events:
   Alfred event whose window encloses it, carrying the exact ``requestId``/``uuid``.
 
 Tokens are exact (from the transcript). Cost is NOT in the transcript: it stays
-``null`` (``cost_confidence: unavailable``) unless ``--allocate-cost`` is given
-and a session total is available, in which case cost is a coarse proportional
-allocation (``cost_confidence: allocated``). The session total remains owned by
-the ccusage ``usage_attributed`` event; this helper never invents a rate table.
+``null`` (``cost_confidence: unavailable``) unless a separate approved
+interaction-level cost source is supplied. A ccusage session total belongs in
+``001-state.md`` for toolbar display, not in interaction JSONL events.
 """
 
 import argparse

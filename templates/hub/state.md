@@ -53,6 +53,7 @@
 - cost source:
 - cost usd:
 - cost confidence:
+- cost granularity:
 - status values: contract | handoff | dry-run | active | disabled | not configured
 - readiness:
 - adapter notes:

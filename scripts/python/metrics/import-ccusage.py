@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Import ccusage session JSON into Alfred state and observability events."""
+"""Import ccusage session JSON into Alfred state for toolbar display.
+
+ccusage reports a host session total. That value is useful for the toolbar and
+for session-level cost visibility, but it is not an interaction-level
+observability event. Per-interaction JSONL attribution must come from a source
+with interaction/request granularity, such as a host transcript.
+"""
 
 import argparse
 import json
@@ -11,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import iter_jsonl, read_state_fields, value_or  # noqa: E402
+from _common import read_state_fields, value_or  # noqa: E402
 
 
 HOST_AGENT = {
@@ -145,7 +151,7 @@ def models(row):
     return None
 
 
-def make_event(row, args, state_fields, selection_method):
+def make_snapshot(row, args, state_fields, selection_method):
     total_cost = row.get("totalCost")
     event_id = f"usage-ccusage-{row.get('period', 'session')}"
     ts = value_or(last_activity(row), now_iso())
@@ -154,33 +160,33 @@ def make_event(row, args, state_fields, selection_method):
     metadata = row.get("metadata") or {}
 
     return {
-        "schema_version": "alfred.observability.v1",
+        "schema_version": "alfred.usage-session.v1",
         "alfred": {
             "version": value_or(state_fields.get("framework version"), "unknown"),
             "framework_ref": value_or(state_fields.get("framework ref"), "local"),
             "framework_commit": value_or(state_fields.get("framework commit"), None),
-            "schema_version": "alfred.observability.v1",
+            "schema_version": "alfred.usage-session.v1",
         },
         "ts": ts,
-        "event_id": event_id,
+        "snapshot_id": event_id,
         "trace_id": value_or(state_fields.get("alfred run id"), value_or(args.run_id, "unknown")),
         "session_id": value_or(row.get("period"), "unknown"),
         "interaction_id": "unknown",
         "sequence": 1,
         "initiative_id": value_or(state_fields.get("initiative id"), "unknown"),
         "demand_id": value_or(state_fields.get("id"), "unknown"),
-        "event_type": "usage_attributed",
+        "record_type": "session_usage_snapshot",
         "phase": value_or(args.phase, value_or(state_fields.get("current phase"), "operation")),
         "lane": value_or(state_fields.get("lane"), value_or(state_fields.get("modo"), "unknown")),
         "actor_type": "system",
         "actor_id": "usage-cost-ccusage",
-        "action": "attribute_usage",
+        "action": "capture_session_usage",
         "status": "recorded",
         "step": {
             "id": "usage-cost",
             "name": "Usage and cost attribution",
             "sequence": 1,
-            "goal": "Import ccusage session usage into Alfred observability",
+            "goal": "Import ccusage session usage into Alfred state for toolbar display",
         },
         "artifacts_used": [
             {"path": source_path, "role": "source_usage_export", "action": "read"}
@@ -199,7 +205,7 @@ def make_event(row, args, state_fields, selection_method):
         },
         "derivation": {
             "rules_applied": ["connectors/usage-cost.md", "metrics/metrics.md"],
-            "method": "ccusage session JSON import; USD confidence is estimated unless an approved billing source confirms it",
+            "method": "ccusage session JSON import; session total only, not an interaction observability event",
         },
         "output": {
             "model": model,
@@ -224,49 +230,18 @@ def make_event(row, args, state_fields, selection_method):
         "blocker": None,
         "error": None,
         "state_transition": None,
-        "actions": [{"type": "import_ccusage", "status": "completed"}],
+        "actions": [{"type": "import_ccusage_session_total", "status": "completed"}],
         "questions_open": [],
         "assumptions": [],
-        "metric_impact": {"usage_attribution": "added"},
+        "metric_impact": {"session_cost_state": "captured"},
         "next": [],
         "metadata": {
             "connector_type": "usage-cost",
             "source_kind": "ccusage",
             "agent": row.get("agent"),
+            "granularity": "session",
         },
     }
-
-
-def default_output_path(state_path):
-    if not state_path:
-        return None
-    candidate = state_path.parent / "05-operation" / "011-observability-log.jsonl"
-    return candidate if candidate.exists() else None
-
-
-def same_usage_snapshot(left, right):
-    left_output = left.get("output") or {}
-    right_output = right.get("output") or {}
-    fields = [
-        "tokens_input",
-        "tokens_output",
-        "tokens_cache_creation",
-        "tokens_cache_read",
-        "total_tokens",
-        "cost_usd",
-    ]
-    return all(left_output.get(field) == right_output.get(field) for field in fields)
-
-
-def already_has_same_snapshot(output_path, event):
-    if not output_path or not output_path.exists():
-        return False
-    for _, parsed, _ in iter_jsonl(output_path):
-        if parsed is None:
-            continue
-        if parsed.get("event_id") == event.get("event_id") and same_usage_snapshot(parsed, event):
-            return True
-    return False
 
 
 def main():
@@ -274,8 +249,14 @@ def main():
     parser.add_argument("--state-path", "-StatePath", dest="state_path", default="")
     parser.add_argument("--input-path", "-InputPath", dest="input_path", default="")
     parser.add_argument("--output-path", "-OutputPath", dest="output_path", default="")
-    parser.add_argument("--append", "-Append", dest="append", action="store_true", default=True)
-    parser.add_argument("--no-append", "-NoAppend", dest="append", action="store_false")
+    parser.add_argument("--append", "-Append", dest="append", action="store_true", default=False,
+                        help="deprecated: ccusage session totals must not be appended to observability JSONL")
+    parser.add_argument("--no-append", "-NoAppend", dest="no_append", action="store_true",
+                        help="deprecated no-op; state-only is the default")
+    parser.add_argument("--write-snapshot", "-WriteSnapshot", dest="write_snapshot", action="store_true",
+                        help="write the session snapshot JSON to -OutputPath for debugging; never append to observability JSONL")
+    parser.add_argument("--emit-json", "-EmitJson", dest="emit_json", action="store_true",
+                        help="print the session snapshot JSON to stdout")
     parser.add_argument("--host", "-Host", dest="host", default="claude-code")
     parser.add_argument("--agent", "-Agent", dest="agent", default="")
     parser.add_argument("--session-id", "-SessionId", dest="session_id", default="")
@@ -285,6 +266,11 @@ def main():
     parser.add_argument("--phase", "-Phase", dest="phase", default="")
     parser.add_argument("--no-state-update", "-NoStateUpdate", dest="state_update", action="store_false", default=True)
     args = parser.parse_args()
+    if args.append:
+        raise SystemExit(
+            "-Append is no longer supported for ccusage session totals. "
+            "Use the state fields for toolbar cost; append JSONL only from interaction/request-granular sources."
+        )
 
     state_path = Path(args.state_path).resolve() if args.state_path else None
     state_fields = read_state_fields(state_path) if state_path else {}
@@ -295,20 +281,18 @@ def main():
 
     payload = load_ccusage(args)
     row, selection_method = select_row(session_rows(payload), args.agent, args.session_id)
-    event = make_event(row, args, state_fields, selection_method)
-    event_line = json.dumps(event, separators=(",", ":"))
+    snapshot = make_snapshot(row, args, state_fields, selection_method)
+    snapshot_line = json.dumps(snapshot, separators=(",", ":"))
 
-    output_path = Path(args.output_path).resolve() if args.output_path else default_output_path(state_path)
-    if output_path and args.append:
-        if already_has_same_snapshot(output_path, event):
-            print(f"Skipped unchanged ccusage event in {output_path}")
-        else:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            with output_path.open("a", encoding="utf-8") as handle:
-                handle.write(event_line + "\n")
-            print(f"Appended ccusage event to {output_path}")
-    else:
-        print(event_line)
+    if args.output_path and args.write_snapshot:
+        output_path = Path(args.output_path).resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(snapshot_line + "\n", encoding="utf-8")
+        print(f"Wrote ccusage session snapshot to {output_path}")
+    elif args.output_path:
+        raise SystemExit("-OutputPath requires -WriteSnapshot; ccusage session totals are not observability JSONL events.")
+    if args.emit_json:
+        print(snapshot_line)
 
     if state_path and args.state_update:
         updates = {
@@ -316,6 +300,7 @@ def main():
             "cost source": "ccusage",
             "cost usd": str(row.get("totalCost")),
             "cost confidence": "estimated",
+            "cost granularity": "session",
             "host": args.host,
             "usage session id": str(row.get("period")),
             "usage imported at": now_iso(),

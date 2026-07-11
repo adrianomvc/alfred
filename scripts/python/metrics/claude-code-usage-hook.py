@@ -12,8 +12,6 @@ JSON from stdin and targets the demand log via env:
 - ``ALFRED_OBS_LOG``     — explicit observability JSONL path.
 If neither is set, it reads ``~/.alfred/runtime/active-demand.json`` written by
 ``render-toolbar.py -RegisterActive``.
-Optional: ``ALFRED_ALLOCATE_COST=1`` allocates the session cost across turns.
-
 Safety: this hook must never block the session. It exits 0 on every path; a
 missing target or any error is reported to stderr and ignored. The transcript is
 written asynchronously and may lag the final turn, so the last turn is picked up
@@ -80,9 +78,6 @@ def main():
     run_id = os.environ.get("ALFRED_RUN_ID") or active.get("alfred_run_id")
     if run_id:
         command += ["--run-id", run_id]
-    if os.environ.get("ALFRED_ALLOCATE_COST"):
-        command += ["--allocate-cost"]
-
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=False)
         if result.returncode != 0 and result.stderr:

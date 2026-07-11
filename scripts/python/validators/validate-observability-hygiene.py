@@ -72,7 +72,8 @@ def main():
         errors.extend(check_log(log))
 
     require_text(root / "metrics/metrics.md", "Event hygiene", errors)
-    require_text(root / "metrics/metrics.md", "Import at checkpoints", errors)
+    require_text(root / "metrics/metrics.md", "Refresh session totals at checkpoints", errors)
+    require_text(root / "metrics/metrics.md", "interaction/request-granular sources", errors)
     require_text(root / "rules/common/session-continuity.md", "real ISO-8601", errors)
 
     if errors:

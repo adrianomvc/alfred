@@ -410,10 +410,12 @@ def assert_usage_cost_policy(root):
             "- cost source:",
             "- cost usd:",
             "- cost confidence:",
+            "- cost granularity:",
         ],
         "core/presentation/toolbar-quick.md": [
-            "If `state` has `cost usd:`",
+            "If `state` has session-level `cost usd:`",
             "Claude Code `/cost`",
+            "Do not read ccusage session totals from observability JSONL",
         ],
     }
     for rel, phrases in checks.items():
@@ -472,6 +474,8 @@ def assert_ccusage_import_policy(root):
             "scripts/python/metrics/import-ccusage.py",
             "ccusage session --json",
             "cost source: ccusage",
+            "cost granularity: session",
+            "must not be appended",
             "cost confidence:",
             "estimated",
         ],
@@ -480,10 +484,13 @@ def assert_ccusage_import_policy(root):
             "Claude Code automatic path",
             "selection_method: latest_agent_session",
             "API import remains",
+            "Session totals are state fields",
         ],
         "hosts/_template/hosts.json": [
             "automatically import the current local CLI session",
+            "do not append the ccusage session total",
             "For Devin, automatic usage attribution requires",
+            "append JSONL only when the export provides interaction/request-granular usage",
         ],
         "templates/hub/state.md": [
             "- alfred run id:",
@@ -494,6 +501,7 @@ def assert_ccusage_import_policy(root):
         "scripts/README.md": [
             "import-ccusage",
             "ccusage session --json",
+            "does not append session totals to observability JSONL",
         ],
     }
     for rel, phrases in checks.items():
@@ -510,7 +518,7 @@ def assert_ccusage_import_policy(root):
             str(root / "examples/connectors/ccusage-session.json"),
             "-Host",
             "claude-code",
-            "-NoAppend",
+            "-EmitJson",
             "-NoStateUpdate",
         ],
         capture_output=True,
@@ -521,12 +529,15 @@ def assert_ccusage_import_policy(root):
             print(result.stderr, file=sys.stderr)
         raise SystemExit("ccusage import fixture failed")
     event = json.loads(result.stdout.strip().splitlines()[-1])
-    if event.get("event_type") != "usage_attributed":
-        raise SystemExit("ccusage import fixture did not emit usage_attributed")
-    if event.get("cost_usd") != 1.23:
+    if event.get("event_type") == "usage_attributed":
+        raise SystemExit("ccusage session totals must not emit usage_attributed")
+    if event.get("record_type") != "session_usage_snapshot":
+        raise SystemExit("ccusage import fixture did not emit a session snapshot")
+    if event.get("output", {}).get("cost_usd") != 1.23:
         raise SystemExit("ccusage import fixture did not map totalCost")
-    if event.get("metadata", {}).get("source_kind") != "ccusage":
-        raise SystemExit("ccusage import fixture did not mark source_kind")
+    metadata = event.get("metadata", {})
+    if metadata.get("source_kind") != "ccusage" or metadata.get("granularity") != "session":
+        raise SystemExit("ccusage import fixture did not mark source kind and session granularity")
     print("OK ccusage import policy")
 
 

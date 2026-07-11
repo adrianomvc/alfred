@@ -26,7 +26,9 @@ Fallback:
 
 ## Principles
 - Usage import is optional; Alfred runs without it.
-- Usage/cost records are append-only observability events.
+- Interaction/request usage records are append-only observability events.
+  Session totals are state fields for toolbar/forecast display unless the source
+  provides interaction-level records.
 - Do not estimate USD cost unless the human provides an approved rate table or
   the source export already includes cost.
 - Devin ACU counts may be exact while USD cost may be estimated or allocated;
@@ -64,7 +66,7 @@ Use the most authoritative source available:
 2. Devin organization/user/service-user consumption API.
 3. Enterprise billing export that includes user, workspace, repo, or time
    windows.
-4. ccusage JSON for supported local CLIs.
+4. ccusage JSON for supported local CLIs (session total only).
 5. Host-native interactive cost command manually recorded by the human.
 6. Manual allocation approved by the human/FinOps owner.
 
@@ -86,7 +88,9 @@ The first active implementation should use Devin's ACU sources:
 Implementation target:
 - Python metric helper named `import-devin-usage`;
 - input: saved Devin API JSON or approved local metadata;
-- output: `usage_attributed` JSONL events using `connectors/usage-cost.md`.
+- output: `usage_attributed` JSONL events only when the Devin source is
+  interaction/session-window granular enough for the event being written;
+  otherwise update demand state with session summary fields for toolbar display.
 
 Minimum mapped fields:
 - `source_kind = devin_api`;
@@ -100,9 +104,10 @@ Minimum mapped fields:
 - `cost_usd = null` until a contract/rate table is approved;
 - `cost_confidence = unavailable`, `estimated`, or `allocated`.
 
-If only aggregate ACU or cost is available, attribute by approved allocation rule
-(for example by session id, time window, user, service user, or workspace) and
-mark `acu_confidence` or `cost_confidence` as `allocated`.
+If only aggregate ACU or cost is available, keep it as session/window summary in
+state or a separate approved rollup artifact. Do not append it as an interaction
+JSONL event unless an approved allocation rule and target granularity are
+explicitly recorded.
 
 ## ccusage Secondary Design
 Use `ccusage` only when the host is supported and local logs are available.
@@ -117,8 +122,9 @@ Requirements:
 Active helper:
 - `scripts/python/metrics/import-ccusage.py`;
 - input: `ccusage session --json` output or a saved JSON file;
-- output: normalized `usage_attributed` JSONL events and optional
-  `001-state.md` cost fields.
+- output: `001-state.md` session cost fields for toolbar display. Optional
+  debug snapshots may be written outside the observability log with
+  `-WriteSnapshot`.
 
 Claude Code automatic path:
 
@@ -128,8 +134,8 @@ python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-stat
 
 Set `usage session id:` in `001-state.md` when the host exposes it. If it is
 missing, the helper uses the latest `claude` session and records
-`selection_method: latest_agent_session` in the event so the attribution remains
-auditable instead of silent.
+`selection_method: latest_agent_session` in the state/session snapshot metadata
+so the attribution remains auditable instead of silent.
 
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.
@@ -161,7 +167,8 @@ Run one corporate pilot before implementing automatic policy suggestions:
 3. Run the demand normally with Alfred token-economy policies enabled.
 4. Capture the Devin session id (`devin-...`) and collect Session Insights plus
    session daily consumption after the run.
-5. Normalize usage into `usage_attributed` events.
+5. Normalize interaction/request usage into `usage_attributed` events; keep
+   session totals in state for toolbar/forecast display.
 6. Close Operation with ACU, optional tokens, and optional USD cost in metrics.
 7. Compare:
    - actual spend vs baseline;

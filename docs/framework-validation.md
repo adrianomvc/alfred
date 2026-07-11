@@ -79,7 +79,7 @@ python scripts/python/validators/validate-framework.py
 - Persona validation keeps Alfred's butler voice gender-neutral: rendered welcome/UI text must not address people as `senhor`, `senhora`, or `senhor(a)`.
 - Host shim sync validation keeps copied native host entries refreshable after `~/.alfred` updates, using `sync-host-shims.py` from the host update policy.
 - Claude Code host sync can install the usage attribution Stop hook with `sync-host-shims.py -Host claude-code -Create -InstallHooks`, and the toolbar can register the active demand with `-RegisterActive` so the hook writes to the right JSONL log.
-- `import-ccusage.py` keeps Claude/Codex local CLI cost attribution automatic when `ccusage` is available, while recording estimated confidence and session selection evidence.
+- `import-ccusage.py` keeps Claude/Codex local CLI session cost visible in `001-state.md` for toolbar display when `ccusage` is available. It must not append ccusage session totals to observability JSONL as `usage_attributed`; JSONL usage attribution requires interaction/request granularity.
 - Installers keep optional npm tools degradable: Artifactory registry/package knobs for `ccusage` and `codebase-memory`, skip flags, and no hard dependency on npm.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
 - `validate-token-economy-policy` checks token-budget and deferred-work guardrails.

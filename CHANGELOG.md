@@ -21,6 +21,11 @@ All notable Alfred framework changes should be recorded here.
   Layer 0 hygiene contract that later attribution depends on.
 
 ### Fixed
+- `ccusage` session totals are now state-only for toolbar/forecast display:
+  `import-ccusage.py` updates `001-state.md` with `cost granularity: session`
+  and no longer appends session totals to observability JSONL as
+  `usage_attributed`. Interaction JSONL usage now requires an
+  interaction/request-granular source such as a host transcript.
 - Claude Code usage attribution is now wired into the runtime path:
   `render-toolbar` can register the active demand (`-RegisterActive`), the Stop
   hook falls back to `~/.alfred/runtime/active-demand.json` when no
@@ -40,8 +45,9 @@ All notable Alfred framework changes should be recorded here.
   host `session_id`, stable `trace_id`/`ALFRED_RUN_ID`, and the Execution commit,
   so later usage attribution has precise window boundaries. `metrics/metrics.md`
   documents why per-event tokens/cost stay `null` on hosts without per-interaction
-  usage (the real number arrives session-level as `usage_attributed`) and directs
-  running the `usage-cost` import at each checkpoint, not only at close.
+  usage (session totals arrive in state for toolbar display; interaction tokens
+  can arrive as `usage_attributed`) and directs running the `usage-cost` import
+  at each checkpoint, not only at close.
 - Toolbar forecast display now explains why the total estimate is unavailable
   when cost exists but progress is still 0% or already 100%, instead of hiding
   the forecast line.
@@ -53,8 +59,8 @@ All notable Alfred framework changes should be recorded here.
   stale host instructions active.
 - `ccusage` session import is now an active automatic usage-cost path for local
   CLI hosts: `scripts/python/metrics/import-ccusage.py` maps `ccusage session
-  --json` into `usage_attributed` events and updates `001-state.md` cost fields
-  with estimated confidence and auditable session-selection metadata.
+  --json` into `001-state.md` session cost fields with estimated confidence and
+  auditable session-selection metadata.
 - Requirements questions are file-only: `003-requirements.md` is the single answer channel, chat/UI may only point to it, host-native question popups are forbidden for requirements, and FAST material questions still go to the artifact. The framework validator now guards this rule.
 - Toolbar rendering is now explicitly grounded: boot/orchestrator prefer `render-toolbar`; if the helper is unavailable, agents must load `toolbar-quick.md` and use only the documented text fallback instead of hand-drawing rich blocks.
 - Claude Code cost capture is now an explicit manual usage-cost path: humans can run `/cost`, record `cost usd`/source/confidence in `001-state.md`, and the toolbar renderer reads that state value for display and forecast.

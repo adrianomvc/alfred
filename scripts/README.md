@@ -45,8 +45,8 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
-- `import-ccusage` - optional automatic importer for `ccusage session --json`; updates demand cost state and appends `usage_attributed` events.
-- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`). `claude-code-usage-hook` runs the turn mode from a Stop hook (`core/hooks/usage-attribution.md`).
+- `import-ccusage` - optional automatic importer for `ccusage session --json`; updates demand cost state for toolbar display. It does not append session totals to observability JSONL.
+- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`, cost `null` unless a separate interaction-cost source exists). `claude-code-usage-hook` runs the turn mode from a Stop hook (`core/hooks/usage-attribution.md`).
 - `validate-toolbar-fixtures` - optional drift check for toolbar examples.
 - `validate-skills-registry` - optional consistency check for `skills/skills.md`.
 - `validate-email-adapter` - optional behavior check for the Python-only notification adapter: dry-run report generation, allowlist refusal, and audit subject prefix.
