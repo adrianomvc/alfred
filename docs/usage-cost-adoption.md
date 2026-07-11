@@ -29,6 +29,8 @@ Fallback:
 - Interaction/request usage records are append-only observability events.
   Session totals are state fields for toolbar/forecast display unless the source
   provides interaction-level records.
+- Interaction cost records are separate append-only `usage_cost_attributed`
+  events when exact usage is priced by an approved rate card.
 - Do not estimate USD cost unless the human provides an approved rate table or
   the source export already includes cost.
 - Devin ACU counts may be exact while USD cost may be estimated or allocated;
@@ -67,8 +69,9 @@ Use the most authoritative source available:
 3. Enterprise billing export that includes user, workspace, repo, or time
    windows.
 4. ccusage JSON for supported local CLIs (session total only).
-5. Host-native interactive cost command manually recorded by the human.
-6. Manual allocation approved by the human/FinOps owner.
+5. Approved usage rate card applied to exact interaction usage.
+6. Host-native interactive cost command manually recorded by the human.
+7. Manual allocation approved by the human/FinOps owner.
 
 If sources conflict, keep both records with their source and mark the conflict
 in metrics; do not silently reconcile.
@@ -140,6 +143,22 @@ so the attribution remains auditable instead of silent.
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.
 
+## Interaction Cost from Rate Cards
+For Claude Code and similar transcript-based hosts, the transcript can provide
+exact request tokens but not USD cost. To populate interaction cost in JSONL,
+Alfred needs an approved rate card:
+
+```bash
+python scripts/python/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
+```
+
+This appends `usage_cost_attributed` events that reference the original
+`usage_attributed` event by `parent_event_id`. It does not edit old lines and
+does not allocate `ccusage` session totals. Confidence is `rated` when the rate
+card is approved by the human/FinOps owner, `estimated` when the table is
+approved only as a public/approximate rate, and `exact` only when the source
+itself provides per-interaction billed cost.
+
 ## Claude Code Manual Cost Capture
 Claude Code may expose session cost through `/cost` in the interactive UI.
 Alfred cannot assume that value or call it as a normal shell command. Use this
@@ -169,8 +188,10 @@ Run one corporate pilot before implementing automatic policy suggestions:
    session daily consumption after the run.
 5. Normalize interaction/request usage into `usage_attributed` events; keep
    session totals in state for toolbar/forecast display.
-6. Close Operation with ACU, optional tokens, and optional USD cost in metrics.
-7. Compare:
+6. If an approved rate card exists, append `usage_cost_attributed` events from
+   the exact usage events.
+7. Close Operation with ACU, optional tokens, and optional USD cost in metrics.
+8. Compare:
    - actual spend vs baseline;
    - ACU consumption and product breakdown;
    - cache/token savings when a non-Devin source exposes them;

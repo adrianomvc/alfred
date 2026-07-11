@@ -13,7 +13,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 |---|---|---|
 | `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
 | `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `sync-host-shims` |
-| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `claude-code-usage-hook` |
+| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
 `scripts/python/_common.py` stays at the runtime root (shared by all categories).
@@ -27,6 +27,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 - collect local observability JSONL into a telemetry-style batch
 - generate a Markdown metrics rollup from local observability JSONL
 - normalize host usage/cost exports into append-only observability events
+- apply an approved rate card to exact usage events and append separate interaction cost events
 - validate toolbar fixtures against the renderer output
 - validate registered skills and required skill sections
 - validate the notification e-mail adapter dry-run, allowlist refusal, and audit JSONL
@@ -46,7 +47,8 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `generate-metrics-rollup` - optional local Markdown rollup generator.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
 - `import-ccusage` - optional automatic importer for `ccusage session --json`; updates demand cost state for toolbar display. It does not append session totals to observability JSONL.
-- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`, cost `null` unless a separate interaction-cost source exists). `claude-code-usage-hook` runs the turn mode from a Stop hook (`core/hooks/usage-attribution.md`).
+- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`, cost `null` unless `-RateCardPath` supplies an approved interaction rate card). `claude-code-usage-hook` runs the turn mode from a Stop hook (`core/hooks/usage-attribution.md`).
+- `apply-usage-rate-card` - optional cost attribution helper; reads token-exact `usage_attributed` events plus an approved `usage-rate-card` fixture and appends separate `usage_cost_attributed` events. It never allocates `ccusage` session totals.
 - `validate-toolbar-fixtures` - optional drift check for toolbar examples.
 - `validate-skills-registry` - optional consistency check for `skills/skills.md`.
 - `validate-email-adapter` - optional behavior check for the Python-only notification adapter: dry-run report generation, allowlist refusal, and audit subject prefix.
@@ -95,6 +97,10 @@ python scripts/python/metrics/normalize-usage-cost.py -InputPath examples/connec
 
 ```bash
 python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+```
+
+```bash
+python scripts/python/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
 ```
 
 ```bash

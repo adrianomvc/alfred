@@ -9,6 +9,8 @@ These examples show how connector contracts can be used without making the frame
 - `vcs-git-dry-run-adapter.md` - example adapter shape for VCS in dry-run mode.
 - `usage-export.jsonl` - example host usage export.
 - `usage-attribution-events.jsonl` - example normalized `usage_attributed` event.
+- `usage-attribution-tokens-only.jsonl` - example token-only interaction usage event.
+- `usage-rate-card.json` - example approved rate card fixture for interaction cost.
 
 ## Sandbox simulators (run a demand end-to-end without a host)
 Test doubles that satisfy a connector contract with deterministic, clearly

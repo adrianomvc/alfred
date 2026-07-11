@@ -47,10 +47,13 @@ Metric fields:
 
 Usage may also arrive later as append-only `usage_attributed` events produced by
 a `usage-cost` connector when the source has interaction/request granularity.
-These events should reference the original session, interaction, trace, or
-parent event when the host exposes those identifiers. Session totals such as
-`ccusage session --json` belong in `001-state.md` for toolbar display; they are
-not interaction events and must not be appended to the observability JSONL log.
+Interaction cost may be appended later as separate `usage_cost_attributed`
+events when exact usage is combined with an approved `usage-rate-card`
+connector. These events should reference the original session, interaction,
+trace, or parent event when the host exposes those identifiers. Session totals
+such as `ccusage session --json` belong in `001-state.md` for toolbar display;
+they are not interaction events and must not be appended to the observability
+JSONL log or allocated into interaction cost.
 
 Detail fields:
 - `input`
@@ -98,9 +101,11 @@ Do not batch observability in memory. Alfred appends events as soon as they happ
 If a later schema adds fields, do not rewrite old JSONL lines. Append a new event that records the schema/version change or backfill summary.
 
 If interaction/request token usage arrives after the original interaction,
-append a `usage_attributed` event instead of editing the original line. If only a
-session total cost arrives, refresh the state fields used by the toolbar instead
-of appending a JSONL event.
+append a `usage_attributed` event instead of editing the original line. If
+interaction cost is computed later from an approved rate card, append a
+`usage_cost_attributed` event that references the usage event. If only a session
+total cost arrives, refresh the state fields used by the toolbar instead of
+appending a JSONL event.
 
 ## Event hygiene (enables attribution)
 Per-event `tokens_input`, `tokens_output`, and `cost_usd` stay `null` on hosts
@@ -119,7 +124,9 @@ possible only if the event metadata is real:
 - **Refresh session totals at checkpoints.** Run the session-total source
   (`import-ccusage.py`, Devin session/consumption summary) at each checkpoint so
   the toolbar stays current. Do not append those session totals to JSONL. Append
-  JSONL only from interaction/request-granular sources.
+  JSONL only from interaction/request-granular sources. Append interaction cost
+  only from a source that already has interaction cost or from exact usage plus
+  an approved rate card.
 
 ## Rollup
 Roll demand -> initiative -> org. Insights suggest policy changes; humans ratify them in commits.

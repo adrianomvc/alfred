@@ -10,12 +10,16 @@ All notable Alfred framework changes should be recorded here.
   transcript (Claude Code) into per-window or per-turn `usage_attributed` events.
   Tokens are exact — de-duplicated by `requestId`, since one request spans
   several transcript lines that repeat the same usage. Cost stays `null` unless
-  `--allocate-cost` allocates the session total across buckets (`allocated`).
-  Turn mode is idempotent (stable `usage-turn-<requestId>` ids, skips
+  `--rate-card-path` supplies an approved interaction rate card. Turn mode is
+  idempotent (stable `usage-turn-<requestId>` ids, skips
   already-attributed requests). `claude-code-usage-hook.py` plus
   `core/hooks/usage-attribution.md` run turn mode from a Claude Code Stop hook,
   out-of-band: hooks receive `transcript_path`, not usage, so the host that owns
   the usage object stamps it instead of the in-band agent.
+- `scripts/python/metrics/apply-usage-rate-card.py` and the
+  `usage-rate-card` connector append `usage_cost_attributed` events from exact
+  usage plus an approved rate card. This keeps interaction cost separate from
+  `ccusage` session totals.
 - `validate-observability-hygiene` validator: example event logs must use real,
   distinct ISO-8601 timestamps (no placeholders, not all-identical), guarding the
   Layer 0 hygiene contract that later attribution depends on.
@@ -26,6 +30,9 @@ All notable Alfred framework changes should be recorded here.
   and no longer appends session totals to observability JSONL as
   `usage_attributed`. Interaction JSONL usage now requires an
   interaction/request-granular source such as a host transcript.
+- `--allocate-cost` / `--session-cost-usd` are no longer accepted for transcript
+  interaction attribution, preventing proportional allocation of session totals
+  into JSONL interactions.
 - Claude Code usage attribution is now wired into the runtime path:
   `render-toolbar` can register the active demand (`-RegisterActive`), the Stop
   hook falls back to `~/.alfred/runtime/active-demand.json` when no

@@ -31,6 +31,7 @@ Concrete host adapters must also follow `connectors/adapter-template.md` and `do
 | notification | `send(destination, subject, attachments)` |
 | telemetry | `send_events(batch)` |
 | usage-cost | `read_usage(window, filters)`, `map_usage(record)`, `append_usage_event(event)` |
+| usage-rate-card | `read_rate_card(path)`, `price_usage(usage_event, rate_card)`, `append_cost_event(event)` |
 | codebase-memory | `find_symbol(name)`, `find_references(symbol)`, `impact_analysis(files_or_symbols)`, `related_tests(symbol_or_file)` |
 
 ## Adapter states

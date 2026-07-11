@@ -15,9 +15,9 @@ layers, each more faithful and less in-band:
 
 Tokens are exact (de-duplicated by `requestId` — a request spans several
 transcript lines that repeat the same usage). Cost is not in the transcript: it
-stays `null` unless a separate interaction-level cost source is approved. A
-ccusage or `/cost` session total belongs in `001-state.md` for toolbar display,
-not in the interaction JSONL log.
+stays `null` unless a separate interaction-level cost source or approved
+`usage-rate-card` is applied. A ccusage or `/cost` session total belongs in
+`001-state.md` for toolbar display, not in the interaction JSONL log.
 
 ## Supported host
 Claude Code. Other hosts without a durable transcript use the ccusage import or a
@@ -76,5 +76,7 @@ final turn is captured on the next Stop or at close. If the hook cannot resolve 
 target, nothing is written; run
 `scripts/python/metrics/attribute-usage-transcript.py` manually at close, and
 keep the ccusage session import (`connectors/usage-cost.md`) as the session-total
-toolbar backstop. Record the limitation only when it affects validation,
-evidence, or a human decision.
+toolbar backstop. Apply `scripts/python/metrics/apply-usage-rate-card.py` only
+when an approved rate card prices exact interaction usage; it appends
+`usage_cost_attributed` events instead of editing the token event. Record the
+limitation only when it affects validation, evidence, or a human decision.

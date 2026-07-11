@@ -1,0 +1,22 @@
+{
+  "schema_version": "alfred.usage-rate-card.v1",
+  "currency": "USD",
+  "source": "example-approved-rate-card",
+  "approved_by": "Alfred fixture",
+  "effective_from": "2026-01-01",
+  "confidence": "rated",
+  "models": {
+    "gpt-example": {
+      "input_per_1m": 10.0,
+      "output_per_1m": 30.0,
+      "cache_creation_per_1m": 12.5,
+      "cache_read_per_1m": 1.0
+    },
+    "claude-opus-4-8": {
+      "input_per_1m": 15.0,
+      "output_per_1m": 75.0,
+      "cache_creation_per_1m": 18.75,
+      "cache_read_per_1m": 1.5
+    }
+  }
+}

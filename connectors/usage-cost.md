@@ -33,6 +33,9 @@ observability event and must not be appended to the demand JSONL log as
 - `read_usage(window, filters)` reads usage records from the host or an exported file.
 - `map_usage(record)` maps one host usage record to Alfred observability fields.
 - `append_usage_event(event)` appends a `usage_attributed` event to the demand JSONL log.
+- `append_cost_event(event)` appends a separate `usage_cost_attributed` event
+  only when an interaction/request source already has cost or exact usage is
+  priced through `connectors/usage-rate-card.md`.
 
 ## input fields
 - `ts`
@@ -74,8 +77,10 @@ observability event and must not be appended to the demand JSONL log as
   valid for toolbar/state session display, not for interaction JSONL events.
 - `host_transcript`: exact per-request token usage parsed from a host transcript
   (for example the Claude Code session JSONL), attributed to Alfred event windows
-  or turns. Tokens are exact; cost is `null` unless allocated from a session
-  total. See the layered attribution below.
+  or turns. Tokens are exact; cost is `null` unless an approved interaction cost
+  source or rate card is applied. See the layered attribution below.
+- `usage_rate_card`: approved per-model/per-unit table applied to exact
+  interaction usage; confidence `rated` or `estimated` depending on approval.
 - `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
   recorded by the human or by a supported host export. It is valid only as a
   session/window total, with source and timestamp.
@@ -111,14 +116,17 @@ When the host keeps a durable transcript with per-request usage (Claude Code),
 granularity from the `host_transcript` source. Usage is de-duplicated by
 `requestId` (a request spans several transcript lines that repeat the same
 usage), so tokens are exact. Cost is not in the transcript: it stays `null`
-unless an approved interaction-level cost source is provided. Do not allocate a
-ccusage session total into interaction events by default.
+unless an approved interaction-level cost source or `usage-rate-card` is
+provided. Do not allocate a ccusage session total into interaction events.
 
 - `--granularity window`: sum requests into windows bounded by consecutive Alfred
   event timestamps (needs real, distinct event `ts`). One-shot, run at close.
 - `--granularity turn`: one event per request (`usage-turn-<requestId>`), tagged
   with the enclosing event. Idempotent — re-runs skip already-attributed
   requests, so it is safe to append every checkpoint.
+- `--rate-card-path`: optional approved `usage-rate-card` JSON. When supplied,
+  transcript attribution can compute interaction cost from exact tokens. Without
+  it, cost stays `null`.
 
 The Claude Code Stop hook (`core/hooks/usage-attribution.md`) runs the turn mode
 automatically and out-of-band, since the host — not the in-band agent — owns the
@@ -139,8 +147,9 @@ skipped, missing identifiers, confidence, output JSONL path.
 Use explicit confidence labels:
 - `exact`: source provides exact tokens, ACUs, credits, or cost for the
   correlated session.
-- `estimated`: source provides tokens/ACUs and Alfred applies an approved rate
-  table.
+- `rated`: exact interaction usage priced by an approved rate card.
+- `estimated`: source provides tokens/ACUs and Alfred applies an approved but
+  approximate/public rate table.
 - `allocated`: source provides aggregate usage/cost and an approved allocation
   rule.
 - `unavailable`: source did not provide the field.
