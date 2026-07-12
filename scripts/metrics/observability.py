@@ -11,36 +11,15 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Canonical artifact classification lives in the shared domain service; this
+# module re-exports it for the metrics commands (single source of truth).
+from shared.observability.domain.services.artifact_classifier import classify_artifact  # noqa: F401
+
 SENSITIVE_PATH_RE = re.compile(
     r"(^|[\\/])(\.env($|[.\-_])|id_rsa|id_dsa|id_ed25519|\.ssh|\.aws|"
     r"credentials?|secrets?|private[-_]?key|token|password)",
     re.IGNORECASE,
 )
-
-FRAMEWORK_PREFIX_TYPES = [
-    ("core/", "framework_core"),
-    ("rules/common/", "framework_policy"),
-    ("rules/", "framework_rule"),
-    ("skills/", "framework_skill"),
-    ("templates/", "framework_template"),
-    ("connectors/", "framework_connector"),
-    ("hosts/", "framework_host_adapter"),
-    ("knowledge/", "framework_knowledge"),
-]
-
-DEMAND_NAME_TYPES = [
-    ("001-state.md", "state"),
-    ("002-problem.md", "problem"),
-    ("003-requirements.md", "requirements"),
-    ("004-risk.md", "risk"),
-    ("006-decisions.md", "decisions"),
-    ("003-spec.md", "spec"),
-    ("012-execution-plan.md", "execution_plan"),
-    ("013-validation-evidence.md", "validation_evidence"),
-    ("007-audit.md", "audit"),
-    ("008-metrics.md", "metrics"),
-    ("009-summary.md", "summary"),
-]
 
 
 def now_iso():
@@ -75,32 +54,6 @@ def safe_path(path):
             "path_hash": stable_hash(text),
         }
     return {"path": text, "path_redacted": False}
-
-
-def classify_artifact(path):
-    if not path:
-        return "unknown"
-    normalized = str(path).replace("\\", "/").lstrip("./")
-    for prefix, artifact_type in FRAMEWORK_PREFIX_TYPES:
-        if normalized.startswith(prefix):
-            return artifact_type
-    name = normalized.rsplit("/", 1)[-1]
-    for suffix, artifact_type in DEMAND_NAME_TYPES:
-        if name == suffix:
-            return artifact_type
-    if normalized.endswith((".py", ".ts", ".tsx", ".js", ".jsx", ".java", ".go", ".rs")):
-        return "source_code"
-    if "/test" in normalized or normalized.endswith(("_test.py", ".test.ts", ".spec.ts")):
-        return "test"
-    if normalized.endswith((".tf", ".yaml", ".yml", ".json", ".toml", ".ini", ".env")):
-        return "configuration"
-    if normalized.endswith((".md", ".rst", ".txt")):
-        return "documentation"
-    if normalized.endswith((".log", ".jsonl")):
-        return "log"
-    if normalized.endswith((".diff", ".patch")):
-        return "diff"
-    return "external_source" if re.match(r"^[a-z]+://", normalized) else "unknown"
 
 
 def path_metadata(path):
