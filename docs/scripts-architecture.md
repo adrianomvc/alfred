@@ -35,6 +35,14 @@ lives at the edges as adapters.
   `generate-metrics-insights`, `normalize-usage-cost`) stay compatible entry
   points and delegate into the layered package as they are touched.
 
+The former grab-bag `scripts/metrics/observability.py` is now a thin
+re-export shim: its helpers live in the shared package — artifact classification
+and sensitive-path redaction and legacy token/cost readers in `domain/services/`
+(`artifact_classifier.py`, `redaction.py`, `legacy_usage.py`), and artifact
+record building plus event deduplication in `infrastructure/`
+(`artifacts.py`, `legacy_events.py`). Command call sites keep importing from
+`metrics.observability`; new code imports from `shared.observability.*`.
+
 ## Whole-Scripts Rule
 New reusable logic must not be added to command scripts directly. Add it under
 `scripts/shared/<subdomain>/` with the same layer boundaries:
