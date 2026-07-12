@@ -29,7 +29,7 @@ Run all structure, JSONL, and behavioral sub-checks at once. Python is the
 canonical gate:
 
 ```bash
-python scripts/python/validators/validate-framework.py
+python scripts/validators/validate-framework.py
 ```
 
 ## Example Validation Tiers
@@ -42,7 +42,7 @@ Run a JSON parse over all observability logs in examples and active pilots.
 
 Python:
 ```bash
-python scripts/python/validators/validate-framework.py
+python scripts/validators/validate-framework.py
 ```
 
 ## Link/Path Checks

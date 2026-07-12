@@ -28,7 +28,7 @@ Unresolved conflict → the human decides.
 
 ## Loading
 The Orchestrator loads only active skills for the current phase, lane, demand type, and app context. Both the framework (global) and a sigla's HUB may carry 1..N skills.
-Each skill is a folder `skills/<name>/SKILL.md`: the `SKILL.md` is the ~1-screen entry; any sibling files (checklists, reference tables, templates) load JIT. Executable helper code stays canonical in `scripts/python/` — skill folders carry content, not helpers.
+Each skill is a folder `skills/<name>/SKILL.md`: the `SKILL.md` is the ~1-screen entry; any sibling files (checklists, reference tables, templates) load JIT. Executable helper code stays canonical in `scripts/` — skill folders carry content, not helpers.
 
 ## External skills
 External skills live in other repos and are referenced by a pointer (path, URL, or sigla), resolved only on activation (JIT). They are not copied into the framework; only the pointer is registered in the HUB `skills.md` for the sigla. A HUB may also hold **local skills authored by the squad** at `<hub>/skills/<name>/SKILL.md` for its own process.

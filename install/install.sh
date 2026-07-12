@@ -266,7 +266,7 @@ JSON
     fi
   fi
 
-  MCP_SERVER="$INSTALL_DIR/scripts/python/adapters/mcp-email-server.py"
+  MCP_SERVER="$INSTALL_DIR/scripts/adapters/mcp-email-server.py"
   PYTHON_BIN="$(command -v python3 || command -v python || true)"
   if command -v claude >/dev/null 2>&1 && [ -n "$PYTHON_BIN" ] && [ -f "$MCP_SERVER" ]; then
     if claude mcp get alfred-email >/dev/null 2>&1; then

@@ -84,9 +84,9 @@ REQUIRED_PATHS = [
     "knowledge/policy-template.md",
     "docs/knowledge-governance.md",
     "docs/automation-fallback.md",
-    "scripts/python/validators/validate-knowledge.py",
-    "scripts/python/validators/validate-links.py",
-    "scripts/python/validators/validate-context-manifest-fixtures.py",
+    "scripts/validators/validate-knowledge.py",
+    "scripts/validators/validate-links.py",
+    "scripts/validators/validate-context-manifest-fixtures.py",
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
@@ -113,19 +113,19 @@ REQUIRED_PATHS = [
     "skills/lang-sql/SKILL.md",
     "skills/lang-terraform/SKILL.md",
     "skills/platform-aws-data/SKILL.md",
-    "scripts/python/workflow/alfred-boot.py",
-    "scripts/python/workflow/context-manifest.py",
-    "scripts/python/workflow/generate-host-shims.py",
-    "scripts/python/workflow/generate-registry.py",
-    "scripts/python/workflow/render-toolbar.py",
-    "scripts/python/workflow/sync-host-shims.py",
-    "scripts/python/metrics/collect-observability.py",
-    "scripts/python/metrics/generate-metrics-rollup.py",
-    "scripts/python/metrics/generate-metrics-insights.py",
-    "scripts/python/metrics/observability.py",
-    "scripts/python/metrics/import-ccusage.py",
-    "scripts/python/metrics/apply-usage-rate-card.py",
-    "scripts/python/metrics/normalize-usage-cost.py",
+    "scripts/workflow/alfred-boot.py",
+    "scripts/workflow/context-manifest.py",
+    "scripts/workflow/generate-host-shims.py",
+    "scripts/workflow/generate-registry.py",
+    "scripts/workflow/render-toolbar.py",
+    "scripts/workflow/sync-host-shims.py",
+    "scripts/metrics/collect-observability.py",
+    "scripts/metrics/generate-metrics-rollup.py",
+    "scripts/metrics/generate-metrics-insights.py",
+    "scripts/metrics/observability.py",
+    "scripts/metrics/import-ccusage.py",
+    "scripts/metrics/apply-usage-rate-card.py",
+    "scripts/metrics/normalize-usage-cost.py",
     "scripts/shared/__init__.py",
     "scripts/shared/observability/domain/models.py",
     "scripts/shared/observability/domain/enums.py",
@@ -135,21 +135,21 @@ REQUIRED_PATHS = [
     "scripts/shared/observability/infrastructure/repositories/json_usage_summary_repository.py",
     "scripts/shared/observability/composition/adapter_bootstrap.py",
     "scripts/shared/observability/presentation/toolbar_presenter.py",
-    "scripts/python/validators/validate-framework.py",
-    "scripts/python/validators/validate-demand.py",
-    "scripts/python/validators/validate-reverse-eng-staleness.py",
-    "scripts/python/validators/validate-sdd-gate.py",
-    "scripts/python/validators/validate-toolbar-fixtures.py",
-    "scripts/python/validators/validate-skills-registry.py",
-    "scripts/python/validators/validate-connectors.py",
-    "scripts/python/validators/validate-email-adapter.py",
-    "scripts/python/validators/validate-tool-discovery-policy.py",
-    "scripts/python/validators/validate-context-compression-policy.py",
-    "scripts/python/validators/validate-token-economy-policy.py",
-    "scripts/python/validators/validate-observability-hygiene.py",
-    "scripts/python/validators/validate-observability-intelligence.py",
-    "scripts/python/validators/validate-scripts-architecture.py",
-    "scripts/python/validators/validate-model-policy.py",
+    "scripts/validators/validate-framework.py",
+    "scripts/validators/validate-demand.py",
+    "scripts/validators/validate-reverse-eng-staleness.py",
+    "scripts/validators/validate-sdd-gate.py",
+    "scripts/validators/validate-toolbar-fixtures.py",
+    "scripts/validators/validate-skills-registry.py",
+    "scripts/validators/validate-connectors.py",
+    "scripts/validators/validate-email-adapter.py",
+    "scripts/validators/validate-tool-discovery-policy.py",
+    "scripts/validators/validate-context-compression-policy.py",
+    "scripts/validators/validate-token-economy-policy.py",
+    "scripts/validators/validate-observability-hygiene.py",
+    "scripts/validators/validate-observability-intelligence.py",
+    "scripts/validators/validate-scripts-architecture.py",
+    "scripts/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/usage-rate-card.md",
     "connectors/adapter-template.md",
@@ -253,7 +253,7 @@ def assert_gender_neutral_persona_policy(root):
 
 def assert_host_shim_sync_policy(root):
     checks = {
-        "scripts/python/workflow/sync-host-shims.py": [
+        "scripts/workflow/sync-host-shims.py": [
             "HOST_SOURCES",
             "claude-code",
             "devin-cli",
@@ -295,7 +295,7 @@ def assert_host_shim_sync_policy(root):
     result = subprocess.run(
         [
             sys.executable,
-            str(root / "scripts/python/workflow/sync-host-shims.py"),
+            str(root / "scripts/workflow/sync-host-shims.py"),
             "-Host",
             "claude-code",
             "-AlfredHome",
@@ -325,13 +325,13 @@ def assert_host_shim_sync_policy(root):
 def assert_toolbar_rendering_policy(root):
     checks = {
         "core/boot.md": [
-            "scripts/python/workflow/render-toolbar.py",
+            "scripts/workflow/render-toolbar.py",
             "-RegisterActive",
             "load `presentation/toolbar-quick.md`",
             "do not hand-draw a rich toolbar from memory",
         ],
         "rules/agents/orchestrator.md": [
-            "scripts/python/workflow/render-toolbar.py",
+            "scripts/workflow/render-toolbar.py",
             "load `core/presentation/toolbar-quick.md` first",
             "Do not improvise a rich toolbar",
         ],
@@ -362,7 +362,7 @@ def assert_toolbar_rendering_policy(root):
             "load `core/presentation/toolbar-quick.md`",
             "do not hand-draw the rich block",
         ],
-        "scripts/python/workflow/render-toolbar.py": [
+        "scripts/workflow/render-toolbar.py": [
             "allow_text_fallback",
             "--profile text is the degraded fallback",
             "--allow-text-fallback",
@@ -374,7 +374,7 @@ def assert_toolbar_rendering_policy(root):
             "adapter de uso não configurado",
             "CostForecastService",
         ],
-        "scripts/python/metrics/claude-code-usage-hook.py": [
+        "scripts/metrics/claude-code-usage-hook.py": [
             "active-demand.json",
             "render-toolbar.py -RegisterActive",
         ],
@@ -392,7 +392,7 @@ def assert_toolbar_rendering_policy(root):
     result = subprocess.run(
         [
             sys.executable,
-            str(root / "scripts/python/workflow/render-toolbar.py"),
+            str(root / "scripts/workflow/render-toolbar.py"),
             "-StatePath",
             str(zero_state),
             "-CostUsd",
@@ -506,7 +506,7 @@ def assert_optional_npm_tools_policy(root):
 def assert_ccusage_import_policy(root):
     checks = {
         "connectors/usage-cost.md": [
-            "scripts/python/metrics/import-ccusage.py",
+            "scripts/metrics/import-ccusage.py",
             "ccusage session --json",
             "cost source: ccusage",
             "cost granularity: session",
@@ -548,7 +548,7 @@ def assert_ccusage_import_policy(root):
     result = subprocess.run(
         [
             sys.executable,
-            str(root / "scripts/python/metrics/import-ccusage.py"),
+            str(root / "scripts/metrics/import-ccusage.py"),
             "-InputPath",
             str(root / "examples/connectors/ccusage-session.json"),
             "-Host",
@@ -597,29 +597,29 @@ def assert_usage_rate_card_policy(root):
             "apply-usage-rate-card.py",
             "do not allocate session ACU/USD totals",
         ],
-        "scripts/python/metrics/attribute-usage-transcript.py": [
+        "scripts/metrics/attribute-usage-transcript.py": [
             "--rate-card-path",
             "--allocate-cost/--session-cost-usd are deprecated",
             "ccusage/session totals are not allocated",
         ],
-        "scripts/python/metrics/apply-usage-rate-card.py": [
+        "scripts/metrics/apply-usage-rate-card.py": [
             "usage_cost_attributed",
             "rate_card_hash",
             "no session-total allocation",
         ],
-        "scripts/python/metrics/generate-metrics-rollup.py": [
+        "scripts/metrics/generate-metrics-rollup.py": [
             "USAGE_EVENT",
             "COST_EVENT",
             "tokens_cache_read",
             "cache_reuse_ratio",
         ],
-        "scripts/python/validators/validate-observability-intelligence.py": [
+        "scripts/validators/validate-observability-intelligence.py": [
             "cursor",
             "AI_OBS_RAW_LOG",
             "usage_cost_attributed",
             "Human decision: pending",
         ],
-        "scripts/python/validators/validate-scripts-architecture.py": [
+        "scripts/validators/validate-scripts-architecture.py": [
             "Forbidden import",
             "Shared package must not import",
             "SyntheticCreditAdapter",
@@ -634,7 +634,7 @@ def assert_usage_rate_card_policy(root):
     result = subprocess.run(
         [
             sys.executable,
-            str(root / "scripts/python/metrics/apply-usage-rate-card.py"),
+            str(root / "scripts/metrics/apply-usage-rate-card.py"),
             "-InputPath",
             str(root / "examples/connectors/usage-attribution-tokens-only.jsonl"),
             "-RateCardPath",
@@ -699,32 +699,32 @@ def main():
     assert_ccusage_import_policy(root)
     assert_usage_rate_card_policy(root)
 
-    run_sub(root, "scripts/python/validators/validate-toolbar-fixtures.py", "-Root", str(root))
-    run_sub(root, "scripts/python/workflow/generate-registry.py", "-Root", str(root), "--check")
-    run_sub(root, "scripts/python/workflow/generate-host-shims.py", "-Root", str(root), "--check")
-    run_sub(root, "scripts/python/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-skills-registry.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-connectors.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-email-adapter.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-tool-discovery-policy.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-context-compression-policy.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-observability-hygiene.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-observability-intelligence.py")
-    run_sub(root, "scripts/python/validators/validate-scripts-architecture.py")
-    run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-demand.py",
+    run_sub(root, "scripts/validators/validate-toolbar-fixtures.py", "-Root", str(root))
+    run_sub(root, "scripts/workflow/generate-registry.py", "-Root", str(root), "--check")
+    run_sub(root, "scripts/workflow/generate-host-shims.py", "-Root", str(root), "--check")
+    run_sub(root, "scripts/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-skills-registry.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-connectors.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-email-adapter.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-tool-discovery-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-context-compression-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-token-economy-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-observability-hygiene.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-observability-intelligence.py")
+    run_sub(root, "scripts/validators/validate-scripts-architecture.py")
+    run_sub(root, "scripts/validators/validate-model-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-knowledge.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-links.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-demand.py",
             "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND),
             "-AppDemandPath", str(root / STRICT_EXAMPLE_APP_DEMAND),
             "-AppCurrentCommit", STRICT_EXAMPLE_APP_COMMIT,
             "--strict")
-    run_sub(root, "scripts/python/workflow/alfred-boot.py", "-Root", str(root))
-    run_sub(root, "scripts/python/validators/validate-reverse-eng-staleness.py",
+    run_sub(root, "scripts/workflow/alfred-boot.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-reverse-eng-staleness.py",
             "-ReverseEngPath", str(root / "examples/staleness-fixtures/reverse-eng-fresh.md"),
             "-CurrentCommit", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-    run_sub(root, "scripts/python/validators/validate-sdd-gate.py", "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND))
+    run_sub(root, "scripts/validators/validate-sdd-gate.py", "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND))
 
     print("Framework validation completed.")
 

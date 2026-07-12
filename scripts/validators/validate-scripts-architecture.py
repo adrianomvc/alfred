@@ -6,11 +6,38 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
-PYTHON_ROOT = Path(__file__).resolve().parents[1]
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / "shared"
 OBS = PACKAGE / "observability"
 ENTRYPOINT_DIRS = ("workflow", "metrics", "validators", "adapters")
+
+# Commands migrated to thin drivers: host-format parsing and cost math must live
+# in shared.*, not be reintroduced inline. (Wave 1 ingestion migration.)
+MIGRATED_COMMANDS = (
+    "attribute-usage-transcript.py",
+    "claude-code-usage-hook.py",
+    "import-ccusage.py",
+    "apply-usage-rate-card.py",
+)
+# Host-parsing/pricing functions that moved into shared adapters/domain; a
+# command redefining them locally is a regression.
+FORBIDDEN_COMMAND_DEFS = (
+    "load_transcript_requests",
+    "raw_events_from_transcript",
+    "read_new_lines",
+    "session_rows",
+    "select_row",
+    "operation_for_tool",
+    "extract_tool_paths",
+)
+# Commands that attribute cost must delegate pricing to the domain service.
+PRICING_COMMANDS = ("attribute-usage-transcript.py", "apply-usage-rate-card.py")
+# Adapters that must carry real host parsing now (not delegate to the generic
+# passthrough). Others (codex/*, devin/*) remain acknowledged Wave 2 stubs.
+REAL_ADAPTER_MODULES = (
+    OBS / "infrastructure" / "adapters" / "claude" / "transcript.py",
+    OBS / "infrastructure" / "adapters" / "ccusage" / "session.py",
+)
 
 
 def imports(path):
@@ -22,6 +49,11 @@ def imports(path):
         elif isinstance(node, ast.ImportFrom):
             output.append(node.module or "")
     return output
+
+
+def function_defs(path):
+    tree = ast.parse(path.read_text(encoding="utf-8-sig"))
+    return {node.name for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))}
 
 
 def fail(message):
@@ -48,13 +80,64 @@ def assert_architecture():
     assert_no_imports(OBS / "application", ["shared.observability.infrastructure", "subprocess", "os"])
     assert_no_imports(OBS / "presentation", ["shared.observability.infrastructure", "subprocess", "os"])
     for dirname in ENTRYPOINT_DIRS:
-        if not (PYTHON_ROOT / dirname).exists():
+        if not (ROOT / dirname).exists():
             fail(f"Missing scripts entrypoint directory: {dirname}")
-    toolbar = PYTHON_ROOT / "workflow" / "render-toolbar.py"
+    toolbar = ROOT / "workflow" / "render-toolbar.py"
     toolbar_imports = imports(toolbar)
     for forbidden in ("ccusage", "attribute-usage-transcript", "claude-code-usage-hook"):
         if any(forbidden in item for item in toolbar_imports):
             fail(f"Toolbar imports forbidden runtime source: {forbidden}")
+
+
+def assert_commands_delegate():
+    """Migrated commands are thin drivers: they import shared.* and never
+    reintroduce host-parsing or pricing logic inline."""
+    metrics = ROOT / "metrics"
+    for name in MIGRATED_COMMANDS:
+        path = metrics / name
+        if not path.exists():
+            fail(f"Missing migrated command: {name}")
+        found = imports(path)
+        if not any(item.startswith("shared.observability") for item in found):
+            fail(f"Migrated command must delegate into shared.observability: {name}")
+        local_defs = function_defs(path)
+        clashes = local_defs.intersection(FORBIDDEN_COMMAND_DEFS)
+        if clashes:
+            fail(f"Command reintroduces shared host/parsing logic locally ({name}): {', '.join(sorted(clashes))}")
+    for name in PRICING_COMMANDS:
+        found = imports(metrics / name)
+        if not any("rate_card" in item for item in found):
+            fail(f"Cost-attributing command must price via shared rate_card service: {name}")
+
+
+def assert_real_adapters_not_stub():
+    """Host adapters expected to parse must not merely delegate to the generic
+    passthrough."""
+    for module in REAL_ADAPTER_MODULES:
+        if not module.exists():
+            fail(f"Missing real adapter module: {module.relative_to(ROOT)}")
+        if any("GenericJsonlAdapter" in item for item in imports(module)):
+            fail(f"Adapter must implement real parsing, not delegate to GenericJsonlAdapter: {module.relative_to(ROOT)}")
+        if "GenericJsonlAdapter" in module.read_text(encoding="utf-8-sig"):
+            fail(f"Adapter must not reference GenericJsonlAdapter: {module.relative_to(ROOT)}")
+
+
+def assert_adapter_roundtrip():
+    """Behavioral anti-stub proof: real adapters parse host format into events."""
+    sys.path.insert(0, str(ROOT))
+    from shared.observability.domain.models import AdapterContext
+    from shared.observability.infrastructure.adapters.ccusage.session import CcusageSessionAdapter
+
+    row, method = CcusageSessionAdapter().select_session(
+        {"sessions": [{"agent": "claude", "period": "p1", "totalCost": 1.0, "inputTokens": 10, "modelsUsed": ["m"]}]},
+        "claude",
+        "",
+    )
+    if row.get("period") != "p1" or method != "latest_agent_session":
+        fail("ccusage adapter must select the session row from host payload.")
+    events = CcusageSessionAdapter().read_session_usage({"sessions": [row]}, AdapterContext(host="claude-code"))
+    if not events or events[0].event_scope != "session" or events[0].cost.value is None:
+        fail("ccusage adapter must yield a session-scoped canonical event with cost.")
 
 
 def assert_substitution():
@@ -129,6 +212,9 @@ def assert_domain_behaviors():
 
 def main():
     assert_architecture()
+    assert_commands_delegate()
+    assert_real_adapters_not_stub()
+    assert_adapter_roundtrip()
     assert_domain_behaviors()
     assert_substitution()
     print("Scripts architecture validation completed.")

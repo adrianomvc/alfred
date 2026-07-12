@@ -24,7 +24,7 @@ def read_jsonl(path):
 
 
 def run_adapter(root, temp_dir, to_addr):
-    adapter = root / "scripts/python/adapters/mcp-email-server.py"
+    adapter = root / "scripts/adapters/mcp-email-server.py"
     demand = root / "examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2"
     outbox = temp_dir / "outbox"
     audit = temp_dir / "audit.jsonl"

@@ -1,8 +1,8 @@
 # Scripts Architecture
 
 Alfred Python helpers use a shared SOLID package under `scripts/shared/`.
-Runtime folders such as `scripts/python/workflow/`, `scripts/python/metrics/`,
-`scripts/python/validators/`, and `scripts/python/adapters/` are command
+Runtime folders such as `scripts/workflow/`, `scripts/metrics/`,
+`scripts/validators/`, and `scripts/adapters/` are command
 entrypoints or compatibility wrappers. Reusable domain, application,
 infrastructure, and presentation code belongs under `scripts/shared/`.
 
@@ -12,17 +12,28 @@ lives at the edges as adapters.
 
 ## Layers
 - `scripts/shared/observability/domain/`: typed models and pure services
-  (`Usage`, `Cost`, artifact classification, cache ratio, forecast).
+  (`Usage`, `Cost`, artifact classification, cache ratio, forecast, and
+  rate-card pricing in `services/rate_card.py` — `price_usage`/`price_usage_usd`,
+  the single source of the cost math).
 - `scripts/shared/observability/application/`: ports and use cases.
   Business rules depend on abstractions, not Claude, Codex, Devin, filesystem,
   or subprocess.
 - `scripts/shared/observability/infrastructure/`: JSONL/summary
-  repositories, clocks, subprocess runner, and thin host/source adapters.
+  repositories, clocks, subprocess runner, the rate-card loader
+  (`rate_cards/json_rate_card_repository.py`), and host/source adapters. The
+  Claude adapters carry real parsing — `adapters/claude/transcript.py`
+  (transcript requests), `adapters/claude/transcript_cursor.py` (the single
+  byte-offset cursor), `adapters/claude/hook.py` (raw telemetry; artifact,
+  redaction, and clock helpers are injected so shared never imports the command
+  package) — and `adapters/ccusage/session.py` (session-row selection).
 - `scripts/shared/observability/presentation/`: view models and
   renderers such as the toolbar presenter.
-- Legacy scripts under `scripts/python/metrics/` and `scripts/python/workflow/`
-  remain compatible entry points and should delegate into the layered package
-  as they are touched.
+- The ingestion commands under `scripts/metrics/`
+  (`attribute-usage-transcript`, `claude-code-usage-hook`, `import-ccusage`,
+  `apply-usage-rate-card`) are thin drivers: argparse, I/O, and delegation into
+  `shared.*`. Remaining commands (`generate-metrics-rollup`,
+  `generate-metrics-insights`, `normalize-usage-cost`) stay compatible entry
+  points and delegate into the layered package as they are touched.
 
 ## Whole-Scripts Rule
 New reusable logic must not be added to command scripts directly. Add it under

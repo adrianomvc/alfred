@@ -2,14 +2,18 @@
 """Append interaction cost events from exact usage plus an approved rate card."""
 
 import argparse
-import hashlib
 import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from metrics.observability import canonical_artifact  # noqa: E402
+from shared.observability.domain.services.rate_card import ModelRate, price_usage_usd  # noqa: E402
+from shared.observability.infrastructure.rate_cards.json_rate_card_repository import (  # noqa: E402
+    JsonRateCardRepository,
+    RateCardError,
+)
 
 
 def now_iso():
@@ -17,16 +21,24 @@ def now_iso():
 
 
 def load_rate_card(path):
-    path = Path(path).resolve()
-    payload = json.loads(path.read_text(encoding="utf-8-sig"))
-    if payload.get("schema_version") != "alfred.usage-rate-card.v1":
-        raise SystemExit("Unsupported rate card schema_version.")
-    if not payload.get("models"):
-        raise SystemExit("Rate card has no models.")
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    payload["_path"] = str(path)
-    payload["_hash"] = digest
-    return payload
+    """Load the approved rate card, exposing the legacy dict shape the cost
+    event assembly reads (`_hash`, `_path`, metadata). Pricing math lives in the
+    shared domain service."""
+    try:
+        repo = JsonRateCardRepository(path)
+    except RateCardError as error:
+        raise SystemExit(str(error))
+    meta = repo.metadata()
+    return {
+        "_repo": repo,
+        "_hash": repo.hash,
+        "_path": repo.path,
+        "source": meta["source"],
+        "currency": meta["currency"],
+        "confidence": meta["confidence"],
+        "effective_from": meta["effective_from"],
+        "approved_by": meta["approved_by"],
+    }
 
 
 def event_tokens(event):
@@ -41,18 +53,12 @@ def event_tokens(event):
 
 def rate_for(event, rate_card):
     model = event.get("model") or (event.get("output") or {}).get("model")
-    rates = rate_card.get("models", {}).get(model)
+    rates = rate_card["_repo"].raw_rates_for(model)
     return model, rates
 
 
 def calculate_cost(tokens, rates):
-    total = (
-        tokens["tokens_input"] * float(rates.get("input_per_1m") or 0)
-        + tokens["tokens_output"] * float(rates.get("output_per_1m") or 0)
-        + tokens["tokens_cache_creation"] * float(rates.get("cache_creation_per_1m") or 0)
-        + tokens["tokens_cache_read"] * float(rates.get("cache_read_per_1m") or 0)
-    )
-    return round(total / 1_000_000, 8)
+    return price_usage_usd(tokens, ModelRate.from_mapping(rates))
 
 
 def iter_jsonl(path):
@@ -138,7 +144,7 @@ def make_cost_event(usage_event, tokens, cost, model, rates, rate_card, sequence
             "rates_per_1m": rates,
         },
         "model": model,
-        "tool": "scripts/python/metrics/apply-usage-rate-card.py",
+        "tool": "scripts/metrics/apply-usage-rate-card.py",
         "parent_event_id": parent,
         "artifacts": [],
         "files_changed": [],

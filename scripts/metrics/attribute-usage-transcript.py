@@ -16,237 +16,58 @@ In policy terms, ccusage/session totals are not allocated across interactions.
 """
 
 import argparse
-import hashlib
 import json
 import os
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _common import read_state_fields, value_or  # noqa: E402
 from metrics.observability import canonical_artifact, now_iso, usage_tokens  # noqa: E402
-
-
-def parse_ts(raw):
-    if not raw:
-        return None
-    text = str(raw).strip()
-    if text.endswith("Z"):
-        text = text[:-1] + "+00:00"
-    try:
-        parsed = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
-
-
-def iso(dt):
-    if not isinstance(dt, datetime):
-        return None
-    return dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+from shared.observability.domain.services.rate_card import ModelRate, price_usage_usd  # noqa: E402
+from shared.observability.infrastructure.adapters.claude.transcript import (  # noqa: E402
+    ClaudeTranscriptAdapter,
+    iso,
+    parse_ts,
+)
+from shared.observability.infrastructure.adapters.claude.transcript_cursor import TranscriptCursor  # noqa: E402
+from shared.observability.infrastructure.rate_cards.json_rate_card_repository import (  # noqa: E402
+    JsonRateCardRepository,
+    RateCardError,
+)
 
 
 def load_rate_card(path):
+    """Load the approved rate card as the legacy dict shape the event assembly
+    reads. Empty path means no rate card (cost stays null). Pricing math lives in
+    the shared domain service."""
     if not path:
         return None
-    rate_card_path = Path(path).resolve()
-    payload = json.loads(rate_card_path.read_text(encoding="utf-8-sig"))
-    if payload.get("schema_version") != "alfred.usage-rate-card.v1":
-        raise SystemExit("Unsupported rate card schema_version.")
-    if not payload.get("models"):
-        raise SystemExit("Rate card has no models.")
-    payload["_path"] = str(rate_card_path)
-    payload["_hash"] = hashlib.sha256(rate_card_path.read_bytes()).hexdigest()
-    return payload
+    try:
+        repo = JsonRateCardRepository(path)
+    except RateCardError as error:
+        raise SystemExit(str(error))
+    meta = repo.metadata()
+    return {
+        "_repo": repo,
+        "_hash": repo.hash,
+        "source": meta["source"],
+        "currency": meta["currency"],
+        "confidence": meta["confidence"],
+        "effective_from": meta["effective_from"],
+        "approved_by": meta["approved_by"],
+    }
 
 
 def rates_for(model, rate_card):
     if not rate_card:
         return None
-    return (rate_card.get("models") or {}).get(model)
+    return rate_card["_repo"].raw_rates_for(model)
 
 
 def calculate_cost(tokens, rates):
-    total = (
-        tokens["tokens_input"] * float(rates.get("input_per_1m") or 0)
-        + tokens["tokens_output"] * float(rates.get("output_per_1m") or 0)
-        + tokens["tokens_cache_creation"] * float(rates.get("cache_creation_per_1m") or 0)
-        + tokens["tokens_cache_read"] * float(rates.get("cache_read_per_1m") or 0)
-    )
-    return round(total / 1_000_000, 8)
-
-
-def read_cursor(cursor_path, transcript_path):
-    if not cursor_path or not Path(cursor_path).exists():
-        return 0
-    try:
-        payload = json.loads(Path(cursor_path).read_text(encoding="utf-8-sig"))
-    except (json.JSONDecodeError, OSError):
-        return 0
-    if payload.get("transcript_path") != str(Path(transcript_path).resolve()):
-        return 0
-    try:
-        offset = int(payload.get("last_byte_offset") or 0)
-    except (TypeError, ValueError):
-        return 0
-    size = Path(transcript_path).stat().st_size
-    if offset < 0 or offset > size:
-        return 0
-    return offset
-
-
-def write_cursor(cursor_path, transcript_path, offset, last_request_id=None):
-    if not cursor_path:
-        return
-    target = Path(cursor_path)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "transcript_path": str(Path(transcript_path).resolve()),
-        "last_byte_offset": offset,
-        "last_request_id": last_request_id,
-        "updated_at": now_iso(),
-    }
-    tmp = target.with_suffix(target.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8")
-    tmp.replace(target)
-
-
-def read_transcript_lines(path, cursor_path=None):
-    full = Path(path).resolve()
-    offset = read_cursor(cursor_path, full) if cursor_path else 0
-    with full.open("rb") as handle:
-        handle.seek(offset)
-        data = handle.read()
-        end_offset = handle.tell()
-    text = data.decode("utf-8-sig", errors="replace")
-    lines = [line for line in text.splitlines() if line.strip()]
-    return lines, offset, end_offset
-
-
-def iter_records(lines):
-    for raw in lines:
-        try:
-            yield json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-
-
-def content_tool_uses(message):
-    content = message.get("content") if isinstance(message, dict) else None
-    if not isinstance(content, list):
-        return []
-    return [item for item in content if isinstance(item, dict) and item.get("type") == "tool_use"]
-
-
-def request_tokens(record):
-    message = record.get("message") or {}
-    usage = message.get("usage") or {}
-    return {
-        "tokens_input": usage.get("input_tokens") or 0,
-        "tokens_output": usage.get("output_tokens") or 0,
-        "tokens_cache_creation": usage.get("cache_creation_input_tokens") or 0,
-        "tokens_cache_read": usage.get("cache_read_input_tokens") or 0,
-    }
-
-
-def load_transcript_requests(path, cursor_path=None):
-    """Return request usage and raw tool/artifact observations from transcript."""
-    lines, start_offset, end_offset = read_transcript_lines(path, cursor_path)
-    requests = {}
-    tools = []
-    current_interaction = None
-    current_interaction_sequence = 0
-    request_sequence_by_interaction = defaultdict(int)
-
-    for record in iter_records(lines):
-        ts = parse_ts(record.get("timestamp"))
-        record_type = record.get("type")
-        session_id = record.get("sessionId") or record.get("session_id")
-
-        if record_type == "user":
-            prompt_id = record.get("promptId")
-            user_uuid = record.get("uuid")
-            if prompt_id:
-                interaction_id = prompt_id
-                confidence = "exact"
-                method = "prompt_id"
-            elif user_uuid:
-                interaction_id = f"derived-user-{user_uuid}"
-                confidence = "derived"
-                method = "transcript_user_boundary"
-            else:
-                interaction_id = None
-                confidence = "unavailable"
-                method = "request_only"
-            current_interaction_sequence += 1
-            current_interaction = {
-                "interaction_id": interaction_id,
-                "interaction_sequence": current_interaction_sequence,
-                "interaction_confidence": confidence,
-                "correlation_method": method,
-                "ts": ts,
-                "session_id": session_id,
-            }
-            continue
-
-        if record_type != "assistant":
-            continue
-
-        message = record.get("message") or {}
-        request_id = record.get("requestId") or record.get("uuid")
-        if not request_id:
-            continue
-        interaction = current_interaction or {
-            "interaction_id": None,
-            "interaction_sequence": None,
-            "interaction_confidence": "unavailable",
-            "correlation_method": "request_only",
-            "ts": None,
-            "session_id": session_id,
-        }
-        request_sequence_by_interaction[interaction["interaction_id"]] += 1
-        payload = {
-            "request_id": request_id,
-            "uuid": record.get("uuid"),
-            "ts": ts,
-            "session_id": session_id or interaction.get("session_id"),
-            "model": message.get("model"),
-            "interaction_id": interaction.get("interaction_id"),
-            "interaction_sequence": interaction.get("interaction_sequence"),
-            "request_sequence": request_sequence_by_interaction[interaction["interaction_id"]],
-            "interaction_confidence": interaction.get("interaction_confidence"),
-            "correlation_method": interaction.get("correlation_method"),
-            **request_tokens(record),
-        }
-        existing = requests.get(request_id)
-        if existing is None:
-            requests[request_id] = payload
-        else:
-            if ts and (existing["ts"] is None or ts < existing["ts"]):
-                existing["ts"] = ts
-            existing.update({k: v for k, v in payload.items() if v is not None})
-            existing.update(request_tokens(record))
-
-        for item in content_tool_uses(message):
-            tools.append(
-                {
-                    "ts": ts,
-                    "session_id": session_id,
-                    "interaction_id": interaction.get("interaction_id"),
-                    "request_id": request_id,
-                    "tool_use_id": item.get("id"),
-                    "tool_name": item.get("name"),
-                    "input": item.get("input") if isinstance(item.get("input"), dict) else {},
-                }
-            )
-
-    ordered = [r for r in requests.values() if r["ts"] is not None]
-    ordered.sort(key=lambda r: r["ts"])
-    return ordered, tools, start_offset, end_offset
+    return price_usage_usd(tokens, ModelRate.from_mapping(rates))
 
 
 def already_attributed_request_ids(path):
@@ -417,7 +238,7 @@ def make_request_event(request, args, state_fields, anchor, rate_card, sequence)
             "token_confidence": "exact",
         },
         "model": request.get("model"),
-        "tool": "scripts/python/metrics/attribute-usage-transcript.py",
+        "tool": "scripts/metrics/attribute-usage-transcript.py",
         "parent_event_id": anchor_ref,
         "artifacts": [],
         "files_changed": [],
@@ -544,7 +365,7 @@ def make_interaction_events(request_events, state_fields):
                 "derivation": {"rules_applied": ["metrics/metrics.md"], "method": "sum effective request-scope usage events by interaction_id"},
                 "output": {"models": sorted(models), "phases": sorted(phases), "lanes": sorted(lanes)},
                 "model": ",".join(sorted(models)) if len(models) == 1 else None,
-                "tool": "scripts/python/metrics/attribute-usage-transcript.py",
+                "tool": "scripts/metrics/attribute-usage-transcript.py",
                 "parent_event_id": None,
                 "artifacts": [],
                 "files_changed": [],
@@ -600,7 +421,7 @@ def main():
     state_fields = read_state_fields(state_path) if state_path else {}
     rate_card = load_rate_card(args.rate_card_path)
     output_path = Path(args.output_path).resolve() if args.output_path else default_output_path(state_path)
-    requests, _tools, _start_offset, end_offset = load_transcript_requests(args.transcript_path, args.cursor_path)
+    requests, _tools, _start_offset, end_offset = ClaudeTranscriptAdapter().load_requests(args.transcript_path, args.cursor_path)
 
     since = parse_ts(args.since) if args.since else None
     if since is not None:
@@ -612,7 +433,7 @@ def main():
 
     if not requests:
         if args.cursor_path and args.cursor_update:
-            write_cursor(args.cursor_path, args.transcript_path, end_offset)
+            TranscriptCursor().write(args.cursor_path, args.transcript_path, end_offset)
         print("No new transcript requests to attribute.")
         return
 
@@ -646,7 +467,7 @@ def main():
             print(line)
 
     if args.cursor_path and args.cursor_update:
-        write_cursor(args.cursor_path, args.transcript_path, end_offset, requests[-1].get("request_id"))
+        TranscriptCursor().write(args.cursor_path, args.transcript_path, end_offset, requests[-1].get("request_id"))
 
 
 if __name__ == "__main__":

@@ -16,9 +16,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _common import read_state_fields, value_or  # noqa: E402
 from metrics.observability import canonical_artifact  # noqa: E402
+from shared.observability.infrastructure.adapters.ccusage.session import (  # noqa: E402
+    CcusageSessionAdapter,
+    NoSessionMatch,
+    last_activity,
+    models,
+)
 
 
 HOST_AGENT = {
@@ -105,53 +111,6 @@ def load_ccusage(args):
     return json.loads(result.stdout)
 
 
-def session_rows(payload):
-    if isinstance(payload, list):
-        return payload
-    if isinstance(payload, dict):
-        for key in ["session", "sessions", "rows", "data"]:
-            value = payload.get(key)
-            if isinstance(value, list):
-                return value
-    return []
-
-
-def last_activity(row):
-    metadata = row.get("metadata") or {}
-    return value_or(metadata.get("lastActivity"), "")
-
-
-def select_row(rows, agent, session_id):
-    candidates = []
-    for row in rows:
-        if agent and row.get("agent") != agent:
-            continue
-        if session_id and row.get("period") != session_id:
-            continue
-        candidates.append(row)
-
-    if not candidates:
-        raise SystemExit("No ccusage session matched the requested filters.")
-
-    if session_id:
-        return candidates[0], "session_id"
-
-    candidates.sort(key=last_activity, reverse=True)
-    return candidates[0], "latest_agent_session"
-
-
-def models(row):
-    used = row.get("modelsUsed")
-    if isinstance(used, list) and used:
-        return ",".join(str(item) for item in used)
-    breakdowns = row.get("modelBreakdowns")
-    if isinstance(breakdowns, list):
-        names = [item.get("modelName") for item in breakdowns if item.get("modelName")]
-        if names:
-            return ",".join(names)
-    return None
-
-
 def make_snapshot(row, args, state_fields, selection_method):
     total_cost = row.get("totalCost")
     event_id = f"usage-ccusage-{row.get('period', 'session')}"
@@ -219,7 +178,7 @@ def make_snapshot(row, args, state_fields, selection_method):
             "cost_confidence": "estimated",
         },
         "model": model,
-        "tool": "scripts/python/metrics/import-ccusage.py",
+        "tool": "scripts/metrics/import-ccusage.py",
         "parent_event_id": None,
         "artifacts": [],
         "files_changed": [],
@@ -281,7 +240,10 @@ def main():
         args.session_id = value_or(state_fields.get("usage session id"), "")
 
     payload = load_ccusage(args)
-    row, selection_method = select_row(session_rows(payload), args.agent, args.session_id)
+    try:
+        row, selection_method = CcusageSessionAdapter().select_session(payload, args.agent, args.session_id)
+    except NoSessionMatch as error:
+        raise SystemExit(str(error))
     snapshot = make_snapshot(row, args, state_fields, selection_method)
     snapshot_line = json.dumps(snapshot, separators=(",", ":"))
 

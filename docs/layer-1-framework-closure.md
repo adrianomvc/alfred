@@ -63,7 +63,7 @@ These items are intentionally not closed inside Layer 1 because they need a real
 
 ## Exit Criteria
 Layer 1 can be considered ready to apply to Layer 2 when:
-- `python scripts/python/validators/validate-framework.py` passes;
+- `python scripts/validators/validate-framework.py` passes;
 - `docs/implementation-status.md` lists only host/credential/policy-dependent gaps;
 - a pilot example passes `validate-demand -Strict` in either runtime;
 - README and roadmap point the next step to HUB/App adoption.

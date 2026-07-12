@@ -18,11 +18,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from metrics.observability import canonical_artifact, file_hash, now_iso, safe_path  # noqa: E402
+from shared.observability.infrastructure.adapters.claude.hook import ClaudeHookAdapter  # noqa: E402
+from shared.observability.infrastructure.adapters.claude.transcript_cursor import TranscriptCursor  # noqa: E402
 
 ENGINE = Path(__file__).resolve().parent / "attribute-usage-transcript.py"
-FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
+FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 
 
 def active_demand():
@@ -49,151 +51,8 @@ def cursor_path(transcript_path, suffix):
     return cursor_dir() / f"{digest}.{suffix}.json"
 
 
-def read_cursor(path, transcript_path):
-    if not path.exists():
-        return 0
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8-sig"))
-        if payload.get("transcript_path") != str(Path(transcript_path).resolve()):
-            return 0
-        offset = int(payload.get("last_byte_offset") or 0)
-    except (json.JSONDecodeError, OSError, TypeError, ValueError):
-        return 0
-    size = Path(transcript_path).stat().st_size
-    return 0 if offset < 0 or offset > size else offset
-
-
-def write_cursor(path, transcript_path, offset, last_request_id=None):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "transcript_path": str(Path(transcript_path).resolve()),
-        "last_byte_offset": offset,
-        "last_request_id": last_request_id,
-        "updated_at": now_iso(),
-    }
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8")
-    tmp.replace(path)
-
-
-def read_new_lines(transcript_path, cursor):
-    offset = read_cursor(cursor, transcript_path)
-    with Path(transcript_path).open("rb") as handle:
-        handle.seek(offset)
-        data = handle.read()
-        end_offset = handle.tell()
-    return data.decode("utf-8-sig", errors="replace").splitlines(), end_offset
-
-
-def extract_tool_paths(tool_name, tool_input):
-    if not isinstance(tool_input, dict):
-        return []
-    candidates = []
-    for key in ("file_path", "path", "notebook_path"):
-        if tool_input.get(key):
-            candidates.append(tool_input[key])
-    if tool_name in ("Bash", "Shell") and tool_input.get("command"):
-        candidates.append("command_output")
-    return candidates
-
-
-def operation_for_tool(tool_name):
-    if tool_name in ("Read", "Glob", "Grep", "LS"):
-        return "read"
-    if tool_name in ("Write",):
-        return "create"
-    if tool_name in ("Edit", "MultiEdit"):
-        return "update"
-    if tool_name in ("Bash", "Shell"):
-        return "execute"
-    return "use"
-
-
-def raw_events_from_transcript(transcript_path, lines, provider):
-    events = []
-    last_request_id = None
-    current_prompt_id = None
-    for raw in lines:
-        if not raw.strip():
-            continue
-        try:
-            record = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        ts = record.get("timestamp") or now_iso()
-        record_type = record.get("type")
-        session_id = record.get("sessionId") or record.get("session_id")
-        if record_type == "user":
-            current_prompt_id = record.get("promptId") or current_prompt_id
-            events.append(
-                {
-                    "schema_version": "ai.agent.raw.v1",
-                    "ts": ts,
-                    "provider": provider,
-                    "raw_event_type": "user_prompt",
-                    "session_id": session_id,
-                    "interaction_id": record.get("promptId"),
-                    "message_uuid": record.get("uuid"),
-                    "cwd": safe_path(record.get("cwd")),
-                    "git_branch": record.get("gitBranch"),
-                    "content_recorded": False,
-                }
-            )
-        elif record_type == "assistant":
-            message = record.get("message") or {}
-            request_id = record.get("requestId") or record.get("uuid")
-            last_request_id = request_id or last_request_id
-            usage = message.get("usage") or {}
-            events.append(
-                {
-                    "schema_version": "ai.agent.raw.v1",
-                    "ts": ts,
-                    "provider": provider,
-                    "raw_event_type": "model_request",
-                    "session_id": session_id,
-                    "interaction_id": current_prompt_id,
-                    "request_id": request_id,
-                    "model": message.get("model"),
-                    "tokens_input": usage.get("input_tokens"),
-                    "tokens_output": usage.get("output_tokens"),
-                    "tokens_cache_creation": usage.get("cache_creation_input_tokens"),
-                    "tokens_cache_read": usage.get("cache_read_input_tokens"),
-                    "content_recorded": False,
-                }
-            )
-            content = message.get("content")
-            if isinstance(content, list):
-                for item in content:
-                    if not isinstance(item, dict) or item.get("type") != "tool_use":
-                        continue
-                    tool_name = item.get("name")
-                    tool_input = item.get("input") if isinstance(item.get("input"), dict) else {}
-                    event = {
-                        "schema_version": "ai.agent.raw.v1",
-                        "ts": ts,
-                        "provider": provider,
-                        "raw_event_type": "tool_use",
-                        "session_id": session_id,
-                        "interaction_id": current_prompt_id,
-                        "request_id": request_id,
-                        "tool_use_id": item.get("id"),
-                        "tool_name": tool_name,
-                        "operation": operation_for_tool(tool_name),
-                        "input_keys": sorted(tool_input.keys()),
-                        "artifacts": [
-                            canonical_artifact(
-                                path,
-                                operation_for_tool(tool_name),
-                                selection_reason="claude_tool_input",
-                                observed_by="claude_hook",
-                                ts=ts,
-                            )
-                            for path in extract_tool_paths(tool_name, tool_input)
-                        ],
-                        "content_recorded": False,
-                    }
-                    events.append(event)
-    return events, last_request_id
+def hook_adapter():
+    return ClaudeHookAdapter(artifact_builder=canonical_artifact, path_sanitizer=safe_path, now=now_iso)
 
 
 def append_jsonl(path, events):
@@ -371,10 +230,10 @@ def main():
 
     if mode in ("raw", "both") and raw_log:
         try:
+            cursor = TranscriptCursor()
             raw_cursor = cursor_path(transcript_path, "raw")
-            lines, end_offset = read_new_lines(transcript_path, raw_cursor)
-            events, last_request_id = raw_events_from_transcript(
-                transcript_path,
+            lines, _start_offset, end_offset = cursor.read_slice(transcript_path, raw_cursor)
+            events, last_request_id = hook_adapter().normalize_records(
                 lines,
                 os.environ.get("AI_OBS_PROVIDER", "claude-code"),
             )
@@ -383,7 +242,7 @@ def main():
                 event["team"] = os.environ.get("AI_OBS_TEAM")
                 event["environment"] = os.environ.get("AI_OBS_ENVIRONMENT")
             append_jsonl(raw_log, events)
-            write_cursor(raw_cursor, transcript_path, end_offset, last_request_id)
+            cursor.write(raw_cursor, transcript_path, end_offset, last_request_id)
         except Exception as error:  # noqa: BLE001 - hook must never block host
             print(f"alfred-usage-hook raw: {error}", file=sys.stderr)
 

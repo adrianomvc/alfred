@@ -208,7 +208,7 @@ new Alfred version, refresh the copied entry so the host does not keep old boot
 instructions:
 
 ```bash
-python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host devin-cli
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host devin-cli
 ```
 
 For Claude Code use `-Host claude-code`; for Codex use `-Host codex`. Missing
@@ -219,7 +219,7 @@ Claude Code can collect request tokens from its transcript without asking the
 agent to estimate usage. Install or refresh the hook explicitly:
 
 ```bash
-python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
 ```
 
 To write only sanitized technical telemetry outside a demand, set

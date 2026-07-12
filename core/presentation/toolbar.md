@@ -7,7 +7,7 @@ Orchestrator from `state`. It is never a separate source of truth.
 is the full spec: layers, profiles, and rules — load it when a case is not
 covered there or when changing the renderer.
 
-`scripts/python/workflow/render-toolbar.py` is an optional
+`scripts/workflow/render-toolbar.py` is an optional
 helper that renders it from a `001-state.md`. Hosts that cannot run scripts
 render it manually from the same fields.
 

@@ -3,7 +3,7 @@
 Scripts are optional helpers. The framework must keep working without them.
 
 Python is the canonical helper runtime for Alfred helpers.
-- `scripts/python/` - canonical Python 3 helpers (D3 portability).
+- `scripts/` - canonical Python 3 helpers (D3 portability).
 
 New helper logic starts in Python. Documentation and examples should call the
 Python helpers only. Installers remain OS-native under `install/`.
@@ -16,7 +16,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 | `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `generate-metrics-insights` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
-`scripts/python/_common.py` stays at the runtime root (shared by all categories).
+`scripts/_common.py` stays at the runtime root (shared by all categories).
 
 ## Allowed helpers
 - validate required sections in markdown artifacts
@@ -40,7 +40,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 Any script output must degrade to a manual markdown checklist when the host cannot run scripts.
 
 ## Available
-Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/` folder contains concrete local adapters.
+Canonical helpers live at `scripts/<category>/<name>.py`. The `adapters/` folder contains concrete local adapters.
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
 - `render-toolbar` - optional but preferred toolbar renderer derived from `001-state.md`; use it whenever available instead of hand-drawing. Profiles: `-Profile rich` (default, Unicode block) · `text` (ASCII fallback, CLI requires `-AllowTextFallback`) · `web` (self-contained SVG). On Claude Code, pass `-RegisterActive` so the Stop hook can target the active demand log. See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
@@ -69,69 +69,69 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 Requires Python 3.
 
 ```bash
-python scripts/python/validators/validate-framework.py
+python scripts/validators/validate-framework.py
 ```
 
 ```bash
-python scripts/python/workflow/render-toolbar.py -StatePath examples/toolbar-states/standard.md -Model GPT-5 -Cost "n/a"
+python scripts/workflow/render-toolbar.py -StatePath examples/toolbar-states/standard.md -Model GPT-5 -Cost "n/a"
 ```
 
 ```bash
-python scripts/python/validators/validate-demand.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2 --strict
+python scripts/validators/validate-demand.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2 --strict
 ```
 
 ```bash
-python scripts/python/workflow/alfred-boot.py -Root .
+python scripts/workflow/alfred-boot.py -Root .
 ```
 
 ```bash
-python scripts/python/metrics/collect-observability.py -Root examples
+python scripts/metrics/collect-observability.py -Root examples
 ```
 
 ```bash
-python scripts/python/metrics/generate-metrics-rollup.py -Root examples
+python scripts/metrics/generate-metrics-rollup.py -Root examples
 ```
 
 ```bash
-python scripts/python/metrics/generate-metrics-insights.py -Root examples
+python scripts/metrics/generate-metrics-insights.py -Root examples
 ```
 
 ```bash
-python scripts/python/metrics/normalize-usage-cost.py -InputPath examples/connectors/usage-export.jsonl
+python scripts/metrics/normalize-usage-cost.py -InputPath examples/connectors/usage-export.jsonl
 ```
 
 ```bash
-python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+python scripts/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
 ```bash
-python scripts/python/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
+python scripts/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
 ```
 
 ```bash
-python scripts/python/workflow/sync-host-shims.py -Host claude-code
+python scripts/workflow/sync-host-shims.py -Host claude-code
 ```
 
 ```bash
-python scripts/python/validators/validate-toolbar-fixtures.py
+python scripts/validators/validate-toolbar-fixtures.py
 ```
 
 ```bash
-python scripts/python/validators/validate-skills-registry.py
+python scripts/validators/validate-skills-registry.py
 ```
 
 ```bash
-python scripts/python/validators/validate-reverse-eng-staleness.py -ReverseEngPath examples/staleness-fixtures/reverse-eng-fresh.md -CurrentCommit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+python scripts/validators/validate-reverse-eng-staleness.py -ReverseEngPath examples/staleness-fixtures/reverse-eng-fresh.md -CurrentCommit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ```
 
 ```bash
-python scripts/python/validators/validate-sdd-gate.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2
+python scripts/validators/validate-sdd-gate.py -HubDemandPath examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2
 ```
 
 ```bash
-python scripts/python/workflow/classify-risk.py -Reversibility 1 -BlastRadius 1 -SensitiveData 0 -CustomerImpact 1 -Cost 1 -Components 1 -Novelty 1 -Ambiguity 1 -Integrations 1 -Effort 1
+python scripts/workflow/classify-risk.py -Reversibility 1 -BlastRadius 1 -SensitiveData 0 -CustomerImpact 1 -Cost 1 -Components 1 -Novelty 1 -Ambiguity 1 -Integrations 1 -Effort 1
 ```
 
 Every other helper follows the same pattern:
-`python scripts/python/<category>/<name>.py`. Flags also accept the
+`python scripts/<category>/<name>.py`. Flags also accept the
 `--kebab-case` form, e.g. `--state-path`.

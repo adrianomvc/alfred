@@ -8,7 +8,7 @@ spec (layers, profiles, rules):
 `core/presentation/toolbar.md` — load it only when a case is not covered here.
 
 ## Rendering procedure
-1. Prefer the helper with the default rich profile: `python scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md` (or `-Profile rich` explicitly). On Claude Code, add `-RegisterActive` so the usage attribution Stop hook can target the same demand log.
+1. Prefer the helper with the default rich profile: `python scripts/workflow/render-toolbar.py -StatePath <demand>/001-state.md` (or `-Profile rich` explicitly). On Claude Code, add `-RegisterActive` so the usage attribution Stop hook can target the same demand log.
 2. If the helper cannot run, use this file as the loaded source and emit the
    documented text fallback from `state`.
 3. Do not pass `-Profile text` in a host that renders Unicode/emoji. Text is a
@@ -60,4 +60,4 @@ Proximo: <next step from state>
 - Show traceability next to cost: `Framework: v<version> (<commit>)` and
   `App: <commit>`. Prefer stamped state fields; otherwise the helper may read
   the current framework clone and app artifacts.
-- Helper (optional but preferred whenever available): `render-toolbar` in `scripts/python/workflow/`.
+- Helper (optional but preferred whenever available): `render-toolbar` in `scripts/workflow/`.

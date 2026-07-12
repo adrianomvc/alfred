@@ -28,7 +28,7 @@ def word_count(value):
 
 
 def load_email_tools(root):
-    script = root / "scripts/python/adapters/mcp-email-server.py"
+    script = root / "scripts/adapters/mcp-email-server.py"
     spec = importlib.util.spec_from_file_location("mcp_email_server", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

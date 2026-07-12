@@ -1,4 +1,4 @@
-# Python helper bytecode (scripts/python/)
+# Python helper bytecode (scripts/)
 __pycache__/
 *.py[cod]
 

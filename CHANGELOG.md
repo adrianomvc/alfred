@@ -6,7 +6,7 @@ All notable Alfred framework changes should be recorded here.
 
 ### Added
 - Layered transcript usage attribution (usage-cost Layers 1-3):
-  `scripts/python/metrics/attribute-usage-transcript.py` maps a durable host
+  `scripts/metrics/attribute-usage-transcript.py` maps a durable host
   transcript (Claude Code) into request-scoped `usage_attributed` events and
   optional `interaction_completed` aggregates. Tokens are exact and
   de-duplicated by `requestId`; human interaction ids use host `promptId` when
@@ -17,7 +17,7 @@ All notable Alfred framework changes should be recorded here.
   `core/hooks/usage-attribution.md` run incrementally from a Claude Code Stop
   hook, can write sanitized raw JSONL via `AI_OBS_RAW_LOG`, and never block the
   host.
-- `scripts/python/metrics/apply-usage-rate-card.py` and the
+- `scripts/metrics/apply-usage-rate-card.py` and the
   `usage-rate-card` connector append `usage_cost_attributed` events from exact
   usage plus an approved rate card. This keeps interaction cost separate from
   `ccusage` session totals.
@@ -80,7 +80,7 @@ All notable Alfred framework changes should be recorded here.
   can refresh copied Claude Code/DEVIN/Codex entry files instead of leaving
   stale host instructions active.
 - `ccusage` session import is now an active automatic usage-cost path for local
-  CLI hosts: `scripts/python/metrics/import-ccusage.py` maps `ccusage session
+  CLI hosts: `scripts/metrics/import-ccusage.py` maps `ccusage session
   --json` into `001-state.md` session cost fields with estimated confidence and
   auditable session-selection metadata.
 - Requirements questions are file-only: `003-requirements.md` is the single answer channel, chat/UI may only point to it, host-native question popups are forbidden for requirements, and FAST material questions still go to the artifact. The framework validator now guards this rule.
@@ -146,7 +146,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
   - `core/squad.md` gains SRE/On-call, Security, and FinOps as checkpoint owners (SAFE/emergency) with recorded fallback.
   - Original untracked conceptual plan removed from `.claude/` after byte-level verification against the committed copy.
 - Examples fixed: app-side `05-operation/008-observability-log.jsonl` added to the 5 example app demands — `validate-demand --app-demand-path` now passes (pre-existing gap).
-- `mcp-email-server` (`scripts/python/`, **Python-only by owner decision**) — the first concrete connector adapter: an MCP stdio server (stdlib only, no dependencies) implementing the `notification` contract. Tools `send_email` (allowlist gating with human-only unblock, `[Alfred-Framework]` subject prefix, per-attempt audit JSONL, dry-run outbox by default, SMTP/STARTTLS in active mode) and `email_status`. Tested end-to-end: MCP handshake, dry-run compose, allowlist refusal audited. Registered per host via MCP (e.g. `claude mcp add alfred-email -- python .../mcp-email-server.py`). Resolves the D44 channel decision (MCP + Python); `active` state awaits real SMTP credentials.
+- `mcp-email-server` (`scripts/`, **Python-only by owner decision**) — the first concrete connector adapter: an MCP stdio server (stdlib only, no dependencies) implementing the `notification` contract. Tools `send_email` (allowlist gating with human-only unblock, `[Alfred-Framework]` subject prefix, per-attempt audit JSONL, dry-run outbox by default, SMTP/STARTTLS in active mode) and `email_status`. Tested end-to-end: MCP handshake, dry-run compose, allowlist refusal audited. Registered per host via MCP (e.g. `claude mcp add alfred-email -- python .../mcp-email-server.py`). Resolves the D44 channel decision (MCP + Python); `active` state awaits real SMTP credentials.
 - `mcp-email-server` gains a **registered destination** (JSON config at `~/.alfred-email.json` or `ALFRED_EMAIL_CONFIG`; env vars override) and a `send_demand_report` tool that reads `001-state.md` and auto-attaches the demand's metrics, audit, summary, and observability JSONL (short body + attachments, per the D44 e-mail pattern). `knowledge/notification.md` documents the registration precedence (HUB knowledge → config file → env).
 - `spec-vs-impl` helper (W8.2, both runtimes) — heuristic coverage check of spec acceptance criteria against `013-validation-evidence.md`; flags gaps, never approves. Its first run caught a real gap in the 2.0.0 rehearsal demand (app-side criteria missing from the HUB evidence), now fixed.
 - `confidence-score` helper (W8.1, both runtimes) — pre-Execution clarity score from recorded signals (unanswered questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit); below the floor the verdict is the escalation rule. The score informs; the human decides.
@@ -159,7 +159,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 
 ### Compatibility notes
 - No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
-- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/python/validate-framework.py`) must add the category segment (e.g. `scripts/python/validators/validate-framework.py`). Flags and behavior are unchanged.
+- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/validate-framework.py`) must add the category segment (e.g. `scripts/validators/validate-framework.py`). Flags and behavior are unchanged.
 - New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
 
 ## 0.4.0 - 2026-06-29
@@ -245,7 +245,7 @@ Presentation, persona, and AI-DLC depth pass, kept within the v0.2 line.
 Portability, distribution, and governance pass over the 0.1.0 framework: a Python helper set, a DEVIN CLI installer with version pinning, per-type playbooks, a richer knowledge subsystem, and closure of the plan's open items.
 
 ### Added
-- Python 3 helper set under `scripts/python/` mirroring every PowerShell helper, so the framework can be validated on machines without PowerShell (D3 portability).
+- Python 3 helper set under `scripts/` mirroring every PowerShell helper, so the framework can be validated on machines without PowerShell (D3 portability).
 - DEVIN CLI installer (`install/`) that clones the framework into `~/.alfred` and installs the `/alfred` skill; supports pinned versions via `-Version`/`ALFRED_VERSION` (D14/D15/D26).
 - Per-type playbook convention (`rules/demand-types/playbooks/`) with a Migration playbook distilled from the real SQ9 migration (D5/3.6).
 - Knowledge subsystem: richer policy template, `docs/knowledge-governance.md`, `docs/automation-fallback.md`, and a `validate-knowledge` helper (both runtimes) wired into framework validation (D42/D3).
@@ -253,7 +253,7 @@ Portability, distribution, and governance pass over the 0.1.0 framework: a Pytho
 - External skill versioning policy (pinned default, opt-in track-latest) in `skills/skills.md` (plan 6.8 closed).
 
 ### Changed
-- Helper scripts are now organized by runtime: `scripts/powershell/*.ps1` and `scripts/python/*.py`. Both runtimes accept the same flags and produce equivalent output.
+- Helper scripts are now organized by runtime: `scripts/powershell/*.ps1` and `scripts/*.py`. Both runtimes accept the same flags and produce equivalent output.
 - Docs and examples now reference the runtime-scoped script paths.
 
 ### Compatibility Notes

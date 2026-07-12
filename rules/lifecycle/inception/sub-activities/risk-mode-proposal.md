@@ -26,7 +26,7 @@ contracts (`../../../lanes/*`), `knowledge` policies that can force a floor.
 1. Pre-fill the **Risk Mode checklist** from intent: scope size, blast radius,
    data sensitivity, reversibility, external dependencies.
 2. Derive a **proposed lane** from the checklist (FAST / Standard / SAFE).
-   Optional helper: `python scripts/python/workflow/classify-risk.py`
+   Optional helper: `python scripts/workflow/classify-risk.py`
    computes the axes, fires the hard overrides, and prints the pt-BR block for
    `004-risk.md`. `core/risk-mode.md` stays the source of truth; without the
    helper, apply the same tables manually (D3).

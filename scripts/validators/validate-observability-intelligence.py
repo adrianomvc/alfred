@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[2]
+ROOT = HERE.parents[1]
 PY = sys.executable
 
 
@@ -95,7 +95,7 @@ def assert_true(condition, message):
 def validate_transcript_attribution(tmp):
     transcript = tmp / "one.jsonl"
     write_jsonl(transcript, [user("2026-07-12T10:00:00Z", "prompt-1"), assistant("2026-07-12T10:00:01Z", "req-1")])
-    result = run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"])
+    result = run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"])
     events = parse_lines(result.stdout)
     assert_true(len(events) == 1, "one request transcript should emit one request usage event")
     event = events[0]
@@ -106,7 +106,7 @@ def validate_transcript_attribution(tmp):
 
     multi = tmp / "multi.jsonl"
     write_jsonl(multi, [user("2026-07-12T10:00:00Z", "prompt-2"), assistant("2026-07-12T10:00:01Z", "req-2"), assistant("2026-07-12T10:00:02Z", "req-3")])
-    result = run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", multi, "-NoAppend", "-EmitInteractions"])
+    result = run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", multi, "-NoAppend", "-EmitInteractions"])
     events = parse_lines(result.stdout)
     assert_true(sum(1 for e in events if e.get("event_type") == "usage_attributed") == 2, "multi request interaction should emit two request events")
     aggregate = [e for e in events if e.get("event_type") == "interaction_completed"][0]
@@ -114,17 +114,17 @@ def validate_transcript_attribution(tmp):
 
     repeated = tmp / "repeated.jsonl"
     write_jsonl(repeated, [user("2026-07-12T10:00:00Z", "prompt-3"), assistant("2026-07-12T10:00:01Z", "req-4", input_tokens=1), assistant("2026-07-12T10:00:02Z", "req-4", input_tokens=9)])
-    events = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", repeated, "-NoAppend"]).stdout)
+    events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", repeated, "-NoAppend"]).stdout)
     assert_true(len(events) == 1 and events[0]["tokens_input"] == 9, "repeated requestId must deduplicate and keep final usage")
 
     two = tmp / "two.jsonl"
     write_jsonl(two, [user("2026-07-12T10:00:00Z", "prompt-a"), assistant("2026-07-12T10:00:01Z", "req-a"), user("2026-07-12T10:01:00Z", "prompt-b"), assistant("2026-07-12T10:01:01Z", "req-b")])
-    events = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", two, "-NoAppend"]).stdout)
+    events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", two, "-NoAppend"]).stdout)
     assert_true({e["interaction_id"] for e in events} == {"prompt-a", "prompt-b"}, "two user prompts must produce two interaction ids")
 
     no_user = tmp / "nouser.jsonl"
     write_jsonl(no_user, [assistant("2026-07-12T10:00:01Z", "req-no-user")])
-    event = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", no_user, "-NoAppend"]).stdout)[0]
+    event = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", no_user, "-NoAppend"]).stdout)[0]
     assert_true(event["interaction_id"] is None and event["interaction_confidence"] == "unavailable", "missing user boundary must not fake interaction id")
 
 
@@ -133,20 +133,20 @@ def validate_cursor_and_hook(tmp):
     write_jsonl(transcript, [user("2026-07-12T10:00:00Z", "prompt-c"), assistant("2026-07-12T10:00:01Z", "req-c1")])
     cursor = tmp / "cursor.json"
     output = tmp / "obs.jsonl"
-    run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-OutputPath", output, "-CursorPath", cursor])
+    run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-OutputPath", output, "-CursorPath", cursor])
     first_count = len(output.read_text(encoding="utf-8").splitlines())
-    run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-OutputPath", output, "-CursorPath", cursor])
+    run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-OutputPath", output, "-CursorPath", cursor])
     assert_true(len(output.read_text(encoding="utf-8").splitlines()) == first_count, "cursor/idempotence must avoid duplicate requests")
 
     cursor.write_text("{bad json", encoding="utf-8")
-    events = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend", "-CursorPath", cursor, "-NoCursorUpdate"]).stdout)
+    events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend", "-CursorPath", cursor, "-NoCursorUpdate"]).stdout)
     assert_true(events, "corrupt cursor must degrade by rereading safely")
 
     cursor.write_text(json.dumps({"transcript_path": str(transcript.resolve()), "last_byte_offset": 999999}), encoding="utf-8")
-    events = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend", "-CursorPath", cursor, "-NoCursorUpdate"]).stdout)
+    events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend", "-CursorPath", cursor, "-NoCursorUpdate"]).stdout)
     assert_true(events, "truncated/rotated transcript must reset cursor safely")
 
-    hook = ROOT / "scripts/python/metrics/claude-code-usage-hook.py"
+    hook = ROOT / "scripts/metrics/claude-code-usage-hook.py"
     run([hook], stdin="{}", expect=0)
 
     raw_log = tmp / "raw.jsonl"
@@ -167,7 +167,7 @@ def validate_cursor_and_hook(tmp):
     assert_true(len(both_alfred.read_text(encoding="utf-8").splitlines()) == before, "hook cursor must be idempotent")
 
     # Manual flush fallback: run the transcript attribution directly without a hook event.
-    flush = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"]).stdout)
+    flush = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"]).stdout)
     assert_true(flush, "manual flush must remain available when SessionEnd is unsupported")
 
 
@@ -184,16 +184,16 @@ def validate_artifacts_cost_rollup_and_insights(tmp):
         ],
     )
     raw = tmp / "tool-raw.jsonl"
-    run([ROOT / "scripts/python/metrics/claude-code-usage-hook.py"], stdin=json.dumps({"transcript_path": str(transcript)}), env={"AI_OBS_RAW_LOG": str(raw), "AI_OBS_MODE": "raw", "AI_OBS_CURSOR_DIR": str(tmp / "tool-cursors")})
+    run([ROOT / "scripts/metrics/claude-code-usage-hook.py"], stdin=json.dumps({"transcript_path": str(transcript)}), env={"AI_OBS_RAW_LOG": str(raw), "AI_OBS_MODE": "raw", "AI_OBS_CURSOR_DIR": str(tmp / "tool-cursors")})
     raw_events = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()]
     assert_true(any((artifact.get("path_redacted") for event in raw_events for artifact in event.get("artifacts", []))), "sensitive paths must be redacted")
     assert_true(any((artifact.get("operation") == "update" for event in raw_events for artifact in event.get("artifacts", []))), "modified artifact operation must be captured")
 
     usage_log = tmp / "usage-observability-log.jsonl"
-    usage_events = parse_lines(run([ROOT / "scripts/python/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"]).stdout)
+    usage_events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", transcript, "-NoAppend"]).stdout)
     write_jsonl(usage_log, usage_events)
     rate_card = ROOT / "examples/connectors/usage-rate-card.json"
-    run([ROOT / "scripts/python/metrics/apply-usage-rate-card.py", "-InputPath", usage_log, "-RateCardPath", rate_card])
+    run([ROOT / "scripts/metrics/apply-usage-rate-card.py", "-InputPath", usage_log, "-RateCardPath", rate_card])
     combined = [json.loads(line) for line in usage_log.read_text(encoding="utf-8").splitlines()]
     assert_true(any(e.get("event_type") == "usage_cost_attributed" for e in combined), "rate card must append cost events")
 
@@ -210,7 +210,7 @@ def validate_artifacts_cost_rollup_and_insights(tmp):
         }),
         encoding="utf-8",
     )
-    missing = run([ROOT / "scripts/python/metrics/apply-usage-rate-card.py", "-InputPath", usage_log, "-RateCardPath", missing_card, "-NoAppend"], expect=1)
+    missing = run([ROOT / "scripts/metrics/apply-usage-rate-card.py", "-InputPath", usage_log, "-RateCardPath", missing_card, "-NoAppend"], expect=1)
     assert_true("Missing rate card models" in missing.stderr or "Missing rate card models" in missing.stdout, "missing model must fail safely")
 
     demand = tmp / "demand"
@@ -240,17 +240,17 @@ def validate_artifacts_cost_rollup_and_insights(tmp):
             *combined,
         ],
     )
-    rollup = run([ROOT / "scripts/python/metrics/generate-metrics-rollup.py", "-Root", demand]).stdout
+    rollup = run([ROOT / "scripts/metrics/generate-metrics-rollup.py", "-Root", demand]).stdout
     assert_true("tokens cache read:" in rollup, "rollup must include cache tokens")
     assert_true("cost events:" in rollup, "rollup must separate cost events")
     assert_true("legacy usage events with inline cost ignored" not in rollup, "new cost events should avoid legacy double count warning")
     assert_true("cache reuse ratio:" in rollup, "rollup must include cache reuse ratio")
     assert_true("`001-state.md`" in rollup, "legacy artifacts_used object must be readable")
 
-    insights = run([ROOT / "scripts/python/metrics/generate-metrics-insights.py", "-Root", demand]).stdout
+    insights = run([ROOT / "scripts/metrics/generate-metrics-insights.py", "-Root", demand]).stdout
     assert_true("Human decision: pending" in insights, "insights must require human decision")
     before = (ROOT / "core/model-policy.md").read_text(encoding="utf-8")
-    run([ROOT / "scripts/python/metrics/generate-metrics-insights.py", "-Root", demand, "-OutputPath", tmp / "insights.md"])
+    run([ROOT / "scripts/metrics/generate-metrics-insights.py", "-Root", demand, "-OutputPath", tmp / "insights.md"])
     after = (ROOT / "core/model-policy.md").read_text(encoding="utf-8")
     assert_true(before == after, "insight generator must not alter policies")
 

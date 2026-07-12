@@ -123,7 +123,7 @@ Requirements:
 - import JSON into Alfred instead of treating the terminal report as evidence.
 
 Active helper:
-- `scripts/python/metrics/import-ccusage.py`;
+- `scripts/metrics/import-ccusage.py`;
 - input: `ccusage session --json` output or a saved JSON file;
 - output: `001-state.md` session cost fields for toolbar display. Optional
   debug snapshots may be written outside the observability log with
@@ -132,7 +132,7 @@ Active helper:
 Claude Code automatic path:
 
 ```bash
-python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+python scripts/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
 Set `usage session id:` in `001-state.md` when the host exposes it. If it is
@@ -156,7 +156,7 @@ fields without asking the agent to estimate them:
 - artifacts/tools: captured only when the transcript or hook event exposes
   enough metadata; raw content is not recorded.
 
-The optional hook (`scripts/python/metrics/claude-code-usage-hook.py`) can write
+The optional hook (`scripts/metrics/claude-code-usage-hook.py`) can write
 sanitized raw telemetry outside the demand and normalized Alfred events inside
 the demand:
 
@@ -177,7 +177,7 @@ incremental cursor. The installed path currently uses the confirmed Claude Code
 configuration is confirmed. Manual close/flush remains:
 
 ```bash
-python scripts/python/metrics/attribute-usage-transcript.py --transcript-path <transcript.jsonl> --observability-log <hub-demand>/05-operation/011-observability-log.jsonl --granularity request --emit-interactions
+python scripts/metrics/attribute-usage-transcript.py --transcript-path <transcript.jsonl> --observability-log <hub-demand>/05-operation/011-observability-log.jsonl --granularity request --emit-interactions
 ```
 
 ## Devin Source Boundary
@@ -194,7 +194,7 @@ exact request tokens but not USD cost. To populate interaction cost in JSONL,
 Alfred needs an approved rate card:
 
 ```bash
-python scripts/python/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
+python scripts/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
 ```
 
 This appends `usage_cost_attributed` events that reference the original

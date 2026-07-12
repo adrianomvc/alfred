@@ -273,7 +273,7 @@ if (-not $SkipEmail) {
       }
     }
 
-    $mcpServer = Join-Path $InstallDir "scripts/python/adapters/mcp-email-server.py"
+    $mcpServer = Join-Path $InstallDir "scripts/adapters/mcp-email-server.py"
     $claude = Get-Command claude -ErrorAction SilentlyContinue
     $python = Get-Command python -ErrorAction SilentlyContinue
     if ($claude -and $python -and (Test-Path -LiteralPath $mcpServer)) {

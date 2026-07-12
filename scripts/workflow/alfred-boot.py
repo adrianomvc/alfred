@@ -10,7 +10,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from _common import get_field, read_lines, value_or  # noqa: E402
 
-FRAMEWORK_ROOT = HERE.parent.parent.parent
+FRAMEWORK_ROOT = HERE.parent.parent
 
 CLOSED = (
     "closed", "fechado", "fechada", "concluida", "concluída", "done",

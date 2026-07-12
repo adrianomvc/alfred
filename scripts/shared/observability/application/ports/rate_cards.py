@@ -1,16 +1,11 @@
-from dataclasses import dataclass
-from decimal import Decimal
 from typing import Protocol
 
+from shared.observability.domain.services.rate_card import ModelRate
 
-@dataclass(frozen=True)
-class ModelRate:
-    input_per_1m: Decimal = Decimal("0")
-    output_per_1m: Decimal = Decimal("0")
-    cache_creation_per_1m: Decimal = Decimal("0")
-    cache_read_per_1m: Decimal = Decimal("0")
+__all__ = ["ModelRate", "RateCardRepository"]
 
 
 class RateCardRepository(Protocol):
     def get_for_model(self, model: str) -> ModelRate | None: ...
 
+    def metadata(self) -> dict: ...

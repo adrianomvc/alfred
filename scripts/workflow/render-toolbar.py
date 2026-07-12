@@ -10,10 +10,8 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
-SCRIPTS_ROOT = Path(__file__).resolve().parents[2]
-PYTHON_ROOT = Path(__file__).resolve().parent.parent
+SCRIPTS_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS_ROOT))
-sys.path.insert(0, str(PYTHON_ROOT))
 from _common import get_field, read_lines, read_state_fields  # noqa: E402
 from shared.observability.application.use_cases.reconcile_usage_summary import ReconcileUsageSummary  # noqa: E402
 from shared.observability.domain.models import SummaryKey  # noqa: E402
@@ -23,7 +21,7 @@ from shared.observability.infrastructure.repositories.jsonl_event_repository imp
 from shared.observability.infrastructure.system_clock import SystemClock  # noqa: E402
 from shared.observability.presentation.toolbar_presenter import ToolbarViewModelBuilder  # noqa: E402
 
-FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
+FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 
 
 def now_iso():

@@ -80,7 +80,7 @@ def command_exists_in_hooks(settings, command):
 
 def install_claude_code_usage_hook(alfred_home, settings_path, dry_run):
     settings_path = settings_path or (Path.home() / ".claude" / "settings.json")
-    hook_script = alfred_home / "scripts" / "python" / "metrics" / "claude-code-usage-hook.py"
+    hook_script = alfred_home / "scripts" / "metrics" / "claude-code-usage-hook.py"
     if not hook_script.exists():
         raise SystemExit(f"Claude Code usage hook script not found: {hook_script}")
 

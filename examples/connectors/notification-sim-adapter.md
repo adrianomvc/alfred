@@ -77,5 +77,5 @@ and records it as a handoff/reminder. Swapping in a real notification adapter
 
 ## fixture
 - minimal fixture path: `examples/connectors/notification-handoff.md`
-- validation command: `python scripts/python/validators/validate-connectors.py`
+- validation command: `python scripts/validators/validate-connectors.py`
 - expected result: connector and adapter validation completes

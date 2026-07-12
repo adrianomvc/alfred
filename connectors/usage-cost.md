@@ -21,7 +21,7 @@ The installer can best-effort install `ccusage` from the configured npm registry
 `ALFRED_CCUSAGE_PACKAGE` / `-CcusagePackage`.
 
 When `ccusage` is installed and local logs are durable, Alfred can import the
-current host session with `scripts/python/metrics/import-ccusage.py`. The helper
+current host session with `scripts/metrics/import-ccusage.py`. The helper
 maps `ccusage session --json` into session-level state fields for toolbar
 display (`cost source: ccusage`, `cost usd`, `cost granularity: session`) and
 keeps `cost confidence: estimated` unless an approved billing source confirms
@@ -104,7 +104,7 @@ For Claude Code/Codex-like local CLIs, prefer `ccusage` before asking for a
 manual `/cost` value:
 
 ```bash
-python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+python scripts/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
 If the state contains `usage session id`, the helper imports that exact session.
@@ -120,7 +120,7 @@ helper resolves the `ccusage` npm shim via `PATHEXT`; if it is unreachable, dump
 
 ### Layered transcript attribution (finer than the session total)
 When the host keeps a durable transcript with per-request usage (Claude Code),
-`scripts/python/metrics/attribute-usage-transcript.py` recovers finer
+`scripts/metrics/attribute-usage-transcript.py` recovers finer
 granularity from the `host_transcript` source. Usage is de-duplicated by
 `requestId` (a request spans several transcript lines that repeat the same
 usage), so tokens are exact. Cost is not in the transcript: it stays `null`
