@@ -1,4 +1,4 @@
-ALFRED | TST | #toolbar-standard | STANDARD | 40% | custo: US$ 1.20 | est. total: ~US$ 3.00
+ALFRED | TST | #toolbar-standard | STANDARD | 40% | Custo: USD 1,20 · session · host_cost_command · exact | Consumo: não coletado · adapter de uso não configurado
 Framework: v2.0.0 (fixture) | App: f9a3739
 Fases: 1 Inception:ok | 2 Design:ok | 3 Execution:agora | 4 Validate:pendente | 5 Operation:pendente
 HITL: Tech Lead | modelo: GPT-5 | etapa: unit loop

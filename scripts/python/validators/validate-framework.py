@@ -104,6 +104,7 @@ REQUIRED_PATHS = [
     "docs/onboarding-sigla.md",
     "docs/framework-validation.md",
     "docs/host-adapter-readiness.md",
+    "docs/observability-architecture.md",
     "docs/version-adoption.md",
     "docs/release-governance.md",
     "CHANGELOG.md",
@@ -125,6 +126,14 @@ REQUIRED_PATHS = [
     "scripts/python/metrics/import-ccusage.py",
     "scripts/python/metrics/apply-usage-rate-card.py",
     "scripts/python/metrics/normalize-usage-cost.py",
+    "scripts/python/observability/domain/models.py",
+    "scripts/python/observability/domain/enums.py",
+    "scripts/python/observability/application/ports/adapters.py",
+    "scripts/python/observability/application/use_cases/reconcile_usage_summary.py",
+    "scripts/python/observability/infrastructure/repositories/jsonl_event_repository.py",
+    "scripts/python/observability/infrastructure/repositories/json_usage_summary_repository.py",
+    "scripts/python/observability/entrypoints/adapter_bootstrap.py",
+    "scripts/python/observability/presentation/toolbar_presenter.py",
     "scripts/python/validators/validate-framework.py",
     "scripts/python/validators/validate-demand.py",
     "scripts/python/validators/validate-reverse-eng-staleness.py",
@@ -138,6 +147,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-token-economy-policy.py",
     "scripts/python/validators/validate-observability-hygiene.py",
     "scripts/python/validators/validate-observability-intelligence.py",
+    "scripts/python/validators/validate-observability-architecture.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/usage-rate-card.md",
@@ -335,15 +345,15 @@ def assert_toolbar_rendering_policy(root):
             "Do not pass `-Profile text` in a host that renders Unicode/emoji",
             "-AllowTextFallback",
             "Never hand-draw the rich block from memory",
-            "progress at 0% or 100%",
+            "Never forecast the demand from a",
             "-RegisterActive",
         ],
         "core/presentation/toolbar.md": [
-            "progress is 0% or 100%",
-            "forecast as unavailable",
+            "Session totals",
+            "A linear forecast appears only when demand-scoped cost",
         ],
         "docs/framework-validation.md": [
-            "Toolbar forecast display shows a reason",
+            "Toolbar forecast display is demand-scoped only",
             "0<progress<100",
         ],
         "docs/automation-fallback.md": [
@@ -355,9 +365,13 @@ def assert_toolbar_rendering_policy(root):
             "allow_text_fallback",
             "--profile text is the degraded fallback",
             "--allow-text-fallback",
-            "indisponível (0% concluído)",
             "RegisterActive",
             "active-demand.json",
+        ],
+        "scripts/python/observability/presentation/toolbar_presenter.py": [
+            "fonte de custo não configurada",
+            "adapter de uso não configurado",
+            "CostForecastService",
         ],
         "scripts/python/metrics/claude-code-usage-hook.py": [
             "active-demand.json",
@@ -391,8 +405,8 @@ def assert_toolbar_rendering_policy(root):
         if result.stderr:
             print(result.stderr, file=sys.stderr)
         raise SystemExit("Toolbar zero-progress forecast smoke failed")
-    if "Previs" not in result.stdout or "indisponível (0% concluído)" not in result.stdout:
-        raise SystemExit("Toolbar must explain unavailable forecast at 0% progress with numeric cost.")
+    if "Previs" in result.stdout or "session" not in result.stdout:
+        raise SystemExit("Toolbar must not forecast demand cost from unavailable or session-only cost.")
     print("OK toolbar rendering policy")
 
 
@@ -435,6 +449,7 @@ def assert_usage_cost_policy(root):
             "If `state` has session-level `cost usd:`",
             "Claude Code `/cost`",
             "Do not read ccusage session totals from observability JSONL",
+            "do not treat",
         ],
     }
     for rel, phrases in checks.items():
@@ -603,6 +618,10 @@ def assert_usage_rate_card_policy(root):
             "usage_cost_attributed",
             "Human decision: pending",
         ],
+        "scripts/python/validators/validate-observability-architecture.py": [
+            "Forbidden import",
+            "SyntheticCreditAdapter",
+        ],
     }
     for rel, phrases in checks.items():
         text = (root / rel).read_text(encoding="utf-8")
@@ -690,6 +709,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-observability-hygiene.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-observability-intelligence.py")
+    run_sub(root, "scripts/python/validators/validate-observability-architecture.py")
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))

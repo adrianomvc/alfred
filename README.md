@@ -41,9 +41,9 @@ One responsibility per folder â€” the mental model: **`core/` = what Alfred is Â
 Alfred keeps the demand log append-only at `05-operation/011-observability-log.jsonl`. The canonical split is:
 - `usage_attributed` for exact request/interaction usage from the host transcript/runtime.
 - `usage_cost_attributed` for cost derived from an approved source, linked by `parent_event_id`.
-- `interaction_completed`, `artifact_accessed`, `artifact_changed`, `validation_result`, `human_decision`, and `policy_insight_proposed` for governance signals.
+- `interaction_completed`, `artifact_accessed`, `artifact_changed`, `policy_snapshot`, `validation_result`, `human_decision`, and `policy_insight_proposed` for governance signals.
 
-Claude Code can use `scripts/python/metrics/claude-code-usage-hook.py` to read durable transcripts incrementally, write a sanitized raw JSONL when `AI_OBS_RAW_LOG` is set, and append Alfred decision events when `ALFRED_OBS_LOG` or `ALFRED_STATE_PATH` is available. `ccusage` remains a session-total source for `001-state.md` and toolbar display only; it is not allocated across interactions. Devin keeps Session Insights/Consumption API as the preferred ACU source and must not invent token-level interaction data when the API/export does not provide it.
+Claude Code can use `scripts/python/metrics/claude-code-usage-hook.py` to read durable transcripts incrementally, write a sanitized raw JSONL when `AI_OBS_RAW_LOG` is set, and append Alfred decision events when `ALFRED_OBS_LOG` or `ALFRED_STATE_PATH` is available. `ccusage` remains a session-total source for `001-state.md` and toolbar display only; it is not allocated across interactions. Devin keeps Session Insights/Consumption API as the preferred ACU source and must not invent token-level interaction data when the API/export does not provide it. Architecture and extension rules: [`docs/observability-architecture.md`](docs/observability-architecture.md).
 
 ## Operating rule
 The framework is referenced by HUB and App repos; it is not copied into them. Generated artifacts live under `alfred-docs-hub` (HUB) and `.alfred-docs-app` (App) and are written in pt-BR. Framework files stay in English.

@@ -100,7 +100,11 @@ def summarize(events):
         "model": sum(1 for e in metric_events if e.get("model") or (e.get("output") or {}).get("model")),
         "usage_exact": sum(1 for e in usage_events if (e.get("token_confidence") or (e.get("output") or {}).get("token_confidence")) == "exact"),
         "cost": sum(1 for e in cost_events if cost_value(e) is not None),
-        "artifacts": sum(1 for e in metric_events if normalize_artifacts_used(e.get("artifacts_used"), ts=e.get("ts"))),
+        "artifacts": sum(
+            1 for e in metric_events
+            if e.get("event_type") != "policy_snapshot"
+            and normalize_artifacts_used(e.get("artifacts_used"), ts=e.get("ts"))
+        ),
         "outcome": sum(1 for e in metric_events if e.get("outcome")),
     }
 
@@ -136,6 +140,8 @@ def summarize(events):
             interaction_cost[event["interaction_id"]] += cost_value(event)
 
     for event in metric_events:
+        if event.get("event_type") == "policy_snapshot":
+            continue
         for item in normalize_artifacts_used(event.get("artifacts_used"), observed_by=event.get("actor_id"), ts=event.get("ts")):
             key = artifact_key(item)
             stat = artifacts.setdefault(

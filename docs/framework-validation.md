@@ -87,7 +87,9 @@ python scripts/python/validators/validate-framework.py
 - `validate-observability-hygiene` checks example event logs for real, distinct ISO-8601 timestamps (no placeholders) and the Layer 0 hygiene wiring.
 - `validate-model-policy` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
 - Toolbar rendering remains grounded: boot/orchestrator prefer `render-toolbar`, capable hosts use default/rich profile, CLI `text` requires an explicit fallback flag, manual fallback loads `core/presentation/toolbar-quick.md`, and rich blocks are not hand-drawn.
-- Toolbar forecast display shows a reason when cost exists but progress is 0% or 100%; only 0<progress<100 may show a linear `~US$` total.
+- Toolbar forecast display is demand-scoped only: session totals may be shown,
+  but only demand cost with sufficient coverage and 0<progress<100 may show a
+  linear `~US$` total.
 - `validate-links` checks that internal Markdown references (links and inline framework paths) still resolve after moves/renames.
 - The architecture SOLID **extension checklist** in `core/architecture.md` passes for any added/moved module, file, or artifact (one reason to change; extend by adding; substitutable via contract; loads only what it needs; depends on a role, not a concrete).
 

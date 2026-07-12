@@ -291,7 +291,7 @@ def write_policy_snapshot(payload, active):
     event = {
         "schema_version": "alfred.observability.v1",
         "event_id": event_id,
-        "event_type": "artifact_accessed",
+        "event_type": "policy_snapshot",
         "event_scope": "session",
         "ts": ts,
         "session_id": session_id,

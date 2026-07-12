@@ -27,8 +27,8 @@ Fallback:
 ## Principles
 - Usage import is optional; Alfred runs without it.
 - Interaction/request usage records are append-only observability events.
-  Session totals are state fields for toolbar/forecast display unless the source
-  provides interaction-level records.
+  Session totals are state fields for toolbar display unless the source provides
+  interaction-level records; they must not drive demand forecasts.
 - Interaction cost records are separate append-only `usage_cost_attributed`
   events when exact usage is priced by an approved rate card.
 - Do not estimate USD cost unless the human provides an approved rate table or
@@ -218,8 +218,9 @@ configured:
    - `cost source: host_cost_command`
    - `cost usd: <numeric USD value>`
    - `cost confidence: exact` when `/cost` reports the current session total.
-3. Render the toolbar from `state`; the renderer reads `cost usd` and can show
-   the linear `Previsao`/`est. total` when progress is between 0 and 100.
+3. Render the toolbar from `state`; the renderer reads `cost usd` as
+   session-scoped unless demand-scoped cost evidence exists. It must not show a
+   demand forecast from `/cost`.
 4. If the value is not provided, keep `custo: nao coletado`; never invent a
    dollar amount.
 
@@ -232,7 +233,7 @@ Run one corporate pilot before implementing automatic policy suggestions:
 4. Capture the Devin session id (`devin-...`) and collect Session Insights plus
    session daily consumption after the run.
 5. Normalize interaction/request usage into `usage_attributed` events; keep
-   session totals in state for toolbar/forecast display.
+   session totals in state for toolbar display.
 6. If an approved rate card exists, append `usage_cost_attributed` events from
    the exact usage events.
 7. Close Operation with ACU, optional tokens, and optional USD cost in metrics.

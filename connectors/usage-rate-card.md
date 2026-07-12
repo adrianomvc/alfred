@@ -20,8 +20,8 @@ at runtime to invent cost.
 ## degradation
 If no approved rate card exists, keep interaction `cost_usd: null` and
 `cost_confidence: unavailable`. Do not allocate `ccusage` or other session
-totals across interactions. Session totals remain state fields for toolbar and
-forecast display.
+totals across interactions. Session totals remain state fields for toolbar
+display and must not drive demand forecasts.
 
 ## audit fields
 - `rate_card_source`

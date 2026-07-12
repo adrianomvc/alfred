@@ -5,14 +5,20 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import get_field, read_lines  # noqa: E402
+from _common import get_field, read_lines, read_state_fields  # noqa: E402
+from observability.application.use_cases.reconcile_usage_summary import ReconcileUsageSummary  # noqa: E402
+from observability.domain.models import SummaryKey  # noqa: E402
+from observability.domain.services.cost_calculator import CostResolver  # noqa: E402
+from observability.infrastructure.repositories.json_usage_summary_repository import JsonUsageSummaryRepository, NoopUsageSummaryRepository  # noqa: E402
+from observability.infrastructure.repositories.jsonl_event_repository import JsonlEventRepository  # noqa: E402
+from observability.infrastructure.system_clock import SystemClock  # noqa: E402
+from observability.presentation.toolbar_presenter import ToolbarViewModelBuilder  # noqa: E402
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
 
@@ -116,52 +122,6 @@ def _rich_bar(progress):
     return "▰" * filled + "▱" * (10 - filled)
 
 
-def forecast_total(cost_usd, progress):
-    """Linear extrapolation of the total demand cost from recorded cost + progress.
-
-    Estimate, never a fact: labeled with '~' when computable. When cost exists
-    but progress is 0/100, return an explicit unavailable reason instead of
-    hiding the forecast or inventing a value."""
-    try:
-        value = float(str(cost_usd).replace(",", "."))
-    except (TypeError, ValueError):
-        return ""
-    if value <= 0:
-        return ""
-    if progress <= 0:
-        return "indisponível (0% concluído)"
-    if progress >= 100:
-        return "indisponível (demanda concluída)"
-    return f"~US$ {value * 100.0 / progress:.2f}"
-
-
-def format_cost_usd(cost_usd):
-    try:
-        value = float(str(cost_usd).replace(",", "."))
-    except (TypeError, ValueError):
-        return ""
-    if value <= 0:
-        return ""
-    return f"US$ {value:.2f}"
-
-
-def normalize_cost(cost, cost_usd="", usage_cost=""):
-    cost_text = str(cost or "").strip()
-    missing = {"", "n/a", "na", "none", "unknown", "not collected",
-               "nao coletado", "não coletado", "not available"}
-    if cost_text.lower() not in missing:
-        return cost_text
-
-    numeric = format_cost_usd(cost_usd)
-    if numeric:
-        return numeric
-
-    usage = str(usage_cost or "").strip()
-    if usage:
-        return shorten(f"nao coletado ({usage})", 42)
-    return "nao coletado"
-
-
 def short_commit(value):
     value = str(value or "").strip().strip("`")
     if value == "" or value.lower() in {"unknown", "not-git", "a confirmar", "n/a"}:
@@ -181,19 +141,7 @@ def local_framework_value(kind):
         version_path = FRAMEWORK_ROOT / "VERSION"
         if version_path.exists():
             return version_path.read_text(encoding="utf-8-sig").splitlines()[0].strip()
-        return "unknown"
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(FRAMEWORK_ROOT), "rev-parse", "--short", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError:
-        return "unknown"
-    if result.returncode != 0:
-        return "unknown"
-    return result.stdout.strip() or "unknown"
+    return "unknown"
 
 
 def resolve_path(raw, state_path):
@@ -269,8 +217,35 @@ def register_active_demand(state_path, content):
     return target
 
 
+def _cost_line(view_model):
+    if view_model.demand_cost_text:
+        return f"Custo demanda: {view_model.demand_cost_text}"
+    if view_model.session_cost_text:
+        return f"Custo: {view_model.session_cost_text}"
+    return f"Custo USD: indisponível · {view_model.cost_gap_text or 'fonte não configurada'}"
+
+
+def _usage_line(view_model):
+    label = "Consumo" if (
+        "ACU" in view_model.primary_usage_text
+        or "crédito" in view_model.primary_usage_text
+        or view_model.primary_usage_text.startswith("não coletado")
+    ) else "Uso"
+    return f"{label}: {view_model.primary_usage_text}"
+
+
+def _numeric_cost_text(value):
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"(\d+(?:[.,]\d+)?)", text)
+    if not match:
+        return ""
+    return match.group(1).replace(",", ".")
+
+
 def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
-                 model, cost, progress, markers, forecast, framework, app_commit):
+                 model, progress, markers, framework, app_commit, view_model):
     icon = _LANE_ICON.get(lane.lower(), "⚪")
     track = " · ".join(
         _ALIAS_RICH.get(name, name)
@@ -278,13 +253,15 @@ def _render_rich(sigla, demand_id, lane, phase, nxt, checkpoint,
         for name, m in markers[:5]
     )
     title = f"🎩 ALFRED · {sigla} · #{demand_id}"
-    summary = f"Modo: {icon} {lane.upper()}   Progresso: {progress}%  {_rich_bar(progress)}   Custo: {cost}"
+    summary = f"Modo: {icon} {lane.upper()}   Progresso: {progress}%  {_rich_bar(progress)}"
     lines = [
         _box_top(title),
         _box_line(summary),
+        _box_line(_cost_line(view_model)),
+        _box_line(_usage_line(view_model)),
     ]
-    if forecast:
-        lines.append(_box_line(f"Previsão: {forecast}"))
+    if view_model.forecast_text:
+        lines.append(_box_line(f"Previsão demanda: {view_model.forecast_text}"))
     lines.append(_box_line(f"Framework: {framework}        App: {app_commit}"))
     lines.append(
         _box_sep(),
@@ -352,7 +329,7 @@ def _render_web(sigla, demand_id, lane, nxt, step, progress, markers):
 
 
 def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
-           app_commit="", app_demand_path=""):
+           app_commit="", app_demand_path="", write_usage_summary=False):
     if not Path(state_path).exists():
         raise SystemExit(f"State file not found: {state_path}")
 
@@ -367,7 +344,6 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
     checkpoint = get_field(content, "checkpoint") or "n/a"
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
     state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
-    effective_cost_usd = cost_usd or state_cost_usd or ""
     stamped_framework_version = get_first_field(
         content, ["framework version", "versao framework", "versão framework"]
     )
@@ -418,19 +394,50 @@ def render(state_path, model="default", cost="n/a", profile="rich", cost_usd="",
         markers.append((item, marker))
 
     progress = min(100, round((completed / 5) * 100))
-    forecast = forecast_total(effective_cost_usd, progress)
-    cost_display = normalize_cost(cost, effective_cost_usd, usage_cost)
+    state_fields = read_state_fields(Path(state_path).resolve())
+    if cost_usd and not state_fields.get("cost usd"):
+        state_fields["cost usd"] = cost_usd
+    cost_value = _numeric_cost_text(cost)
+    if cost_value and not state_fields.get("cost usd"):
+        state_fields["cost usd"] = cost_value
+    if (cost_usd or cost_value) and not state_fields.get("cost source"):
+        state_fields.setdefault("cost source", "manual")
+        state_fields.setdefault("cost confidence", "manual")
+        state_fields.setdefault("cost granularity", "session")
+    if usage_cost:
+        state_fields.setdefault("usage-cost", usage_cost)
+    obs_log = Path(state_path).resolve().parent / "05-operation" / "011-observability-log.jsonl"
+    summary_repository = (
+        JsonUsageSummaryRepository()
+        if write_usage_summary and obs_log.exists()
+        else NoopUsageSummaryRepository()
+    )
+    summary = ReconcileUsageSummary(
+        JsonlEventRepository(obs_log),
+        summary_repository,
+        CostResolver(),
+        SystemClock(),
+    ).execute(SummaryKey(str(Path(state_path).resolve())), state_fields)
+    view_model = ToolbarViewModelBuilder().build(
+        demand_id=demand_id,
+        sigla=sigla,
+        lane=lane,
+        progress=progress,
+        framework=framework,
+        app_commit=app_commit_display,
+        summary=summary,
+    )
 
     if profile == "rich":
         return _render_rich(sigla, demand_id, lane, phase, nxt,
-                            checkpoint, model, cost_display, progress, markers, forecast,
-                            framework, app_commit_display)
+                            checkpoint, model, progress, markers,
+                            framework, app_commit_display, view_model)
     if profile == "web":
         return _render_web(sigla, demand_id, lane, nxt, step, progress, markers)
 
     # text floor: ASCII fallback (no Unicode dependency; degrades anywhere)
-    forecast_part = f" | est. total: {forecast}" if forecast else ""
-    cost_part = f"custo: {cost_display}{forecast_part}"
+    forecast_part = f" | est. demanda: {view_model.forecast_text}" if view_model.forecast_text else ""
+    cost_part = f"{_cost_line(view_model)}{forecast_part} | {_usage_line(view_model)}"
     if lane.lower() == "fast":
         return [
             f"ALFRED | {sigla} | #{demand_id} | FAST | {phase} | {progress}% | "
@@ -465,13 +472,16 @@ def main():
                         dest="allow_text_fallback", action="store_true",
                         help="permit --profile text when the host cannot render Unicode/emoji")
     parser.add_argument("--cost-usd", "-CostUsd", dest="cost_usd", default="",
-                        help="numeric cost so far (USD); enables the linear total-cost forecast")
+                        help="numeric cost observed so far (USD); forecast still requires demand-scoped cost")
     parser.add_argument("--app-commit", "-AppCommit", dest="app_commit", default="",
                         help="current or recorded app commit to show in the toolbar")
     parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="",
                         help="optional app demand artifact path used to read current/captured app commit")
     parser.add_argument("--register-active", "-RegisterActive", dest="register_active", action="store_true",
                         help="record this state as the active demand for host hooks")
+    parser.add_argument("--write-usage-summary", "-WriteUsageSummary",
+                        dest="write_usage_summary", action="store_true",
+                        help="persist 001-usage-summary.json while rendering")
     args = parser.parse_args()
 
     if args.profile == "text" and not args.allow_text_fallback:
@@ -485,7 +495,8 @@ def main():
         register_active_demand(args.state_path, read_lines(args.state_path))
 
     for line in render(args.state_path, args.model, args.cost, args.profile,
-                       args.cost_usd, args.app_commit, args.app_demand_path):
+                       args.cost_usd, args.app_commit, args.app_demand_path,
+                       args.write_usage_summary):
         print(line)
 
 

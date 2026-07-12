@@ -29,6 +29,11 @@ All notable Alfred framework changes should be recorded here.
   legacy `artifacts_used`, and reports data-quality coverage.
 - `generate-metrics-insights.py` proposes evidence-backed policy/rule/skill
   insights without changing policies automatically.
+- Layered observability package under `scripts/python/observability/` with
+  domain models, application ports/use cases, infrastructure repositories,
+  host adapter registry, and toolbar presentation view models. This keeps
+  metrics host-agnostic while allowing Claude Code, Codex, Devin, ccusage, and
+  generic adapters to remain thin edge implementations.
 
 ### Fixed
 - `ccusage` session totals are now state-only for toolbar/forecast display:
@@ -51,6 +56,9 @@ All notable Alfred framework changes should be recorded here.
   failing with `WinError 2`. When it is still unreachable, the helper exits with
   a clear message pointing to the `-InputPath` fallback instead of a raw
   traceback.
+- Claude Code policy snapshots now emit `policy_snapshot` instead of
+  `artifact_accessed`; metrics rollups ignore snapshot entries for real
+  artifact reads, repeated reads, and loaded-artifact analysis.
 
 ### Changed
 - Observability event hygiene is now an explicit contract (Layer 0): events must
@@ -79,6 +87,10 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code cost capture is now an explicit manual usage-cost path: humans can run `/cost`, record `cost usd`/source/confidence in `001-state.md`, and the toolbar renderer reads that state value for display and forecast.
 - Toolbar CLI now guards against accidental ASCII fallback: `--profile text` requires `--allow-text-fallback`; capable hosts should omit `--profile` or use `--profile rich`.
 - Installers can now best-effort install optional npm tools from a corporate registry / Artifactory: `ccusage` and `codebase-memory`, with package-name overrides and skip flags.
+- Toolbar rendering now consumes a usage summary view model and separates
+  session cost from demand cost. Session totals can be displayed with scope and
+  confidence, but demand forecasts require demand-scoped cost with sufficient
+  coverage.
 
 ## 2.0.0 - in progress (opened 2026-07-05)
 

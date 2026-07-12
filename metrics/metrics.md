@@ -102,6 +102,11 @@ Readers must accept the legacy object form (`read`/`created`/`updated`/`output`)
 and normalize it into this list. Sensitive paths are redacted by category/hash;
 contents are never recorded by default.
 
+`policy_snapshot` is a separate event type for version/hash evidence about the
+policies and rules in force. Its artifact entries use `operation: snapshot` and
+must not be counted as artifact reads, repeated reads, or artifacts actually
+loaded for the interaction.
+
 `actions` records the concrete step-by-step operations performed by Alfred: filesystem changes, command checks, validations, handoffs, or human checkpoints.
 
 `input` records what entered the step: human message, command result, artifact content, connector result, or previous event. For human input, store both a short `raw_excerpt` and a normalized `intent` when useful. Avoid storing secrets or large transcripts.

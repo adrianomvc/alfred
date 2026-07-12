@@ -85,9 +85,10 @@ python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -C
 - Privacy-preserving: raw logs contain metadata, ids, token counts, tool names,
   redacted paths, hashes, and counters; not prompt/response/file contents.
 - Policy snapshot: when an Alfred destination is available, the hook appends one
-  idempotent session-scoped `artifact_accessed` event with version/commit and
+  idempotent session-scoped `policy_snapshot` event with version/commit and
   hashes for the core model/usage/context policies. It records references and
-  hashes only, never policy content.
+  hashes only, never policy content. Snapshots are evidence of the governing
+  policy version; they are not counted as real artifact reads.
 - Non-blocking: exits `0` on every path. A missing target or any error is written
   to stderr and ignored — the session is never blocked.
 - Current installer wires the supported `Stop` hook. `SessionEnd` is not added
