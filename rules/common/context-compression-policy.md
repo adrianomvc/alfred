@@ -59,3 +59,9 @@ the original source cannot be opened and the action depends on it, pause and ask
 Record material use of compression in `audit` or observability metadata:
 compressor/tool, query, sources returned, source refs opened, limitations, and
 fallbacks.
+
+## Observability
+When compression is used, record candidate count, original sources opened,
+estimated/actual reduction when measured, validation outcome, and later failures
+that may relate to omitted context. Compression metrics inform proposals only;
+original sources remain required for edits and validation evidence.

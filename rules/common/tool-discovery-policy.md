@@ -42,3 +42,9 @@ Recommended order:
 ## Audit
 For material external calls or mutations, record the selected connector/tool,
 adapter state, approval basis, and any fallback used.
+
+## Observability
+Record tools discovered, schemas loaded, tools actually used, repeated
+discovery, fallback reason, MCP server/tool name, and whether discovery happened
+outside the expected trigger. Use this to propose JIT trigger changes; do not
+auto-disable tools.

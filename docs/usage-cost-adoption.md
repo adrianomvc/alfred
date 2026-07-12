@@ -143,6 +143,51 @@ so the attribution remains auditable instead of silent.
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.
 
+## Claude Code Transcript and Hook Path
+Claude Code durable transcripts can provide request-level tokens and cache
+fields without asking the agent to estimate them:
+
+- request tokens: supported when assistant transcript records include
+  `requestId`, `message.model`, and `message.usage`;
+- interaction id: exact when the host exposes `promptId`, derived from user
+  boundaries when safe, otherwise `interaction_confidence: unavailable`;
+- cost: not in the transcript, so JSONL cost requires an approved rate card or
+  another granular host/billing export;
+- artifacts/tools: captured only when the transcript or hook event exposes
+  enough metadata; raw content is not recorded.
+
+The optional hook (`scripts/python/metrics/claude-code-usage-hook.py`) can write
+sanitized raw telemetry outside the demand and normalized Alfred events inside
+the demand:
+
+| Variable | Meaning |
+|---|---|
+| `AI_OBS_RAW_LOG` | external JSONL path for technical raw events |
+| `AI_OBS_CURSOR_DIR` | per-transcript cursor directory |
+| `AI_OBS_MODE` | `raw`, `alfred`, or `both` |
+| `AI_OBS_PROVIDER` | provider label, default `claude-code` |
+| `AI_OBS_PROJECT` / `AI_OBS_TEAM` / `AI_OBS_ENVIRONMENT` | optional dimensions |
+| `ALFRED_OBS_LOG` | explicit demand observability JSONL |
+| `ALFRED_STATE_PATH` | demand `001-state.md`; log is derived from it |
+| `ALFRED_RUN_ID` | run correlation id |
+
+The hook is non-blocking, append-only, idempotent by `requestId`, and uses an
+incremental cursor. The installed path currently uses the confirmed Claude Code
+`Stop` hook; `SessionEnd` is documented as a future addition until the host
+configuration is confirmed. Manual close/flush remains:
+
+```bash
+python scripts/python/metrics/attribute-usage-transcript.py --transcript-path <transcript.jsonl> --observability-log <hub-demand>/05-operation/011-observability-log.jsonl --granularity request --emit-interactions
+```
+
+## Devin Source Boundary
+Devin remains API/export first. ACU/session API continues to be the preferred
+corporate source. Alfred must not infer request tokens or interaction cost from
+Devin wall time, terminal output, or conversation text. If the API only exposes
+session-level ACU/USD, keep it in state/rollup with confidence metadata; append
+JSONL interaction events only when the Devin export itself provides suitable
+granularity or an approved rate card prices exact granular usage.
+
 ## Interaction Cost from Rate Cards
 For Claude Code and similar transcript-based hosts, the transcript can provide
 exact request tokens but not USD cost. To populate interaction cost in JSONL,

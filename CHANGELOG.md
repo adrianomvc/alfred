@@ -7,15 +7,16 @@ All notable Alfred framework changes should be recorded here.
 ### Added
 - Layered transcript usage attribution (usage-cost Layers 1-3):
   `scripts/python/metrics/attribute-usage-transcript.py` maps a durable host
-  transcript (Claude Code) into per-window or per-turn `usage_attributed` events.
-  Tokens are exact — de-duplicated by `requestId`, since one request spans
-  several transcript lines that repeat the same usage. Cost stays `null` unless
-  `--rate-card-path` supplies an approved interaction rate card. Turn mode is
-  idempotent (stable `usage-turn-<requestId>` ids, skips
-  already-attributed requests). `claude-code-usage-hook.py` plus
-  `core/hooks/usage-attribution.md` run turn mode from a Claude Code Stop hook,
-  out-of-band: hooks receive `transcript_path`, not usage, so the host that owns
-  the usage object stamps it instead of the in-band agent.
+  transcript (Claude Code) into request-scoped `usage_attributed` events and
+  optional `interaction_completed` aggregates. Tokens are exact and
+  de-duplicated by `requestId`; human interaction ids use host `promptId` when
+  present, otherwise derived user boundaries or `interaction_confidence:
+  unavailable`. The legacy `--granularity turn` flag remains an alias for
+  request. Cost stays `null` unless `--rate-card-path` supplies an approved
+  interaction rate card. `claude-code-usage-hook.py` plus
+  `core/hooks/usage-attribution.md` run incrementally from a Claude Code Stop
+  hook, can write sanitized raw JSONL via `AI_OBS_RAW_LOG`, and never block the
+  host.
 - `scripts/python/metrics/apply-usage-rate-card.py` and the
   `usage-rate-card` connector append `usage_cost_attributed` events from exact
   usage plus an approved rate card. This keeps interaction cost separate from
@@ -23,6 +24,11 @@ All notable Alfred framework changes should be recorded here.
 - `validate-observability-hygiene` validator: example event logs must use real,
   distinct ISO-8601 timestamps (no placeholders, not all-identical), guarding the
   Layer 0 hygiene contract that later attribution depends on.
+- `generate-metrics-rollup.py` now separates usage tokens from cost events,
+  includes cache creation/read/output and `cache_reuse_ratio`, normalizes
+  legacy `artifacts_used`, and reports data-quality coverage.
+- `generate-metrics-insights.py` proposes evidence-backed policy/rule/skill
+  insights without changing policies automatically.
 
 ### Fixed
 - `ccusage` session totals are now state-only for toolbar/forecast display:

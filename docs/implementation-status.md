@@ -14,13 +14,13 @@ All D1–D47 decisions are materialized. Highlights by area:
 - **Lifecycle:** D19 five phases with full sub-activity parity (27 JIT files); D6/D34 Execution-first with mandatory post-mortem; D24 units; D29 SDD gate.
 - **Artifacts:** D4 state/decisions/audit/metrics; D43/D45 JSONL observability; D26 version stamps; D37 persistence granularity; D28 demand states and resume.
 - **Extension points:** D12/D22 skills registry with precedence and pinned external refs; D40 connector contracts with adapter states; D42 knowledge guardrails; D35/D36 templates and coding standards.
-- **Measurement:** D10/D32 cost and baselines; D43 rollup and insights; D46 model policy with automated validation.
+- **Measurement:** D10/D32 cost and baselines; D43 append-only usage/cost/artifact logs, raw Claude Code hook support, decision rollups, insights, and D46 model policy with automated validation.
 - **Distribution:** D15/D26 version freeze/upgrade policy; releases with `VERSION` + `CHANGELOG.md`; DEVIN installer; per-host entry points.
 
 Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framework-closure.md`.
 
 ## Still incomplete
-- D10/D43: usage/cost attributable from host exports or APIs, but no automatic collection without a real host usage source.
+- D10/D43: Claude Code request tokens can be collected from durable transcripts through the optional hook; interaction cost still needs an approved rate card or host/API source. Devin ACU import remains pending approved Session Insights/Consumption API access.
 - D14: host-specific execution adapters not implemented; readiness checklist, adapter states, template, validation, and handoff examples exist.
 - D20/D23: tracker/PR integration is a connector contract plus readiness checklist/example handoff, not a working adapter.
 - D32/D46: insight examples and model-policy validation exist; tuning needs more real project data.

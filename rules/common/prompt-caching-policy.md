@@ -41,3 +41,8 @@ Recommended order:
 When a host exposes cache controls and Alfred intentionally changes the loading
 order, record the order or cache policy used in `audit` or the observability
 event metadata.
+
+## Observability
+Record cache creation tokens, cache read tokens, cache reuse ratio, stable-prefix
+ordering, and any prefix invalidation when the host exposes them. Use the data to
+propose pilots for context ordering; do not change loading policy automatically.

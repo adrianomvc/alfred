@@ -48,3 +48,9 @@ RTK is a local terminal tool and hook. It is optional automation, not a new
 Alfred runtime requirement. The current supported automatic setup path is DEVIN
 CLI only; other hosts follow this policy manually until they receive a native
 RTK hook.
+
+## Observability
+When the host/runtime exposes it, record raw output bytes, emitted output bytes,
+filter/RTK used, reduction ratio, command category, failure status, and whether
+the full output had to be reopened. These metrics support terminal policy
+insights but do not replace original validation evidence.

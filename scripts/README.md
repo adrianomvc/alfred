@@ -13,7 +13,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 |---|---|---|
 | `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
 | `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `sync-host-shims` |
-| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
+| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `generate-metrics-insights` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
 `scripts/python/_common.py` stays at the runtime root (shared by all categories).
@@ -25,7 +25,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 - parse example observability JSONL and verify required framework paths
 - render the demand toolbar from a demand `001-state.md`
 - collect local observability JSONL into a telemetry-style batch
-- generate a Markdown metrics rollup from local observability JSONL
+- generate a Markdown metrics rollup and human-reviewable insights from local observability JSONL
 - normalize host usage/cost exports into append-only observability events
 - apply an approved rate card to exact usage events and append separate interaction cost events
 - validate toolbar fixtures against the renderer output
@@ -44,10 +44,11 @@ Canonical helpers live at `scripts/python/<category>/<name>.py`. The `adapters/`
 - `validate-framework` - optional local validation helper matching `docs/framework-validation.md`.
 - `render-toolbar` - optional but preferred toolbar renderer derived from `001-state.md`; use it whenever available instead of hand-drawing. Profiles: `-Profile rich` (default, Unicode block) · `text` (ASCII fallback, CLI requires `-AllowTextFallback`) · `web` (self-contained SVG). On Claude Code, pass `-RegisterActive` so the Stop hook can target the active demand log. See `core/presentation/README.md`.
 - `collect-observability` - optional local collector for JSONL events; it does not send data anywhere.
-- `generate-metrics-rollup` - optional local Markdown rollup generator.
+- `generate-metrics-rollup` - optional local Markdown rollup generator; separates usage tokens from cost events, includes cache reuse, artifact lineage, and data-quality coverage.
+- `generate-metrics-insights` - optional proposal generator; emits human-reviewable insight blocks and never changes policies/rules automatically.
 - `normalize-usage-cost` - optional adapter for host-exported token/cost usage records.
 - `import-ccusage` - optional automatic importer for `ccusage session --json`; updates demand cost state for toolbar display. It does not append session totals to observability JSONL.
-- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits per-window or per-turn `usage_attributed` events (tokens exact, de-duplicated by `requestId`, cost `null` unless `-RateCardPath` supplies an approved interaction rate card). `claude-code-usage-hook` runs the turn mode from a Stop hook (`core/hooks/usage-attribution.md`).
+- `attribute-usage-transcript` - optional finer attribution from a host transcript (Claude Code); emits request-scoped `usage_attributed` events (legacy `-Granularity turn` remains an alias), de-duplicated by `requestId`, correlated to `promptId` when the host exposes it. `-EmitInteractions` adds derived `interaction_completed` aggregates. Cost stays `null` unless `-RateCardPath` supplies an approved interaction rate card.
 - `apply-usage-rate-card` - optional cost attribution helper; reads token-exact `usage_attributed` events plus an approved `usage-rate-card` fixture and appends separate `usage_cost_attributed` events. It never allocates `ccusage` session totals.
 - `validate-toolbar-fixtures` - optional drift check for toolbar examples.
 - `validate-skills-registry` - optional consistency check for `skills/skills.md`.
@@ -89,6 +90,10 @@ python scripts/python/metrics/collect-observability.py -Root examples
 
 ```bash
 python scripts/python/metrics/generate-metrics-rollup.py -Root examples
+```
+
+```bash
+python scripts/python/metrics/generate-metrics-insights.py -Root examples
 ```
 
 ```bash

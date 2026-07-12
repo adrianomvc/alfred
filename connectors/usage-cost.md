@@ -44,6 +44,10 @@ observability event and must not be appended to the demand JSONL log as
 - `alfred_run_id`
 - `session_id`
 - `interaction_id`
+- `request_id`
+- `event_scope`
+- `interaction_confidence`
+- `correlation_method`
 - `trace_id`
 - `initiative_id`
 - `demand_id`
@@ -65,6 +69,7 @@ observability event and must not be appended to the demand JSONL log as
 - `acu_confidence`
 - `cost_usd`
 - `cost_confidence`
+- `token_confidence`
 - `source`
 - `source_record_id`
 
@@ -79,6 +84,9 @@ observability event and must not be appended to the demand JSONL log as
   (for example the Claude Code session JSONL), attributed to Alfred event windows
   or turns. Tokens are exact; cost is `null` unless an approved interaction cost
   source or rate card is applied. See the layered attribution below.
+- `host_raw_log`: sanitized technical JSONL written by a runtime hook outside
+  the demand; it may include request/tool/artifact metadata, never prompt/file
+  contents by default.
 - `usage_rate_card`: approved per-model/per-unit table applied to exact
   interaction usage; confidence `rated` or `estimated` depending on approval.
 - `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
@@ -119,14 +127,21 @@ usage), so tokens are exact. Cost is not in the transcript: it stays `null`
 unless an approved interaction-level cost source or `usage-rate-card` is
 provided. Do not allocate a ccusage session total into interaction events.
 
+- `--granularity request`: one event per host model request. Legacy
+  `--granularity turn` remains an alias for compatibility.
 - `--granularity window`: sum requests into windows bounded by consecutive Alfred
   event timestamps (needs real, distinct event `ts`). One-shot, run at close.
-- `--granularity turn`: one event per request (`usage-turn-<requestId>`), tagged
-  with the enclosing event. Idempotent — re-runs skip already-attributed
-  requests, so it is safe to append every checkpoint.
+- `--emit-interactions`: append `interaction_completed` aggregates from
+  request-level usage when `promptId` or a user boundary supports correlation.
 - `--rate-card-path`: optional approved `usage-rate-card` JSON. When supplied,
   transcript attribution can compute interaction cost from exact tokens. Without
   it, cost stays `null`.
+
+Interaction correlation priority:
+1. host-provided `promptId` or equivalent span id (`interaction_confidence:
+   exact`);
+2. transcript user boundary (`derived`);
+3. request-only, with `interaction_id: null` and the limitation recorded.
 
 The Claude Code Stop hook (`core/hooks/usage-attribution.md`) runs the turn mode
 automatically and out-of-band, since the host — not the in-band agent — owns the

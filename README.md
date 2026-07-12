@@ -11,6 +11,7 @@ Layer 1 of the framework is operational for pilots and real demands, and the SQ9
 - **Risk Mode:** FAST, Standard, or SAFE sets depth, artifacts, checkpoints, and model floor.
 - **Human in control:** AI proposes, organizes, executes, and records; humans decide.
 - **JIT context:** load only the current phase, lane, demand type, and active specialty.
+- **Measured operations:** usage, cost, cache, artifacts, and quality are collected from host transcripts, hooks, telemetry, exports, or approved rate cards; agents do not invent their own usage.
 
 ![Fluxo do Alfred: as 5 fases (Inception, Design, Execution, Validate, Operation) e os modos de risco FAST, Standard e SAFE](docs/assets/alfred-fluxo.svg)
 
@@ -35,6 +36,14 @@ One responsibility per folder — the mental model: **`core/` = what Alfred is �
 - **I want to USE Alfred in my squad** → run `install/` and read [`docs/onboarding-sigla.md`](docs/onboarding-sigla.md), then [`docs/quickstart-real-demand.md`](docs/quickstart-real-demand.md).
 - **I want to UNDERSTAND how it works** → [`core/README.md`](core/README.md) → [`core/risk-mode.md`](core/risk-mode.md) → [`rules/README.md`](rules/README.md).
 - **I want to CHANGE the framework** → [`AGENTS.md`](AGENTS.md) (invariants + validation) and [`docs/plan/implementation-plan-2.0.0.md`](docs/plan/implementation-plan-2.0.0.md) (active plan).
+
+## Observability and Cost
+Alfred keeps the demand log append-only at `05-operation/011-observability-log.jsonl`. The canonical split is:
+- `usage_attributed` for exact request/interaction usage from the host transcript/runtime.
+- `usage_cost_attributed` for cost derived from an approved source, linked by `parent_event_id`.
+- `interaction_completed`, `artifact_accessed`, `artifact_changed`, `validation_result`, `human_decision`, and `policy_insight_proposed` for governance signals.
+
+Claude Code can use `scripts/python/metrics/claude-code-usage-hook.py` to read durable transcripts incrementally, write a sanitized raw JSONL when `AI_OBS_RAW_LOG` is set, and append Alfred decision events when `ALFRED_OBS_LOG` or `ALFRED_STATE_PATH` is available. `ccusage` remains a session-total source for `001-state.md` and toolbar display only; it is not allocated across interactions. Devin keeps Session Insights/Consumption API as the preferred ACU source and must not invent token-level interaction data when the API/export does not provide it.
 
 ## Operating rule
 The framework is referenced by HUB and App repos; it is not copied into them. Generated artifacts live under `alfred-docs-hub` (HUB) and `.alfred-docs-app` (App) and are written in pt-BR. Framework files stay in English.

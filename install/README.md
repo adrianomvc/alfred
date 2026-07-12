@@ -214,6 +214,20 @@ python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host devin-cli
 For Claude Code use `-Host claude-code`; for Codex use `-Host codex`. Missing
 targets are skipped unless `-Create` is passed.
 
+## Claude Code usage hook
+Claude Code can collect request tokens from its transcript without asking the
+agent to estimate usage. Install or refresh the hook explicitly:
+
+```bash
+python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
+```
+
+To write only sanitized technical telemetry outside a demand, set
+`AI_OBS_RAW_LOG` and optionally `AI_OBS_MODE=raw`. To write Alfred decision
+events, set `ALFRED_STATE_PATH` or `ALFRED_OBS_LOG`; `AI_OBS_MODE=both` writes
+both. `ccusage` can still update `001-state.md` and the toolbar with the total
+session cost, but that total is not appended to interaction JSONL.
+
 ## Uninstall
 - Delete the skill folder (`%APPDATA%\devin\skills\alfred` or `~/.agents/skills/alfred`); optionally remove `~/.alfred`.
 

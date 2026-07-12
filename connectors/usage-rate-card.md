@@ -36,3 +36,7 @@ Interaction cost needs two inputs: exact interaction/request usage plus an
 approved rate card or a source that already provides per-interaction cost.
 ccusage session totals satisfy neither requirement for JSONL interaction cost;
 they update `001-state.md` only.
+
+Rate cards must include approval metadata (`source`, `approved_by`,
+`effective_from`, `currency`) and are hashed into every
+`usage_cost_attributed` event for auditability.

@@ -56,3 +56,9 @@ work only because exact token counting is unavailable.
 ## Audit
 For material Standard/SAFE work, record the budget note or the chosen context
 strategy in `audit` or observability metadata.
+
+## Observability
+When available, record planned versus actual usage as advisory data:
+`planned_tokens`, `actual_tokens`, `variance_tokens`, `variance_percent`,
+`overrun_reason`, source, confidence, approver, and scope. This is a human
+conversation trigger, not an automatic blocker.

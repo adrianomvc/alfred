@@ -42,6 +42,8 @@ Metric fields:
 - `duration_ms`
 - `tokens_input`
 - `tokens_output`
+- `tokens_cache_creation`
+- `tokens_cache_read`
 - `cost_usd`
 - `retry_count`
 
@@ -54,6 +56,16 @@ trace, or parent event when the host exposes those identifiers. Session totals
 such as `ccusage session --json` belong in `001-state.md` for toolbar display;
 they are not interaction events and must not be appended to the observability
 JSONL log or allocated into interaction cost.
+
+Scopes are explicit:
+- `event_scope: request` = one real model request/call, with `request_id`.
+- `event_scope: interaction` = one human prompt/span and all resulting requests
+  and tools.
+- `event_scope: step` = Alfred lifecycle step.
+- session-level totals stay in `001-state.md`.
+
+`--granularity turn` in legacy helpers is an alias for request-level attribution,
+not proof of one human interaction.
 
 Detail fields:
 - `input`
@@ -80,7 +92,15 @@ Detail fields:
 
 `alfred` records the framework version used to produce the event: `version`, `framework_ref`, `framework_commit`, and `schema_version`. This makes it possible to analyze old logs after Alfred evolves.
 
-`artifacts_used` records which artifacts were read, created, updated, or produced by the step. This is the field used to answer "what did Alfred use for this step?"
+`artifacts_used` records which artifacts were read, created, updated, or produced by the step. The canonical shape is a list of objects:
+
+```json
+{"artifacts_used":[{"path":"rules/common/token-budget-policy.md","artifact_type":"framework_policy","operation":"read","selection_reason":"token_heavy_step","observed_by":"claude_hook","size_bytes":4280,"lines_read":60,"content_hash":"sha256:...","first_seen_at":"2026-07-12T15:00:00Z","last_seen_at":"2026-07-12T15:00:03Z","read_count":1}]}
+```
+
+Readers must accept the legacy object form (`read`/`created`/`updated`/`output`)
+and normalize it into this list. Sensitive paths are redacted by category/hash;
+contents are never recorded by default.
 
 `actions` records the concrete step-by-step operations performed by Alfred: filesystem changes, command checks, validations, handoffs, or human checkpoints.
 
@@ -107,6 +127,10 @@ interaction cost is computed later from an approved rate card, append a
 total cost arrives, refresh the state fields used by the toolbar instead of
 appending a JSONL event.
 
+Unknown is not zero. Use `null` when duration, retry count, usage, cost, outcome,
+or file-change status was not observed. Use `0` only when the runtime/export
+observed a real zero. Use `[]` only when an empty list was actually observed.
+
 ## Event hygiene (enables attribution)
 Per-event `tokens_input`, `tokens_output`, and `cost_usd` stay `null` on hosts
 that do not expose per-interaction usage/cost (for example Claude Code). Exact
@@ -127,6 +151,12 @@ possible only if the event metadata is real:
   JSONL only from interaction/request-granular sources. Append interaction cost
   only from a source that already has interaction cost or from exact usage plus
   an approved rate card.
+- **Cache reuse ratio.** Rollups calculate
+  `cache_reuse_ratio = tokens_cache_read / (tokens_input + tokens_cache_creation + tokens_cache_read)`.
+  If the denominator is zero or not observed, the ratio is `n/a`.
+- **No double counting.** Rollups sum tokens only from `usage_attributed` events
+  and cost only from `usage_cost_attributed` events. Tokens copied into cost
+  events are evidence, not additional usage.
 
 ## Rollup
 Roll demand -> initiative -> org. Insights suggest policy changes; humans ratify them in commits.

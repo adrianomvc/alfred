@@ -18,8 +18,10 @@ triggers:
 - **Writes:** `metrics`, `summary`, `index`, close event in `audit`.
 
 ## Does
-- Capture elapsed time, phase time, interactions, model used, tokens/cost when available, review cycles, defects, and acceptance result.
+- Capture elapsed time, phase time, requests, interactions, model used, cache tokens, tokens/cost when available, review cycles, defects, and acceptance result.
 - Prefer `05-operation/011-observability-log.jsonl` as the event source for metrics; use `audit` only as fallback.
+- Count tokens from `usage_attributed` only and cost from `usage_cost_attributed` only; never treat missing metrics as zero.
+- Track artifacts/rules/skills loaded by interaction from canonical `artifacts_used` lists and `artifact_accessed` events.
 - In App-only mode, compute local repo metrics from `05-operation/008-observability-log.jsonl` and mark HUB rollup as pending sync.
 - Check baselines and produce insights for humans to ratify.
 - Refresh summaries so future sessions can resume with JIT context.

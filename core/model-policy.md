@@ -86,6 +86,13 @@ The policy uses **abstract tiers** (`cheap` / `medium` / `strong`); this map tra
 - **Human ratifies:** a change enters only with human approval → a new commit to this file (traceable). Never a silent switch.
 - **Declare the switch:** whenever the model changes between steps, Alfred **tells the person** (toolbar/interaction line, pt-BR), e.g. *"Mudando para <modelo> nesta etapa (Design/SAFE)."* The switch is also an `audit` event.
 
+## Evidence for future changes
+Model comparisons must consider the full context: model, effort, phase, lane,
+cost, first-pass acceptance, rework, validation result, duration, and
+interaction/request count. A cheaper model is not recommended on cost alone.
+Insights may propose a pilot, but this policy changes only after a human
+decision and explicit commit.
+
 ## User override
 The person may **set/switch the model at any time** — one step or the whole demand. Alfred respects and records it in `state`/`audit`. If the choice is **below the risk floor** (e.g. cheap model in SAFE), Alfred **warns the trade-off** (does not block — human in control) and records the decision. Raising the tier is free.
 
