@@ -8,7 +8,8 @@ are maintained by a validator or intentionally serve a documented fixture role.
 | `sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2/` | strict demand regression | `validate-demand --strict` |
 | `sq9-pilot/.alfred-docs-app/iniciativa-001-piloto/006-simulado-adocao-v2/` | strict app-side regression | `validate-demand --strict -AppDemandPath` |
 | `fresh-sigla-onboarding/` | onboarding fixture | `validate-framework` JSONL/link checks |
-| `connectors/` | connector handoff/sandbox fixture | `validate-connectors` |
+| `observability-fixtures/` | usage/cost/cache/artifact rollup fixture | `validate-framework` JSONL + rollup checks |
+| `connectors/` | connector handoff/sandbox fixture, including canonical observability decision events | `validate-connectors` + JSONL checks |
 | `toolbar-states/` | renderer input fixture | `validate-toolbar-fixtures` |
 | `toolbar-fixtures/` | renderer expected output fixture | `validate-toolbar-fixtures` |
 | `context-manifest-fixtures/` | JIT context manifest fixture | `validate-context-manifest-fixtures` |
