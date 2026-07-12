@@ -6,7 +6,7 @@ Connector contract: `connectors/telemetry-api.md`
 Use the optional script:
 
 ```bash
-python scripts/python/metrics/collect-observability.py -Root examples -OutputPath .tmp-observability-batch.jsonl
+python scripts/metrics/collect-observability.py -Root examples -OutputPath .tmp-observability-batch.jsonl
 ```
 
 ## Batch Shape

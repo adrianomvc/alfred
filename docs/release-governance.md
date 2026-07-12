@@ -23,7 +23,7 @@ Pre-1.0 versions may still change quickly. Record compatibility notes explicitly
 Before a version is announced or tagged:
 - update `VERSION` when the version changes;
 - update `CHANGELOG.md`;
-- run `python scripts/python/validators/validate-framework.py`;
+- run `python scripts/validators/validate-framework.py`;
 - confirm docs mention any changed artifact path, required field, lane rule, connector contract, or observability schema;
 - record migration notes when existing HUB/App artifacts need manual adjustment;
 - keep generated example artifacts parseable and aligned with current validators.

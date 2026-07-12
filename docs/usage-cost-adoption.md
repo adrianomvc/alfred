@@ -27,8 +27,8 @@ Fallback:
 ## Principles
 - Usage import is optional; Alfred runs without it.
 - Interaction/request usage records are append-only observability events.
-  Session totals are state fields for toolbar/forecast display unless the source
-  provides interaction-level records.
+  Session totals are state fields for toolbar display unless the source provides
+  interaction-level records; they must not drive demand forecasts.
 - Interaction cost records are separate append-only `usage_cost_attributed`
   events when exact usage is priced by an approved rate card.
 - Do not estimate USD cost unless the human provides an approved rate table or
@@ -123,7 +123,7 @@ Requirements:
 - import JSON into Alfred instead of treating the terminal report as evidence.
 
 Active helper:
-- `scripts/python/metrics/import-ccusage.py`;
+- `scripts/metrics/import-ccusage.py`;
 - input: `ccusage session --json` output or a saved JSON file;
 - output: `001-state.md` session cost fields for toolbar display. Optional
   debug snapshots may be written outside the observability log with
@@ -132,7 +132,7 @@ Active helper:
 Claude Code automatic path:
 
 ```bash
-python scripts/python/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
+python scripts/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
 Set `usage session id:` in `001-state.md` when the host exposes it. If it is
@@ -156,7 +156,7 @@ fields without asking the agent to estimate them:
 - artifacts/tools: captured only when the transcript or hook event exposes
   enough metadata; raw content is not recorded.
 
-The optional hook (`scripts/python/metrics/claude-code-usage-hook.py`) can write
+The optional hook (`scripts/metrics/claude-code-usage-hook.py`) can write
 sanitized raw telemetry outside the demand and normalized Alfred events inside
 the demand:
 
@@ -177,7 +177,7 @@ incremental cursor. The installed path currently uses the confirmed Claude Code
 configuration is confirmed. Manual close/flush remains:
 
 ```bash
-python scripts/python/metrics/attribute-usage-transcript.py --transcript-path <transcript.jsonl> --observability-log <hub-demand>/05-operation/011-observability-log.jsonl --granularity request --emit-interactions
+python scripts/metrics/attribute-usage-transcript.py --transcript-path <transcript.jsonl> --observability-log <hub-demand>/05-operation/011-observability-log.jsonl --granularity request --emit-interactions
 ```
 
 ## Devin Source Boundary
@@ -194,7 +194,7 @@ exact request tokens but not USD cost. To populate interaction cost in JSONL,
 Alfred needs an approved rate card:
 
 ```bash
-python scripts/python/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
+python scripts/metrics/apply-usage-rate-card.py -InputPath <hub-demand>/05-operation/011-observability-log.jsonl -RateCardPath <approved-rate-card.json>
 ```
 
 This appends `usage_cost_attributed` events that reference the original
@@ -218,8 +218,9 @@ configured:
    - `cost source: host_cost_command`
    - `cost usd: <numeric USD value>`
    - `cost confidence: exact` when `/cost` reports the current session total.
-3. Render the toolbar from `state`; the renderer reads `cost usd` and can show
-   the linear `Previsao`/`est. total` when progress is between 0 and 100.
+3. Render the toolbar from `state`; the renderer reads `cost usd` as
+   session-scoped unless demand-scoped cost evidence exists. It must not show a
+   demand forecast from `/cost`.
 4. If the value is not provided, keep `custo: nao coletado`; never invent a
    dollar amount.
 
@@ -232,7 +233,7 @@ Run one corporate pilot before implementing automatic policy suggestions:
 4. Capture the Devin session id (`devin-...`) and collect Session Insights plus
    session daily consumption after the run.
 5. Normalize interaction/request usage into `usage_attributed` events; keep
-   session totals in state for toolbar/forecast display.
+   session totals in state for toolbar display.
 6. If an approved rate card exists, append `usage_cost_attributed` events from
    the exact usage events.
 7. Close Operation with ACU, optional tokens, and optional USD cost in metrics.

@@ -54,7 +54,7 @@ Updating `~/.alfred` is not enough when a host reads a copied native entry file.
 After a framework pull, refresh the host entry with:
 
 ```bash
-python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host claude-code
 ```
 
 Use `-Host devin-cli` or `-Host codex` for those hosts. Missing targets are

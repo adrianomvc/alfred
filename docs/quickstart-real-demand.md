@@ -65,7 +65,7 @@ Keep `001-index.md` as the app-local context index. It should point to reverse e
 When creating `01-inception/002-reverse-eng.md`, record the app commit used for the analysis. Before code changes, recheck staleness:
 
 ```bash
-python scripts/python/validators/validate-reverse-eng-staleness.py -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
+python scripts/validators/validate-reverse-eng-staleness.py -ReverseEngPath .alfred-docs-app/<id-iniciativa>/<id-demanda>/01-inception/002-reverse-eng.md -AppRepoPath .
 ```
 
 ## App-only mode
@@ -108,7 +108,7 @@ Before running commands against real infrastructure or external hosts, confirm `
 Before entering Execution for Standard/SAFE, run the optional SDD gate:
 
 ```bash
-python scripts/python/validators/validate-sdd-gate.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
+python scripts/validators/validate-sdd-gate.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```
 
 Keep `001-state.md` current. A demand is only closed when the checklist is complete and `05-operation/009-summary.md`/`05-operation/008-metrics.md` are updated from `05-operation/011-observability-log.jsonl`.
@@ -116,7 +116,7 @@ Keep `001-state.md` current. A demand is only closed when the checklist is compl
 If a host usage source is available, normalize it before closure using the
 `usage-cost` connector contract. For Devin, prefer ACU/session consumption first;
 tokens are optional and may be unavailable. For Claude Code/Codex local CLI
-sessions with durable logs, run `scripts/python/metrics/import-ccusage.py`
+sessions with durable logs, run `scripts/metrics/import-ccusage.py`
 against the demand state before the manual cost fallback. If no source is
 available, mark usage/cost as not collected instead of estimating.
 
@@ -130,7 +130,7 @@ Stamp the active Alfred version in `001-state.md`, `05-operation/008-metrics.md`
 Before advancing to a major checkpoint or closing a demand, run the optional demand validator:
 
 ```bash
-python scripts/python/validators/validate-demand.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
+python scripts/validators/validate-demand.py -HubDemandPath <alfred-docs-hub>/<id-iniciativa>/<id-demanda>
 ```
 
 Use `-Strict` before closure when warnings should block the close.

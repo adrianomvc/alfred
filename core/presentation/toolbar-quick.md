@@ -8,7 +8,7 @@ spec (layers, profiles, rules):
 `core/presentation/toolbar.md` — load it only when a case is not covered here.
 
 ## Rendering procedure
-1. Prefer the helper with the default rich profile: `python scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md` (or `-Profile rich` explicitly). On Claude Code, add `-RegisterActive` so the usage attribution Stop hook can target the same demand log.
+1. Prefer the helper with the default rich profile: `python scripts/workflow/render-toolbar.py -StatePath <demand>/001-state.md` (or `-Profile rich` explicitly). On Claude Code, add `-RegisterActive` so the usage attribution Stop hook can target the same demand log.
 2. If the helper cannot run, use this file as the loaded source and emit the
    documented text fallback from `state`.
 3. Do not pass `-Profile text` in a host that renders Unicode/emoji. Text is a
@@ -19,8 +19,10 @@ spec (layers, profiles, rules):
 ## Preferred rich block
 ```text
 ╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
-│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
-│ Previsão: ~US$ 3.00                                                        │
+│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱                              │
+│ Custo: US$ 1.20 · demanda · usage_cost_rollup · rated                       │
+│ Uso: 45,2 mil tokens · cache 50%                                            │
+│ Previsão demanda: ~US$ 3.00                                                 │
 │ Framework: v2.0.0 (a289a26)        App: f9a3739                            │
 ├────────────────────────────────────────────────────────────────────────────┤
 │ 1 Inception ✅ · 2 Design ✅ · 3 Execution ▶ · 4 Validate ○ · 5 Operation ○ │
@@ -46,14 +48,16 @@ Proximo: <next step from state>
 - Progress = completed phases / 5; rich markers: `✅` done · `▶` current · `○` pending. Text fallback statuses: `ok` · `agora` · `pendente`.
 - Phase labels stay numbered and canonical: `1 Inception` · `2 Design` · `3 Execution` · `4 Validate` · `5 Operation`.
 - Execution-first (emergency): track becomes `Execution-first stabilization -> Inception posterior -> Design posterior -> Validate posterior -> Operation / post-mortem`.
-- Cost is shown prominently in the top block. If no host usage source exists, write
-  `custo: nao coletado` (or include the `usage-cost` state note); never hide it.
+- Cost and usage are shown prominently in the top block. If no host usage source
+  exists, write `Consumo: nao coletado` with the configured gap; never hide it.
 - If `state` has session-level `cost usd:` from an approved export, `ccusage`,
   or a host-native cost command such as Claude Code `/cost`, render that value.
-  Do not read ccusage session totals from observability JSONL.
-- With a numeric cost and 0<progress<100, append `| est. total: ~US$ <linear>` (estimate, never a fact).
-- With a numeric cost and progress at 0% or 100%, show the forecast as unavailable with the reason; do not hide it and do not invent a total.
+  Do not read ccusage session totals from observability JSONL, and do not treat
+  session cost as demand cost.
+- Render a forecast only when a demand-scoped cost is known, progress is between
+  0 and 100, and coverage is sufficient. Never forecast the demand from a
+  session total.
 - Show traceability next to cost: `Framework: v<version> (<commit>)` and
   `App: <commit>`. Prefer stamped state fields; otherwise the helper may read
   the current framework clone and app artifacts.
-- Helper (optional but preferred whenever available): `render-toolbar` in `scripts/python/workflow/`.
+- Helper (optional but preferred whenever available): `render-toolbar` in `scripts/workflow/`.

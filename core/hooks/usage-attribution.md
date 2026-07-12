@@ -10,7 +10,7 @@ Per-event `tokens`/`cost` are `null` on hosts that do not expose per-interaction
 usage in-band (`metrics/metrics.md` → Event hygiene). Usage is recovered in
 layers, each more faithful and less in-band:
 
-- **Layer 1 — window attribution.** `scripts/python/metrics/attribute-usage-transcript.py --granularity window` sums transcript requests into windows bounded by consecutive Alfred event timestamps. Needs real, distinct event `ts` (Layer 0).
+- **Layer 1 — window attribution.** `scripts/metrics/attribute-usage-transcript.py --granularity window` sums transcript requests into windows bounded by consecutive Alfred event timestamps. Needs real, distinct event `ts` (Layer 0).
 - **Layer 2 — request attribution.** `--granularity request` emits one event per transcript request, id `usage-request-<requestId>`, tagged with the enclosing Alfred event. Legacy `--granularity turn` remains an alias for request, not proof of one human turn.
 - **Layer 3 — interaction aggregation.** `--emit-interactions` derives `interaction_completed` from request events when the transcript exposes `promptId` or a user boundary.
 - **Layer 4 — this hook.** The layer that owns the usage object stamps it, not the in-band agent. Claude Code Stop/SubagentStop hooks pass `transcript_path`; the transcript holds exact usage per request. The hook runs request attribution incrementally.
@@ -39,7 +39,7 @@ first (never a literal `~`):
         "hooks": [
           {
             "type": "command",
-            "command": "python <abs>/.alfred/scripts/python/metrics/claude-code-usage-hook.py"
+            "command": "python <abs>/.alfred/scripts/metrics/claude-code-usage-hook.py"
           }
         ]
       }
@@ -65,7 +65,7 @@ Optional raw technical log:
 If the environment is not set, render the toolbar with `-RegisterActive` first:
 
 ```bash
-python ~/.alfred/scripts/python/workflow/render-toolbar.py -StatePath <demand>/001-state.md -RegisterActive
+python ~/.alfred/scripts/workflow/render-toolbar.py -StatePath <demand>/001-state.md -RegisterActive
 ```
 
 That writes `~/.alfred/runtime/active-demand.json`, which the Stop hook reads as
@@ -74,7 +74,7 @@ the fallback target.
 To install the hook while refreshing the Claude Code host entry:
 
 ```bash
-python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
 ```
 
 ## Behavior
@@ -85,9 +85,10 @@ python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -C
 - Privacy-preserving: raw logs contain metadata, ids, token counts, tool names,
   redacted paths, hashes, and counters; not prompt/response/file contents.
 - Policy snapshot: when an Alfred destination is available, the hook appends one
-  idempotent session-scoped `artifact_accessed` event with version/commit and
+  idempotent session-scoped `policy_snapshot` event with version/commit and
   hashes for the core model/usage/context policies. It records references and
-  hashes only, never policy content.
+  hashes only, never policy content. Snapshots are evidence of the governing
+  policy version; they are not counted as real artifact reads.
 - Non-blocking: exits `0` on every path. A missing target or any error is written
   to stderr and ignored — the session is never blocked.
 - Current installer wires the supported `Stop` hook. `SessionEnd` is not added
@@ -98,9 +99,9 @@ python ~/.alfred/scripts/python/workflow/sync-host-shims.py -Host claude-code -C
 The transcript is written asynchronously and may lag the current turn, so the
 final turn is captured on the next Stop or at close. If the hook cannot resolve a
 target, nothing is written; run
-`scripts/python/metrics/attribute-usage-transcript.py` manually at close, and
+`scripts/metrics/attribute-usage-transcript.py` manually at close, and
 keep the ccusage session import (`connectors/usage-cost.md`) as the session-total
-toolbar backstop. Apply `scripts/python/metrics/apply-usage-rate-card.py` only
+toolbar backstop. Apply `scripts/metrics/apply-usage-rate-card.py` only
 when an approved rate card prices exact interaction usage; it appends
 `usage_cost_attributed` events instead of editing the token event. Record the
 limitation only when it affects validation, evidence, or a human decision.

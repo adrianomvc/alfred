@@ -93,8 +93,8 @@ o host não oferece nada especial.
 ## Evidência de validação
 Cada fase foi validada com:
 
-- `python scripts/python/validators/validate-framework.py -Root .`
-- `python scripts/python/validators/validate-framework.py -Root .`
+- `python scripts/validators/validate-framework.py -Root .`
+- `python scripts/validators/validate-framework.py -Root .`
 
 O fechamento também preserva:
 - link validation limpo dentro de `validate-framework`;

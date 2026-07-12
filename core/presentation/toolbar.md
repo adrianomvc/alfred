@@ -7,7 +7,7 @@ Orchestrator from `state`. It is never a separate source of truth.
 is the full spec: layers, profiles, and rules — load it when a case is not
 covered there or when changing the renderer.
 
-`scripts/python/workflow/render-toolbar.py` is an optional
+`scripts/workflow/render-toolbar.py` is an optional
 helper that renders it from a `001-state.md`. Hosts that cannot run scripts
 render it manually from the same fields.
 
@@ -32,8 +32,10 @@ with `welcome-screen.md`:
 
 ```text
 ╭─ 🎩 ALFRED · TST · #toolbar-standard ──────────────────────────────────────╮
-│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱   Custo: US$ 1.20           │
-│ Previsão: ~US$ 3.00                                                        │
+│ Modo: 🟡 STANDARD   Progresso: 40%  ▰▰▰▰▱▱▱▱▱▱                              │
+│ Custo: US$ 1.20 · demanda · usage_cost_rollup · rated                       │
+│ Uso: 45,2 mil tokens · cache 50%                                            │
+│ Previsão demanda: ~US$ 3.00                                                 │
 │ Framework: v2.0.0 (a289a26)        App: f9a3739                            │
 ├────────────────────────────────────────────────────────────────────────────┤
 │ 1 Inception ✅ · 2 Design ✅ · 3 Execution ▶ · 4 Validate ○ · 5 Operation ○ │
@@ -44,14 +46,13 @@ with `welcome-screen.md`:
 
 Progress = completed phases / 5. The phase track uses numbered canonical phase
 names with `✅` / `▶` / `○` statuses; Execution-first swaps the track for the
-emergency sequence with posterior phases. Cost is prominent top-block
-information: show the compact cost when collected, otherwise show
-`custo: nao coletado` and, when available, the `usage-cost` state note. A
-numeric cost (helper flag `-CostUsd`) adds `est. total: ~US$ <linear forecast>`
-while 0 < progress < 100 — an estimate, labeled `~`. When numeric cost exists
-but progress is 0% or 100%, the toolbar shows the forecast as unavailable with
-the reason instead of hiding it or inventing a total. Traceability appears in the same block: `Framework: v<version>
-(<commit>)` and `App: <commit>`.
+emergency sequence with posterior phases. Cost and usage are prominent
+top-block information: show the compact cost with scope/source/confidence when
+collected, otherwise show the specific gap. Session totals (`ccusage`,
+host-native cost commands, or session exports) are display-only and must not be
+treated as demand cost. A linear forecast appears only when demand-scoped cost
+is known, 0 < progress < 100, and coverage is sufficient. Traceability appears
+in the same block: `Framework: v<version> (<commit>)` and `App: <commit>`.
 
 ## Text floor (fallback)
 No Unicode dependency; degrades anywhere. **FAST** is one line;

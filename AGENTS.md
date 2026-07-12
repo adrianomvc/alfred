@@ -15,13 +15,13 @@ A markdown-first governance framework for hybrid squads (humans + AI). Kernel in
 
 ## Conventions
 - Folder entry points: navigation index = `README.md`; contract registry = `<name>.md` (e.g. `skills/skills.md`, `connectors/connectors.md`, `metrics/metrics.md`).
-- Skills are folders: each built-in skill is `skills/<name>/SKILL.md` (the ~1-screen entry) plus optional sibling files (checklists, reference tables) loaded JIT; `skills/skills.md` stays the generated registry. A HUB may carry local squad skills at `<hub>/skills/<name>/SKILL.md` or external pointers in `<hub>/004-skills.md`. Precedence: HUB (specific) over framework (global), safety always first; fallback is discovery in an allowlisted catalog. Skill folders hold content, not executable helpers (those stay in `scripts/python/`).
-- Helper logic and documented helper commands are Python-canonical under `scripts/python/`. Do not add a second helper implementation unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
+- Skills are folders: each built-in skill is `skills/<name>/SKILL.md` (the ~1-screen entry) plus optional sibling files (checklists, reference tables) loaded JIT; `skills/skills.md` stays the generated registry. A HUB may carry local squad skills at `<hub>/skills/<name>/SKILL.md` or external pointers in `<hub>/004-skills.md`. Precedence: HUB (specific) over framework (global), safety always first; fallback is discovery in an allowlisted catalog. Skill folders hold content, not executable helpers (those stay in `scripts/`).
+- Helper logic and documented helper commands are Python-canonical under `scripts/`. Do not add a second helper implementation unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
 - Templates carry the note that generated content is written in pt-BR.
 
 ## Before finishing any change
 Run the canonical Python gate and require 0 errors (includes link validation):
-- `python scripts/python/validators/validate-framework.py`
+- `python scripts/validators/validate-framework.py`
 
 Version/release rules: `docs/release-governance.md`. All current work lands under the version in `VERSION` — no bumps per change (owner decision recorded in the plan).
 

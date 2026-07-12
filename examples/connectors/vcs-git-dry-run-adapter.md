@@ -75,5 +75,5 @@ The handoff must include demand id, branch, base branch, files expected to chang
 
 ## fixture
 - minimal fixture path: `examples/connectors/git-pr-handoff.md`
-- validation command: `python scripts/python/validators/validate-connectors.py`
+- validation command: `python scripts/validators/validate-connectors.py`
 - expected result: connector and adapter validation completes

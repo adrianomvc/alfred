@@ -19,7 +19,7 @@ triggers:
 
 ## Does
 - Detect current phase, lane, stream/type, blockers, and next agent.
-- Render progress at every interaction from `state`: use `scripts/python/workflow/render-toolbar.py` when available. If the helper cannot run, load `core/presentation/toolbar-quick.md` first and emit the documented text fallback only. Do not improvise a rich toolbar or duplicate an old visual from memory.
+- Render progress at every interaction from `state`: use `scripts/workflow/render-toolbar.py` when available. If the helper cannot run, load `core/presentation/toolbar-quick.md` first and emit the documented text fallback only. Do not improvise a rich toolbar or duplicate an old visual from memory.
 - Validate HUB/App links at each handoff.
 - Detect write scope: HUB, App with HUB available, or App-only. In App-only mode, write no HUB files; update `05-operation/009-hub-sync.md` instead.
 - Apply model policy: lane floor + phase/agent adjustment; announce model changes.

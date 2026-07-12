@@ -61,10 +61,10 @@ Open-ended exceptions are not valid framework defaults.
 Run:
 
 ```bash
-python scripts/python/validators/validate-knowledge.py
+python scripts/validators/validate-knowledge.py
 ```
 ```bash
-python scripts/python/validators/validate-knowledge.py
+python scripts/validators/validate-knowledge.py
 ```
 
 The validator checks the framework knowledge files, the policy template, and example HUB knowledge policies.
