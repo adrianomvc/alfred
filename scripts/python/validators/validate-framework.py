@@ -104,7 +104,7 @@ REQUIRED_PATHS = [
     "docs/onboarding-sigla.md",
     "docs/framework-validation.md",
     "docs/host-adapter-readiness.md",
-    "docs/observability-architecture.md",
+    "docs/scripts-architecture.md",
     "docs/version-adoption.md",
     "docs/release-governance.md",
     "CHANGELOG.md",
@@ -126,14 +126,15 @@ REQUIRED_PATHS = [
     "scripts/python/metrics/import-ccusage.py",
     "scripts/python/metrics/apply-usage-rate-card.py",
     "scripts/python/metrics/normalize-usage-cost.py",
-    "scripts/python/observability/domain/models.py",
-    "scripts/python/observability/domain/enums.py",
-    "scripts/python/observability/application/ports/adapters.py",
-    "scripts/python/observability/application/use_cases/reconcile_usage_summary.py",
-    "scripts/python/observability/infrastructure/repositories/jsonl_event_repository.py",
-    "scripts/python/observability/infrastructure/repositories/json_usage_summary_repository.py",
-    "scripts/python/observability/entrypoints/adapter_bootstrap.py",
-    "scripts/python/observability/presentation/toolbar_presenter.py",
+    "scripts/shared/__init__.py",
+    "scripts/shared/observability/domain/models.py",
+    "scripts/shared/observability/domain/enums.py",
+    "scripts/shared/observability/application/ports/adapters.py",
+    "scripts/shared/observability/application/use_cases/reconcile_usage_summary.py",
+    "scripts/shared/observability/infrastructure/repositories/jsonl_event_repository.py",
+    "scripts/shared/observability/infrastructure/repositories/json_usage_summary_repository.py",
+    "scripts/shared/observability/composition/adapter_bootstrap.py",
+    "scripts/shared/observability/presentation/toolbar_presenter.py",
     "scripts/python/validators/validate-framework.py",
     "scripts/python/validators/validate-demand.py",
     "scripts/python/validators/validate-reverse-eng-staleness.py",
@@ -147,7 +148,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-token-economy-policy.py",
     "scripts/python/validators/validate-observability-hygiene.py",
     "scripts/python/validators/validate-observability-intelligence.py",
-    "scripts/python/validators/validate-observability-architecture.py",
+    "scripts/python/validators/validate-scripts-architecture.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/usage-rate-card.md",
@@ -368,7 +369,7 @@ def assert_toolbar_rendering_policy(root):
             "RegisterActive",
             "active-demand.json",
         ],
-        "scripts/python/observability/presentation/toolbar_presenter.py": [
+        "scripts/shared/observability/presentation/toolbar_presenter.py": [
             "fonte de custo não configurada",
             "adapter de uso não configurado",
             "CostForecastService",
@@ -618,8 +619,9 @@ def assert_usage_rate_card_policy(root):
             "usage_cost_attributed",
             "Human decision: pending",
         ],
-        "scripts/python/validators/validate-observability-architecture.py": [
+        "scripts/python/validators/validate-scripts-architecture.py": [
             "Forbidden import",
+            "Shared package must not import",
             "SyntheticCreditAdapter",
         ],
     }
@@ -709,7 +711,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-observability-hygiene.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-observability-intelligence.py")
-    run_sub(root, "scripts/python/validators/validate-observability-architecture.py")
+    run_sub(root, "scripts/python/validators/validate-scripts-architecture.py")
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))

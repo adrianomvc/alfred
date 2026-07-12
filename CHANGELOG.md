@@ -29,11 +29,12 @@ All notable Alfred framework changes should be recorded here.
   legacy `artifacts_used`, and reports data-quality coverage.
 - `generate-metrics-insights.py` proposes evidence-backed policy/rule/skill
   insights without changing policies automatically.
-- Layered observability package under `scripts/python/observability/` with
-  domain models, application ports/use cases, infrastructure repositories,
-  host adapter registry, and toolbar presentation view models. This keeps
-  metrics host-agnostic while allowing Claude Code, Codex, Devin, ccusage, and
-  generic adapters to remain thin edge implementations.
+- Shared SOLID package under `scripts/shared/`, with the first implemented
+  subdomain at `scripts/shared/observability/`: domain
+  models, application ports/use cases, infrastructure repositories, host adapter
+  registry, and toolbar presentation view models. This keeps scripts
+  host-agnostic while allowing Claude Code, Codex, Devin, ccusage, and generic
+  adapters to remain thin edge implementations.
 
 ### Fixed
 - `ccusage` session totals are now state-only for toolbar/forecast display:

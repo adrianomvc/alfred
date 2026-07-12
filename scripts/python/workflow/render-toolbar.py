@@ -10,15 +10,18 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+SCRIPTS_ROOT = Path(__file__).resolve().parents[2]
+PYTHON_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(SCRIPTS_ROOT))
+sys.path.insert(0, str(PYTHON_ROOT))
 from _common import get_field, read_lines, read_state_fields  # noqa: E402
-from observability.application.use_cases.reconcile_usage_summary import ReconcileUsageSummary  # noqa: E402
-from observability.domain.models import SummaryKey  # noqa: E402
-from observability.domain.services.cost_calculator import CostResolver  # noqa: E402
-from observability.infrastructure.repositories.json_usage_summary_repository import JsonUsageSummaryRepository, NoopUsageSummaryRepository  # noqa: E402
-from observability.infrastructure.repositories.jsonl_event_repository import JsonlEventRepository  # noqa: E402
-from observability.infrastructure.system_clock import SystemClock  # noqa: E402
-from observability.presentation.toolbar_presenter import ToolbarViewModelBuilder  # noqa: E402
+from shared.observability.application.use_cases.reconcile_usage_summary import ReconcileUsageSummary  # noqa: E402
+from shared.observability.domain.models import SummaryKey  # noqa: E402
+from shared.observability.domain.services.cost_calculator import CostResolver  # noqa: E402
+from shared.observability.infrastructure.repositories.json_usage_summary_repository import JsonUsageSummaryRepository, NoopUsageSummaryRepository  # noqa: E402
+from shared.observability.infrastructure.repositories.jsonl_event_repository import JsonlEventRepository  # noqa: E402
+from shared.observability.infrastructure.system_clock import SystemClock  # noqa: E402
+from shared.observability.presentation.toolbar_presenter import ToolbarViewModelBuilder  # noqa: E402
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[3]
 
