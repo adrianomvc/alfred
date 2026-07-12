@@ -120,6 +120,8 @@ REQUIRED_PATHS = [
     "scripts/python/workflow/sync-host-shims.py",
     "scripts/python/metrics/collect-observability.py",
     "scripts/python/metrics/generate-metrics-rollup.py",
+    "scripts/python/metrics/generate-metrics-insights.py",
+    "scripts/python/metrics/observability.py",
     "scripts/python/metrics/import-ccusage.py",
     "scripts/python/metrics/apply-usage-rate-card.py",
     "scripts/python/metrics/normalize-usage-cost.py",
@@ -135,6 +137,7 @@ REQUIRED_PATHS = [
     "scripts/python/validators/validate-context-compression-policy.py",
     "scripts/python/validators/validate-token-economy-policy.py",
     "scripts/python/validators/validate-observability-hygiene.py",
+    "scripts/python/validators/validate-observability-intelligence.py",
     "scripts/python/validators/validate-model-policy.py",
     "connectors/usage-cost.md",
     "connectors/usage-rate-card.md",
@@ -150,6 +153,7 @@ REQUIRED_PATHS = [
     "examples/connectors/usage-export.jsonl",
     "examples/connectors/usage-attribution-events.jsonl",
     "examples/connectors/usage-attribution-tokens-only.jsonl",
+    "examples/connectors/observability-decision-events.jsonl",
     "examples/toolbar-fixtures/fast.txt",
     "examples/toolbar-fixtures/safe.txt",
     "examples/toolbar-fixtures/execution-first.txt",
@@ -163,6 +167,7 @@ REQUIRED_PATHS = [
     "examples/context-manifest-fixtures/safe-engineering-inception.txt",
     "examples/generated/metrics-rollup.md",
     "examples/generated/insights.md",
+    "examples/observability-fixtures/example-demand/05-operation/011-observability-log.jsonl",
     "examples/staleness-fixtures/reverse-eng-fresh.md",
 ]
 
@@ -586,6 +591,18 @@ def assert_usage_rate_card_policy(root):
             "rate_card_hash",
             "no session-total allocation",
         ],
+        "scripts/python/metrics/generate-metrics-rollup.py": [
+            "USAGE_EVENT",
+            "COST_EVENT",
+            "tokens_cache_read",
+            "cache_reuse_ratio",
+        ],
+        "scripts/python/validators/validate-observability-intelligence.py": [
+            "cursor",
+            "AI_OBS_RAW_LOG",
+            "usage_cost_attributed",
+            "Human decision: pending",
+        ],
     }
     for rel, phrases in checks.items():
         text = (root / rel).read_text(encoding="utf-8")
@@ -651,6 +668,7 @@ def main():
 
     assert_jsonl(root / "examples/connectors/usage-export.jsonl")
     assert_jsonl(root / "examples/connectors/usage-attribution-events.jsonl")
+    assert_jsonl(root / "examples/connectors/observability-decision-events.jsonl")
     assert_question_format_policy(root)
     assert_gender_neutral_persona_policy(root)
     assert_host_shim_sync_policy(root)
@@ -671,6 +689,7 @@ def main():
     run_sub(root, "scripts/python/validators/validate-context-compression-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-token-economy-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-observability-hygiene.py", "-Root", str(root))
+    run_sub(root, "scripts/python/validators/validate-observability-intelligence.py")
     run_sub(root, "scripts/python/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-knowledge.py", "-Root", str(root))
     run_sub(root, "scripts/python/validators/validate-links.py", "-Root", str(root))

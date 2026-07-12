@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-"""Attribute host transcript usage to Alfred observability windows or turns.
+"""Attribute Claude Code transcript usage to Alfred request/interaction events.
 
-Layers 1-2 of the usage-cost design. A Claude Code transcript records exact
-token usage per API request (``requestId``); a single request spans several
-JSONL lines that repeat the same ``usage`` object, so usage MUST be de-duplicated
-by ``requestId`` before summing. This helper reads a transcript, de-dupes by
-request, and emits append-only ``usage_attributed`` events:
+Claude Code transcripts expose exact model usage on assistant records with a
+stable ``requestId``. Human turns are user records with ``promptId`` when the
+host can provide it. This helper keeps those concepts separate:
 
-- ``--granularity window`` (Layer 1): sum the requests whose timestamp falls in
-  each window bounded by consecutive Alfred event timestamps, and attribute that
-  bucket to the anchoring event. Depends on real, distinct event ``ts`` (Layer 0).
-- ``--granularity turn`` (Layer 2): emit one event per request, tagged with the
-  Alfred event whose window encloses it, carrying the exact ``requestId``/``uuid``.
+- ``request``: one real model API request.
+- ``interaction``: one human prompt plus the requests/tools that follow it.
+- ``session``: the host session.
 
-Tokens are exact (from the transcript). Cost is NOT in the transcript: it stays
-``null`` (``cost_confidence: unavailable``) unless an approved interaction
-rate card is supplied with ``--rate-card-path``. A ccusage session total belongs
-in ``001-state.md`` for toolbar display, not in interaction JSONL events.
+The legacy ``--granularity turn`` flag is still accepted as an alias for
+``request`` for compatibility. Cost remains ``null`` unless an approved rate
+card is supplied; ccusage session totals are never allocated into requests.
+In policy terms, ccusage/session totals are not allocated across interactions.
 """
 
 import argparse
@@ -24,15 +20,13 @@ import hashlib
 import json
 import os
 import sys
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_state_fields, value_or  # noqa: E402
-
-
-def now_iso():
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+from metrics.observability import canonical_artifact, now_iso, usage_tokens  # noqa: E402
 
 
 def parse_ts(raw):
@@ -50,122 +44,10 @@ def parse_ts(raw):
     return parsed.astimezone(timezone.utc)
 
 
-def load_transcript_requests(path):
-    """Return requests de-duplicated by ``requestId``, sorted by start time.
-
-    Each request keeps the earliest timestamp seen (start) and the final line's
-    usage (complete). Only ``assistant`` lines carry usage.
-    """
-    requests = {}
-    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
-        if not raw.strip():
-            continue
-        try:
-            record = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if record.get("type") != "assistant":
-            continue
-        request_id = record.get("requestId") or record.get("uuid")
-        message = record.get("message") or {}
-        usage = message.get("usage") or {}
-        ts = parse_ts(record.get("timestamp"))
-        tokens = {
-            "tokens_input": usage.get("input_tokens") or 0,
-            "tokens_output": usage.get("output_tokens") or 0,
-            "tokens_cache_creation": usage.get("cache_creation_input_tokens") or 0,
-            "tokens_cache_read": usage.get("cache_read_input_tokens") or 0,
-        }
-        existing = requests.get(request_id)
-        if existing is None:
-            requests[request_id] = {
-                "request_id": request_id,
-                "uuid": record.get("uuid"),
-                "ts": ts,
-                "model": message.get("model"),
-                **tokens,
-            }
-        else:
-            if ts and (existing["ts"] is None or ts < existing["ts"]):
-                existing["ts"] = ts
-            # Final line of a request holds the complete usage.
-            existing.update(tokens)
-            existing["model"] = message.get("model") or existing["model"]
-    ordered = [r for r in requests.values() if r["ts"] is not None]
-    ordered.sort(key=lambda r: r["ts"])
-    return ordered
-
-
-def already_attributed_request_ids(path):
-    """Collect request ids already emitted as transcript ``usage_attributed``.
-
-    Lets the Stop hook re-run every turn without duplicating: a request keeps its
-    stable ``usage-turn-<requestId>`` id, so previously attributed turns are
-    skipped instead of appended twice.
-    """
-    seen = set()
-    if not path or not Path(path).exists():
-        return seen
-    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
-        if not raw.strip():
-            continue
-        try:
-            event = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if event.get("event_type") != "usage_attributed":
-            continue
-        for request_id in (event.get("input") or {}).get("request_ids") or []:
-            seen.add(request_id)
-    return seen
-
-
-def load_events(path):
-    """Return real Alfred work events (not prior attribution) with parsed ts."""
-    events = []
-    if not path or not Path(path).exists():
-        return events
-    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
-        if not raw.strip():
-            continue
-        try:
-            event = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if event.get("event_type") == "usage_attributed":
-            continue
-        ts = parse_ts(event.get("ts"))
-        if ts is None:
-            continue
-        events.append(
-            {
-                "ts": ts,
-                "event_id": event.get("event_id"),
-                "phase": event.get("phase"),
-                "lane": event.get("lane"),
-                "step": event.get("step"),
-            }
-        )
-    events.sort(key=lambda e: e["ts"])
-    return events
-
-
-def total_tokens(bucket):
-    return (
-        bucket["tokens_input"]
-        + bucket["tokens_output"]
-        + bucket["tokens_cache_creation"]
-        + bucket["tokens_cache_read"]
-    )
-
-
-def empty_tokens():
-    return {
-        "tokens_input": 0,
-        "tokens_output": 0,
-        "tokens_cache_creation": 0,
-        "tokens_cache_read": 0,
-    }
+def iso(dt):
+    if not isinstance(dt, datetime):
+        return None
+    return dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def load_rate_card(path):
@@ -182,75 +64,250 @@ def load_rate_card(path):
     return payload
 
 
-def rate_for_model(model, rate_card):
+def rates_for(model, rate_card):
     if not rate_card:
         return None
     return (rate_card.get("models") or {}).get(model)
 
 
-def calculate_cost(bucket, rates):
+def calculate_cost(tokens, rates):
     total = (
-        bucket["tokens_input"] * float(rates.get("input_per_1m") or 0)
-        + bucket["tokens_output"] * float(rates.get("output_per_1m") or 0)
-        + bucket["tokens_cache_creation"] * float(rates.get("cache_creation_per_1m") or 0)
-        + bucket["tokens_cache_read"] * float(rates.get("cache_read_per_1m") or 0)
+        tokens["tokens_input"] * float(rates.get("input_per_1m") or 0)
+        + tokens["tokens_output"] * float(rates.get("output_per_1m") or 0)
+        + tokens["tokens_cache_creation"] * float(rates.get("cache_creation_per_1m") or 0)
+        + tokens["tokens_cache_read"] * float(rates.get("cache_read_per_1m") or 0)
     )
     return round(total / 1_000_000, 8)
 
 
-def add_tokens(target, request):
-    for key in empty_tokens():
-        target[key] += request[key]
+def read_cursor(cursor_path, transcript_path):
+    if not cursor_path or not Path(cursor_path).exists():
+        return 0
+    try:
+        payload = json.loads(Path(cursor_path).read_text(encoding="utf-8-sig"))
+    except (json.JSONDecodeError, OSError):
+        return 0
+    if payload.get("transcript_path") != str(Path(transcript_path).resolve()):
+        return 0
+    try:
+        offset = int(payload.get("last_byte_offset") or 0)
+    except (TypeError, ValueError):
+        return 0
+    size = Path(transcript_path).stat().st_size
+    if offset < 0 or offset > size:
+        return 0
+    return offset
 
 
-def assign_windows(requests, events):
-    """Bucket requests into windows anchored by consecutive events.
+def write_cursor(cursor_path, transcript_path, offset, last_request_id=None):
+    if not cursor_path:
+        return
+    target = Path(cursor_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "transcript_path": str(Path(transcript_path).resolve()),
+        "last_byte_offset": offset,
+        "last_request_id": last_request_id,
+        "updated_at": now_iso(),
+    }
+    tmp = target.with_suffix(target.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8")
+    tmp.replace(target)
 
-    Window i spans [events[i].ts, events[i+1].ts); the first window extends to
-    -inf and the last to +inf so every request is captured exactly once.
-    """
-    if not events:
-        # No boundaries: one window over the whole transcript.
-        bucket = {"anchor": None, "start": None, "end": None, "model": None, **empty_tokens(), "request_ids": []}
-        for request in requests:
-            add_tokens(bucket, request)
-            bucket["request_ids"].append(request["request_id"])
-            bucket["model"] = request["model"] if bucket["model"] in (None, request["model"]) else "__mixed__"
-        return [bucket] if requests else []
 
-    buckets = []
-    for index, event in enumerate(events):
-        lower = None if index == 0 else event["ts"]
-        upper = events[index + 1]["ts"] if index + 1 < len(events) else None
-        buckets.append(
-            {
-                "anchor": event,
-                "start": lower,
-                "end": upper,
-                "model": None,
-                **empty_tokens(),
-                "request_ids": [],
+def read_transcript_lines(path, cursor_path=None):
+    full = Path(path).resolve()
+    offset = read_cursor(cursor_path, full) if cursor_path else 0
+    with full.open("rb") as handle:
+        handle.seek(offset)
+        data = handle.read()
+        end_offset = handle.tell()
+    text = data.decode("utf-8-sig", errors="replace")
+    lines = [line for line in text.splitlines() if line.strip()]
+    return lines, offset, end_offset
+
+
+def iter_records(lines):
+    for raw in lines:
+        try:
+            yield json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+
+
+def content_tool_uses(message):
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, list):
+        return []
+    return [item for item in content if isinstance(item, dict) and item.get("type") == "tool_use"]
+
+
+def request_tokens(record):
+    message = record.get("message") or {}
+    usage = message.get("usage") or {}
+    return {
+        "tokens_input": usage.get("input_tokens") or 0,
+        "tokens_output": usage.get("output_tokens") or 0,
+        "tokens_cache_creation": usage.get("cache_creation_input_tokens") or 0,
+        "tokens_cache_read": usage.get("cache_read_input_tokens") or 0,
+    }
+
+
+def load_transcript_requests(path, cursor_path=None):
+    """Return request usage and raw tool/artifact observations from transcript."""
+    lines, start_offset, end_offset = read_transcript_lines(path, cursor_path)
+    requests = {}
+    tools = []
+    current_interaction = None
+    current_interaction_sequence = 0
+    request_sequence_by_interaction = defaultdict(int)
+
+    for record in iter_records(lines):
+        ts = parse_ts(record.get("timestamp"))
+        record_type = record.get("type")
+        session_id = record.get("sessionId") or record.get("session_id")
+
+        if record_type == "user":
+            prompt_id = record.get("promptId")
+            user_uuid = record.get("uuid")
+            if prompt_id:
+                interaction_id = prompt_id
+                confidence = "exact"
+                method = "prompt_id"
+            elif user_uuid:
+                interaction_id = f"derived-user-{user_uuid}"
+                confidence = "derived"
+                method = "transcript_user_boundary"
+            else:
+                interaction_id = None
+                confidence = "unavailable"
+                method = "request_only"
+            current_interaction_sequence += 1
+            current_interaction = {
+                "interaction_id": interaction_id,
+                "interaction_sequence": current_interaction_sequence,
+                "interaction_confidence": confidence,
+                "correlation_method": method,
+                "ts": ts,
+                "session_id": session_id,
             }
-        )
+            continue
 
-    for request in requests:
-        ts = request["ts"]
-        target = buckets[0]
-        for bucket in buckets:
-            lower = bucket["start"]
-            upper = bucket["end"]
-            if (lower is None or ts >= lower) and (upper is None or ts < upper):
-                target = bucket
-                break
-        add_tokens(target, request)
-        target["request_ids"].append(request["request_id"])
-        target["model"] = request["model"] if target["model"] in (None, request["model"]) else "__mixed__"
+        if record_type != "assistant":
+            continue
 
-    return [b for b in buckets if b["request_ids"]]
+        message = record.get("message") or {}
+        request_id = record.get("requestId") or record.get("uuid")
+        if not request_id:
+            continue
+        interaction = current_interaction or {
+            "interaction_id": None,
+            "interaction_sequence": None,
+            "interaction_confidence": "unavailable",
+            "correlation_method": "request_only",
+            "ts": None,
+            "session_id": session_id,
+        }
+        request_sequence_by_interaction[interaction["interaction_id"]] += 1
+        payload = {
+            "request_id": request_id,
+            "uuid": record.get("uuid"),
+            "ts": ts,
+            "session_id": session_id or interaction.get("session_id"),
+            "model": message.get("model"),
+            "interaction_id": interaction.get("interaction_id"),
+            "interaction_sequence": interaction.get("interaction_sequence"),
+            "request_sequence": request_sequence_by_interaction[interaction["interaction_id"]],
+            "interaction_confidence": interaction.get("interaction_confidence"),
+            "correlation_method": interaction.get("correlation_method"),
+            **request_tokens(record),
+        }
+        existing = requests.get(request_id)
+        if existing is None:
+            requests[request_id] = payload
+        else:
+            if ts and (existing["ts"] is None or ts < existing["ts"]):
+                existing["ts"] = ts
+            existing.update({k: v for k, v in payload.items() if v is not None})
+            existing.update(request_tokens(record))
+
+        for item in content_tool_uses(message):
+            tools.append(
+                {
+                    "ts": ts,
+                    "session_id": session_id,
+                    "interaction_id": interaction.get("interaction_id"),
+                    "request_id": request_id,
+                    "tool_use_id": item.get("id"),
+                    "tool_name": item.get("name"),
+                    "input": item.get("input") if isinstance(item.get("input"), dict) else {},
+                }
+            )
+
+    ordered = [r for r in requests.values() if r["ts"] is not None]
+    ordered.sort(key=lambda r: r["ts"])
+    return ordered, tools, start_offset, end_offset
+
+
+def already_attributed_request_ids(path):
+    seen = set()
+    if not path or not Path(path).exists():
+        return seen
+    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
+        if not raw.strip():
+            continue
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if event.get("event_type") != "usage_attributed":
+            continue
+        request_id = event.get("request_id")
+        if request_id:
+            seen.add(request_id)
+        for item in (event.get("input") or {}).get("request_ids") or []:
+            seen.add(item)
+    return seen
+
+
+def existing_usage_events(path):
+    events = []
+    if not path or not Path(path).exists():
+        return events
+    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
+        if not raw.strip():
+            continue
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if event.get("event_type") == "usage_attributed" and event.get("event_scope") == "request":
+            events.append(event)
+    return events
+
+
+def load_anchor_events(path):
+    events = []
+    if not path or not Path(path).exists():
+        return events
+    for raw in Path(path).read_text(encoding="utf-8-sig").splitlines():
+        if not raw.strip():
+            continue
+        try:
+            event = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if event.get("event_type") in ("usage_attributed", "usage_cost_attributed", "interaction_completed"):
+            continue
+        ts = parse_ts(event.get("ts"))
+        if ts is None:
+            continue
+        events.append({"ts": ts, "event_id": event.get("event_id"), "phase": event.get("phase"), "lane": event.get("lane")})
+    events.sort(key=lambda e: e["ts"])
+    return events
 
 
 def enclosing_event(request_ts, events):
-    """Last event with ts <= request_ts (else the first event)."""
     anchor = events[0] if events else None
     for event in events:
         if event["ts"] <= request_ts:
@@ -260,37 +317,38 @@ def enclosing_event(request_ts, events):
     return anchor
 
 
-def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
-    anchor = bucket.get("anchor")
-    tokens = total_tokens(bucket)
+def default_output_path(state_path):
+    if not state_path:
+        return None
+    candidate = state_path.parent / "05-operation" / "011-observability-log.jsonl"
+    return candidate if candidate.exists() else None
 
+
+def phase_lane(args, state_fields, anchor):
+    phase = value_or(args.phase, value_or((anchor or {}).get("phase"), value_or(state_fields.get("current phase"), "operation")))
+    lane = value_or((anchor or {}).get("lane"), value_or(state_fields.get("lane"), value_or(state_fields.get("modo"), "unknown")))
+    return phase, lane
+
+
+def make_request_event(request, args, state_fields, anchor, rate_card, sequence):
+    tokens = {
+        "tokens_input": request["tokens_input"],
+        "tokens_output": request["tokens_output"],
+        "tokens_cache_creation": request["tokens_cache_creation"],
+        "tokens_cache_read": request["tokens_cache_read"],
+    }
+    tokens["total_tokens"] = sum(tokens.values())
     cost = None
     confidence = "unavailable"
-    cost_source = None
-    model = bucket.get("model")
-    rates = rate_for_model(model, rate_card)
+    rates = rates_for(request.get("model"), rate_card)
     if rate_card and not rates:
-        raise SystemExit(f"Rate card has no rates for model: {model or 'unknown'}")
+        raise SystemExit(f"Rate card has no rates for model: {request.get('model') or 'unknown'}")
     if rates:
-        cost = calculate_cost(bucket, rates)
+        cost = calculate_cost(tokens, rates)
         confidence = value_or(rate_card.get("confidence"), "rated")
-        cost_source = "usage_rate_card"
-
-    method = f"{granularity}-attribution"
-    if granularity == "turn":
-        event_id = f"usage-turn-{bucket.get('request_ids', ['x'])[0]}"
-        anchor_ref = anchor.get("event_id") if anchor else None
-    else:
-        anchor_id = anchor.get("event_id") if anchor else f"window-{sequence}"
-        event_id = f"usage-window-{anchor_id}"
-        anchor_ref = anchor.get("event_id") if anchor else None
-
-    phase = value_or(
-        args.phase,
-        value_or((anchor or {}).get("phase"), value_or(state_fields.get("current phase"), "operation")),
-    )
-    lane = value_or((anchor or {}).get("lane"), value_or(state_fields.get("lane"), value_or(state_fields.get("modo"), "unknown")))
-
+    phase, lane = phase_lane(args, state_fields, anchor)
+    anchor_ref = anchor.get("event_id") if anchor else None
+    interaction_id = request.get("interaction_id")
     return {
         "schema_version": "alfred.observability.v1",
         "alfred": {
@@ -299,11 +357,15 @@ def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
             "framework_commit": value_or(state_fields.get("framework commit"), None),
             "schema_version": "alfred.observability.v1",
         },
-        "ts": _iso(bucket.get("start")) or now_iso(),
-        "event_id": event_id,
+        "ts": iso(request.get("ts")) or now_iso(),
+        "event_id": f"usage-request-{request['request_id']}",
+        "event_scope": "request",
         "trace_id": value_or(state_fields.get("alfred run id"), value_or(args.run_id, "unknown")),
-        "session_id": value_or(args.session_id, value_or(state_fields.get("usage session id"), "unknown")),
-        "interaction_id": value_or(bucket.get("uuid"), "unknown"),
+        "session_id": value_or(args.session_id, value_or(request.get("session_id"), value_or(state_fields.get("usage session id"), "unknown"))),
+        "interaction_id": interaction_id,
+        "request_id": request["request_id"],
+        "interaction_sequence": request.get("interaction_sequence"),
+        "request_sequence": request.get("request_sequence"),
         "sequence": sequence,
         "initiative_id": value_or(state_fields.get("initiative id"), "unknown"),
         "demand_id": value_or(state_fields.get("id"), "unknown"),
@@ -318,48 +380,43 @@ def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
             "id": "usage-cost",
             "name": "Usage and cost attribution",
             "sequence": sequence,
-            "goal": f"Attribute host transcript usage by {method}",
+            "goal": "Attribute exact host transcript usage at request scope",
         },
         "artifacts_used": [
-            {"path": str(args.transcript_path), "role": "source_usage_export", "action": "read"}
+            canonical_artifact(str(args.transcript_path), "read", selection_reason="host_transcript_usage", observed_by="claude_hook", ts=iso(request.get("ts")))
         ],
         "duration_ms": None,
-        "tokens_input": bucket["tokens_input"],
-        "tokens_output": bucket["tokens_output"],
+        "tokens_input": tokens["tokens_input"],
+        "tokens_output": tokens["tokens_output"],
+        "tokens_cache_creation": tokens["tokens_cache_creation"],
+        "tokens_cache_read": tokens["tokens_cache_read"],
         "cost_usd": cost,
-        "retry_count": 0,
+        "retry_count": None,
+        "token_confidence": "exact",
+        "interaction_confidence": request.get("interaction_confidence"),
+        "correlation_method": request.get("correlation_method"),
         "input": {
             "source": "host_transcript",
             "source_kind": "host_transcript",
-            "granularity": granularity,
-            "request_count": len(bucket.get("request_ids", [])),
-            "request_ids": bucket.get("request_ids", []),
-            "window_start": _iso(bucket.get("start")),
-            "window_end": _iso(bucket.get("end")),
+            "granularity": "request",
+            "legacy_granularity_alias": "turn" if args.granularity == "turn" else None,
+            "request_ids": [request["request_id"]],
             "anchor_event_id": anchor_ref,
         },
         "derivation": {
             "rules_applied": ["connectors/usage-cost.md", "metrics/metrics.md"],
-            "method": (
-                f"{method}: tokens summed from transcript requests de-duplicated by requestId; "
-                "cost is null unless --rate-card-path supplies an approved interaction rate card; "
-                "ccusage/session totals are not allocated into interaction events"
-            ),
+            "method": "request-attribution: exact tokens from transcript requestId; interaction correlation from promptId/user boundary when available",
             "attribution": "derived",
         },
         "output": {
-            "model": model,
-            "tokens_input": bucket["tokens_input"],
-            "tokens_output": bucket["tokens_output"],
-            "tokens_cache_creation": bucket["tokens_cache_creation"],
-            "tokens_cache_read": bucket["tokens_cache_read"],
-            "total_tokens": tokens,
+            "model": request.get("model"),
+            **tokens,
             "cost_usd": cost,
             "currency": (rate_card or {}).get("currency"),
             "cost_confidence": confidence,
             "token_confidence": "exact",
         },
-        "model": model,
+        "model": request.get("model"),
         "tool": "scripts/python/metrics/attribute-usage-transcript.py",
         "parent_event_id": anchor_ref,
         "artifacts": [],
@@ -371,14 +428,14 @@ def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
         "state_transition": None,
         "actions": [{"type": "attribute_usage", "status": "completed"}],
         "questions_open": [],
-        "assumptions": [],
+        "assumptions": [] if interaction_id else ["Host transcript did not expose an interaction id for this request."],
         "metric_impact": {"usage_attribution": "added"},
         "next": [],
         "metadata": {
             "connector_type": "usage-cost",
             "source_kind": "host_transcript",
-            "granularity": granularity,
-            "cost_source_kind": cost_source,
+            "granularity": "request",
+            "cost_source_kind": "usage_rate_card" if rates else None,
             "rate_card_source": (rate_card or {}).get("source"),
             "rate_card_effective_from": (rate_card or {}).get("effective_from"),
             "rate_card_approved_by": (rate_card or {}).get("approved_by"),
@@ -387,17 +444,129 @@ def make_event(bucket, args, state_fields, granularity, rate_card, sequence):
     }
 
 
-def _iso(dt):
-    if not isinstance(dt, datetime):
-        return None
-    return dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+def event_to_request(event):
+    output = event.get("output") or {}
+    return {
+        "interaction_id": event.get("interaction_id"),
+        "session_id": event.get("session_id"),
+        "request_id": event.get("request_id") or ((event.get("input") or {}).get("request_ids") or [None])[0],
+        "model": event.get("model") or output.get("model"),
+        "phase": event.get("phase"),
+        "lane": event.get("lane"),
+        "ts": parse_ts(event.get("ts")),
+        "tokens_input": output.get("tokens_input") if output.get("tokens_input") is not None else event.get("tokens_input"),
+        "tokens_output": output.get("tokens_output") if output.get("tokens_output") is not None else event.get("tokens_output"),
+        "tokens_cache_creation": output.get("tokens_cache_creation"),
+        "tokens_cache_read": output.get("tokens_cache_read"),
+    }
 
 
-def default_output_path(state_path):
-    if not state_path:
-        return None
-    candidate = state_path.parent / "05-operation" / "011-observability-log.jsonl"
-    return candidate if candidate.exists() else None
+def make_interaction_events(request_events, state_fields):
+    by_interaction = defaultdict(list)
+    for event in request_events:
+        interaction_id = event.get("interaction_id")
+        if interaction_id:
+            by_interaction[interaction_id].append(event)
+    events = []
+    for index, (interaction_id, group) in enumerate(sorted(by_interaction.items()), start=1):
+        group.sort(key=lambda e: e.get("ts") or "")
+        first = group[0]
+        tokens = Counter()
+        models = set()
+        phases = set()
+        lanes = set()
+        for event in group:
+            current = usage_tokens(event)
+            for key in ("tokens_input", "tokens_output", "tokens_cache_creation", "tokens_cache_read", "total_tokens"):
+                tokens[key] += current[key]
+            if event.get("model"):
+                models.add(event["model"])
+            if event.get("phase"):
+                phases.add(event["phase"])
+            if event.get("lane"):
+                lanes.add(event["lane"])
+        denominator = tokens["tokens_input"] + tokens["tokens_cache_creation"] + tokens["tokens_cache_read"]
+        cache_ratio = None if denominator == 0 else tokens["tokens_cache_read"] / denominator
+        events.append(
+            {
+                "schema_version": "alfred.observability.v1",
+                "alfred": first.get("alfred") or {"schema_version": "alfred.observability.v1"},
+                "ts": first.get("ts") or now_iso(),
+                "event_id": f"interaction-completed-{interaction_id}",
+                "event_scope": "interaction",
+                "trace_id": first.get("trace_id"),
+                "session_id": first.get("session_id"),
+                "interaction_id": interaction_id,
+                "request_id": None,
+                "sequence": index,
+                "initiative_id": first.get("initiative_id"),
+                "demand_id": first.get("demand_id"),
+                "event_type": "interaction_completed",
+                "phase": first.get("phase"),
+                "lane": first.get("lane"),
+                "actor_type": "system",
+                "actor_id": "usage-cost-transcript",
+                "action": "aggregate_interaction_usage",
+                "status": "recorded",
+                "step": {"id": "usage-cost", "name": "Usage and cost attribution", "sequence": index, "goal": "Aggregate request usage by interaction"},
+                "artifacts_used": [],
+                "duration_ms": None,
+                "tokens_input": None,
+                "tokens_output": None,
+                "tokens_cache_creation": None,
+                "tokens_cache_read": None,
+                "cost_usd": None,
+                "retry_count": None,
+                "request_count": len(group),
+                "tool_call_count": None,
+                "tool_failure_count": None,
+                "usage": {
+                    "tokens_input": tokens["tokens_input"],
+                    "tokens_output": tokens["tokens_output"],
+                    "tokens_cache_creation": tokens["tokens_cache_creation"],
+                    "tokens_cache_read": tokens["tokens_cache_read"],
+                    "total_tokens": tokens["total_tokens"],
+                    "cache_reuse_ratio": cache_ratio,
+                },
+                "context": {
+                    "unique_artifacts_read": None,
+                    "framework_rules_read": None,
+                    "skills_loaded": None,
+                    "source_files_read": None,
+                    "logs_read": None,
+                    "repeated_reads": None,
+                    "total_bytes_read": None,
+                    "compression_used": None,
+                    "rtk_used": None,
+                },
+                "outcome": None,
+                "input": {"source": "usage_attributed_events", "request_ids": [e.get("request_id") for e in group]},
+                "derivation": {"rules_applied": ["metrics/metrics.md"], "method": "sum effective request-scope usage events by interaction_id"},
+                "output": {"models": sorted(models), "phases": sorted(phases), "lanes": sorted(lanes)},
+                "model": ",".join(sorted(models)) if len(models) == 1 else None,
+                "tool": "scripts/python/metrics/attribute-usage-transcript.py",
+                "parent_event_id": None,
+                "artifacts": [],
+                "files_changed": [],
+                "validation": {"source_request_events": len(group)},
+                "risk": None,
+                "blocker": None,
+                "error": None,
+                "state_transition": None,
+                "actions": [{"type": "aggregate_interaction_usage", "status": "completed"}],
+                "questions_open": [],
+                "assumptions": [],
+                "metric_impact": {"interaction_usage": "aggregated"},
+                "next": [],
+                "metadata": {
+                    "connector_type": "usage-cost",
+                    "source_kind": "derived_observability",
+                    "correlation_method": "interaction_id",
+                    "framework_version": state_fields.get("framework version"),
+                },
+            }
+        )
+    return events
 
 
 def main():
@@ -406,7 +575,10 @@ def main():
     parser.add_argument("--state-path", "-StatePath", dest="state_path", default="")
     parser.add_argument("--events-path", "-EventsPath", dest="events_path", default="")
     parser.add_argument("--output-path", "-OutputPath", dest="output_path", default="")
-    parser.add_argument("--granularity", "-Granularity", dest="granularity", choices=["window", "turn"], default="window")
+    parser.add_argument("--granularity", "-Granularity", dest="granularity", choices=["request", "turn", "window", "interaction"], default="request")
+    parser.add_argument("--emit-interactions", "-EmitInteractions", dest="emit_interactions", action="store_true", default=False)
+    parser.add_argument("--cursor-path", "-CursorPath", dest="cursor_path", default="")
+    parser.add_argument("--no-cursor-update", "-NoCursorUpdate", dest="cursor_update", action="store_false", default=True)
     parser.add_argument("--allocate-cost", "-AllocateCost", dest="allocate_cost", action="store_true", default=False)
     parser.add_argument("--session-cost-usd", "-SessionCostUsd", dest="session_cost_usd", default="")
     parser.add_argument("--rate-card-path", "-RateCardPath", dest="rate_card_path", default="")
@@ -421,72 +593,60 @@ def main():
     if args.allocate_cost or args.session_cost_usd:
         raise SystemExit(
             "--allocate-cost/--session-cost-usd are deprecated for interaction JSONL. "
-            "Do not allocate ccusage/session totals into interactions; use --rate-card-path "
-            "with exact transcript tokens or a host export that already has interaction cost."
+            "Do not allocate ccusage/session totals into interactions; use --rate-card-path."
         )
 
     state_path = Path(args.state_path).resolve() if args.state_path else None
     state_fields = read_state_fields(state_path) if state_path else {}
     rate_card = load_rate_card(args.rate_card_path)
-
-    requests = load_transcript_requests(args.transcript_path)
-    if not requests:
-        raise SystemExit("No usage-bearing requests found in the transcript.")
+    output_path = Path(args.output_path).resolve() if args.output_path else default_output_path(state_path)
+    requests, _tools, _start_offset, end_offset = load_transcript_requests(args.transcript_path, args.cursor_path)
 
     since = parse_ts(args.since) if args.since else None
     if since is not None:
         requests = [r for r in requests if r["ts"] >= since]
 
-    output_path = Path(args.output_path).resolve() if args.output_path else default_output_path(state_path)
-
-    # Idempotent incremental appends (Stop hook): skip requests already attributed.
-    if args.granularity == "turn" and args.append and output_path:
+    if args.append and output_path:
         seen = already_attributed_request_ids(output_path)
-        if seen:
-            requests = [r for r in requests if r["request_id"] not in seen]
+        requests = [r for r in requests if r["request_id"] not in seen]
 
     if not requests:
+        if args.cursor_path and args.cursor_update:
+            write_cursor(args.cursor_path, args.transcript_path, end_offset)
         print("No new transcript requests to attribute.")
         return
 
-    events_path = args.events_path or (str(default_output_path(state_path)) if state_path else "")
-    events = load_events(events_path) if events_path else []
+    events_path = args.events_path or (str(output_path) if output_path else "")
+    anchors = load_anchor_events(events_path) if events_path else []
 
-    if args.granularity == "window":
-        buckets = assign_windows(requests, events)
-    else:
-        buckets = []
-        for request in requests:
-            anchor = enclosing_event(request["ts"], events)
-            buckets.append(
-                {
-                    "anchor": anchor,
-                    "start": request["ts"],
-                    "end": request["ts"],
-                    "uuid": request["uuid"],
-                    "model": request["model"],
-                    "request_ids": [request["request_id"]],
-                    "tokens_input": request["tokens_input"],
-                    "tokens_output": request["tokens_output"],
-                    "tokens_cache_creation": request["tokens_cache_creation"],
-                    "tokens_cache_read": request["tokens_cache_read"],
-                }
-            )
+    request_events = []
+    for index, request in enumerate(requests, start=1):
+        anchor = enclosing_event(request["ts"], anchors)
+        request_events.append(make_request_event(request, args, state_fields, anchor, rate_card, index))
 
-    lines = []
-    for index, bucket in enumerate(buckets, start=1):
-        event = make_event(bucket, args, state_fields, args.granularity, rate_card, index)
-        lines.append(json.dumps(event, separators=(",", ":")))
+    output_events = []
+    if args.granularity in ("request", "turn", "window"):
+        output_events.extend(request_events)
+    if args.granularity == "interaction" or args.emit_interactions:
+        aggregate_input = []
+        if output_path:
+            aggregate_input.extend(existing_usage_events(output_path))
+        aggregate_input.extend(request_events)
+        output_events.extend(make_interaction_events(aggregate_input, state_fields))
 
+    lines = [json.dumps(event, separators=(",", ":")) for event in output_events]
     if output_path and args.append:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with output_path.open("a", encoding="utf-8") as handle:
             for line in lines:
                 handle.write(line + "\n")
-        print(f"Appended {len(lines)} {args.granularity}-attribution events to {output_path}")
+        print(f"Appended {len(lines)} attribution events to {output_path}")
     else:
         for line in lines:
             print(line)
+
+    if args.cursor_path and args.cursor_update:
+        write_cursor(args.cursor_path, args.transcript_path, end_offset, requests[-1].get("request_id"))
 
 
 if __name__ == "__main__":

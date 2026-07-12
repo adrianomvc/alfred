@@ -18,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_state_fields, value_or  # noqa: E402
+from metrics.observability import canonical_artifact  # noqa: E402
 
 
 HOST_AGENT = {
@@ -189,13 +190,13 @@ def make_snapshot(row, args, state_fields, selection_method):
             "goal": "Import ccusage session usage into Alfred state for toolbar display",
         },
         "artifacts_used": [
-            {"path": source_path, "role": "source_usage_export", "action": "read"}
+            canonical_artifact(source_path, "read", selection_reason="source_usage_export", observed_by="usage-cost-ccusage", ts=ts)
         ],
         "duration_ms": None,
         "tokens_input": row.get("inputTokens"),
         "tokens_output": row.get("outputTokens"),
         "cost_usd": total_cost,
-        "retry_count": 0,
+        "retry_count": None,
         "input": {
             "source": "ccusage",
             "source_kind": "ccusage",

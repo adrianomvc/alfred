@@ -32,7 +32,7 @@ def parseable_iso(value):
     return True
 
 
-def check_log(path):
+def check_log(path, require_distinct_timestamps=True):
     errors = []
     timestamps = []
     for line_number, event, _ in iter_jsonl(path):
@@ -46,7 +46,30 @@ def check_log(path):
             )
         else:
             timestamps.append(ts)
-    if len(timestamps) > 1 and len(set(timestamps)) == 1:
+        artifacts_used = event.get("artifacts_used")
+        if artifacts_used is not None and not isinstance(artifacts_used, list):
+            errors.append(f"{path.as_posix()}:{line_number} artifacts_used must be a canonical list")
+        if isinstance(artifacts_used, list):
+            for index, item in enumerate(artifacts_used, start=1):
+                if not isinstance(item, dict):
+                    errors.append(f"{path.as_posix()}:{line_number} artifacts_used[{index}] must be an object")
+                    continue
+                for key in ("artifact_type", "operation", "observed_by"):
+                    if key not in item:
+                        errors.append(f"{path.as_posix()}:{line_number} artifacts_used[{index}] missing {key}")
+        if event.get("event_type") == "usage_attributed" and event.get("event_scope") == "request":
+            if not event.get("request_id"):
+                errors.append(f"{path.as_posix()}:{line_number} request usage must include request_id")
+            if event.get("cost_usd") is not None:
+                errors.append(f"{path.as_posix()}:{line_number} request usage must not carry interaction cost")
+        if event.get("event_type") == "usage_cost_attributed":
+            if not event.get("parent_event_id"):
+                errors.append(f"{path.as_posix()}:{line_number} usage_cost_attributed must include parent_event_id")
+            if event.get("cost_usd") is None:
+                errors.append(f"{path.as_posix()}:{line_number} usage_cost_attributed must include observed/derived cost")
+        if event.get("duration_ms") == 0:
+            errors.append(f"{path.as_posix()}:{line_number} duration_ms=0 requires observed duration; use null when unknown")
+    if require_distinct_timestamps and len(timestamps) > 1 and len(set(timestamps)) == 1:
         errors.append(
             f"{path.as_posix()} all {len(timestamps)} events share one ts "
             f"({timestamps[0]!r}); stamp real per-event timestamps"
@@ -70,12 +93,21 @@ def main():
     logs = find_observability_logs(root / "examples")
     for log in logs:
         errors.extend(check_log(log))
+    for rel in (
+        "examples/connectors/usage-attribution-events.jsonl",
+        "examples/connectors/usage-attribution-tokens-only.jsonl",
+    ):
+        path = root / rel
+        if path.exists():
+            errors.extend(check_log(path, require_distinct_timestamps=False))
 
     require_text(root / "metrics/metrics.md", "Event hygiene", errors)
     require_text(root / "metrics/metrics.md", "Refresh session totals at checkpoints", errors)
     require_text(root / "metrics/metrics.md", "interaction/request-granular sources", errors)
     require_text(root / "metrics/metrics.md", "usage_cost_attributed", errors)
     require_text(root / "metrics/metrics.md", "approved rate card", errors)
+    require_text(root / "metrics/metrics.md", "No double counting", errors)
+    require_text(root / "metrics/metrics.md", "cache_reuse_ratio", errors)
     require_text(root / "rules/common/session-continuity.md", "real ISO-8601", errors)
 
     if errors:

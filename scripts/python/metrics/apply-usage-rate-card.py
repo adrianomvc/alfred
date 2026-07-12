@@ -8,6 +8,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from metrics.observability import canonical_artifact  # noqa: E402
+
 
 def now_iso():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -99,14 +102,14 @@ def make_cost_event(usage_event, tokens, cost, model, rates, rate_card, sequence
             "goal": "Compute interaction cost from exact usage and an approved rate card",
         },
         "artifacts_used": [
-            {"path": rate_card["_path"], "role": "approved_rate_card", "action": "read"},
-            {"path": parent, "role": "parent_usage_event", "action": "reference"},
+            canonical_artifact(rate_card["_path"], "read", selection_reason="approved_rate_card", observed_by="usage-rate-card", ts=now_iso()),
+            canonical_artifact(parent, "reference", selection_reason="parent_usage_event", observed_by="usage-rate-card", ts=now_iso()),
         ],
         "duration_ms": None,
         "tokens_input": tokens["tokens_input"],
         "tokens_output": tokens["tokens_output"],
         "cost_usd": cost,
-        "retry_count": 0,
+        "retry_count": None,
         "input": {
             "source": "usage_attributed_event",
             "source_kind": "usage_rate_card",
