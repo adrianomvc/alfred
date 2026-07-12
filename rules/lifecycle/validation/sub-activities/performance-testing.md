@@ -1,3 +1,14 @@
+---
+name: sub-activity-performance-testing
+description: Validate sub-activity — Performance Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Performance Testing
 
 > Trigger: an **NFR perf/scale target exists** (from `nfr-design`) or the change

@@ -1,3 +1,14 @@
+---
+name: lane-standard
+description: Lane — Standard
+load: lane
+triggers:
+  phase: all
+  lane: standard
+  demand-type: all
+  agent: all
+---
+
 # Lane — Standard
 
 Medium risk/complexity. Basic discovery, clear spec, acceptance criteria, technical review, one human checkpoint, validation before release.
@@ -23,7 +34,7 @@ Medium risk/complexity. Basic discovery, clear spec, acceptance criteria, techni
 ## Tracking
 `state` + `decisions` + `audit`.
 
-## Toolbar (full ASCII block)
+## Toolbar
 Rendered by the Orchestrator at the top of each interaction (see `core/...` toolbar spec): mode, % progress, the 5-phase track, current step, checkpoint, next step, accumulated cost.
 
 ## Standardized HITL

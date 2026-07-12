@@ -1,3 +1,14 @@
+---
+name: sub-activity-technical-review
+description: Execution sub-activity — Technical Review
+load: sub-activity
+triggers:
+  phase: execution
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Execution sub-activity — Technical Review
 
 > Trigger: **Standard/SAFE** (FAST self-reviews). Optional, inside Execution.

@@ -1,3 +1,14 @@
+---
+name: sub-activity-business-inception
+description: Inception sub-activity — Business Inception
+load: sub-activity
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Inception sub-activity — Business Inception
 
 > Trigger: **Produto stream** carrying an external `inception-input`. Optional,

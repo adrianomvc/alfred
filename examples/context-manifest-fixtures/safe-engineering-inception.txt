@@ -1,0 +1,10 @@
+core/principles.md
+rules/README.md
+rules/rules-index.md
+rules/common/overconfidence.md
+rules/lifecycle/lifecycle.md
+rules/demand-types/engineering.md
+rules/lanes/safe.md
+rules/lifecycle/inception/inception.md
+rules/agents/discovery.md
+rules/lifecycle/inception/sub-activities/risk-mode-proposal.md

@@ -20,4 +20,4 @@
 <!-- record how conflicts were resolved: safer/more restrictive > more specific > human decides -->
 
 ## JIT loading
-<!-- for the current demand, list only the skill sections actually loaded, e.g. `skills/lang-python.md#rules` -->
+<!-- for the current demand, list only the skill sections actually loaded, e.g. `skills/lang-python/SKILL.md#rules` -->

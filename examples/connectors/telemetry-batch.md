@@ -5,8 +5,8 @@ Connector contract: `connectors/telemetry-api.md`
 ## Local Collection
 Use the optional script:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/metrics/collect-observability.ps1 -Root examples -OutputPath .tmp-observability-batch.jsonl
+```bash
+python scripts/metrics/collect-observability.py -Root examples -OutputPath .tmp-observability-batch.jsonl
 ```
 
 ## Batch Shape

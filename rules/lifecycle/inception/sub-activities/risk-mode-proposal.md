@@ -1,3 +1,14 @@
+---
+name: sub-activity-risk-mode-proposal
+description: Inception sub-activity — Risk Mode Proposal
+load: sub-activity
+triggers:
+  phase: inception
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Inception sub-activity — Risk Mode Proposal
 
 > Trigger: **Standard/SAFE** demands (FAST is self-evident). Optional, inside
@@ -15,7 +26,7 @@ contracts (`../../../lanes/*`), `knowledge` policies that can force a floor.
 1. Pre-fill the **Risk Mode checklist** from intent: scope size, blast radius,
    data sensitivity, reversibility, external dependencies.
 2. Derive a **proposed lane** from the checklist (FAST / Standard / SAFE).
-   Optional helper: `classify-risk` (`scripts/powershell/` · `scripts/python/`)
+   Optional helper: `python scripts/workflow/classify-risk.py`
    computes the axes, fires the hard overrides, and prints the pt-BR block for
    `004-risk.md`. `core/risk-mode.md` stays the source of truth; without the
    helper, apply the same tables manually (D3).

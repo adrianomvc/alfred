@@ -1,0 +1,38 @@
+{
+  "session": [
+    {
+      "agent": "claude",
+      "cacheCreationTokens": 100,
+      "cacheReadTokens": 200,
+      "inputTokens": 300,
+      "metadata": {
+        "lastActivity": "2026-07-10T12:00:00.000Z"
+      },
+      "modelBreakdowns": [
+        {
+          "cacheCreationTokens": 100,
+          "cacheReadTokens": 200,
+          "cost": 1.23,
+          "inputTokens": 300,
+          "modelName": "claude-opus-4-8",
+          "outputTokens": 400
+        }
+      ],
+      "modelsUsed": [
+        "claude-opus-4-8"
+      ],
+      "outputTokens": 400,
+      "period": "fixture-claude-session",
+      "totalCost": 1.23,
+      "totalTokens": 1000
+    }
+  ],
+  "totals": {
+    "cacheCreationTokens": 100,
+    "cacheReadTokens": 200,
+    "inputTokens": 300,
+    "outputTokens": 400,
+    "totalCost": 1.23,
+    "totalTokens": 1000
+  }
+}

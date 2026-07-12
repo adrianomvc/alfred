@@ -14,6 +14,15 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
    observability logs are batched and e-mailed there automatically (provisional
    transport until the telemetry API exists, D45) so the org can aggregate metrics.
    Existing config is never overwritten; every part degrades gracefully (D3).
+4. Optionally set up **RTK** for DEVIN CLI terminal sessions. RTK is a local
+   tool/hook that bounds large command output. Alfred downloads the configured
+   RTK URL when RTK is not already on `PATH`. The default URL is a public GitHub
+   Windows zip placeholder that should be replaced by the corporate Artifactory
+   zip when available.
+5. Optionally install approved npm tools from the corporate npm registry /
+   Artifactory: `ccusage` for local Claude/Codex usage attribution and
+   `codebase-memory` for brownfield structural discovery. This is best-effort:
+   missing npm, registry access, or packages never break the Alfred install.
 
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
@@ -44,6 +53,52 @@ curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/main/install/inst
 Installs the skill to `~/.agents/skills/alfred/SKILL.md` (a user skill path the
 DEVIN CLI reads on every platform).
 
+## Corporate Machine Setup
+When preparing this installer for a company computer, there are three external
+locations
+you normally need to replace:
+
+1. **Alfred framework repo**
+   - PowerShell: edit the `-FrameworkUrl` default in the `COMPANY SETTINGS`
+     block at the top of `install/install.ps1`.
+   - bash: edit `DEFAULT_FRAMEWORK_URL` in the `COMPANY SETTINGS` block at the
+     top of `install/install.sh`.
+   - Temporary alternative:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File install/install.ps1 -FrameworkUrl "<internal-alfred-git-url>"
+     ```
+     ```bash
+     ALFRED_FRAMEWORK_URL="<internal-alfred-git-url>" bash install/install.sh
+     ```
+
+2. **RTK download URL**
+   - PowerShell: edit the `-RtkUrl` default in the same `COMPANY SETTINGS`
+     block at the top of `install/install.ps1`.
+   - bash: edit `DEFAULT_RTK_URL` in the `COMPANY SETTINGS` block at the top of
+     `install/install.sh`.
+   - The default RTK URL is intentionally the public Windows zip placeholder
+     because the primary company path is Windows/Git Bash and the Artifactory
+     package will also be a zip. Replace it with the internal Artifactory zip
+     when available.
+   - Temporary alternative:
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-rtk-url>"
+     ```
+     ```bash
+     ALFRED_RTK_URL="<artifactory-rtk-url>" bash install/install.sh
+     ```
+
+3. **npm registry / Artifactory**
+   - PowerShell: pass `-NpmRegistry "<artifactory-npm-registry>"`.
+   - bash: set `ALFRED_NPM_REGISTRY="<artifactory-npm-registry>"`.
+   - If the corporate packages have scoped/internal names, override them:
+     `ALFRED_CCUSAGE_PACKAGE` and `ALFRED_CODEBASE_MEMORY_PACKAGE` (bash) or
+     `-CcusagePackage` and `-CodebaseMemoryPackage` (PowerShell).
+
+If the one-line install command is used inside the company network, replace the
+`raw.githubusercontent.com/.../install/install.ps1` or `install/install.sh` URL
+with the internal raw-file URL from the company mirror.
+
 ## Options
 | Setting | PowerShell flag | bash env var | Default |
 |---|---|---|---|
@@ -54,6 +109,57 @@ DEVIN CLI reads on every platform).
 | Skills dir | `-SkillsDir` | `ALFRED_SKILLS_DIR` | `%APPDATA%\devin\skills` / `~/.agents/skills` |
 | Notification e-mail | `-Email` | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `-SkipEmail` | `ALFRED_SKIP_EMAIL=1` | setup runs |
+| RTK package URL | `-RtkUrl` | `ALFRED_RTK_URL` | public Windows zip placeholder |
+| Skip RTK setup | `-SkipRtk` | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
+| npm registry / Artifactory | `-NpmRegistry` | `ALFRED_NPM_REGISTRY` | current npm config |
+| ccusage npm package | `-CcusagePackage` | `ALFRED_CCUSAGE_PACKAGE` | `ccusage` |
+| codebase-memory npm package | `-CodebaseMemoryPackage` | `ALFRED_CODEBASE_MEMORY_PACKAGE` | `codebase-memory` |
+| Skip npm tools | `-SkipNpmTools` | `ALFRED_SKIP_NPM_TOOLS=1` | setup runs if `npm` exists |
+
+## RTK terminal hook (DEVIN CLI only)
+RTK setup is optional and currently scoped to the DEVIN CLI install path.
+
+PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-url>"
+```
+
+bash:
+```bash
+ALFRED_RTK_URL="<artifactory-url>" bash install/install.sh
+```
+
+If `rtk` is already on `PATH`, the installer only runs:
+```bash
+rtk init -g
+```
+
+If the URL is removed or RTK cannot be downloaded, Alfred then follows
+`rules/common/terminal-token-policy.md`: prefer bounded native commands and
+load `core/hooks/rtk.md` only as guidance.
+
+## npm tools (optional)
+The installer can install the approved npm packages used by optional connectors:
+
+PowerShell:
+```powershell
+powershell -ExecutionPolicy Bypass -File install/install.ps1 `
+  -NpmRegistry "<artifactory-npm-registry>" `
+  -CcusagePackage "ccusage" `
+  -CodebaseMemoryPackage "codebase-memory"
+```
+
+bash:
+```bash
+ALFRED_NPM_REGISTRY="<artifactory-npm-registry>" \
+ALFRED_CCUSAGE_PACKAGE="ccusage" \
+ALFRED_CODEBASE_MEMORY_PACKAGE="codebase-memory" \
+bash install/install.sh
+```
+
+If npm is already configured with the corporate registry, omit the registry
+flag/env var. If a package cannot be installed, Alfred records the degraded
+state and keeps working through `rg`, bounded file reads, and manual cost input.
 
 ## Versions
 Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).
@@ -95,6 +201,32 @@ Manual controls:
 version breaks something). Re-running the installer without `-Rollback` returns
 to the latest. A demand records the version it ran on (D26), so you know which
 tag to roll back to.
+
+## Refresh copied host entries
+Host entry files are copied into native locations during setup. After pulling a
+new Alfred version, refresh the copied entry so the host does not keep old boot
+instructions:
+
+```bash
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host devin-cli
+```
+
+For Claude Code use `-Host claude-code`; for Codex use `-Host codex`. Missing
+targets are skipped unless `-Create` is passed.
+
+## Claude Code usage hook
+Claude Code can collect request tokens from its transcript without asking the
+agent to estimate usage. Install or refresh the hook explicitly:
+
+```bash
+python ~/.alfred/scripts/workflow/sync-host-shims.py -Host claude-code -Create -InstallHooks
+```
+
+To write only sanitized technical telemetry outside a demand, set
+`AI_OBS_RAW_LOG` and optionally `AI_OBS_MODE=raw`. To write Alfred decision
+events, set `ALFRED_STATE_PATH` or `ALFRED_OBS_LOG`; `AI_OBS_MODE=both` writes
+both. `ccusage` can still update `001-state.md` and the toolbar with the total
+session cost, but that total is not appended to interaction JSONL.
 
 ## Uninstall
 - Delete the skill folder (`%APPDATA%\devin\skills\alfred` or `~/.agents/skills/alfred`); optionally remove `~/.alfred`.

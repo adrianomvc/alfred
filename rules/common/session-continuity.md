@@ -1,3 +1,14 @@
+---
+name: common-session-continuity
+description: Common rule — session continuity
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common rule — session continuity
 
 Inherited from AI-DLC `session-continuity`. The core of resilience: a demand can be paused and resumed later without starting over. Alfred **never** declares abandonment by inactivity.
@@ -21,7 +32,7 @@ If Alfred is running only inside an app repo, it cannot update the HUB `state` d
 The HUB is still the final source of truth. Until `05-operation/009-hub-sync.md` is imported into the HUB, the demand is **pending sync**.
 
 ## Observability write timing
-Observability is append-only and must not wait for a final summary. Append one JSONL line immediately for each relevant interaction, step start, artifact write, step completion, error, checkpoint, and pause. Every event must include Alfred version metadata and explicit output artifact paths when files were created or updated.
+Observability is append-only and must not wait for a final summary. Append one JSONL line immediately for each relevant interaction, step start, artifact write, step completion, error, checkpoint, and pause. Every event must include Alfred version metadata and explicit output artifact paths when files were created or updated. Stamp each event with a **real ISO-8601 `ts`** from the system clock at write time — never a placeholder or rounded value; the `ts` sequence is what later usage attribution correlates against (`../../metrics/metrics.md` → Event hygiene).
 
 ## Demand states
 `em andamento` (in progress) · `em espera` (on hold — first-class, resumable anytime) · `bloqueada` (blocked — depends on external) · `aguardando checkpoint` (awaiting checkpoint) · `concluída` (done) · `cancelada` (cancelled — only by explicit human decision).

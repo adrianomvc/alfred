@@ -1,0 +1,10 @@
+core/principles.md
+rules/README.md
+rules/rules-index.md
+rules/common/overconfidence.md
+rules/lifecycle/lifecycle.md
+rules/demand-types/product.md
+rules/lanes/standard.md
+rules/lifecycle/design/design.md
+rules/agents/spec-design.md
+rules/lifecycle/design/sub-activities/functional-design.md

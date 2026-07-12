@@ -12,7 +12,7 @@ Este plano deriva do diagnóstico completo do Alfred (plano conceitual D1–D47 
 
 ## Regras de trabalho
 1. **PRs pequenos** — 1 item do backlog por PR sempre que possível.
-2. Antes de cada merge: `validate-framework` (qualquer runtime) com 0 erros; `validate-links` sem referência quebrada.
+2. Antes de cada merge: `validate-framework` canônico em Python com 0 erros; rodar também o wrapper PowerShell quando ele mudar ou quando o fluxo Windows/host for afetado. `validate-links` sem referência quebrada.
 3. Evoluções de inteligência (Wave 8) rodam como **dogfooding**: demanda Engineering do próprio Alfred pelas 5 fases (precedente: skill `property-based-testing`).
 4. Itens marcados **DH** (decisão humana) não avançam sem confirmação explícita do dono.
 5. Não mexer nos preservados: `core/welcome.md`, `core/presentation/toolbar.md` + fixtures, fluxo das 5 fases, lanes, modelo de `state`, continuidade de sessão, templates em uso, `hosts/`, `install/`, validadores.
@@ -36,6 +36,7 @@ Objetivo: eliminar duplicidade e referência errada.
 - [x] W1.6 ✅ (2026-07-05) Seção "Cumulative threshold" em `rules/common/escalation-triggers.md` — 10 eventos de escalação acumulados por demanda (tunável via `knowledge`) forçam checkpoint humano.
 - [x] W1.7 **Guia agnóstico para agentes que editam o framework** ✅ (2026-07-05): `AGENTS.md` na raiz seguindo o padrão aberto vendor-neutral (Linux Foundation) — invariantes, convenções, comandos de validação, plano ativo. Decisão do dono: **agnóstico de IA** — nenhum arquivo vendor-specific na raiz; shim opcional por host (ex.: `CLAUDE.md` de 1 linha importando o `AGENTS.md`) fica como DH. `validate-links` passou a escanear o `AGENTS.md`.
 - [x] W1.8 **Índice completo do `docs/README.md`** ✅ (2026-07-05): todos os documentos de `docs/` e `docs/plan/` agora aparecem no índice (progressive disclosure sem varrer pasta).
+- [x] W1.9 **Otimização de contexto/tokens** ✅ (2026-07-08): pacote fechado em [`architecture-review-context-2026-07.md`](architecture-review-context-2026-07.md) e handoff em [`context-optimization-progress.md`](context-optimization-progress.md). Reduziu custo fixo planejado de sessão (~8,230 → ~3,300 tk), adicionou registries/manifests gerados, skills enxutas, shims de host por template, ordem cache-friendly e baseline em `metrics/baselines.md`.
 
 Aceite: `validate-framework` + `validate-demand` nos dois exemplos, 0 erros. Não mexer: toolbar, welcome, boot, state.
 
@@ -44,7 +45,7 @@ Objetivo: fechar o contrato documental intenção → desenho → execução →
 - [x] W2.1 ✅ (2026-07-05) `templates/app/spec.md` completo (plano 5.3.2): fora de escopo, alternativas (SAFE), dependências, impactos, rollout/rollback (SAFE), com marcação por lane.
 - [x] W2.2 ✅ (2026-07-05) `templates/hub/post-mortem.md` criado (incidente, timeline, causa raiz, spec retroativa, decisões, lições, ações preventivas → follow-up).
 - [x] W2.3 ✅ (2026-07-05) `templates/hub/skills.md` criado (skills ativas com ref pinada + allowlist de catálogos externos ligada ao guardrail W1.4).
-- [x] W2.4 ✅ (2026-07-05) Guardrail de testes em `skills/coding-standard.md` e `rules/lifecycle/validation/validation.md`: nunca remover/afrouxar teste para passar num gate — é escalação, não correção.
+- [x] W2.4 ✅ (2026-07-05) Guardrail de testes em `skills/coding-standard/SKILL.md` e `rules/lifecycle/validation/validation.md`: nunca remover/afrouxar teste para passar num gate — é escalação, não correção.
 
 Aceite: `validate-sdd-gate` reconhece as seções novas; exemplo Execution-first referencia o template de post-mortem. Não mexer: DoD das lanes.
 
@@ -53,7 +54,7 @@ Objetivo: classificação computável, opcional e degradável (D3).
 - [x] W3.1 ✅ (2026-07-05) Helper `classify-risk` nos 2 runtimes: computa os 2 eixos (critérios 0/1/2), aplica overrides duros, lembra a trava anti-SAFE e imprime o bloco pt-BR para `004-risk.md`.
 - [x] W3.2 ✅ (2026-07-05) Referenciado como opcional em `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md` e em `scripts/README.md` (degrada para manual, D3).
 
-Aceite ✅: 4 casos testados nos 2 runtimes — FAST (1/1), Standard (4/5), SAFE (8/6, espelhando o exemplo sq9 `003-simulado-safe`) e o caso "simples e perigoso" (base FAST + dados sensíveis=2 → mínimo Standard). Overrides duros disparam (checklist 8.4). Não mexido: o checklist de `core/risk-mode.md` (fonte de verdade; o helper só o computa).
+Aceite ✅: 4 casos testados nos 2 runtimes — FAST (1/1), Standard (4/5), SAFE (8/6) e o caso "simples e perigoso" (base FAST + dados sensíveis=2 → mínimo Standard). Overrides duros disparam (checklist 8.4). Não mexido: o checklist de `core/risk-mode.md` (fonte de verdade; o helper só o computa).
 
 ### Wave 4 — Demanda real integrada
 Objetivo: primeira demanda SQ9 real ponta a ponta com validação estrita.
@@ -65,12 +66,18 @@ Riscos: bloqueio por credenciais → usar simuladores de `examples/connectors/` 
 
 ### Wave 5 — Skills da casa
 Objetivo: exercitar extensão real do registry.
-- [ ] W5.1 1 skill externa real ativada com **pin** (branch+commit registrados no state/audit — exercita o versionamento de `skills/skills.md`).
+- [x] W5.1 ✅ (2026-07-09) `aws/agent-toolkit-for-aws` registrada como skill externa **available**, **pinada em `main`@`4217c65a`**, no HUB de exemplo `fresh-sigla-onboarding`: `004-skills.md` (tabelas External Skills + External Catalogs), `001-state.md` e audit `007-audit.md`. Exercita o versionamento (pin branch+commit) e os 4 gates (allowlist org já em `knowledge/external-catalogs.md` → pin → confirmação humana → conteúdo=dado). A ativação disparada por **demanda AWS real** fica para uma demanda AWS (Wave 4); aqui a skill fica `available`, não copiada.
 - [ ] W5.2 Novas skills de linguagem/plataforma só quando a stack real pedir (gatilho, não antecipação).
 - [x] W5.3 ✅ (2026-07-05) Disciplina "Eval before skill" documentada em `skills/skills.md`: skill nasce de lacuna observada + 2–3 casos que dobram como aceite.
 - [x] W5.4 ✅ (2026-07-05, aprovado pelo dono) Frontmatter YAML `name`/`description` (padrão aberto Agent Skills) nas 7 skills + convenção no registry; skills podem apontar helpers executáveis próprios (opcional, D3).
 - [x] W5.5 ✅ (2026-07-05, aprovado pelo dono) Seção "Discovery in external catalogs (on demand)" em `skills/skills.md`: busca em catálogo registrado (ex.: Context7) com os 4 gates — allowlist, pin por ref, humano confirma 1º uso, conteúdo = dado (W1.4). Sem catálogo na allowlist → perguntar, nunca buscar de fonte arbitrária. Confiabilidade analisada em [`anthropic-research-notes.md`](anthropic-research-notes.md).
   - **Context7 ativado pelo dono** (2026-07-05): allowlist org em `knowledge/external-catalogs.md` (política no formato policy-template); registro MCP por projeto no DEVIN via template `config.local.template.json` em `hosts/devin-cli/` (alfred-email + context7), criado no primeiro boot da skill `/alfred` com confirmação humana. Gates de uso permanecem.
+  - **AWS ativado pelo dono** (2026-07-09): `aws/agent-toolkit-for-aws` (fonte oficial first-party) adicionado ao allowlist org em `knowledge/external-catalogs.md`, escopado a **docs + agent-skills** (a superfície de API/execução do MCP fica de fora — seria connector SAFE à parte). Regra de precedência de docs: **AWS-first para tópicos AWS, Context7 como fallback geral**. Complementa a skill built-in `platform-aws-data`.
+- [x] W5.6 ✅ (2026-07-09, aprovado e executado pelo dono) Layout pasta-por-skill + skills locais no HUB + precedência HUB→framework→Context7.
+  - **Layout:** migrar `skills/<nome>.md` (flat) → `skills/<nome>/SKILL.md`; a pasta da skill pode carregar arquivos de apoio (checklist, tabela de referência, template) lidos JIT após o `SKILL.md` (reforça "~1 tela por arquivo" + progressive disclosure). **Helper executável continua canônico em `scripts/`** — pasta de skill = conteúdo/dado, não código (regra de home único do `AGENTS.md` preservada).
+  - **Framework e HUB carregam 1..N skills.** O HUB passa a suportar **skill local da squad** (`<hub>/skills/<nome>/SKILL.md`, escrita pela squad para seu processo) **além** do ponteiro externo já existente.
+  - **Precedência HUB → framework → Context7** (a registrar também em `skills/skills.md` na seção `Precedence`): 1) segurança primeiro — mais seguro/restritivo vence entre tiers, sigla **endurece, nunca afrouxa**; 2) especificidade — para a mesma ferramenta, a skill do HUB sobrepõe a global do framework; 3) fallback — sem skill ativa cobrindo a necessidade, discovery em catálogo allowlisted (AWS-first para AWS, depois Context7); sem fonte na allowlist → perguntar ao humano.
+  - **Executado (2026-07-09):** 7 skills movidas para `skills/<nome>/SKILL.md` via `git mv` (histórico preservado); `generate-registry` e `validate-skills-registry` descobrem via `glob("*/SKILL.md")`; `skills/skills.md` regenerada com a seção `Precedence` reescrita (HUB→framework→Context7) + layout de pasta em `Loading`/`External skills`; `validate-framework` (lista de arquivos), refs no repo e nota de convenção no `AGENTS.md` atualizados. Gate: `validate-framework` exit 0, `validate-links` 0 quebrados, 7 skills OK. Conteúdo das 7 skills e os 5 agentes intactos.
 
 Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar agentes novos).
 
@@ -78,7 +85,7 @@ Aceite: `validate-skills-registry` 0 erros. Não mexer: os 5 agentes (não criar
 Objetivo: provar valor da squad híbrida com dados.
 - [x] W6.0 ✅ (2026-07-05) **Simulado de adoção 2.0.0** (`006-simulado-adocao-v2` no exemplo sq9-pilot): ensaio ponta a ponta offline da linha 2.0.0 exercitando classify-risk, requirements por prioridade, formato único de decisions, spec completa (lado app), carimbo 2.0.0 e JSONL HUB+App — **`validate-demand --strict` 0 erros / 0 avisos nos 2 runtimes**. Vira eval de regressão permanente. De quebra, `validate-demand` ganhou `--app-repo-path`/`--app-current-commit` (encaminhados ao staleness check — lacuna real de uso).
 - [ ] W6.1 Medir em ≥5 demandas reais: retrabalho, aceite de 1ª, % aguardando humano, custo (campos D43 já definidos em `metrics/metrics.md`).
-- [ ] W6.2 `normalize-usage-cost` com export real do host.
+- [ ] W6.2 parcial: `import-ccusage.py` ativo para Claude/Codex local CLI com logs duraveis; atualiza `001-state.md` com `cost source: ccusage` / `cost confidence: estimated` / `cost granularity: session` para toolbar, sem gravar totais de sessao no JSONL. `apply-usage-rate-card.py` calcula custo de interacao somente a partir de uso exato + rate card aprovada, em evento separado `usage_cost_attributed`. Devin Session Insights + Consumption API segue pendente de acesso/export aprovado; `normalize-usage-cost` continua para exports genericos com granularidade de interacao.
 - [ ] W6.3 1 relatório de insights comparado com `metrics/baselines.md`, ratificado por humano.
 
 Não mexer: baselines sem dados reais.
@@ -86,9 +93,10 @@ Não mexer: baselines sem dados reais.
 ### Wave 7 — Primeiro adapter real
 Objetivo: um connector sai de `contract`/`handoff` para `active`.
 - [x] W7.1 ✅ (2026-07-05, decisão do dono) Primeiro adapter = **notification**, canal = **MCP em Python** (funciona em qualquer host MCP; registrado via `claude mcp add` no Claude Code). Pendente para `active`: credenciais SMTP e dono.
-- [x] W7.2 ✅ parcial (2026-07-05) `mcp-email-server` (`scripts/python/`, stdlib puro): estados `contract → handoff → dry-run` percorridos — dry-run compõe o `.eml` no outbox (é o próprio handoff materializado); testado ponta a ponta (handshake MCP, envio dry-run, recusa fora da allowlist auditada). `active` aguarda `SMTP_*` reais.
+- [x] W7.2 ✅ parcial (2026-07-05) `mcp-email-server` (`scripts/`, stdlib puro): estados `contract → handoff → dry-run` percorridos — dry-run compõe o `.eml` no outbox (é o próprio handoff materializado); testado ponta a ponta (handshake MCP, envio dry-run, recusa fora da allowlist auditada). `active` aguarda `SMTP_*` reais.
 - [x] W7.3 ✅ (2026-07-05) Seção "Response format & error guidance" em `connectors/connectors.md`; aplicada concretamente no adapter de e-mail (resposta concisa; erro diz o próximo passo e quando só um humano desbloqueia).
 - [x] W7.4 ✅ (2026-07-05) Seção "Optional deterministic enforcement (hooks)" em `hosts/README.md`: validadores existentes como stop/pre-write hooks; advisório × determinístico; degrada (D3).
+- [ ] W7.5 Avaliar **Codebase Memory MCP** para brownfield grande: identificar uma implementação/fonte aprovada para máquina corporativa, entender instalação offline/Artifactory, confirmar suporte no DEVIN CLI via `.devin/config.local.json`, definir contrato `connectors/codebase-memory.md` (find_symbol, references, impact, related_tests), fallback `rg`+leitura manual, e só então decidir se o installer do Alfred deve configurar esse MCP opcionalmente.
 
 Aceite: `validate-connectors` 0 erros; 1 handoff real registrado no audit. Não mexer: regra "IA nunca mergeia branch protegida".
 
@@ -120,26 +128,48 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Eval antes de skill | W5.3 | ✅ concluído (2026-07-05) |
 | P2 | Formato Agent Skills + scripts em skills | W5.4 | ✅ concluído (2026-07-05) |
 | P2 | Descoberta de skills em catálogos externos (ex.: Context7) | W5.5 | ✅ concluído (2026-07-05) |
-| P2 | Connector: response format + error guidance | W7.3 | pendente |
-| P2 | Hooks determinísticos por host (opcional) | W7.4 | pendente |
+| P2 | Allowlist AWS (agent-toolkit-for-aws) + precedência AWS-first para docs | W5.5 | ✅ concluído (2026-07-09) |
+| P2 | Layout pasta-por-skill (`<nome>/SKILL.md`) + skills locais no HUB + precedência HUB→framework→Context7 | W5.6 | ✅ concluído (2026-07-09) |
+| P2 | Connector: response format + error guidance | W7.3 | ✅ concluído (2026-07-05) |
+| P2 | Hooks determinísticos por host (opcional) | W7.4 | ✅ concluído (2026-07-05) |
 | P2 | Rubrica LLM-as-judge para artefatos | W8.6 | pendente |
-| P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa (restam só WARNs históricos) |
+| P2 | Corrigir exemplos: JSONL de observabilidade do lado App | W6 | ✅ concluído (2026-07-05): `008-observability-log.jsonl` criado nas 5 demandas de exemplo; `validate-demand` em modo app passa; exemplos históricos ficam no tier ilustrativo/non-strict até migração |
 | P2 | Recomendação de próxima ação no boot | W8.4 | ✅ concluído (2026-07-05) |
 | P2 | Retrospectiva com transcripts | W8.7 | pendente |
+| P1 | Otimização de contexto/tokens do framework | W1.9 | ✅ concluído (2026-07-08) |
 | P1 | Template hub/skills.md | W2.3 | ✅ concluído (2026-07-05) |
 | P1 | Compactar implementation-status | W1.3 | ✅ concluído (2026-07-05) |
 | P1 | Papéis SRE/Security/FinOps em `core/squad.md` | — | ✅ concluído (2026-07-05) |
+| P2 | Pergunta explícita e opcional de repo de template no onboarding + fallback "sem template" no Design (fecha elicitação do D35) | — | ✅ concluído (2026-07-09) |
+| P2 | Model-policy: Inception e Design fixos em `strong` em todas as lanes (decisão do dono) | — | ✅ concluído (2026-07-09) |
+| P2 | Model-policy: Execution nunca em `cheap` (piso mínimo medium; FAST sem gate de Design) — decisão do dono | — | ✅ concluído (2026-07-09) |
+| P2 | Model-policy eixo 2 (`effort` por fase×lane) + task budget na Execution + subagent barato p/ units paralelas (práticas Anthropic) | — | ✅ concluído (2026-07-09) |
+| P2 | Model-policy: Inception FAST/Std → medium·high (effort compensa; SAFE segue strong) + mapa tier→modelo Claude preenchido (Haiku/Sonnet/Opus) | — | ✅ concluído (2026-07-09) |
+| P2 | Model-policy refino: Inception FAST=strong (sem gate de Design), Validate nunca `cheap` (mín. medium), Operate=exceção documentada ao piso SAFE (medium) — decisão do dono | — | ✅ concluído (2026-07-09) |
+| P2 | Sigla **auto-derivada** do nome do repo (`itau-<sigla>-...`), nunca perguntada — rótulo de exibição only (regra em `core/boot.md`); decisão do dono, nasceu do teste real | — | ✅ concluído (2026-07-09) |
+| P2 | Onboarding "provisiona, não interroga": HUB novo → cria esqueleto direto, owner/apps/tracker=pending, sem menu de escopo (regra em `onboarding-sigla.md` + `boot.md`); nasceu do teste real | — | ✅ concluído (2026-07-09) |
 | P2 | Helper classify-risk | W3 | ✅ concluído (2026-07-05) |
 | P2 | Score de confiança pré-Execution | W8.1 | ✅ concluído (2026-07-05) |
 | P2 | spec-vs-impl | W8.2 | ✅ concluído (2026-07-05) |
 | P2 | Memória de decisões | W8.3 | pendente |
 | P2 | Métricas de retrabalho/intervenção | W6 | pendente |
+| P2 | Usage-cost real: desenho Devin-first + ccusage secundário | W6.2 | parcial: ccusage ativo; Devin API pendente |
 | P3 | Adapter real (MCP candidato) | W7 | pendente (DH) |
+| P3 | Avaliar Codebase Memory MCP para instalação corporativa + integração opcional no install do Alfred | W7.5 | pendente (DH: fonte aprovada, segurança, empacotamento, DEVIN CLI) |
 | P3 | Sugestão de model-policy | W8.5 | pendente |
 | P3 | Dashboard sobre JSONL | futuro | adiado |
 
 ## Organização de `scripts/` (pedido do dono, 2026-07-05)
 - [x] ✅ Diretório reorganizado por responsabilidade nos 2 runtimes: `validators/` · `workflow/` · `metrics/` · `adapters/` (python-only). Referências atualizadas em todo o repo (CHANGELOG e plano conceitual preservados como históricos); smoke tests e validação estrita 0/0 pós-mudança. Nota de compatibilidade no CHANGELOG (paths de chamada mudaram; flags idênticos).
+- [x] ✅ Política simplificada de runtime (pedido do dono, 2026-07-09): Python passa a ser o runtime canônico para lógica de helpers e para exemplos de uso. `install.ps1` e `install.sh` continuam nativos por sistema operacional.
+- [ ] Remover gradualmente helpers de runtime não canônico quando forem tocados, sem big-bang e sem quebrar instalações existentes.
+
+### Migração SOLID dos scripts (observabilidade)
+Objetivo: lógica reutilizável mora em `scripts/shared/observability/` (SOLID); comandos em `scripts/metrics/` são drivers finos. Boundary e regras em [`scripts-architecture.md`](../scripts-architecture.md), travadas por `validate-scripts-architecture.py`.
+- [x] W-SOLID.1 ✅ (2026-07-12) **Núcleo de ingestão migrado.** Custo unificado em domínio (`domain/services/rate_card.py` `price_usage`, substituindo os dois `calculate_cost` duplicados) + carga de rate card em infra (`infrastructure/rate_cards/`). Parsing host-específico saiu dos comandos para adapters reais: `adapters/claude/transcript.py` (parse de transcript + `load_requests`), `adapters/claude/transcript_cursor.py` (cursor único, antes duplicado em 2 comandos), `adapters/claude/hook.py` (raw telemetry, helpers de artefato/redação/clock injetados) e `adapters/ccusage/session.py` (seleção de sessão). Os 4 comandos (`attribute-usage-transcript`, `claude-code-usage-hook`, `import-ccusage`, `apply-usage-rate-card`) viraram drivers finos via `shared.*` — contrato de CLI inalterado, saída byte-idêntica (fixtures ts-normalizadas) e `validate-observability-intelligence` verde. Enforcement endurecido: anti-stub, sem-parsing/pricing-inline no comando, comando-delega. Gate `validate-framework` 0 erros.
+- [x] W-SOLID.2 ✅ (2026-07-12) **Classificador de artefato desduplicado.** As duas cópias divergentes de `classify_artifact` (domínio × `scripts/metrics/observability.py`) viraram uma só em `domain/services/artifact_classifier.py`, com a lista completa de tipos (prefixos de framework + nomes de demanda + extensões) e a melhoria de classificar teste antes de `source_code`. Equivalência provada contra a versão emitida (idêntica para todo caso não-teste). `scripts/metrics/observability.py` passou a reexportar do shared. Gate `validate-framework` 0 erros.
+- [x] W-SOLID.3 ✅ (2026-07-12) **Helpers de `observability.py` consolidados em `shared`.** Redação e leitura de uso (puras) foram para o domínio (`domain/services/redaction.py`, `domain/services/legacy_usage.py`); construção de artefato (I/O) e dedup de eventos (json) foram para infra (`infrastructure/artifacts.py`, `infrastructure/legacy_events.py`). `scripts/metrics/observability.py` virou shim fino de reexport — todos os call sites (`from metrics.observability import …`) seguem inalterados; gate `validate-framework` 0 erros. `generate-metrics-rollup`/`generate-metrics-insights`/`normalize-usage-cost` seguem como drivers que consomem o shim (adelgaçamento direto fica sob demanda, sem ganho que justifique o risco).
+- [ ] W-SOLID.4 (sob demanda) Preencher os adapters ainda stub (`codex/*`, `devin/*`) com parsing real quando houver fonte/fixture aprovada.
 
 ## Base de pesquisa
 As recomendações da Anthropic (agentes, context engineering, skills, tools, evals, autonomia governada) foram analisadas e mapeadas às decisões deste plano em [`anthropic-research-notes.md`](anthropic-research-notes.md). Os 5 ajustes sugeridos lá aguardam aprovação humana antes de entrar nas waves.
@@ -163,6 +193,8 @@ Aprovadas em 2026-07-05 ("aprovo 1–7") e executadas:
 
 - [x] Telemetria por e-mail ✅ (2026-07-05, decisão do dono): os logs de observabilidade de **cada pessoa rodando o Alfred** são enviados automaticamente ao destino org (`telemetry_to` em `knowledge/notification.md`, copiado pelo installer para o config de cada máquina) — tool `send_telemetry` no MCP (lote = `{sender, collected_at, source, event}`), disparo na strategic-notification a cada geração de eventos. **Transporte provisório até a API de telemetria existir (D45)** — trocar o transporte não toca as regras. Endereço confirmado pelo dono: `adriano.vilela-costa@itau-unibanco.com.br`.
 - [x] Cadastro do e-mail ✅ (2026-07-05, decisão do dono): acontece **no processo de install** — os instaladores (`install/`, 2 runtimes) perguntam o e-mail (ou `-Email`/`ALFRED_EMAIL`), gravam `~/.alfred-email.json` em dry-run sem sobrescrever config existente, e registram o MCP `alfred-email` no Claude Code quando CLI+Python existem (best-effort; degrada, D3).
+
+- [x] Otimização de contexto/tokens ✅ (2026-07-08, decisões do dono): aprovados e executados os 6 DHs do pacote — split do welcome, Risk Mode JIT na Inception, model-policy JIT na seleção de modelo, toolbar quick, contrato enxuto de skills com frontmatter, e shims de host gerados de template. Relatório final: [`architecture-review-context-2026-07.md`](architecture-review-context-2026-07.md).
 
 Ainda pendentes:
 - [ ] Credenciais SMTP + dono para promover o adapter de e-mail de `dry-run` a `active` (preencher `smtp{}` no `~/.alfred-email.json`).

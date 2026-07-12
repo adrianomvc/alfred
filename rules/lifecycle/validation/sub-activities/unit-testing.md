@@ -1,3 +1,14 @@
+---
+name: sub-activity-unit-testing
+description: Validate sub-activity — Unit Testing
+load: sub-activity
+triggers:
+  phase: validation
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Validate sub-activity — Unit Testing
 
 > Trigger: **logic changed**. Optional, inside Validate. The cheapest, most

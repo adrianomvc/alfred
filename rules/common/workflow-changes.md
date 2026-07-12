@@ -1,3 +1,14 @@
+---
+name: common-workflow-changes
+description: Common Rule - Mid-Workflow Changes
+load: event
+triggers:
+  phase: all
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Common Rule - Mid-Workflow Changes
 
 The squad may change the process during a demand — add a sub-activity that was

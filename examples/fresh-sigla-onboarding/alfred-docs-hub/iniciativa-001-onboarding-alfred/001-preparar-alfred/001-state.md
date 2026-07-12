@@ -27,6 +27,9 @@
 - observability log: `05-operation/011-observability-log.jsonl`
 - app artifacts: `../../../../.alfred-docs-app/iniciativa-001-onboarding-alfred/001-preparar-alfred/`
 
+## Active external skills (pinned)
+- `aws/agent-toolkit-for-aws` — `main` @ `4217c65af277aa5a63b88395dfd9d3655ef7e0fb`; status available; registered in `004-skills.md`, human-confirmed (see audit). Complements built-in `platform-aws-data`.
+
 ## Checklist
 - [ ] Inception
 - [ ] Design

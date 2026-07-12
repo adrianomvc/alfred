@@ -24,13 +24,20 @@ Every script must satisfy:
 - clear manual fallback;
 - no required host, shell, CI, IDE, or model runtime.
 
-PowerShell and Python helpers may coexist. They are parallel conveniences, not competing sources of truth. Each helper ships as `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py` with the same flags (the Python set shares small helpers in `scripts/python/_common.py`).
+Python is the canonical helper runtime. New helper logic and documented helper commands live under `scripts/`; do not add another helper runtime unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
+
+## Terminal Tooling
+RTK is a local terminal hook, not an Alfred runtime. When installed in a DEVIN
+CLI environment, Alfred may prefer `rtk cat`, `rtk grep`, `rtk diff`, and
+`rtk test` to keep command output bounded. Without RTK, use the manual fallback:
+native commands with explicit limits (`tail`, `head`, `Select-Object -First`,
+`git diff --stat`, scoped diffs, targeted searches).
 
 ## Manual Fallback Matrix
 | Helper (`<name>`) | Script output | Manual Markdown/JSONL fallback |
 |---|---|---|
 | `alfred-boot` | terminal context summary | read HUB `001-index.md` and demand `001-state.md`; list open demands manually |
-| `render-toolbar` | terminal toolbar | render the toolbar text from `001-state.md` using `core/presentation/toolbar.md` |
+| `render-toolbar` | terminal toolbar | use default rich profile when the helper can run; if Unicode/emoji is unsupported, run `--profile text --allow-text-fallback` or load `core/presentation/toolbar-quick.md` and render only the documented text fallback from `001-state.md`; do not hand-draw the rich block |
 | `validate-framework` | terminal validation result | execute `docs/framework-validation.md` checklist manually |
 | `validate-demand` | terminal validation result | review required HUB/App artifacts, links, JSONL, audit, metrics, skills, and adapters manually |
 | `validate-sdd-gate` | terminal validation result | review problem, requirements, risk, decisions, spec, and execution plan manually before Execution |
@@ -43,6 +50,7 @@ PowerShell and Python helpers may coexist. They are parallel conveniences, not c
 | `collect-observability` | JSONL batch | concatenate relevant `observability-log.jsonl` files preserving source path and line references |
 | `generate-metrics-rollup` | Markdown rollup | summarize JSONL events manually into `metrics-rollup.md` or `05-operation/008-metrics.md` |
 | `normalize-usage-cost` | normalized usage JSONL events | manually append `usage_attributed` events only from approved host export data |
+| `apply-usage-rate-card` | `usage_cost_attributed` interaction cost events | manually append a cost event only from exact usage plus an approved rate card; never allocate a session total |
 
 ## Generated Artifacts
 Generated outputs should live in normal Alfred artifact locations:

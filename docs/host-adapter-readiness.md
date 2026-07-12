@@ -36,7 +36,7 @@ Use `connectors/adapter-template.md` for the concrete adapter file and `docs/ada
 - `tracker`: issue creation/update needs project and workflow mapping.
 - `notification`: send operations need destination allowlist and approval policy.
 - `telemetry`: event sending needs destination schema and retry policy.
-- `usage-cost`: usage collection needs a host export/API that exposes model, tokens, cost, and correlation identifiers.
+- `usage-cost`: usage collection needs a host export/API, local usage log, or approved billing export that exposes model, tokens, ACUs/credits, cost or allocation inputs, and correlation identifiers. For DEVIN-first adoption, prefer Devin Session Insights plus the session consumption API; use `docs/usage-cost-adoption.md`.
 
 ## Degradation Rule
 If any required input is missing, keep the connector as a contract or handoff example. Do not create a partial adapter that silently skips audit, approval, or error handling.

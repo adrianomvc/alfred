@@ -1,8 +1,5 @@
-+-- ALFRED ------------------------------- SIGLA:SQ9 | #003-simulado-safe --+
-| Lane: SAFE | Model: GPT-5 | Progress: 100% |
-| Cost: n/a |
-| Inception [x] -> Design [x] -> Execution [x] -> Validate [x] -> Operation [x] |
-| Step : demanda SAFE fechada |
-| HITL : concluido com evidencias formais |
-| Next : executar simulado operacional Execution-first quando aprovado |
-+---------------------------------------------------------------------------+
+ALFRED | TST | #toolbar-safe | SAFE | 60% | Custo USD: indisponível · fonte de custo não configurada | Consumo: não coletado · adapter de uso não configurado
+Framework: v2.0.0 (fixture) | App: f9a3739
+Fases: 1 Inception:ok | 2 Design:ok | 3 Execution:ok | 4 Validate:agora | 5 Operation:pendente
+HITL: Product Owner + Tech Lead + Security | modelo: GPT-5 | etapa: evidence review
+Proximo: collect final evidence and human acceptance

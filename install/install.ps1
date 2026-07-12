@@ -18,6 +18,21 @@
   powershell -ExecutionPolicy Bypass -File install/install.ps1 -Version v0.2.0
 #>
 param(
+  # ==========================================================================
+  # COMPANY SETTINGS - edit these defaults when preparing the installer for a
+  # corporate machine/image.
+  #
+  # 1) Alfred framework repository:
+  #    Replace the default below when the company uses an internal Git mirror.
+  #
+  # 2) RTK package URL:
+  #    The default is the public Windows zip placeholder because most company
+  #    usage is Windows/Git Bash and the future Artifactory package is also zip.
+  #    Replace it with the internal Artifactory zip when available.
+  #
+  # Temporary alternative:
+  #    Keep this file unchanged and pass -FrameworkUrl / -RtkUrl at install time.
+  # ==========================================================================
   [string]$FrameworkUrl = "https://github.com/adrianomvc/alfred.git",
   [string]$InstallDir = (Join-Path $HOME ".alfred"),
   [string]$Branch = "",
@@ -25,6 +40,12 @@ param(
   [string]$SkillsDir = (Join-Path $env:APPDATA "devin/skills"),
   [string]$Email = "",        # notification destination; prompts interactively when omitted
   [switch]$SkipEmail,          # skip the e-mail/MCP notification setup entirely
+  [string]$RtkUrl = "https://github.com/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip",        # public zip placeholder; replace with corporate Artifactory URL
+  [switch]$SkipRtk,             # skip RTK terminal hook setup entirely
+  [string]$NpmRegistry = "",    # optional corporate npm registry / Artifactory URL
+  [string]$CcusagePackage = "ccusage",
+  [string]$CodebaseMemoryPackage = "codebase-memory",
+  [switch]$SkipNpmTools,        # skip npm tool setup entirely
   [switch]$List,
   [switch]$Rollback
 )
@@ -135,7 +156,83 @@ if ($devin) {
   Info "DEVIN CLI not found on PATH; skill files are installed. Run 'devin skills list' to confirm."
 }
 
-# 5. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# 5. RTK terminal hook (DEVIN CLI only) — optional token-control layer.
+# No URL means no download; Alfred falls back to bounded native commands.
+if (-not $SkipRtk) {
+  try {
+    if ($RtkUrl -eq "" -and $env:ALFRED_RTK_URL) { $RtkUrl = $env:ALFRED_RTK_URL }
+
+    $rtk = Get-Command rtk -ErrorAction SilentlyContinue
+    if (-not $rtk -and $RtkUrl -ne "") {
+      $rtkRoot = Join-Path $HOME ".alfred-tools/rtk"
+      New-Item -ItemType Directory -Force -Path $rtkRoot | Out-Null
+      $leaf = Split-Path ([Uri]$RtkUrl).AbsolutePath -Leaf
+      if ($leaf -eq "") { $leaf = "rtk.exe" }
+      $download = Join-Path $rtkRoot $leaf
+      Info "Downloading RTK from configured RTK URL..."
+      Invoke-WebRequest -Uri $RtkUrl -OutFile $download
+
+      if ($download.ToLowerInvariant().EndsWith(".zip")) {
+        Expand-Archive -LiteralPath $download -DestinationPath $rtkRoot -Force
+        $candidate = Get-ChildItem -LiteralPath $rtkRoot -Recurse -File |
+          Where-Object { $_.Name -in @("rtk.exe", "rtk") } |
+          Select-Object -First 1
+        if ($candidate) { Copy-Item -LiteralPath $candidate.FullName -Destination (Join-Path $rtkRoot "rtk.exe") -Force }
+      } else {
+        if ((Split-Path $download -Leaf) -ne "rtk.exe") {
+          Copy-Item -LiteralPath $download -Destination (Join-Path $rtkRoot "rtk.exe") -Force
+        }
+      }
+
+      $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+      if ($userPath -notlike "*$rtkRoot*") {
+        [Environment]::SetEnvironmentVariable("Path", "$userPath;$rtkRoot", "User")
+        Info "Added RTK directory to the user PATH: $rtkRoot"
+      }
+      $env:Path = "$env:Path;$rtkRoot"
+      $rtk = Get-Command rtk -ErrorAction SilentlyContinue
+    }
+
+    if ($rtk) {
+      & $rtk.Source init -g *> $null
+      if ($LASTEXITCODE -eq 0) { Info "RTK initialized globally for DEVIN CLI terminal sessions." }
+      else { Info "RTK found, but 'rtk init -g' did not complete. Run it manually when ready." }
+    } else {
+      Info "RTK setup skipped: configure -RtkUrl or ALFRED_RTK_URL if the default is unavailable."
+    }
+  } catch {
+    Info "RTK setup skipped ($($_.Exception.Message)). Alfred will use bounded native commands."
+  }
+}
+
+# 6. Optional npm tools (corporate Artifactory path): ccusage + codebase-memory.
+# Best-effort: these tools improve usage attribution and brownfield discovery,
+# but Alfred still works without them.
+if (-not $SkipNpmTools) {
+  try {
+    if ($NpmRegistry -eq "" -and $env:ALFRED_NPM_REGISTRY) { $NpmRegistry = $env:ALFRED_NPM_REGISTRY }
+    if ($env:ALFRED_CCUSAGE_PACKAGE) { $CcusagePackage = $env:ALFRED_CCUSAGE_PACKAGE }
+    if ($env:ALFRED_CODEBASE_MEMORY_PACKAGE) { $CodebaseMemoryPackage = $env:ALFRED_CODEBASE_MEMORY_PACKAGE }
+
+    $npm = Get-Command npm -ErrorAction SilentlyContinue
+    if (-not $npm) {
+      Info "npm not found; skipping optional npm tools (ccusage/codebase-memory)."
+    } else {
+      foreach ($pkg in @($CcusagePackage, $CodebaseMemoryPackage)) {
+        if ($pkg -eq "") { continue }
+        $args = @("install", "-g", $pkg)
+        if ($NpmRegistry -ne "") { $args += @("--registry", $NpmRegistry) }
+        & $npm.Source @args *> $null
+        if ($LASTEXITCODE -eq 0) { Info "npm tool installed/updated: $pkg" }
+        else { Info "Could not install npm tool '$pkg'. Check Artifactory/npm access; Alfred will degrade." }
+      }
+    }
+  } catch {
+    Info "npm tool setup skipped ($($_.Exception.Message)). Alfred works without it."
+  }
+}
+
+# 7. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
 # Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
 # server in Claude Code when available. Best-effort: failures never break the install.
 if (-not $SkipEmail) {
@@ -176,7 +273,7 @@ if (-not $SkipEmail) {
       }
     }
 
-    $mcpServer = Join-Path $InstallDir "scripts/python/adapters/mcp-email-server.py"
+    $mcpServer = Join-Path $InstallDir "scripts/adapters/mcp-email-server.py"
     $claude = Get-Command claude -ErrorAction SilentlyContinue
     $python = Get-Command python -ErrorAction SilentlyContinue
     if ($claude -and $python -and (Test-Path -LiteralPath $mcpServer)) {

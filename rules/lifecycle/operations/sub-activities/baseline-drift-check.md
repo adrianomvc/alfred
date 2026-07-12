@@ -1,3 +1,14 @@
+---
+name: sub-activity-baseline-drift-check
+description: Operation sub-activity — Baseline Drift Check
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — Baseline Drift Check
 
 > Trigger: **Standard/SAFE** close. Optional, inside Operation.
@@ -11,11 +22,13 @@ The collected `metrics`, historical baselines / rollup
 (`metrics/` insights), the lane that was actually used, post-mortem status.
 
 ## Steps
-1. Compare against baselines: **elapsed time, cost, interactions, rework**.
+1. Compare against baselines: **elapsed time, cost, requests/interactions,
+   cache reuse, artifacts loaded, tool failures, acceptance, and rework**.
 2. Flag **too much SAFE** — demands escalated beyond their real risk.
 3. Flag **excessive cost** or **repeated rework** on the same area.
 4. Flag a **missing post-mortem** when Execution-first was used.
-5. Record flags as **insight proposals** (human-reviewable), not auto-policy (D46).
+5. Record flags as **insight proposals** with evidence links (human-reviewable),
+   not auto-policy (D46). Pilot baselines are conversation triggers, not gates.
 
 ## Output
 A short list of drift flags / insight proposals attached to the summary; nothing

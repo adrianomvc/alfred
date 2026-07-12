@@ -4,12 +4,107 @@ All notable Alfred framework changes should be recorded here.
 
 ## Unreleased
 
+### Added
+- Layered transcript usage attribution (usage-cost Layers 1-3):
+  `scripts/metrics/attribute-usage-transcript.py` maps a durable host
+  transcript (Claude Code) into request-scoped `usage_attributed` events and
+  optional `interaction_completed` aggregates. Tokens are exact and
+  de-duplicated by `requestId`; human interaction ids use host `promptId` when
+  present, otherwise derived user boundaries or `interaction_confidence:
+  unavailable`. The legacy `--granularity turn` flag remains an alias for
+  request. Cost stays `null` unless `--rate-card-path` supplies an approved
+  interaction rate card. `claude-code-usage-hook.py` plus
+  `core/hooks/usage-attribution.md` run incrementally from a Claude Code Stop
+  hook, can write sanitized raw JSONL via `AI_OBS_RAW_LOG`, and never block the
+  host.
+- `scripts/metrics/apply-usage-rate-card.py` and the
+  `usage-rate-card` connector append `usage_cost_attributed` events from exact
+  usage plus an approved rate card. This keeps interaction cost separate from
+  `ccusage` session totals.
+- `validate-observability-hygiene` validator: example event logs must use real,
+  distinct ISO-8601 timestamps (no placeholders, not all-identical), guarding the
+  Layer 0 hygiene contract that later attribution depends on.
+- `generate-metrics-rollup.py` now separates usage tokens from cost events,
+  includes cache creation/read/output and `cache_reuse_ratio`, normalizes
+  legacy `artifacts_used`, and reports data-quality coverage.
+- `generate-metrics-insights.py` proposes evidence-backed policy/rule/skill
+  insights without changing policies automatically.
+- Shared SOLID package under `scripts/shared/`, with the first implemented
+  subdomain at `scripts/shared/observability/`: domain
+  models, application ports/use cases, infrastructure repositories, host adapter
+  registry, and toolbar presentation view models. This keeps scripts
+  host-agnostic while allowing Claude Code, Codex, Devin, ccusage, and generic
+  adapters to remain thin edge implementations.
+
+### Fixed
+- `ccusage` session totals are now state-only for toolbar/forecast display:
+  `import-ccusage.py` updates `001-state.md` with `cost granularity: session`
+  and no longer appends session totals to observability JSONL as
+  `usage_attributed`. Interaction JSONL usage now requires an
+  interaction/request-granular source such as a host transcript.
+- `--allocate-cost` / `--session-cost-usd` are no longer accepted for transcript
+  interaction attribution, preventing proportional allocation of session totals
+  into JSONL interactions.
+- Claude Code usage attribution is now wired into the runtime path:
+  `render-toolbar` can register the active demand (`-RegisterActive`), the Stop
+  hook falls back to `~/.alfred/runtime/active-demand.json` when no
+  `ALFRED_STATE_PATH` is set, and `sync-host-shims.py -Host claude-code -Create
+  -InstallHooks` installs the hook while preserving existing settings. Metrics
+  rollup counts the latest event per `event_id`, so repeated session snapshots do
+  not double-count tokens/cost.
+- `import-ccusage.py` now resolves the `ccusage` executable via `shutil.which`
+  before spawning it, so Windows npm shims (`ccusage.cmd`) are found instead of
+  failing with `WinError 2`. When it is still unreachable, the helper exits with
+  a clear message pointing to the `-InputPath` fallback instead of a raw
+  traceback.
+- Claude Code policy snapshots now emit `policy_snapshot` instead of
+  `artifact_accessed`; metrics rollups ignore snapshot entries for real
+  artifact reads, repeated reads, and loaded-artifact analysis.
+
+### Changed
+- Observability event hygiene is now an explicit contract (Layer 0): events must
+  carry a real ISO-8601 `ts` from the system clock (never a placeholder), a real
+  host `session_id`, stable `trace_id`/`ALFRED_RUN_ID`, and the Execution commit,
+  so later usage attribution has precise window boundaries. `metrics/metrics.md`
+  documents why per-event tokens/cost stay `null` on hosts without per-interaction
+  usage (session totals arrive in state for toolbar display; interaction tokens
+  can arrive as `usage_attributed`) and directs running the `usage-cost` import
+  at each checkpoint, not only at close.
+- Toolbar forecast display now explains why the total estimate is unavailable
+  when cost exists but progress is still 0% or already 100%, instead of hiding
+  the forecast line.
+- Alfred's butler persona now uses gender-neutral address for people: rendered
+  welcome/UI text avoids `senhor`, `senhora`, and `senhor(a)`, and validation
+  guards the neutral-address rule.
+- Host entry updates now include `sync-host-shims.py`, so pulling `~/.alfred`
+  can refresh copied Claude Code/DEVIN/Codex entry files instead of leaving
+  stale host instructions active.
+- `ccusage` session import is now an active automatic usage-cost path for local
+  CLI hosts: `scripts/metrics/import-ccusage.py` maps `ccusage session
+  --json` into `001-state.md` session cost fields with estimated confidence and
+  auditable session-selection metadata.
+- Requirements questions are file-only: `003-requirements.md` is the single answer channel, chat/UI may only point to it, host-native question popups are forbidden for requirements, and FAST material questions still go to the artifact. The framework validator now guards this rule.
+- Toolbar rendering is now explicitly grounded: boot/orchestrator prefer `render-toolbar`; if the helper is unavailable, agents must load `toolbar-quick.md` and use only the documented text fallback instead of hand-drawing rich blocks.
+- Claude Code cost capture is now an explicit manual usage-cost path: humans can run `/cost`, record `cost usd`/source/confidence in `001-state.md`, and the toolbar renderer reads that state value for display and forecast.
+- Toolbar CLI now guards against accidental ASCII fallback: `--profile text` requires `--allow-text-fallback`; capable hosts should omit `--profile` or use `--profile rich`.
+- Installers can now best-effort install optional npm tools from a corporate registry / Artifactory: `ccusage` and `codebase-memory`, with package-name overrides and skip flags.
+- Toolbar rendering now consumes a usage summary view model and separates
+  session cost from demand cost. Session totals can be displayed with scope and
+  confidence, but demand forecasts require demand-scoped cost with sufficient
+  coverage.
+
 ## 2.0.0 - in progress (opened 2026-07-05)
 
 ### Summary
 Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Waves 0–8: preservation, hygiene, full SDD templates, assisted risk classification, first real integrated demand, real skills/metrics/adapters, evolutionary intelligence) lands in this version. **The version stays `2.0.0` until the plan closes — no bumps per wave** (explicit owner decision).
 
 ### Added
+- Usage-cost adoption design: `docs/usage-cost-adoption.md` defines the next measurement path with Devin Session Insights + Consumption API as the primary ACU source, `ccusage` as a secondary local-CLI source, `ALFRED_RUN_ID`/`devin-...` correlation, confidence labels, and a pilot checklist before automatic model-policy suggestions.
+- Token economy policies: `rules/common/token-budget-policy.md` adds context-budget preflight before large loads/token-heavy work, and `rules/common/deferred-work-policy.md` allows batch/flex/background execution only for non-critical-path drafts such as rollups, read-only scans, stale reverse-eng refreshes, summaries, and notifications. `validate-token-economy-policy` keeps the wiring intact.
+- Context compression policy: `rules/common/context-compression-policy.md` allows RAG/compressed summaries for safe context selection while requiring original sources for code edits, Design decisions, SAFE/incident judgment, and validation evidence. Design, Execution, Code Generation, Validate, boot, and `validate-context-compression-policy` now enforce that boundary.
+- Tool discovery / JIT tools policy: `rules/common/tool-discovery-policy.md` defines progressive tool, skill, connector, MCP, and external-catalog loading. Host shims and connector guidance now tell agents to select the capability before loading/calling full schemas, and `validate-tool-discovery-policy` guards MCP tool description size.
+- Prompt caching policy: `rules/common/prompt-caching-policy.md` makes stable-prefix loading explicit for hosts with prompt caching/persistent context, and context-manifest validation now guards the cache-friendly prefix.
+- RTK terminal-token policy and DEVIN CLI hook docs: `rules/common/terminal-token-policy.md` defines bounded terminal-output behavior, `core/hooks/rtk.md` documents optional RTK setup, and the DEVIN installer can run `rtk init -g` or download RTK when `-RtkUrl` / `ALFRED_RTK_URL` is provided. No URL means no download; Alfred degrades to bounded native commands.
 - `docs/plan/implementation-plan-2.0.0.md` — the incremental implementation plan (waves, prioritized backlog, pending human decisions, closure criteria).
 - `docs/plan/anthropic-research-notes.md` — Anthropic engineering/research findings (agents, context engineering, Agent Skills, tool design, evals, governed autonomy) mapped to this plan's pending decisions; extended with a recommendation-by-recommendation adherence audit and additional evolutions A–G.
 - Wave 0 delivered: the conceptual plan (D1–D47) is now versioned at `docs/plan/alfred-conceptual-plan.md` with an as-built note for Fase 7 naming (original kept in `.claude/` until the owner approves removal).
@@ -22,6 +117,9 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `templates/hub/skills.md` (W2.3) — sigla skills registry mold: active skills with pinned refs plus an external-catalog allowlist wired to the injection guardrail.
 
 ### Changed
+- Helper runtime policy simplified: Python is now the canonical runtime for helper logic and documented helper commands. `install.ps1` and `install.sh` stay OS-native bootstraps. Existing non-canonical helper entry points are no longer advertised in active docs and can be removed gradually when touched.
+- E-mail adapter audit hardening: refused allowlist attempts now record the normalized `[Alfred-Framework]` subject in audit JSONL, matching the notification connector contract. New `validate-email-adapter` behavior check covers dry-run report generation, allowlist refusal, `.eml` outbox creation, and audit subject prefix.
+- Examples cleanup: stale SQ9 historical demand snapshots were removed from the maintained example suite. `006-simulado-adocao-v2` is now the SQ9 strict regression demand; lane toolbar coverage moved to small `examples/toolbar-states/` fixtures with `examples/examples.md` declaring tiers.
 - Context7 activated as an allowlisted external catalog (owner decision): org policy `knowledge/external-catalogs.md` (policy-template format) records the allowlist and the four usage gates; DEVIN per-project MCP registration via `hosts/devin-cli/config.local.template.json` (alfred-email + context7 stdio servers) — the `/alfred` skill offers to create `.devin/config.local.json` from it on first boot (human confirms; context7 block removable). Installers point DEVIN users at the template.
 - Telemetry by e-mail (owner decision — provisional transport until the telemetry API exists, D45): new `send_telemetry` MCP tool batches every local observability JSONL (each line = `{sender, collected_at, source, event}`, sender = user@host) and mails it to the org `telemetry_to` destination registered in `knowledge/notification.md`; installers copy that destination into each runner's `~/.alfred-email.json`; the strategic-notification sub-activity fires it automatically at every generation that appends events (closure, hub-sync, rollup), audited, no per-send prompt (durable authorization). Swapping to the real API later changes only the transport, not the rules.
 - Installers (`install/`, both runtimes) now set up the notification adapter (owner decision): prompt for the destination e-mail (`-Email` / `ALFRED_EMAIL`; interactive prompt otherwise; `-SkipEmail` / `ALFRED_SKIP_EMAIL=1` to skip), write `~/.alfred-email.json` in dry-run mode (never overwriting an existing config), and register the `alfred-email` MCP server in Claude Code (user scope) when the CLI and Python are available. Best-effort: no failure breaks the install; everything degrades to the manual handoff (D3).
@@ -48,7 +146,7 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
   - `core/squad.md` gains SRE/On-call, Security, and FinOps as checkpoint owners (SAFE/emergency) with recorded fallback.
   - Original untracked conceptual plan removed from `.claude/` after byte-level verification against the committed copy.
 - Examples fixed: app-side `05-operation/008-observability-log.jsonl` added to the 5 example app demands — `validate-demand --app-demand-path` now passes (pre-existing gap).
-- `mcp-email-server` (`scripts/python/`, **Python-only by owner decision**) — the first concrete connector adapter: an MCP stdio server (stdlib only, no dependencies) implementing the `notification` contract. Tools `send_email` (allowlist gating with human-only unblock, `[Alfred-Framework]` subject prefix, per-attempt audit JSONL, dry-run outbox by default, SMTP/STARTTLS in active mode) and `email_status`. Tested end-to-end: MCP handshake, dry-run compose, allowlist refusal audited. Registered per host via MCP (e.g. `claude mcp add alfred-email -- python .../mcp-email-server.py`). Resolves the D44 channel decision (MCP + Python); `active` state awaits real SMTP credentials.
+- `mcp-email-server` (`scripts/`, **Python-only by owner decision**) — the first concrete connector adapter: an MCP stdio server (stdlib only, no dependencies) implementing the `notification` contract. Tools `send_email` (allowlist gating with human-only unblock, `[Alfred-Framework]` subject prefix, per-attempt audit JSONL, dry-run outbox by default, SMTP/STARTTLS in active mode) and `email_status`. Tested end-to-end: MCP handshake, dry-run compose, allowlist refusal audited. Registered per host via MCP (e.g. `claude mcp add alfred-email -- python .../mcp-email-server.py`). Resolves the D44 channel decision (MCP + Python); `active` state awaits real SMTP credentials.
 - `mcp-email-server` gains a **registered destination** (JSON config at `~/.alfred-email.json` or `ALFRED_EMAIL_CONFIG`; env vars override) and a `send_demand_report` tool that reads `001-state.md` and auto-attaches the demand's metrics, audit, summary, and observability JSONL (short body + attachments, per the D44 e-mail pattern). `knowledge/notification.md` documents the registration precedence (HUB knowledge → config file → env).
 - `spec-vs-impl` helper (W8.2, both runtimes) — heuristic coverage check of spec acceptance criteria against `013-validation-evidence.md`; flags gaps, never approves. Its first run caught a real gap in the 2.0.0 rehearsal demand (app-side criteria missing from the HUB evidence), now fixed.
 - `confidence-score` helper (W8.1, both runtimes) — pre-Execution clarity score from recorded signals (unanswered questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit); below the floor the verdict is the escalation rule. The score informs; the human decides.
@@ -56,11 +154,12 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `hosts/README.md` — "Optional deterministic enforcement (hooks)" section: wiring existing validators to host hook points (advisory rules vs deterministic hooks, D3-degradable) (W7.4).
 - Example demand `006-simulado-adocao-v2` (sq9-pilot) — offline end-to-end rehearsal of the 2.0.0 line: classify-risk proposal recorded in `004-risk.md`, priority-grouped requirements answered in-file, single decisions format, full app spec (new template sections), 2.0.0 stamps, HUB+App JSONL. Passes `validate-demand --strict` with 0 errors / 0 warnings in both runtimes; serves as a permanent regression eval.
 - `validate-demand` (both runtimes) — optional `-AppRepoPath` / `-AppCurrentCommit` forwarded to the reverse-eng staleness check, so app-side strict validation can resolve the current commit (previously always warned `current_commit_unknown`).
+- `validate-framework` (both runtimes) now runs the declared strict regression fixture (`006-simulado-adocao-v2`); `examples/README.md` and `docs/framework-validation.md` document maintained example tiers.
 - `alfred-boot` (both runtimes, W8.4): open demands are ordered by resume priority (pending human checkpoint > in progress > blocked, then last activity) and a "Suggested next" hint with the reason is printed; the human still chooses.
 
 ### Compatibility notes
 - No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
-- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/python/validate-framework.py`) must add the category segment (e.g. `scripts/python/validators/validate-framework.py`). Flags and behavior are unchanged.
+- **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/validate-framework.py`) must add the category segment (e.g. `scripts/validators/validate-framework.py`). Flags and behavior are unchanged.
 - New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
 
 ## 0.4.0 - 2026-06-29
@@ -146,7 +245,7 @@ Presentation, persona, and AI-DLC depth pass, kept within the v0.2 line.
 Portability, distribution, and governance pass over the 0.1.0 framework: a Python helper set, a DEVIN CLI installer with version pinning, per-type playbooks, a richer knowledge subsystem, and closure of the plan's open items.
 
 ### Added
-- Python 3 helper set under `scripts/python/` mirroring every PowerShell helper, so the framework can be validated on machines without PowerShell (D3 portability).
+- Python 3 helper set under `scripts/` mirroring every PowerShell helper, so the framework can be validated on machines without PowerShell (D3 portability).
 - DEVIN CLI installer (`install/`) that clones the framework into `~/.alfred` and installs the `/alfred` skill; supports pinned versions via `-Version`/`ALFRED_VERSION` (D14/D15/D26).
 - Per-type playbook convention (`rules/demand-types/playbooks/`) with a Migration playbook distilled from the real SQ9 migration (D5/3.6).
 - Knowledge subsystem: richer policy template, `docs/knowledge-governance.md`, `docs/automation-fallback.md`, and a `validate-knowledge` helper (both runtimes) wired into framework validation (D42/D3).
@@ -154,7 +253,7 @@ Portability, distribution, and governance pass over the 0.1.0 framework: a Pytho
 - External skill versioning policy (pinned default, opt-in track-latest) in `skills/skills.md` (plan 6.8 closed).
 
 ### Changed
-- Helper scripts are now organized by runtime: `scripts/powershell/*.ps1` and `scripts/python/*.py`. Both runtimes accept the same flags and produce equivalent output.
+- Helper scripts are now organized by runtime: `scripts/powershell/*.ps1` and `scripts/*.py`. Both runtimes accept the same flags and produce equivalent output.
 - Docs and examples now reference the runtime-scoped script paths.
 
 ### Compatibility Notes

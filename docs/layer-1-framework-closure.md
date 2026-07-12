@@ -22,7 +22,7 @@ The following are part of the framework core:
 - Templates for HUB and App artifacts.
 
 ## Optional Helpers
-The scripts under `scripts/` are optional helpers. They make framework rules easier to verify, but Alfred must still work manually through Markdown if scripts cannot run. Each helper ships in two equivalent runtimes: `scripts/powershell/<name>.ps1` and `scripts/python/<name>.py` (for machines without PowerShell).
+The scripts under `scripts/` are optional Python helpers. They make framework rules easier to verify, but Alfred must still work manually through Markdown if scripts cannot run.
 
 Daily-use helpers:
 - `alfred-boot`
@@ -63,7 +63,7 @@ These items are intentionally not closed inside Layer 1 because they need a real
 
 ## Exit Criteria
 Layer 1 can be considered ready to apply to Layer 2 when:
-- `scripts/powershell/validators/validate-framework.ps1` (or `scripts/python/validators/validate-framework.py`) passes;
+- `python scripts/validators/validate-framework.py` passes;
 - `docs/implementation-status.md` lists only host/credential/policy-dependent gaps;
 - a pilot example passes `validate-demand -Strict` in either runtime;
 - README and roadmap point the next step to HUB/App adoption.

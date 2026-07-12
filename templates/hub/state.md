@@ -13,8 +13,17 @@
 - framework version:
 - framework ref:
 - framework commit:
+- app commit:
 - observability schema:
 - branch:
+
+## Opening Framing
+- framing status: pending
+- framing confirmed by:
+- framing confirmed at:
+- target app/source:
+- workspace path:
+- artifact set:
 
 ## Progress
 - current phase:
@@ -30,11 +39,21 @@
 - loaded sections:
 
 ## Host Adapters
+- alfred run id:
+- host:
+- usage session id:
+- usage window started at:
+- usage window ended at:
+- usage imported at:
 - vcs:
 - tracker:
 - notification:
 - telemetry:
 - usage-cost:
+- cost source:
+- cost usd:
+- cost confidence:
+- cost granularity:
 - status values: contract | handoff | dry-run | active | disabled | not configured
 - readiness:
 - adapter notes:

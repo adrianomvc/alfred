@@ -1,0 +1,10 @@
+core/principles.md
+rules/README.md
+rules/rules-index.md
+rules/common/overconfidence.md
+rules/lifecycle/lifecycle.md
+rules/demand-types/operational.md
+rules/lanes/fast.md
+rules/lifecycle/execution/execution.md
+rules/agents/orchestrator.md
+rules/lifecycle/execution/sub-activities/workflow-planning.md

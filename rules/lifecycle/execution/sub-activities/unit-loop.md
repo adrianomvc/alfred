@@ -1,3 +1,14 @@
+---
+name: sub-activity-unit-loop
+description: Execution sub-activity — Unit Loop
+load: sub-activity
+triggers:
+  phase: execution
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Execution sub-activity — Unit Loop
 
 > Trigger: the demand was **decomposed into more than one unit** in Design (D24).

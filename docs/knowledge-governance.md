@@ -36,9 +36,12 @@ Every policy should define:
 ## Runtime Loading
 On boot or phase transition, Alfred loads:
 - the repo index;
-- current demand state;
 - knowledge links for the active scope;
-- only the policy files relevant to the current action.
+- only the policy files relevant to the current action;
+- current demand state.
+
+Policy files are usually more stable than demand state. Keep them before the
+state when possible so hosts with prompt caching can reuse the stable prefix.
 
 Policies that apply to the scope are not optional. If they cannot be loaded and the action depends on them, Alfred must pause and ask.
 
@@ -57,11 +60,11 @@ Open-ended exceptions are not valid framework defaults.
 ## Validation
 Run:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/powershell/validators/validate-knowledge.ps1
+```bash
+python scripts/validators/validate-knowledge.py
 ```
 ```bash
-python scripts/python/validators/validate-knowledge.py
+python scripts/validators/validate-knowledge.py
 ```
 
 The validator checks the framework knowledge files, the policy template, and example HUB knowledge policies.

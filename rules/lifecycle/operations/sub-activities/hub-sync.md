@@ -1,3 +1,14 @@
+---
+name: sub-activity-hub-sync
+description: Operation sub-activity — HUB Sync
+load: sub-activity
+triggers:
+  phase: operations
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Operation sub-activity — HUB Sync
 
 > Trigger: the demand ran in **App-only mode** and local work must flow back to

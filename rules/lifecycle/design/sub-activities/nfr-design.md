@@ -1,3 +1,14 @@
+---
+name: sub-activity-nfr-design
+description: Design sub-activity — NFR Design
+load: sub-activity
+triggers:
+  phase: design
+  lane: all
+  demand-type: all
+  agent: all
+---
+
 # Design sub-activity — NFR Design
 
 > Trigger: **performance, scale, availability, or security** matters for the demand

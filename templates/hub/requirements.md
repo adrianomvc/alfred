@@ -6,7 +6,7 @@
 
 Sigla: <sigla> · Iniciativa: <id-iniciativa> · Modo proposto: <FAST | Standard | SAFE>
 Progresso: <respondidas>/<total> respondidas · <n> bloqueiam o avanço para Design
-Como responder: edite a linha `[Resposta]:` de cada pergunta (ou responda no chat que eu registro aqui).
+Como responder: edite a linha `[Resposta]:` de cada pergunta neste arquivo. Depois de salvar, avise no chat com `pronto` ou `terminei` para eu continuar.
 
 ## Requisitos funcionais
 - <...>
@@ -15,7 +15,7 @@ Como responder: edite a linha `[Resposta]:` de cada pergunta (ou responda no cha
 - <...>
 
 ## Perguntas
-Regras: uma decisão por pergunta · 2 a 5 opções (A–E) · `(Recomendado)` **apenas orienta**, nunca preenche a resposta · não inventar opção (na dúvida, use "A confirmar").
+Regras: uma decisão por pergunta · 2 a 5 opções úteis · escolha única usa A–E por padrão e segue AI-DLC · múltipla seleção é extensão Alfred: usa `[ ]`/`[x]` sem letras e deve dizer `selecione uma ou mais` · `(Recomendado)` **apenas orienta**, nunca preenche a resposta · não inventar opção (na dúvida, use "Outra / A confirmar").
 Status por pergunta: `◻ aberta` · `✓ respondida` · `⚠ contradição`.
 
 ### 🔴 Bloqueiam o avanço
@@ -24,7 +24,8 @@ Status por pergunta: `◻ aberta` · `✓ respondida` · `⚠ contradição`.
 Por quê: <o que esta resposta destrava — ex.: blast radius / Risk Mode>.
 - A) <opção> (Recomendado)
 - B) <opção alternativa>
-- C) A confirmar
+- C) Outra / A confirmar
+
 [Resposta]:
 
 ### 🟡 Podem responder depois (não bloqueiam)
@@ -32,7 +33,8 @@ Por quê: <o que esta resposta destrava — ex.: blast radius / Risk Mode>.
 #### Q2 — <pergunta?>                                ◻ aberta
 Por quê: <impacto>.
 - A) <opção>
-- B) A confirmar
+- B) Outra / A confirmar
+
 [Resposta]:
 
 ## Gate
