@@ -72,10 +72,13 @@ class CcusageSessionAdapter:
         agent has no sessions at all.
 
         Matching is tolerant so a stale/truncated ``usage session id`` never
-        freezes the cost: exact ``period`` match first, then a prefix match, then
-        the most recent session for the agent. The non-exact methods
-        (``fallback_prefix`` / ``fallback_latest``) let the caller warn and
-        reconcile the id in state."""
+        freezes the cost: exact ``period`` match first, then a prefix match. When
+        an id is given but matches nothing, we only auto-heal to the sole session
+        when it is unambiguous (exactly one for the agent); with several sessions
+        we raise ``NoSessionMatch`` rather than guess — the caller then keeps the
+        prior cost and marks it ``stale`` instead of attributing an unrelated
+        session's cost. The non-exact methods (``fallback_prefix`` /
+        ``fallback_latest``) let the caller warn and reconcile the id in state."""
         rows = [row for row in session_rows(payload) if not agent or row.get("agent") == agent]
         if not rows:
             raise NoSessionMatch("No ccusage session matched the requested filters.")
@@ -90,8 +93,12 @@ class CcusageSessionAdapter:
             )
             if prefix:
                 return prefix[0], "fallback_prefix"
-            rows.sort(key=last_activity, reverse=True)
-            return rows[0], "fallback_latest"
+            if len(rows) == 1:
+                return rows[0], "fallback_latest"
+            raise NoSessionMatch(
+                "No ccusage session matched the requested id and several sessions exist; "
+                "refusing to attribute an unrelated session."
+            )
         rows.sort(key=last_activity, reverse=True)
         return rows[0], "latest_agent_session"
 

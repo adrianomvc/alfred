@@ -116,10 +116,20 @@ class CcusageSelectSessionTests(unittest.TestCase):
         self.assertEqual("fallback_prefix", method)
         self.assertEqual("aaaa-1111-2222-3333-444455556666", row["period"])
 
-    def test_unknown_id_falls_back_to_latest_agent_session(self):
-        row, method = CcusageSessionAdapter().select_session(self._payload(), "claude", "zzzz-does-not-exist")
+    def test_unknown_id_with_multiple_sessions_refuses_to_guess(self):
+        # Several agent sessions and no exact/prefix match -> refuse (safe), so the
+        # caller keeps the prior cost as stale instead of attributing an unrelated one.
+        with self.assertRaises(NoSessionMatch):
+            CcusageSessionAdapter().select_session(self._payload(), "claude", "zzzz-does-not-exist")
+
+    def test_unknown_id_with_single_session_auto_heals(self):
+        payload = {"session": [
+            {"agent": "claude", "period": "only-session-uuid",
+             "metadata": {"lastActivity": "2026-07-12T12:00:00Z"}},
+        ]}
+        row, method = CcusageSessionAdapter().select_session(payload, "claude", "totally-different-id")
         self.assertEqual("fallback_latest", method)
-        self.assertEqual("bbbb-7777-8888-9999-000011112222", row["period"])  # most recent claude session
+        self.assertEqual("only-session-uuid", row["period"])
 
     def test_no_agent_sessions_raises(self):
         with self.assertRaises(NoSessionMatch):
