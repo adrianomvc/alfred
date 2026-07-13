@@ -11,13 +11,19 @@ cost, tool, artifact, quality, and insight signals while host-specific logic
 lives at the edges as adapters.
 
 ## Layers
+- `scripts/shared/common/`: low-level reusable helpers for text files,
+  Markdown list fields, demand state parsing, JSONL iteration, and lifecycle
+  normalization. `scripts/_common.py` is now a compatibility shim over this
+  package for old command imports.
 - `scripts/shared/observability/domain/`: typed models and pure services
   (`Usage`, `Cost`, artifact classification, cache ratio, forecast, and
   rate-card pricing in `services/rate_card.py` — `price_usage`/`price_usage_usd`,
   the single source of the cost math).
 - `scripts/shared/observability/application/`: ports and use cases.
   Business rules depend on abstractions, not Claude, Codex, Devin, filesystem,
-  or subprocess.
+  or subprocess. Current ingestion use cases include
+  `attribute_transcript_usage.py`, `apply_usage_rate_card.py`,
+  `import_ccusage_session.py`, and `process_claude_hook.py`.
 - `scripts/shared/observability/infrastructure/`: JSONL/summary
   repositories, clocks, subprocess runner, the rate-card loader
   (`rate_cards/json_rate_card_repository.py`), and host/source adapters. The
@@ -26,14 +32,26 @@ lives at the edges as adapters.
   byte-offset cursor), `adapters/claude/hook.py` (raw telemetry; artifact,
   redaction, and clock helpers are injected so shared never imports the command
   package) — and `adapters/ccusage/session.py` (session-row selection).
-- `scripts/shared/observability/presentation/`: view models and
-  renderers such as the toolbar presenter.
+- `scripts/shared/toolbar/`: toolbar-specific state parsing, runtime helpers
+  for displayed framework/app revisions, active-demand runtime registration,
+  observability summary composition for toolbar display, view models, presenter
+  logic, and text/rich/web renderers. It consumes observability summaries but
+  owns toolbar wording such as usage, cost gaps, and forecast display.
+- `scripts/shared/validation/`: small structured validation primitives
+  (`ValidationIssue`, `ValidationReport`, `Severity`) and reusable validator
+  rules such as reverse-eng staleness, used by validators as they migrate away
+  from inline `SystemExit` checks and subprocess composition.
+- `scripts/shared/observability/presentation/`: compatibility shims for older
+  imports while toolbar presentation migrates to `shared/toolbar/`.
 - The ingestion commands under `scripts/metrics/`
   (`attribute-usage-transcript`, `claude-code-usage-hook`, `import-ccusage`,
   `apply-usage-rate-card`) are thin drivers: argparse, I/O, and delegation into
   `shared.*`. Remaining commands (`generate-metrics-rollup`,
   `generate-metrics-insights`, `normalize-usage-cost`) stay compatible entry
   points and delegate into the layered package as they are touched.
+- `scripts/workflow/alfred-boot.py` renders the resume preview through
+  `shared.toolbar.service` directly. It must not import `render-toolbar.py` by
+  filename; the public toolbar script remains a compatibility entrypoint.
 
 The former grab-bag `scripts/metrics/observability.py` is now a thin
 re-export shim: its helpers live in the shared package — artifact classification
@@ -56,12 +74,17 @@ reverse dependency is forbidden.
 Adding a host/source means:
 1. implement a small adapter for that source;
 2. declare capabilities and gaps;
-3. register it in the observability composition registry;
+3. register it in the observability composition registry only when the adapter
+   satisfies the resolved contract;
 4. add fixtures/tests.
 
 The domain, rollup, insights, lifecycle, and toolbar must not branch on host
 names. Limited adapters return `None` plus capability gaps instead of inventing
 tokens, ACU, credits, or cost.
+
+Passthrough adapters without approved source fixtures stay out of the default
+registry. `build_experimental_registry()` exposes acknowledged Codex/Devin
+passthrough adapters for development, marked as experimental.
 
 ## Cost Boundary
 Session totals (`ccusage`, host-native `/cost`, or session exports) are valid
