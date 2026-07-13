@@ -135,10 +135,14 @@ Claude Code automatic path:
 python scripts/metrics/import-ccusage.py -StatePath <hub-demand>/001-state.md -Host claude-code
 ```
 
-Set `usage session id:` in `001-state.md` when the host exposes it. If it is
-missing, the helper uses the latest `claude` session and records
-`selection_method: latest_agent_session` in the state/session snapshot metadata
-so the attribution remains auditable instead of silent.
+Do **not** hand-write `usage session id:` in `001-state.md` — the importer owns
+that field and writes the full ccusage `period` (a hand-copied id is easily
+truncated, which breaks exact matching). If it is missing, the helper uses the
+latest `claude` session and records `selection_method: latest_agent_session`; if a
+stored id no longer matches exactly, the helper falls back (prefix, then latest),
+warns, and reconciles the id to the real `period`. All selection methods are
+recorded in the state/session snapshot metadata so attribution stays auditable
+instead of silent.
 
 For Claude Code in AWS containers, ccusage is useful only if the usage logs
 survive the container. Without a durable volume, it is not a reliable source.

@@ -34,7 +34,7 @@ class ValidateModelPolicyTests(unittest.TestCase):
 
         self.assertTrue(report.passed)
         self.assertIn("OK heading Selection rule", report.successes)
-        self.assertIn("OK policy toolbar declares current model", report.successes)
+        self.assertIn("OK policy toolbar declares the running model", report.successes)
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ Understand the demand before designing a solution. Owner agent: **Discovery**. S
 1. Detect **stream/type** and, if **Produto**, ingest the external `inception-input` — do not redo business discovery.
 2. **Intent analysis** — classify clarity (clear/vague/incomplete), type (mapped to streams), scope (1 file → cross-app), complexity. This output **pre-fills the Risk Mode checklist**.
 3. Produce **`tech-inception`** (technical lens: affected systems/apps via reverse-eng, integration points, technical risks).
-4. Generate **requirements questions** in a file (multiple choice + `[Resposta]:`, see `../../common/question-format.md`) → instruct the human to edit the file and say `pronto`/`terminei` → **gate** awaits answers in the file → detect contradictions.
+4. Generate **requirements questions** in a file (multiple choice + `[Resposta]:`, see `../../common/question-format.md`) → instruct the human to edit the file and say `pronto`/`terminei` → **gate** awaits answers in the file → detect contradictions. **Alfred never fills the `[Resposta]:` slots** (only the human does, D7); on "continue" the gate stays closed and Alfred never auto-accepts recommended answers to advance. Exception: explicit human delegation → mark answers `assumida` + record in `audit` (see `sub-activities/requirements-elicitation.md`).
 5. Pre-fill and **propose Risk Mode** (intent → checklist); human confirms in Standard/SAFE.
 6. Consolidate `problem`/`requirements`; record risks; satisfy **DoD Inception** (active lane) → checkpoint.
 

@@ -154,7 +154,21 @@ def main():
     try:
         row, selection_method = CcusageSessionAdapter().select_session(payload, args.agent, args.session_id)
     except NoSessionMatch as error:
-        raise SystemExit(str(error))
+        # Non-fatal: never crash the toolbar path and never freeze cost silently.
+        # Keep any prior cost but mark it stale so the toolbar tells the human to
+        # reimport, instead of showing a frozen value as if it were current.
+        if state_path and args.state_update and value_or(state_fields.get("cost usd"), ""):
+            update_state(state_path, {"cost confidence": "stale", "usage imported at": now_iso()})
+            print(f"{error} Kept prior cost but marked it stale in {state_path}", file=sys.stderr)
+        else:
+            print(str(error), file=sys.stderr)
+        return
+    if selection_method in ("fallback_prefix", "fallback_latest"):
+        print(
+            f"ccusage: state 'usage session id' ({args.session_id!r}) did not match a session exactly; "
+            f"used {selection_method} and reconciled the id to period {row.get('period')!r}.",
+            file=sys.stderr,
+        )
     source_path = args.input_path if args.input_path else "ccusage session --json"
     result = ImportCcusageSession(artifact_builder=canonical_artifact, now=now_iso).execute(
         ImportCcusageSessionCommand(

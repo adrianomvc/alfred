@@ -8,7 +8,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from _common import get_field, read_lines, value_or  # noqa: E402
-from shared.toolbar.service import render_toolbar  # noqa: E402
+
+# NOTE: shared.toolbar.service pulls the whole observability graph. It is imported
+# lazily (in render_resume_preview) so repo detection and demand listing — the
+# common boot path — do not pay that cold-start cost.
 
 FRAMEWORK_ROOT = HERE.parent.parent
 
@@ -81,6 +84,8 @@ def priority_reason(state):
 
 
 def render_resume_preview(state, model="default", cost="n/a"):
+    from shared.toolbar.service import render_toolbar  # lazy: heavy observability graph
+
     return render_toolbar(
         state["Path"],
         framework_root=FRAMEWORK_ROOT,

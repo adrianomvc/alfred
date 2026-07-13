@@ -24,6 +24,7 @@ class ToolbarState:
     step: str
     next_step: str
     checkpoint: str
+    model: str
     usage_cost: str
     state_cost_usd: str
     framework_version: str
@@ -55,6 +56,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
     step = get_first_field(content, ["current step", "etapa atual"]) or "unknown"
     nxt = get_first_field(content, ["next step", "proximo passo", "próximo passo"]) or "unknown"
     checkpoint = get_field(content, "checkpoint") or "n/a"
+    model = get_first_field(content, ["model", "current model", "modelo", "running model"])
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
     state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
     framework_version = get_first_field(content, ["framework version", "versao framework", "versão framework"])
@@ -70,6 +72,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
         step=step,
         next_step=nxt,
         checkpoint=checkpoint,
+        model=model,
         usage_cost=usage_cost,
         state_cost_usd=state_cost_usd,
         framework_version=framework_version,

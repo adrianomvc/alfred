@@ -7,6 +7,7 @@ class Confidence(str, Enum):
     ESTIMATED = "estimated"
     ALLOCATED = "allocated"
     MANUAL = "manual"
+    STALE = "stale"
     UNAVAILABLE = "unavailable"
 
 

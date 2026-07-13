@@ -31,6 +31,7 @@
 - next step:
 - checkpoint:
 - status:
+- model:
 
 ## Active Skills
 - base:

@@ -61,6 +61,13 @@ def content_tool_uses(message):
     return [item for item in content if isinstance(item, dict) and item.get("type") == "tool_use"]
 
 
+def content_tool_results(message):
+    content = message.get("content") if isinstance(message, dict) else None
+    if not isinstance(content, list):
+        return []
+    return [item for item in content if isinstance(item, dict) and item.get("type") == "tool_result"]
+
+
 def request_tokens(record):
     message = record.get("message") or {}
     usage = message.get("usage") or {}
@@ -90,6 +97,7 @@ class ClaudeTranscriptAdapter:
         lines, start_offset, end_offset = self._cursor.read_slice(transcript_path, cursor_path)
         requests = {}
         tools = []
+        tool_failures = {}
         current_interaction = None
         current_interaction_sequence = 0
         request_sequence_by_interaction = defaultdict(int)
@@ -100,6 +108,10 @@ class ClaudeTranscriptAdapter:
             session_id = record.get("sessionId") or record.get("session_id")
 
             if record_type == "user":
+                for item in content_tool_results(record.get("message") or {}):
+                    tool_use_id = item.get("tool_use_id")
+                    if tool_use_id and item.get("is_error"):
+                        tool_failures[tool_use_id] = True
                 prompt_id = record.get("promptId")
                 user_uuid = record.get("uuid")
                 if prompt_id:
@@ -175,6 +187,9 @@ class ClaudeTranscriptAdapter:
                         "input": item.get("input") if isinstance(item.get("input"), dict) else {},
                     }
                 )
+
+        for tool in tools:
+            tool["is_error"] = bool(tool_failures.get(tool.get("tool_use_id")))
 
         ordered = [r for r in requests.values() if r["ts"] is not None]
         ordered.sort(key=lambda r: r["ts"])

@@ -32,6 +32,7 @@ from shared.observability.infrastructure.adapters.claude.hook import ClaudeHookA
 from shared.observability.infrastructure.adapters.claude.transcript_cursor import TranscriptCursor  # noqa: E402
 
 ENGINE = Path(__file__).resolve().parent / "attribute-usage-transcript.py"
+COST_ENGINE = Path(__file__).resolve().parent / "apply-usage-rate-card.py"
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -81,6 +82,18 @@ def resolve_obs_log(active):
     if not state_path:
         return None
     return Path(state_path).expanduser().parent / "05-operation" / "011-observability-log.jsonl"
+
+
+def resolve_rate_card_path(active):
+    """Locate the approved usage rate card so the engine can price each request
+    as it is logged. Precedence: env var, active-demand pointer, then the
+    conventional config path. Returns None when none exists (cost stays null)."""
+    configured = os.environ.get("ALFRED_RATE_CARD_PATH", "") or active.get("rate_card_path", "")
+    if configured:
+        candidate = Path(configured).expanduser()
+        return str(candidate) if candidate.exists() else None
+    default = Path.home() / ".alfred" / "config" / "usage-rate-card.json"
+    return str(default) if default.exists() else None
 
 
 def event_exists(path, event_id):
@@ -192,6 +205,36 @@ def run_alfred_engine(invocation: EngineInvocation) -> EngineRunResult:
     return EngineRunResult(result.returncode, result.stdout, result.stderr)
 
 
+def price_new_usage(active):
+    """Emit ``usage_cost_attributed`` events for newly attributed usage, so the
+    toolbar's demand cost reflects real spend. Runs after attribution, prices via
+    the approved rate card, and is idempotent (already-priced events are skipped
+    by apply-usage-rate-card). Non-blocking: any failure — no rate card, no new
+    usage to price, unknown model — is a benign no-op that never blocks the host.
+    """
+    rate_card_path = resolve_rate_card_path(active)
+    obs_log = resolve_obs_log(active)
+    if not rate_card_path or not obs_log or not obs_log.exists():
+        return None
+    command = [
+        sys.executable,
+        str(COST_ENGINE),
+        "--input-path", str(obs_log),
+        "--rate-card-path", rate_card_path,
+    ]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+    except (OSError, subprocess.SubprocessError) as error:
+        return f"alfred-usage-hook cost: {error}"
+    # "No interaction cost events generated" is the idempotent no-op case.
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        if "No interaction cost events" in detail:
+            return None
+        return f"alfred-usage-hook cost: {detail}"
+    return None
+
+
 def build_context(transcript_path, active, raw_log, mode):
     state_path = os.environ.get("ALFRED_STATE_PATH", "") or active.get("state_path", "")
     obs_log = os.environ.get("ALFRED_OBS_LOG", "") or active.get("observability_log", "")
@@ -243,6 +286,10 @@ def main():
     )
     for message in result.messages:
         print(message, file=sys.stderr)
+
+    cost_message = price_new_usage(active)
+    if cost_message:
+        print(cost_message, file=sys.stderr)
 
 
 if __name__ == "__main__":

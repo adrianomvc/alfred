@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from shared.common import read_lines
+from shared.model_policy import describe_model
 from shared.toolbar.presenter import ToolbarViewModelBuilder
 from shared.toolbar.renderers import render_rich, render_text, render_web
 from shared.toolbar.runtime import read_app_commit, resolve_framework_display
@@ -26,6 +27,12 @@ def render_toolbar(
 
     content = read_lines(state)
     toolbar_state = parse_toolbar_state(content)
+    # Always show the model actually running (passed via --model, else the state
+    # `model` field); the policy target is shown only as guidance and flagged when
+    # it differs. Never present the policy target as if it were running (D3).
+    actual_model = model if model and model != "default" else toolbar_state.model
+    described = describe_model(actual_model, toolbar_state.lane, toolbar_state.phase)
+    model = described if described else model
     framework = resolve_framework_display(
         framework_root,
         toolbar_state.framework_version,

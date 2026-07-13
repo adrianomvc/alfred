@@ -24,12 +24,13 @@ Every session begins with a fixed sequence before any work. The host runs it onc
      `docs/onboarding-sigla.md`; write owner/apps/tracker as `pending`, read
      notification from `knowledge/notification.md`, and **never present a scope
      menu** — then offer one next step in a line.
-3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified."
+3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified." Use the TTL-cached check (`scripts/workflow/check-update.py`) so boot skips the network when the framework was checked recently; `sync-host-shims.py` is a no-op when nothing changed.
    - **Safeguard (active demand):** if there is an update **and** an active demand, Alfred **warns and asks** — apply now or only on the next demand. The demand records the framework version used and keeps it frozen until it closes, unless a human decides otherwise.
 4. **JIT context load (anti-hypercontext):**
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
    - on resume → **rebuild from the `state`** and show the toolbar by running `scripts/workflow/render-toolbar.py` over the demand `001-state.md` (preferred). On Claude Code, include `-RegisterActive` so the usage attribution hook can write to the same demand JSONL. If the helper cannot run, load `presentation/toolbar-quick.md` before writing anything and emit only its text fallback shape from the same state fields; do not hand-draw a rich toolbar from memory.
+   - **Render ≠ display:** running the helper only *produces* the toolbar block; you must **paste that rendered block into the response** at every checkpoint — demand open/resume, phase transition, and end of any turn with an active demand. Registering the active demand (`-RegisterActive`) is not a substitute for showing the block.
    - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
    - if using RAG, compressed summaries, or codebase-memory output to select

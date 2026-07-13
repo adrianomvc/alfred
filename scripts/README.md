@@ -11,12 +11,16 @@ Python helpers only. Installers remain OS-native under `install/`.
 ## Layout
 | Folder | Holds | Members |
 |---|---|---|
-| `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures) |
-| `workflow/` | helpers used while running a demand | `alfred-boot` · `render-toolbar` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `sync-host-shims` |
-| `metrics/` | observability and cost processing | `collect-observability` · `generate-metrics-rollup` · `generate-metrics-insights` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
+| `shared/` | the reusable implementation (imported by the thin drivers) | `common/` (jsonl, state, markdown, text helpers) · `validation/` · `toolbar/` (service, presenter, renderers, summary, state, active_demand) · `observability/` (hexagonal: `domain/`, `application/`, `infrastructure/`, `composition/`) · `model_policy.py` · `context_manifest.py` · `sdd_gate.py` · `email_tools.py` |
+| `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, scripts-architecture, observability-hygiene, observability-intelligence, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures, tool-discovery-policy, token-economy-policy, context-compression-policy, context-manifest-fixtures, email-adapter) |
+| `workflow/` | thin drivers used while running a demand | `alfred-boot` · `render-toolbar` · `resolve-model-policy` · `context-manifest` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `check-update` · `generate-registry` · `generate-host-shims` · `sync-host-shims` |
+| `metrics/` | thin drivers over `shared/observability` | `collect-observability` · `generate-metrics-rollup` · `generate-metrics-insights` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
-`scripts/_common.py` stays at the runtime root (shared by all categories).
+Most real logic lives in `shared/`; `workflow/` and `metrics/` files are thin CLI
+drivers that delegate to it (enforced by `validators/validate-scripts-architecture.py`).
+`scripts/_common.py` is a compatibility shim re-exporting `shared.common`.
+Installers remain OS-native at the repo root (`install.ps1`, `install.sh`).
 
 ## Allowed helpers
 - validate required sections in markdown artifacts
@@ -35,6 +39,8 @@ Python helpers only. Installers remain OS-native under `install/`.
 - boot a session by detecting Framework/HUB/App and listing resumable demands
 - validate reverse-engineering staleness against an app commit
 - validate the SDD clarity gate before Execution
+- resolve the model-policy decision (tier/model/effort) for a demand step
+- check for a framework update with a TTL cache so boot skips the network when checked recently
 
 ## Rule
 Any script output must degrade to a manual markdown checklist when the host cannot run scripts.

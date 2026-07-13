@@ -1,5 +1,5 @@
 ALFRED | TST | #toolbar-execution-first | SAFE | 60% | Custo USD: indisponível · fonte de custo não configurada | Consumo: não coletado · adapter de uso não configurado
 Framework: v2.0.0 (fixture) | App: f9a3739
 Fases: Execution-first stabilization:ok | Inception posterior:ok | Design posterior:ok | Validate posterior:agora | Operation / post-mortem:pendente
-HITL: Incident commander + SRE | modelo: GPT-5 | etapa: post-stabilization evidence
+HITL: Incident commander + SRE | modelo: GPT-5 (política: claude-opus-4-8) | etapa: post-stabilization evidence
 Proximo: finish post-mortem before closure

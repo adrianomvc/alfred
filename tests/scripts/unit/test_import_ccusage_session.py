@@ -10,6 +10,10 @@ from shared.observability.application.use_cases.import_ccusage_session import ( 
     ImportCcusageSession,
     ImportCcusageSessionCommand,
 )
+from shared.observability.infrastructure.adapters.ccusage.session import (  # noqa: E402
+    CcusageSessionAdapter,
+    NoSessionMatch,
+)
 
 
 def artifact(path, operation, **kwargs):
@@ -89,6 +93,37 @@ class ImportCcusageSessionTests(unittest.TestCase):
         snapshot = service.execute(command(last_activity="")).snapshot
 
         self.assertEqual("2026-07-12T11:00:00Z", snapshot["ts"])
+
+
+class CcusageSelectSessionTests(unittest.TestCase):
+    def _payload(self):
+        return {"session": [
+            {"agent": "claude", "period": "aaaa-1111-2222-3333-444455556666",
+             "metadata": {"lastActivity": "2026-07-12T09:00:00Z"}},
+            {"agent": "claude", "period": "bbbb-7777-8888-9999-000011112222",
+             "metadata": {"lastActivity": "2026-07-12T12:00:00Z"}},
+            {"agent": "codex", "period": "cccc", "metadata": {"lastActivity": "2026-07-12T13:00:00Z"}},
+        ]}
+
+    def test_exact_period_match(self):
+        row, method = CcusageSessionAdapter().select_session(self._payload(), "claude", "aaaa-1111-2222-3333-444455556666")
+        self.assertEqual("session_id", method)
+        self.assertEqual("aaaa-1111-2222-3333-444455556666", row["period"])
+
+    def test_truncated_id_resolves_via_prefix(self):
+        # a stored id truncated at demand creation still finds its full session
+        row, method = CcusageSessionAdapter().select_session(self._payload(), "claude", "aaaa-1111-2222-3333-4444")
+        self.assertEqual("fallback_prefix", method)
+        self.assertEqual("aaaa-1111-2222-3333-444455556666", row["period"])
+
+    def test_unknown_id_falls_back_to_latest_agent_session(self):
+        row, method = CcusageSessionAdapter().select_session(self._payload(), "claude", "zzzz-does-not-exist")
+        self.assertEqual("fallback_latest", method)
+        self.assertEqual("bbbb-7777-8888-9999-000011112222", row["period"])  # most recent claude session
+
+    def test_no_agent_sessions_raises(self):
+        with self.assertRaises(NoSessionMatch):
+            CcusageSessionAdapter().select_session(self._payload(), "devin", "whatever")
 
 
 if __name__ == "__main__":
