@@ -19,6 +19,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from _common import read_state_fields, value_or  # noqa: E402
 from metrics.observability import canonical_artifact  # noqa: E402
+from shared.observability.application.use_cases.import_ccusage_session import (  # noqa: E402
+    ImportCcusageSession,
+    ImportCcusageSessionCommand,
+)
 from shared.observability.infrastructure.adapters.ccusage.session import (  # noqa: E402
     CcusageSessionAdapter,
     NoSessionMatch,
@@ -111,99 +115,6 @@ def load_ccusage(args):
     return json.loads(result.stdout)
 
 
-def make_snapshot(row, args, state_fields, selection_method):
-    total_cost = row.get("totalCost")
-    event_id = f"usage-ccusage-{row.get('period', 'session')}"
-    ts = value_or(last_activity(row), now_iso())
-    model = models(row)
-    source_path = args.input_path if args.input_path else "ccusage session --json"
-    metadata = row.get("metadata") or {}
-
-    return {
-        "schema_version": "alfred.usage-session.v1",
-        "alfred": {
-            "version": value_or(state_fields.get("framework version"), "unknown"),
-            "framework_ref": value_or(state_fields.get("framework ref"), "local"),
-            "framework_commit": value_or(state_fields.get("framework commit"), None),
-            "schema_version": "alfred.usage-session.v1",
-        },
-        "ts": ts,
-        "snapshot_id": event_id,
-        "trace_id": value_or(state_fields.get("alfred run id"), value_or(args.run_id, "unknown")),
-        "session_id": value_or(row.get("period"), "unknown"),
-        "interaction_id": "unknown",
-        "sequence": 1,
-        "initiative_id": value_or(state_fields.get("initiative id"), "unknown"),
-        "demand_id": value_or(state_fields.get("id"), "unknown"),
-        "record_type": "session_usage_snapshot",
-        "phase": value_or(args.phase, value_or(state_fields.get("current phase"), "operation")),
-        "lane": value_or(state_fields.get("lane"), value_or(state_fields.get("modo"), "unknown")),
-        "actor_type": "system",
-        "actor_id": "usage-cost-ccusage",
-        "action": "capture_session_usage",
-        "status": "recorded",
-        "step": {
-            "id": "usage-cost",
-            "name": "Usage and cost attribution",
-            "sequence": 1,
-            "goal": "Import ccusage session usage into Alfred state for toolbar display",
-        },
-        "artifacts_used": [
-            canonical_artifact(source_path, "read", selection_reason="source_usage_export", observed_by="usage-cost-ccusage", ts=ts)
-        ],
-        "duration_ms": None,
-        "tokens_input": row.get("inputTokens"),
-        "tokens_output": row.get("outputTokens"),
-        "cost_usd": total_cost,
-        "retry_count": None,
-        "input": {
-            "source": "ccusage",
-            "source_kind": "ccusage",
-            "selection_method": selection_method,
-            "agent": row.get("agent"),
-            "last_activity": metadata.get("lastActivity"),
-        },
-        "derivation": {
-            "rules_applied": ["connectors/usage-cost.md", "metrics/metrics.md"],
-            "method": "ccusage session JSON import; session total only, not an interaction observability event",
-        },
-        "output": {
-            "model": model,
-            "tokens_input": row.get("inputTokens"),
-            "tokens_output": row.get("outputTokens"),
-            "tokens_cache_creation": row.get("cacheCreationTokens"),
-            "tokens_cache_read": row.get("cacheReadTokens"),
-            "total_tokens": row.get("totalTokens"),
-            "cost_usd": total_cost,
-            "cost_confidence": "estimated",
-        },
-        "model": model,
-        "tool": "scripts/metrics/import-ccusage.py",
-        "parent_event_id": None,
-        "artifacts": [],
-        "files_changed": [],
-        "validation": {
-            "source_record_parse": "ok",
-            "selection_method": selection_method,
-        },
-        "risk": None,
-        "blocker": None,
-        "error": None,
-        "state_transition": None,
-        "actions": [{"type": "import_ccusage_session_total", "status": "completed"}],
-        "questions_open": [],
-        "assumptions": [],
-        "metric_impact": {"session_cost_state": "captured"},
-        "next": [],
-        "metadata": {
-            "connector_type": "usage-cost",
-            "source_kind": "ccusage",
-            "agent": row.get("agent"),
-            "granularity": "session",
-        },
-    }
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state-path", "-StatePath", dest="state_path", default="")
@@ -244,7 +155,21 @@ def main():
         row, selection_method = CcusageSessionAdapter().select_session(payload, args.agent, args.session_id)
     except NoSessionMatch as error:
         raise SystemExit(str(error))
-    snapshot = make_snapshot(row, args, state_fields, selection_method)
+    source_path = args.input_path if args.input_path else "ccusage session --json"
+    result = ImportCcusageSession(artifact_builder=canonical_artifact, now=now_iso).execute(
+        ImportCcusageSessionCommand(
+            row=row,
+            state_fields=state_fields,
+            selection_method=selection_method,
+            source_path=source_path,
+            run_id=args.run_id,
+            phase=args.phase,
+            host=args.host,
+            model=models(row),
+            last_activity=last_activity(row),
+        )
+    )
+    snapshot = result.snapshot
     snapshot_line = json.dumps(snapshot, separators=(",", ":"))
 
     if args.output_path and args.write_snapshot:
@@ -258,19 +183,7 @@ def main():
         print(snapshot_line)
 
     if state_path and args.state_update:
-        updates = {
-            "usage-cost": "ccusage automatic",
-            "cost source": "ccusage",
-            "cost usd": str(row.get("totalCost")),
-            "cost confidence": "estimated",
-            "cost granularity": "session",
-            "host": args.host,
-            "usage session id": str(row.get("period")),
-            "usage imported at": now_iso(),
-        }
-        if args.run_id:
-            updates["alfred run id"] = args.run_id
-        update_state(state_path, updates)
+        update_state(state_path, result.state_updates)
         print(f"Updated usage-cost fields in {state_path}")
 
 

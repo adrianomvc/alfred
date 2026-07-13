@@ -2,23 +2,22 @@
 """Generate human-reviewable observability insights from Alfred JSONL events."""
 
 import argparse
-import json
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import find_observability_logs  # noqa: E402
+from shared.common import iter_jsonl  # noqa: E402
 from metrics.observability import cost_value, effective_events, normalize_artifacts_used, usage_tokens  # noqa: E402
 
 
 def read_events(root):
     events = []
     for file in find_observability_logs(root):
-        for line_number, raw in enumerate(file.read_text(encoding="utf-8-sig").splitlines(), start=1):
-            if not raw.strip():
-                continue
-            event = json.loads(raw)
+        for line_number, event, _raw in iter_jsonl(file):
+            if event is None:
+                raise SystemExit(f"Invalid JSONL in {file} at line {line_number}")
             event["_source_file"] = str(file)
             event["_source_line"] = line_number
             events.append(event)

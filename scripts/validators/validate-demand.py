@@ -2,9 +2,8 @@
 """Validate one Alfred demand across HUB (and optional App) artifacts."""
 
 import argparse
-import importlib.util
+from dataclasses import dataclass
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -13,15 +12,9 @@ sys.path.insert(0, str(HERE.parent))
 from _common import (  # noqa: E402
     get_field, iter_jsonl, normalize_phase, phase_number, read_lines,
 )
-
-
-def load_sdd_gate():
-    spec = importlib.util.spec_from_file_location(
-        "validate_sdd_gate", HERE / "validate-sdd-gate.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+from shared.sdd_gate import run as run_sdd_gate  # noqa: E402
+from shared.validation import Severity, ValidationIssue, ValidationReport  # noqa: E402
+from shared.validation.reverse_eng_staleness import validate_reverse_eng_staleness  # noqa: E402
 
 
 CLOSED_STATUSES = ("closed", "concluida", "concluída", "done", "finalizada", "completed")
@@ -30,20 +23,32 @@ OPERATIONAL_LABEL = re.compile(
 )
 
 
+@dataclass(frozen=True)
+class DemandValidationResult:
+    report: ValidationReport
+    output: tuple[str, ...]
+    failure_message: str = ""
+
+
 class Validator:
     def __init__(self, strict=False):
         self.issues = []
+        self.output = []
         self.strict = strict
 
     def add(self, severity, code, message):
-        self.issues.append((severity, code, message))
+        level = Severity.ERROR if severity == "ERROR" else Severity.WARNING
+        self.issues.append(ValidationIssue(code=code, severity=level, message=message))
+
+    def ok(self, message):
+        self.output.append(message)
 
     def assert_path(self, root, rel, severity="ERROR"):
         full = Path(root) / rel
         if not full.exists():
             self.add(severity, "missing_path", f"Missing {rel}")
             return False
-        print(f"OK path {rel}")
+        self.ok(f"OK path {rel}")
         return True
 
     def assert_jsonl(self, file_path, label):
@@ -53,7 +58,7 @@ class Validator:
         for line_number, parsed, _ in iter_jsonl(file_path):
             if parsed is None:
                 self.add("ERROR", "invalid_jsonl", f"{label} has invalid JSON at line {line_number}")
-        print(f"OK jsonl {label}")
+        self.ok(f"OK jsonl {label}")
 
     def read_events(self, file_path, label):
         events = []
@@ -88,13 +93,13 @@ class Validator:
             self.add("WARN", "empty_operational_artifact",
                      f"{label} has no operational content: {file_path}")
         else:
-            print(f"OK content {label}")
+            self.ok(f"OK content {label}")
 
     def test_state_field(self, value, name, severity="WARN"):
         if value == "":
             self.add(severity, "missing_state_field", f"Missing state field: {name}")
         else:
-            print(f"OK field {name} = {value}")
+            self.ok(f"OK field {name} = {value}")
 
     def observability_consistency(self, events, demand_id, initiative_id, phase, schema, version):
         if not events:
@@ -125,7 +130,7 @@ class Validator:
                     legacy_missing += 1
 
         if legacy_missing > 0:
-            print(f"OK observability legacy events without artifacts_used {legacy_missing}")
+            self.ok(f"OK observability legacy events without artifacts_used {legacy_missing}")
 
         event_phase = str(last.get("phase", ""))
         st = last.get("state_transition")
@@ -136,38 +141,42 @@ class Validator:
             self.add("WARN", "observability_phase_mismatch",
                      f"Latest event phase '{event_phase}' differs from state phase '{phase}'")
         else:
-            print(f"OK observability latest phase {event_phase}")
+            self.ok(f"OK observability latest phase {event_phase}")
 
-        print(f"OK observability events {len(events)}")
+        self.ok(f"OK observability events {len(events)}")
 
     def finish(self, label):
-        warnings = [i for i in self.issues if i[0] == "WARN"]
-        errors = [i for i in self.issues if i[0] == "ERROR"]
-        for severity, code, message in self.issues:
-            print(f"{severity} {code}: {message}")
+        warnings = [i for i in self.issues if i.severity == Severity.WARNING]
+        errors = [i for i in self.issues if i.severity == Severity.ERROR]
+        lines = list(self.output)
+        for issue in self.issues:
+            lines.append(f"{severity_label(issue)} {issue.code}: {issue.message}")
+        report = ValidationReport(tuple(self.issues), tuple(self.output))
+        failure = ""
         if errors or (self.strict and warnings):
-            sys.exit(f"{label} failed. errors={len(errors)}, warnings={len(warnings)}, strict={self.strict}")
-        print(f"{label} completed. errors={len(errors)}, warnings={len(warnings)}, strict={self.strict}")
+            failure = f"{label} failed. errors={len(errors)}, warnings={len(warnings)}, strict={self.strict}"
+        else:
+            lines.append(f"{label} completed. errors={len(errors)}, warnings={len(warnings)}, strict={self.strict}")
+        return DemandValidationResult(report=report, output=tuple(lines), failure_message=failure)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--hub-demand-path", "-HubDemandPath", dest="hub_demand_path", required=True)
-    parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="")
-    parser.add_argument("--app-repo-path", "-AppRepoPath", dest="app_repo_path", default="",
-                        help="app repo path forwarded to the reverse-eng staleness check")
-    parser.add_argument("--app-current-commit", "-AppCurrentCommit", dest="app_current_commit", default="",
-                        help="current app commit forwarded to the reverse-eng staleness check")
-    parser.add_argument("--strict", "-Strict", dest="strict", action="store_true")
-    args = parser.parse_args()
+def severity_label(issue):
+    return "ERROR" if issue.severity == Severity.ERROR else "WARN"
 
+
+def validate_demand(args):
     v = Validator(strict=args.strict)
     hub = Path(args.hub_demand_path).resolve()
 
     v.assert_path(hub, "001-state.md")
     state_path = hub / "001-state.md"
     if not state_path.exists():
-        raise SystemExit("Cannot validate demand without 001-state.md")
+        result = v.finish("Demand validation")
+        return DemandValidationResult(
+            report=result.report,
+            output=result.output,
+            failure_message="Cannot validate demand without 001-state.md",
+        )
 
     state_lines = read_lines(state_path)
 
@@ -228,12 +237,11 @@ def main():
         v.assert_path(hub, "04-validate/013-validation-evidence.md", "WARN")
 
     if pnum >= 3:
-        sdd = load_sdd_gate()
-        output, errors, warnings, _ = sdd.run(
+        output, errors, warnings, _ = run_sdd_gate(
             str(hub), args.app_demand_path if args.app_demand_path else "", False
         )
         for line in output:
-            print(line)
+            v.output.append(line)
             if line.startswith("ERROR "):
                 v.add("ERROR", "sdd_gate", line)
             elif line.startswith("WARN "):
@@ -272,22 +280,38 @@ def main():
         v.assert_jsonl(app / "05-operation/008-observability-log.jsonl", "App observability log")
 
         if has_reverse_eng:
-            staleness = HERE / "validate-reverse-eng-staleness.py"
-            if staleness.exists():
-                staleness_args = [sys.executable, str(staleness),
-                                  "-ReverseEngPath", str(app / "01-inception/002-reverse-eng.md")]
-                if args.app_current_commit:
-                    staleness_args += ["-CurrentCommit", args.app_current_commit]
-                elif args.app_repo_path:
-                    staleness_args += ["-AppRepoPath", args.app_repo_path]
-                result = subprocess.run(staleness_args, capture_output=True, text=True)
-                for line in result.stdout.splitlines():
-                    print(line)
-                    if line.startswith("WARN "):
-                        v.add("WARN", "reverse_eng_staleness", line)
+            staleness = validate_reverse_eng_staleness(
+                app / "01-inception/002-reverse-eng.md",
+                app_repo_path=args.app_repo_path,
+                current_commit=args.app_current_commit,
+                strict=False,
+            )
+            for line in staleness.output:
+                v.output.append(line)
+                if line.startswith("WARN "):
+                    v.add("WARN", "reverse_eng_staleness", line)
 
-    v.finish("Demand validation")
+    return v.finish("Demand validation")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hub-demand-path", "-HubDemandPath", dest="hub_demand_path", required=True)
+    parser.add_argument("--app-demand-path", "-AppDemandPath", dest="app_demand_path", default="")
+    parser.add_argument("--app-repo-path", "-AppRepoPath", dest="app_repo_path", default="",
+                        help="app repo path forwarded to the reverse-eng staleness check")
+    parser.add_argument("--app-current-commit", "-AppCurrentCommit", dest="app_current_commit", default="",
+                        help="current app commit forwarded to the reverse-eng staleness check")
+    parser.add_argument("--strict", "-Strict", dest="strict", action="store_true")
+    args = parser.parse_args()
+
+    result = validate_demand(args)
+    for line in result.output:
+        print(line)
+    if result.failure_message:
+        raise SystemExit(result.failure_message)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

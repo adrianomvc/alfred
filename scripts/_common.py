@@ -1,110 +1,22 @@
-"""Shared helpers for the Alfred Python helper scripts.
+"""Compatibility shim for shared Alfred Python helpers.
 
-They are optional: Alfred still works manually through Markdown if no helper
-runs. The Python set is the canonical helper runtime (D3 portability).
+New code should import from ``shared.common``. This module preserves the legacy
+``from _common import ...`` call sites used by public command wrappers.
 """
 
-import json
-import re
-from pathlib import Path
-
-
-def read_lines(path):
-    """Read a text file as a list of lines without trailing newlines."""
-    return Path(path).read_text(encoding="utf-8-sig").splitlines()
-
-
-def read_text(path):
-    return Path(path).read_text(encoding="utf-8-sig")
-
-
-def get_field(lines, names):
-    """Return the first ``- name: value`` match for any name in ``names``.
-
-    Matches a markdown list field, trims whitespace and surrounding backticks.
-    """
-    if isinstance(names, str):
-        names = [names]
-    for name in names:
-        escaped = re.escape(name)
-        pattern = re.compile(r"^\s*-\s+" + escaped + r"\s*:\s*(.*?)\s*$")
-        for line in lines:
-            match = pattern.match(line)
-            if match:
-                return match.group(1).strip().strip("`")
-    return ""
+from shared.common import (  # noqa: F401
+    find_observability_logs,
+    get_field,
+    iter_jsonl,
+    normalize_phase,
+    phase_number,
+    read_lines,
+    read_state_fields,
+    read_text,
+)
 
 
 def value_or(value, default):
     if value is None or str(value) == "":
         return default
     return str(value)
-
-
-def normalize_phase(value):
-    normalized = str(value).lower()
-    if "inception" in normalized:
-        return "inception"
-    if "design" in normalized:
-        return "design"
-    if "execution" in normalized:
-        return "execution"
-    if "validate" in normalized or "validation" in normalized:
-        return "validate"
-    if "operation" in normalized:
-        return "operation"
-    return normalized
-
-
-def phase_number(phase):
-    normalized = str(phase).lower()
-    if "inception" in normalized:
-        return 1
-    if "design" in normalized:
-        return 2
-    if "execution" in normalized:
-        return 3
-    if "validate" in normalized or "validation" in normalized:
-        return 4
-    if "operation" in normalized:
-        return 5
-    return 0
-
-
-def read_state_fields(path):
-    """Parse a state markdown file into a ``{lowercased key: value}`` dict.
-
-    Reads ``- key: value`` list lines, trimming whitespace. Returns an empty
-    dict when the path is missing so callers can degrade gracefully.
-    """
-    fields = {}
-    path = Path(path) if path else None
-    if not path or not path.exists():
-        return fields
-    for line in path.read_text(encoding="utf-8-sig").splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("- ") or ":" not in stripped:
-            continue
-        key, value = stripped[2:].split(":", 1)
-        fields[key.strip().lower()] = value.strip()
-    return fields
-
-
-def iter_jsonl(path):
-    """Yield ``(line_number, parsed_or_None, raw)`` for each non-empty line.
-
-    ``parsed_or_None`` is ``None`` when the line is not valid JSON.
-    """
-    line_number = 0
-    for raw in read_lines(path):
-        line_number += 1
-        if raw.strip() == "":
-            continue
-        try:
-            yield line_number, json.loads(raw), raw
-        except json.JSONDecodeError:
-            yield line_number, None, raw
-
-
-def find_observability_logs(root):
-    return sorted(Path(root).rglob("*observability-log.jsonl"))

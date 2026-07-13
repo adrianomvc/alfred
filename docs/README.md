@@ -49,3 +49,6 @@ Use [`quickstart-real-demand.md`](quickstart-real-demand.md) to create the first
 - [`plan/anthropic-research-notes.md`](plan/anthropic-research-notes.md) maps Anthropic agent research to the plan's decisions.
 - [`plan/context-optimization-progress.md`](plan/context-optimization-progress.md) is the handoff log of the 2026-07 context/token optimization (phase status + how to resume).
 - [`plan/architecture-review-context-2026-07.md`](plan/architecture-review-context-2026-07.md) closes the 2026-07 context/token architecture review with baselines, trade-offs, and final recommendation.
+- [`plan/scripts-solid-analysis.md`](plan/scripts-solid-analysis.md) maps the current Python scripts architecture, SOLID gaps, dependency graph, and migration risks.
+- [`plan/scripts-solid-refactoring-plan.md`](plan/scripts-solid-refactoring-plan.md) defines the incremental waves for the Python scripts SOLID refactoring.
+- [`plan/scripts-solid-refactoring-result.md`](plan/scripts-solid-refactoring-result.md) records the current delivered scope, validation results, and remaining technical debt for the scripts refactoring.

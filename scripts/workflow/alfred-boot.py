@@ -2,13 +2,13 @@
 """Boot helper: detect the Alfred context and list resumable demands."""
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from _common import get_field, read_lines, value_or  # noqa: E402
+from shared.toolbar.service import render_toolbar  # noqa: E402
 
 FRAMEWORK_ROOT = HERE.parent.parent
 
@@ -16,13 +16,6 @@ CLOSED = (
     "closed", "fechado", "fechada", "concluida", "concluída", "done",
     "completed", "finalizada", "finalizado", "cancelada", "cancelado", "cancelled",
 )
-
-
-def load_renderer():
-    spec = importlib.util.spec_from_file_location("render_toolbar", HERE / "render-toolbar.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.render
 
 
 def get_repo_kind(path):
@@ -85,6 +78,15 @@ def priority_reason(state):
     return {0: "awaiting a human checkpoint",
             1: "in progress",
             2: "blocked - needs external input"}[resume_priority(state)]
+
+
+def render_resume_preview(state, model="default", cost="n/a"):
+    return render_toolbar(
+        state["Path"],
+        framework_root=FRAMEWORK_ROOT,
+        model=model,
+        cost=cost,
+    )
 
 
 def main():
@@ -155,14 +157,8 @@ def main():
         print("")
         print(f"Suggested next: {first['DemandId']} ({priority_reason(first)}) - the human chooses; this is only an ordering hint.")
         print("Resume preview:")
-        renderer = HERE / "render-toolbar.py"
-        if renderer.exists():
-            render = load_renderer()
-            for line in render(first["Path"], args.model, args.cost):
-                print(line)
-        else:
-            print(f"ALFRED | SIGLA:{first['Sigla']} | #{first['DemandId']} | "
-                  f"{first['Lane']} | {first['Phase']} | next: {first['Next']}")
+        for line in render_resume_preview(first, args.model, args.cost):
+            print(line)
         print("")
         print("Next: choose a demand to resume, start a new demand, or run validate-demand on the selected state folder.")
 
