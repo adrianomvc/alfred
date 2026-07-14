@@ -368,6 +368,7 @@ def assert_toolbar_rendering_policy(root):
             "--allow-text-fallback",
             "RegisterActive",
             "active-demand.json",
+            "--no-fence",
         ],
         "scripts/shared/observability/presentation/toolbar_presenter.py": [
             "fonte de custo não configurada",

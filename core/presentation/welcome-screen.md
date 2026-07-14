@@ -53,8 +53,48 @@ for hosts without Unicode/emoji/color.
 The welcome never marks a current phase. Phase status belongs only to the
 demand toolbar rendered from `001-state.md`.
 
+## Repo kind unknown — APP vs HUB (rendered only when boot cannot tell)
+When boot cannot classify the repo (see `core/boot.md` → *Detect repo*), Alfred
+**never guesses**. Instead of a one-line question, it renders this block so the
+human sees both roles before choosing — the HUB is the **squad's shared repo for
+shared context**, not just "the other folder". A repo name ending in `-hub` is a
+hint, never proof. Same fence/degradation rules as the welcome block apply.
+
+```text
+   Ainda não sei se este repositório é um APP ou um HUB — e eu não
+   suponho. Deixa eu apresentar os dois papéis:
+  ╭────────────────────────────────────────────────────────────────╮
+  │ 📦  APP  —  repositório de UMA aplicação                       │
+  │     o código e as evidências técnicas moram aqui               │
+  │     ├ código-fonte da aplicação                                │
+  │     ├ reverse-eng · spec técnico · evidências                  │
+  │     └ escopo:  1 aplicação                                     │
+  ├────────────────────────────────────────────────────────────────┤
+  │ 🤝  HUB  —  repositório COMPARTILHADO da squad                 │
+  │     o contexto comum do time · a fonte de verdade              │
+  │     ├ estado das demandas · decisões · trilha (audit)          │
+  │     ├ métricas · conhecimento · links p/ os apps               │
+  │     └ escopo:  1 sigla · o time todo                           │
+  ╰────────────────────────────────────────────────────────────────╯
+   ▸ HUB = onde a squad divide o mesmo contexto.
+   ▸ APP = onde vive o código de cada aplicação.
+
+   Como devo tratar este workspace?
+     1  HUB       2  APP       3  Ambos       4  Nenhum (só oriente)
+   ↳ responda com o número — ou aponte o caminho que falta (ex.: onde
+     fica o HUB da squad, ou o repositório da aplicação).
+```
+
+Icon badges live in a dedicated left column padded for double width (`📦`/`🤝`).
+Degradation (per the rules below): no emoji → drop the badge, the `APP —`/`HUB —`
+label already carries it; no Unicode → tree glyphs `├└` become `-`, box `╭╮│` → `+-|`.
+
+Deterministic labels (like the sigla auto-label) may still be inferred; the
+HUB/APP decision never is. Nothing is written until the human answers.
+
 ## Degradação (D3 — piso portável)
 Nothing here may be required. The rich block degrades by rules, not by a second copy:
+- **Markdown host (fence rule — do this first):** when the reply is rendered as markdown (Devin, web/chat UIs, IDE panels — most hosts today), paste the whole block **inside a fenced code block** (```). Without the fence, markdown collapses repeated spaces and soft-wraps long lines, so every border and column breaks. This is orthogonal to the character-set rules below (`core/presentation/README.md` → *Markdown-safe rendering*): fence first, then apply the Unicode/emoji/color degradation.
 - **No color (ANSI):** the rich-cli profile adds color; without it the same text reads fine (the mode names carry the meaning). Color never affects alignment (ANSI has zero display width).
 - **No emoji / narrow terminal:** drop the icon column of the modes table; replace `🎩`→`[Alfred]`, the mode dots → the `FAST/Standard/SAFE` text already in the row, callout box → a `>` line.
 - **No Unicode box-drawing:** swap `┌─┐│` for ASCII `+-|`. Alignment holds because every in-border glyph is width 1.

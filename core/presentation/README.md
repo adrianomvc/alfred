@@ -35,6 +35,16 @@ hard dependency — nothing in the framework requires a non-text profile (D3).
 - `toolbar.md` — full toolbar spec (layers, profiles, rules); for edge cases and renderer changes.
 - `welcome-screen.md` — the rendered welcome block + degradation rules (persona stays in `core/welcome.md`).
 
+## Markdown-safe rendering (fence rule — applies to every profile)
+Most hosts today render Alfred's reply as **markdown** (Devin, web/chat UIs, IDE
+panels), not as a raw terminal. Outside a fenced code block, markdown **collapses
+repeated spaces** and **soft-wraps long lines**, so every bordered/aligned block
+(welcome, toolbar) breaks. Therefore: emit any bordered or column-aligned block
+**inside a fenced code block** (```). This is about the *transport* (markdown vs
+raw terminal), not the character set — it is required for both `text` and `rich`,
+and is orthogonal to the Unicode/emoji/color degradation. Only skip the fence on a
+host proven to render the reply as raw monospace text.
+
 ## Rules
 - `rich` is the preferred human-facing profile; `text` is the portable fallback.
 - `text`, `rich`, and `web` must never

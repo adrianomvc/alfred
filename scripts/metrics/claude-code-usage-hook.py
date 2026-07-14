@@ -20,10 +20,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from metrics.observability import canonical_artifact, file_hash, now_iso, safe_path  # noqa: E402
+from shared.common import iter_jsonl  # noqa: E402
+from shared.observability.application.use_cases.process_claude_hook import (  # noqa: E402
+    ClaudeHookContext,
+    EngineInvocation,
+    EngineRunResult,
+    ProcessClaudeHook,
+    ProcessClaudeHookCommand,
+)
 from shared.observability.infrastructure.adapters.claude.hook import ClaudeHookAdapter  # noqa: E402
 from shared.observability.infrastructure.adapters.claude.transcript_cursor import TranscriptCursor  # noqa: E402
 
 ENGINE = Path(__file__).resolve().parent / "attribute-usage-transcript.py"
+COST_ENGINE = Path(__file__).resolve().parent / "apply-usage-rate-card.py"
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -75,17 +84,26 @@ def resolve_obs_log(active):
     return Path(state_path).expanduser().parent / "05-operation" / "011-observability-log.jsonl"
 
 
+def resolve_rate_card_path(active):
+    """Locate the approved usage rate card so the engine can price each request
+    as it is logged. Precedence: env var, active-demand pointer, then the
+    conventional config path. Returns None when none exists (cost stays null)."""
+    configured = os.environ.get("ALFRED_RATE_CARD_PATH", "") or active.get("rate_card_path", "")
+    if configured:
+        candidate = Path(configured).expanduser()
+        return str(candidate) if candidate.exists() else None
+    default = Path.home() / ".alfred" / "config" / "usage-rate-card.json"
+    return str(default) if default.exists() else None
+
+
 def event_exists(path, event_id):
     if not path or not path.exists():
         return False
     try:
-        for raw in path.read_text(encoding="utf-8-sig").splitlines():
-            if not raw.strip():
-                continue
-            event = json.loads(raw)
-            if event.get("event_id") == event_id:
+        for _line_number, event, _raw in iter_jsonl(path):
+            if event is not None and event.get("event_id") == event_id:
                 return True
-    except (json.JSONDecodeError, OSError):
+    except OSError:
         return False
     return False
 
@@ -177,39 +195,64 @@ def resolve_mode(active, raw_log):
     return "alfred"
 
 
-def run_alfred_engine(transcript_path, payload, active):
-    state_path = os.environ.get("ALFRED_STATE_PATH", "") or active.get("state_path", "")
-    obs_log = os.environ.get("ALFRED_OBS_LOG", "") or active.get("observability_log", "")
-    if not state_path and not obs_log:
-        print(
-            "alfred-usage-hook: set ALFRED_STATE_PATH/ALFRED_OBS_LOG or render toolbar with -RegisterActive; skipping Alfred log",
-            file=sys.stderr,
-        )
-        return
-
+def run_alfred_engine(invocation: EngineInvocation) -> EngineRunResult:
     command = [
         sys.executable,
         str(ENGINE),
-        "--transcript-path",
-        str(transcript_path),
-        "--granularity",
-        "request",
-        "--emit-interactions",
-        "--cursor-path",
-        str(cursor_path(transcript_path, "alfred")),
+        *invocation.args,
     ]
-    if state_path:
-        command += ["--state-path", state_path]
-    if obs_log:
-        command += ["--output-path", obs_log]
-    if payload.get("session_id") or payload.get("sessionId"):
-        command += ["--session-id", str(payload.get("session_id") or payload.get("sessionId"))]
-    run_id = os.environ.get("ALFRED_RUN_ID") or active.get("alfred_run_id")
-    if run_id:
-        command += ["--run-id", run_id]
     result = subprocess.run(command, capture_output=True, text=True, check=False)
+    return EngineRunResult(result.returncode, result.stdout, result.stderr)
+
+
+def price_new_usage(active):
+    """Emit ``usage_cost_attributed`` events for newly attributed usage, so the
+    toolbar's demand cost reflects real spend. Runs after attribution, prices via
+    the approved rate card, and is idempotent (already-priced events are skipped
+    by apply-usage-rate-card). Non-blocking: any failure — no rate card, no new
+    usage to price, unknown model — is a benign no-op that never blocks the host.
+    """
+    rate_card_path = resolve_rate_card_path(active)
+    obs_log = resolve_obs_log(active)
+    if not rate_card_path or not obs_log or not obs_log.exists():
+        return None
+    command = [
+        sys.executable,
+        str(COST_ENGINE),
+        "--input-path", str(obs_log),
+        "--rate-card-path", rate_card_path,
+    ]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+    except (OSError, subprocess.SubprocessError) as error:
+        return f"alfred-usage-hook cost: {error}"
+    # "No interaction cost events generated" is the idempotent no-op case.
     if result.returncode != 0:
-        print(f"alfred-usage-hook: {result.stderr.strip() or result.stdout.strip()}", file=sys.stderr)
+        detail = (result.stderr or result.stdout).strip()
+        if "No interaction cost events" in detail:
+            return None
+        return f"alfred-usage-hook cost: {detail}"
+    return None
+
+
+def build_context(transcript_path, active, raw_log, mode):
+    state_path = os.environ.get("ALFRED_STATE_PATH", "") or active.get("state_path", "")
+    obs_log = os.environ.get("ALFRED_OBS_LOG", "") or active.get("observability_log", "")
+    run_id = os.environ.get("ALFRED_RUN_ID") or active.get("alfred_run_id") or ""
+    return ClaudeHookContext(
+        transcript_path=str(transcript_path),
+        mode=mode,
+        raw_log=raw_log,
+        raw_cursor_path=str(cursor_path(transcript_path, "raw")),
+        alfred_cursor_path=str(cursor_path(transcript_path, "alfred")),
+        state_path=state_path,
+        obs_log=obs_log,
+        run_id=run_id,
+        provider=os.environ.get("AI_OBS_PROVIDER", "claude-code"),
+        project=os.environ.get("AI_OBS_PROJECT"),
+        team=os.environ.get("AI_OBS_TEAM"),
+        environment=os.environ.get("AI_OBS_ENVIRONMENT"),
+    )
 
 
 def main():
@@ -227,31 +270,26 @@ def main():
     active = active_demand()
     raw_log = os.environ.get("AI_OBS_RAW_LOG", "")
     mode = resolve_mode(active, raw_log)
+    cursor = TranscriptCursor()
+    result = ProcessClaudeHook(
+        raw_adapter=hook_adapter(),
+        append_events=append_jsonl,
+        write_cursor=cursor.write,
+        write_policy_snapshot=write_policy_snapshot,
+        run_engine=run_alfred_engine,
+    ).execute(
+        ProcessClaudeHookCommand(
+            payload=payload,
+            active=active,
+            context=build_context(transcript_path, active, raw_log, mode),
+        )
+    )
+    for message in result.messages:
+        print(message, file=sys.stderr)
 
-    if mode in ("raw", "both") and raw_log:
-        try:
-            cursor = TranscriptCursor()
-            raw_cursor = cursor_path(transcript_path, "raw")
-            lines, _start_offset, end_offset = cursor.read_slice(transcript_path, raw_cursor)
-            events, last_request_id = hook_adapter().normalize_records(
-                lines,
-                os.environ.get("AI_OBS_PROVIDER", "claude-code"),
-            )
-            for event in events:
-                event["project"] = os.environ.get("AI_OBS_PROJECT")
-                event["team"] = os.environ.get("AI_OBS_TEAM")
-                event["environment"] = os.environ.get("AI_OBS_ENVIRONMENT")
-            append_jsonl(raw_log, events)
-            cursor.write(raw_cursor, transcript_path, end_offset, last_request_id)
-        except Exception as error:  # noqa: BLE001 - hook must never block host
-            print(f"alfred-usage-hook raw: {error}", file=sys.stderr)
-
-    if mode in ("alfred", "both"):
-        try:
-            write_policy_snapshot(payload, active)
-            run_alfred_engine(transcript_path, payload, active)
-        except Exception as error:  # noqa: BLE001 - hook must never block host
-            print(f"alfred-usage-hook alfred: {error}", file=sys.stderr)
+    cost_message = price_new_usage(active)
+    if cost_message:
+        print(cost_message, file=sys.stderr)
 
 
 if __name__ == "__main__":

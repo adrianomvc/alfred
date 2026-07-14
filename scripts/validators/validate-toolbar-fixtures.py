@@ -2,12 +2,13 @@
 """Check that the toolbar renderer does not drift from saved fixtures."""
 
 import argparse
-import importlib.util
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from _common import read_text  # noqa: E402
+from shared.common import read_text  # noqa: E402
+from shared.toolbar.service import render_toolbar  # noqa: E402
+from shared.validation import Severity, ValidationIssue, ValidationReport  # noqa: E402
 
 CASES = [
     ("fast",
@@ -25,13 +26,58 @@ CASES = [
 ]
 
 
-def load_renderer():
-    spec = importlib.util.spec_from_file_location(
-        "render_toolbar", Path(__file__).resolve().parent.parent / "workflow" / "render-toolbar.py"
+def issue(code, message, path=None):
+    return ValidationIssue(
+        code=code,
+        severity=Severity.ERROR,
+        message=message,
+        path=None if path is None else str(path),
     )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.render
+
+
+def validate_toolbar_fixtures(root) -> ValidationReport:
+    root = Path(root).resolve()
+    issues = []
+    successes = []
+
+    for name, state_rel, expected_rel in CASES:
+        state_path = root / state_rel
+        expected_path = root / expected_rel
+        if not state_path.exists():
+            issues.append(issue(
+                "toolbar_fixture.state_missing",
+                f"Missing toolbar fixture state for {name}: {state_path}",
+                state_path,
+            ))
+            continue
+        if not expected_path.exists():
+            issues.append(issue(
+                "toolbar_fixture.expected_missing",
+                f"Missing toolbar fixture expected output for {name}: {expected_path}",
+                expected_path,
+            ))
+            continue
+
+        actual = "\n".join(render_toolbar(
+            str(state_path),
+            framework_root=root,
+            model="GPT-5",
+            cost="n/a",
+            profile="text",
+        ))
+        expected = read_text(expected_path)
+
+        # Normalize line endings before comparing (fixtures use CRLF).
+        if actual.replace("\r\n", "\n").rstrip() != expected.replace("\r\n", "\n").rstrip():
+            issues.append(issue(
+                "toolbar_fixture.drift",
+                f"Toolbar fixture drift: {name}. Regenerate or update expected output intentionally.",
+                expected_path,
+            ))
+            continue
+        successes.append(f"OK toolbar fixture {name}")
+
+    return ValidationReport(tuple(issues), tuple(successes))
 
 
 def main():
@@ -39,27 +85,13 @@ def main():
     parser.add_argument("--root", "-Root", dest="root", default=".")
     args = parser.parse_args()
 
-    root = Path(args.root).resolve()
-    render = load_renderer()
-
-    for name, state_rel, expected_rel in CASES:
-        state_path = root / state_rel
-        expected_path = root / expected_rel
-        if not state_path.exists():
-            raise SystemExit(f"Missing toolbar fixture state for {name}: {state_path}")
-        if not expected_path.exists():
-            raise SystemExit(f"Missing toolbar fixture expected output for {name}: {expected_path}")
-
-        actual = "\n".join(render(str(state_path), "GPT-5", "n/a", profile="text"))
-        expected = read_text(expected_path)
-
-        # Normalize line endings before comparing (fixtures use CRLF).
-        if actual.replace("\r\n", "\n").rstrip() != expected.replace("\r\n", "\n").rstrip():
-            raise SystemExit(
-                f"Toolbar fixture drift: {name}. "
-                "Regenerate or update expected output intentionally."
-            )
-        print(f"OK toolbar fixture {name}")
+    report = validate_toolbar_fixtures(args.root)
+    for message in report.successes:
+        print(message)
+    if not report.passed:
+        for item in report.issues:
+            print(f"ERROR {item.message}", file=sys.stderr)
+        raise SystemExit(f"Toolbar fixture validation failed: {len(report.issues)} error(s)")
 
     print("Toolbar fixture validation completed.")
 

@@ -24,6 +24,7 @@ Use the canonical terms from `core/glossary.md` consistently. This keeps artifac
 - **Artifact phase folders and canonical paths** live in `core/architecture.md` §"Demand artifact layout" (single source). Keep only `001-state.md` (HUB) or `001-index.md` (App) at the demand root for boot/resume.
 - **Observability log** is the append-only JSONL event source for metrics: phase transitions, model, cost/tokens, validation results, defects, retries, blockers, changed files/artifacts, and closeout. `audit` records responsibility; `05-operation/011-observability-log.jsonl` records HUB measurement events.
 - **Observability timing:** one line per relevant interaction/step/event, appended immediately. Do not accumulate in memory and write later.
+- **Append-once per `event_id`:** never re-append a semantic event whose content is unchanged. An `event_id` may reappear only when its content actually changed (e.g. an `interaction_completed` whose request set grew); read-time dedup keeps the latest. Exact-duplicate lines are noise and fail `validate-observability-hygiene`.
 - **App-only session** records local measurement events in `.alfred-docs-app/<id-iniciativa>/<id-demanda>/05-operation/008-observability-log.jsonl`. The HUB consolidates them into `alfred-docs-hub/<id-iniciativa>/<id-demanda>/05-operation/011-observability-log.jsonl` during sync.
 
 ## Language policy (D47)

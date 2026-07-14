@@ -127,6 +127,19 @@ def validate_transcript_attribution(tmp):
     event = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", no_user, "-NoAppend"]).stdout)[0]
     assert_true(event["interaction_id"] is None and event["interaction_confidence"] == "unavailable", "missing user boundary must not fake interaction id")
 
+    # Interaction telemetry must be populated (not the former all-null block) so
+    # the log supports efficiency analysis.
+    tooled = tmp / "tooled.jsonl"
+    write_jsonl(tooled, [
+        user("2026-07-12T10:00:00Z", "prompt-tooled"),
+        assistant("2026-07-12T10:00:01Z", "req-tooled", tool={"name": "Read", "input": {"file_path": "rules/common/x.md"}}),
+    ])
+    events = parse_lines(run([ROOT / "scripts/metrics/attribute-usage-transcript.py", "-TranscriptPath", tooled, "-NoAppend", "-EmitInteractions"]).stdout)
+    interaction = [e for e in events if e.get("event_type") == "interaction_completed"][0]
+    assert_true(interaction["tool_call_count"] == 1, "interaction must count tool calls")
+    assert_true(interaction["context"]["unique_artifacts_read"] == 1, "interaction context must count unique reads")
+    assert_true(interaction["context"]["framework_rules_read"] == 1, "interaction context must classify framework reads")
+
 
 def validate_cursor_and_hook(tmp):
     transcript = tmp / "cursor.jsonl"

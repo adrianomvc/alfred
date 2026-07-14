@@ -29,11 +29,19 @@ FORBIDDEN_COMMAND_DEFS = (
     "select_row",
     "operation_for_tool",
     "extract_tool_paths",
+    "event_tokens",
+    "rate_for",
+    "make_cost_event",
+    "make_snapshot",
+    "make_request_event",
+    "make_interaction_events",
+    "phase_lane",
 )
 # Commands that attribute cost must delegate pricing to the domain service.
 PRICING_COMMANDS = ("attribute-usage-transcript.py", "apply-usage-rate-card.py")
 # Adapters that must carry real host parsing now (not delegate to the generic
-# passthrough). Others (codex/*, devin/*) remain acknowledged Wave 2 stubs.
+# passthrough). Codex/Devin passthrough adapters may exist only in the
+# experimental registry until a real source fixture is approved.
 REAL_ADAPTER_MODULES = (
     OBS / "infrastructure" / "adapters" / "claude" / "transcript.py",
     OBS / "infrastructure" / "adapters" / "ccusage" / "session.py",
@@ -87,6 +95,40 @@ def assert_architecture():
     for forbidden in ("ccusage", "attribute-usage-transcript", "claude-code-usage-hook"):
         if any(forbidden in item for item in toolbar_imports):
             fail(f"Toolbar imports forbidden runtime source: {forbidden}")
+    boot = ROOT / "workflow" / "alfred-boot.py"
+    boot_imports = imports(boot)
+    if "importlib.util" in boot_imports:
+        fail("alfred-boot must import shared services directly, not scripts by filename.")
+    if "render-toolbar.py" in boot.read_text(encoding="utf-8-sig"):
+        fail("alfred-boot must not depend on render-toolbar.py by filename.")
+    toolbar_fixtures = ROOT / "validators" / "validate-toolbar-fixtures.py"
+    fixture_imports = imports(toolbar_fixtures)
+    if "importlib.util" in fixture_imports:
+        fail("validate-toolbar-fixtures must import shared toolbar services directly, not scripts by filename.")
+    if "render-toolbar.py" in toolbar_fixtures.read_text(encoding="utf-8-sig"):
+        fail("validate-toolbar-fixtures must not depend on render-toolbar.py by filename.")
+    context_fixtures = ROOT / "validators" / "validate-context-manifest-fixtures.py"
+    context_fixture_imports = imports(context_fixtures)
+    if "importlib.util" in context_fixture_imports:
+        fail("validate-context-manifest-fixtures must import shared services directly, not scripts by filename.")
+    if "context-manifest.py" in context_fixtures.read_text(encoding="utf-8-sig"):
+        fail("validate-context-manifest-fixtures must not depend on context-manifest.py by filename.")
+    tool_discovery = ROOT / "validators" / "validate-tool-discovery-policy.py"
+    tool_discovery_imports = imports(tool_discovery)
+    if "importlib.util" in tool_discovery_imports:
+        fail("validate-tool-discovery-policy must import shared MCP tool metadata directly, not scripts by filename.")
+    if "scripts/adapters/mcp-email-server.py" in tool_discovery.read_text(encoding="utf-8-sig"):
+        fail("validate-tool-discovery-policy must not depend on mcp-email-server.py by path.")
+    validate_demand = ROOT / "validators" / "validate-demand.py"
+    demand_imports = imports(validate_demand)
+    if "importlib.util" in demand_imports:
+        fail("validate-demand must import shared validators directly, not scripts by filename.")
+    if "validate-sdd-gate.py" in validate_demand.read_text(encoding="utf-8-sig"):
+        fail("validate-demand must not depend on validate-sdd-gate.py by filename.")
+    if "validate-reverse-eng-staleness.py" in validate_demand.read_text(encoding="utf-8-sig"):
+        fail("validate-demand must not depend on validate-reverse-eng-staleness.py by filename.")
+    if "subprocess" in demand_imports:
+        fail("validate-demand must compose shared validators directly, not use subprocess internally.")
 
 
 def assert_commands_delegate():
@@ -138,6 +180,38 @@ def assert_adapter_roundtrip():
     events = CcusageSessionAdapter().read_session_usage({"sessions": [row]}, AdapterContext(host="claude-code"))
     if not events or events[0].event_scope != "session" or events[0].cost.value is None:
         fail("ccusage adapter must yield a session-scoped canonical event with cost.")
+
+
+def assert_registry_contracts():
+    sys.path.insert(0, str(ROOT))
+    from shared.observability.application.ports.adapters import SessionUsageAdapter, TranscriptUsageAdapter
+    from shared.observability.composition.adapter_bootstrap import build_default_registry, build_experimental_registry
+
+    default = build_default_registry()
+    default_keys = set(default.registered())
+    forbidden_defaults = {
+        ("codex", "hook"),
+        ("codex", "otel"),
+        ("devin-cli", "devin_insights"),
+        ("devin-web", "devin_consumption"),
+    }
+    leaked = sorted(default_keys.intersection(forbidden_defaults))
+    if leaked:
+        fail(f"Experimental passthrough adapters must not be in the default registry: {leaked}")
+
+    transcript = default.resolve("claude-code", "host_transcript")
+    if not isinstance(transcript, TranscriptUsageAdapter):
+        fail("claude-code/host_transcript must implement TranscriptUsageAdapter.")
+    ccusage = default.resolve("claude-code", "ccusage")
+    if not isinstance(ccusage, SessionUsageAdapter):
+        fail("claude-code/ccusage must implement SessionUsageAdapter.")
+
+    experimental = build_experimental_registry()
+    for key in forbidden_defaults:
+        if key not in experimental.registered(include_experimental=True):
+            fail(f"Experimental registry missing acknowledged passthrough adapter: {key}")
+        if not experimental.is_experimental(*key):
+            fail(f"Passthrough adapter must be marked experimental: {key}")
 
 
 def assert_substitution():
@@ -215,6 +289,7 @@ def main():
     assert_commands_delegate()
     assert_real_adapters_not_stub()
     assert_adapter_roundtrip()
+    assert_registry_contracts()
     assert_domain_behaviors()
     assert_substitution()
     print("Scripts architecture validation completed.")

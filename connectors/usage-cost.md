@@ -112,11 +112,31 @@ Otherwise it selects the latest session for the configured agent and records the
 selection method in the state/session snapshot metadata. Humans may still provide
 `/cost` when `ccusage` is unavailable or the session correlation is ambiguous.
 
+**`usage session id` provenance:** only this importer writes that field (from the
+full ccusage `period`). Never hand-stamp it — a truncated/guessed id is exactly
+what breaks exact matching. Matching is tolerant: an exact `period` match wins;
+otherwise a prefix match (self-healing a truncated id) or the latest agent
+session is used, a warning is printed, and the id is reconciled to the real
+`period`. If no session matches at all, the import is **non-fatal** — it keeps the
+prior `cost usd` but sets `cost confidence: stale` so the toolbar shows the last
+value marked `stale` and asks for a reimport, never a silent frozen value.
+
 Run the import at each checkpoint, not only at demand close, so the session cost
 stays current in the toolbar. Each run refreshes the `001-state.md` cost fields;
 it does not append to `05-operation/011-observability-log.jsonl`. On Windows the
 helper resolves the `ccusage` npm shim via `PATHEXT`; if it is unreachable, dump
 `ccusage session --json` to a file and pass `-InputPath`.
+
+**Automatic per-interaction cost (rate card in the hook):** when an approved rate
+card is resolvable (`ALFRED_RATE_CARD_PATH`, the active-demand pointer, or
+`~/.alfred/config/usage-rate-card.json`), the Stop hook prices each newly
+attributed request after attribution by running `apply-usage-rate-card.py`,
+appending `usage_cost_attributed` events (granularity `interaction`) that feed the
+toolbar's demand cost. It is idempotent (already-priced events are skipped) and
+non-blocking (a missing/invalid card or unknown model degrades to `cost null`
+without losing usage events). Session total (ccusage in state) and per-interaction
+cost (rate-card events) are separate axes — the toolbar shows both and never sums
+one into the other.
 
 ### Layered transcript attribution (finer than the session total)
 When the host keeps a durable transcript with per-request usage (Claude Code),

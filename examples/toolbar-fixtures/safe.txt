@@ -1,5 +1,5 @@
 ALFRED | TST | #toolbar-safe | SAFE | 60% | Custo USD: indisponível · fonte de custo não configurada | Consumo: não coletado · adapter de uso não configurado
 Framework: v2.0.0 (fixture) | App: f9a3739
 Fases: 1 Inception:ok | 2 Design:ok | 3 Execution:ok | 4 Validate:agora | 5 Operation:pendente
-HITL: Product Owner + Tech Lead + Security | modelo: GPT-5 | etapa: evidence review
+HITL: Product Owner + Tech Lead + Security | modelo: GPT-5 (política: claude-opus-4-8) | etapa: evidence review
 Proximo: collect final evidence and human acceptance
