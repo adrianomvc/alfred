@@ -62,25 +62,32 @@ hint, never proof. Same fence/degradation rules as the welcome block apply.
 
 ```text
    Ainda não sei se este repositório é um APP ou um HUB — e eu não
-   suponho. Deixa eu explicar os dois papéis no Alfred:
+   suponho. Deixa eu apresentar os dois papéis:
   ╭────────────────────────────────────────────────────────────────╮
-  │ APP  ·  repositório de código de UMA aplicação                 │
-  │ Guarda o código-fonte e as evidências técnicas locais da       │
-  │ demanda: reverse-eng, spec técnico, evidências, sync.          │
-  │ Escopo: uma aplicação.                                         │
+  │ 📦  APP  —  repositório de UMA aplicação                       │
+  │     o código e as evidências técnicas moram aqui               │
+  │     ├ código-fonte da aplicação                                │
+  │     ├ reverse-eng · spec técnico · evidências                  │
+  │     └ escopo:  1 aplicação                                     │
   ├────────────────────────────────────────────────────────────────┤
-  │ HUB  ·  repositório COMPARTILHADO da squad — o contexto        │
-  │ comum entre as pessoas da squad.                               │
-  │ Fonte de verdade de governança: estado das demandas,           │
-  │ decisões, trilha (audit), métricas, conhecimento e os          │
-  │ links para os apps tocados.                                    │
-  │ Escopo: uma sigla / a squad toda.                              │
+  │ 🤝  HUB  —  repositório COMPARTILHADO da squad                 │
+  │     o contexto comum do time · a fonte de verdade              │
+  │     ├ estado das demandas · decisões · trilha (audit)          │
+  │     ├ métricas · conhecimento · links p/ os apps               │
+  │     └ escopo:  1 sigla · o time todo                           │
   ╰────────────────────────────────────────────────────────────────╯
+   ▸ HUB = onde a squad divide o mesmo contexto.
+   ▸ APP = onde vive o código de cada aplicação.
+
    Como devo tratar este workspace?
-     1  HUB       2  APP       3  Ambos       4  Nenhum (só me oriente)
+     1  HUB       2  APP       3  Ambos       4  Nenhum (só oriente)
    ↳ responda com o número — ou aponte o caminho que falta (ex.: onde
      fica o HUB da squad, ou o repositório da aplicação).
 ```
+
+Icon badges live in a dedicated left column padded for double width (`📦`/`🤝`).
+Degradation (per the rules below): no emoji → drop the badge, the `APP —`/`HUB —`
+label already carries it; no Unicode → tree glyphs `├└` become `-`, box `╭╮│` → `+-|`.
 
 Deterministic labels (like the sigla auto-label) may still be inferred; the
 HUB/APP decision never is. Nothing is written until the human answers.
