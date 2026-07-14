@@ -40,6 +40,8 @@ Minimum files:
 Template filenames are source names, not output names. When creating the HUB
 root, write the canonical artifact names:
 - `templates/hub/index.md` -> `alfred-docs-hub/001-index.md`
+- `templates/hub/metrics-rollup.md` -> `alfred-docs-hub/002-metrics-rollup.md`
+- `templates/hub/insights.md` -> `alfred-docs-hub/003-insights.md`
 - `templates/hub/skills.md` -> `alfred-docs-hub/004-skills.md` when skills are registered
 
 Do not create unnumbered HUB aliases such as `index.md`, `skills.md`, or
