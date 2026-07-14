@@ -40,7 +40,12 @@ The DEVIN CLI reads MCP servers from the project's `.devin/config.local.json` (g
 For Devin, automatic usage attribution requires a captured `devin-...` session id plus approved Session Insights/Consumption API export. Session or consumption totals update `001-state.md` for toolbar display; append JSONL only when the export provides interaction/request-granular usage. Interaction cost needs per-interaction cost from the Devin source or exact granular usage plus an approved rate card; do not allocate session ACU/USD totals into JSONL interactions. Without that source, keep `custo: nao coletado`; do not infer ACU/USD from wall time or terminal output. If a local CLI source is also present and supported by `ccusage`, it may update the toolbar state as secondary evidence, but Devin API remains the preferred ACU source.
 
 ## RTK terminal hook (DEVIN CLI only)
-If RTK is installed, follow `~/.alfred/core/hooks/rtk.md` and load `~/.alfred/rules/common/terminal-token-policy.md` before shell commands or large terminal output. Prefer `rtk cat`, `rtk grep`, `rtk diff`, and `rtk test`; otherwise use bounded native commands. If RTK is missing, continue with the bounded-command fallback and do not invent an install source.
+On start, **ensure RTK is configured** — it stays optional (D3), but when the binary is present the SKILL guarantees it is set up and used on every invocation:
+1. Check `rtk --version`. If the binary is present but not yet initialized (no `~/.config/rtk/config.toml` / `RTK.md`), run `rtk init -g` once (idempotent) per `~/.alfred/core/hooks/rtk.md`.
+2. Load `~/.alfred/rules/common/terminal-token-policy.md` before any shell command or large terminal output.
+3. **Use RTK explicitly** — `rtk cat`, `rtk grep`, `rtk diff`, `rtk test`, or `rtk <cmd>`. Devin does not run Claude Code's auto-rewrite `PreToolUse` hook, so explicit calls are what actually save tokens; do not rely on transparent rewriting here. Confirm with `rtk gain`.
+
+If the binary is missing and no approved artifact URL was provided, continue with the bounded-command fallback and do not invent an install source.
 
 ## Always
 - Keep the demand `state` current; commit on the demand branch.
