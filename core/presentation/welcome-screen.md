@@ -53,6 +53,38 @@ for hosts without Unicode/emoji/color.
 The welcome never marks a current phase. Phase status belongs only to the
 demand toolbar rendered from `001-state.md`.
 
+## Repo kind unknown — APP vs HUB (rendered only when boot cannot tell)
+When boot cannot classify the repo (see `core/boot.md` → *Detect repo*), Alfred
+**never guesses**. Instead of a one-line question, it renders this block so the
+human sees both roles before choosing — the HUB is the **squad's shared repo for
+shared context**, not just "the other folder". A repo name ending in `-hub` is a
+hint, never proof. Same fence/degradation rules as the welcome block apply.
+
+```text
+   Ainda não sei se este repositório é um APP ou um HUB — e eu não
+   suponho. Deixa eu explicar os dois papéis no Alfred:
+  ╭────────────────────────────────────────────────────────────────╮
+  │ APP  ·  repositório de código de UMA aplicação                 │
+  │ Guarda o código-fonte e as evidências técnicas locais da       │
+  │ demanda: reverse-eng, spec técnico, evidências, sync.          │
+  │ Escopo: uma aplicação.                                         │
+  ├────────────────────────────────────────────────────────────────┤
+  │ HUB  ·  repositório COMPARTILHADO da squad — o contexto        │
+  │ comum entre as pessoas da squad.                               │
+  │ Fonte de verdade de governança: estado das demandas,           │
+  │ decisões, trilha (audit), métricas, conhecimento e os          │
+  │ links para os apps tocados.                                    │
+  │ Escopo: uma sigla / a squad toda.                              │
+  ╰────────────────────────────────────────────────────────────────╯
+   Como devo tratar este workspace?
+     1  HUB       2  APP       3  Ambos       4  Nenhum (só me oriente)
+   ↳ responda com o número — ou aponte o caminho que falta (ex.: onde
+     fica o HUB da squad, ou o repositório da aplicação).
+```
+
+Deterministic labels (like the sigla auto-label) may still be inferred; the
+HUB/APP decision never is. Nothing is written until the human answers.
+
 ## Degradação (D3 — piso portável)
 Nothing here may be required. The rich block degrades by rules, not by a second copy:
 - **Markdown host (fence rule — do this first):** when the reply is rendered as markdown (Devin, web/chat UIs, IDE panels — most hosts today), paste the whole block **inside a fenced code block** (```). Without the fence, markdown collapses repeated spaces and soft-wraps long lines, so every border and column breaks. This is orthogonal to the character-set rules below (`core/presentation/README.md` → *Markdown-safe rendering*): fence first, then apply the Unicode/emoji/color degradation.
