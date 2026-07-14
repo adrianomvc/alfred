@@ -84,7 +84,7 @@ The policy uses **abstract tiers** (`cheap` / `medium` / `strong`); this map tra
 - **Source of truth = declared here** — the Orchestrator obeys it.
 - **Auto-suggestion:** Alfred analyzes `metrics` (model × cost × first-time acceptance) and **proposes** policy adjustments. It never applies them alone.
 - **Human ratifies:** a change enters only with human approval → a new commit to this file (traceable). Never a silent switch.
-- **Declare the switch:** whenever the model changes between steps, Alfred **tells the person** (toolbar/interaction line, pt-BR), e.g. *"Mudando para <modelo> nesta etapa (Design/SAFE)."* The switch is also an `audit` event.
+- **Declare the switch — two surfaces, two roles:** the **toolbar carries state** (a compact flag: the running model, and `(política: <alvo>)` when it diverges). The **chat interaction line carries the action**, emitted at the phase transition (not permanently in the toolbar): a one-line pt-BR advisory that names the target and invites the switch — e.g. *"Esta etapa (Design) roda melhor em `claude-opus-4-8` (tier strong, esf xhigh). Você está em `claude-sonnet-5` — use `/model` para alinhar, ou siga assim que registro o modelo real."* `scripts/workflow/resolve-model-policy.py --actual-model <running>` prints this exact line (also in `--json` as `advisory`). When aligned, there is no line. Any actual switch is also an `audit` event.
 
 ## Evidence for future changes
 Model comparisons must consider the full context: model, effort, phase, lane,
@@ -97,4 +97,7 @@ decision and explicit commit.
 The person may **set/switch the model at any time** — one step or the whole demand. Alfred respects and records it in `state`/`audit`. If the choice is **below the risk floor** (e.g. cheap model in SAFE), Alfred **warns the trade-off** (does not block — human in control) and records the decision. Raising the tier is free.
 
 ## In the toolbar
-The toolbar shows the **current model** (and effort, when the host exposes it) of the step, so the person always knows what is running.
+The toolbar shows the **model actually running** (and effort, when the host exposes it), so the person always knows what is running — never the policy target dressed up as the running model. The resolved target is shown only as guidance: when the running model matches, the line is compact (`model · tier · esf`); when it differs (forced but not switched, or a human override), the line shows the **running** model and flags the target (`running (política: target)`); when the running model is unknown, the target is shown explicitly as `alvo … não confirmado`. Alfred records the running model in the demand `state` (`model:`) or passes it to the toolbar so this stays truthful.
+
+## Applying the policy (runtime)
+This file is the source of truth; `scripts/shared/model_policy.py` mirrors its table so the runtime can **apply** it, and `scripts/workflow/resolve-model-policy.py` resolves `{tier, model, effort, task_budget}` for a demand step (`lane`+`phase`). The toolbar renders that resolved model instead of `default`. `scripts/validators/validate-model-policy.py` checks the mirror against this table (floors, tier→model map, key outcomes) so "written" and "applied" cannot drift. Hosts that cannot switch models keep their default and record which ran (D3).

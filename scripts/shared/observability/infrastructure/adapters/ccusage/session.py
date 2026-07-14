@@ -41,6 +41,16 @@ def last_activity(row):
     return metadata.get("lastActivity") or ""
 
 
+def period_prefix_match(period, session_id):
+    """A stored ``usage session id`` may be a truncated ``period`` (a display
+    value copied at demand creation). Match either direction so a short id still
+    resolves to its full session."""
+    if not period or not session_id:
+        return False
+    period, session_id = str(period), str(session_id)
+    return period.startswith(session_id) or session_id.startswith(period)
+
+
 def models(row):
     used = row.get("modelsUsed")
     if isinstance(used, list) and used:
@@ -58,20 +68,39 @@ class CcusageSessionAdapter:
         return AdapterCapabilities(request_tokens=False, session_usage=True, cost=True, artifacts=False, tools=False)
 
     def select_session(self, payload, agent, session_id):
-        """Return (row, selection_method). Raises NoSessionMatch on no match."""
-        candidates = []
-        for row in session_rows(payload):
-            if agent and row.get("agent") != agent:
-                continue
-            if session_id and row.get("period") != session_id:
-                continue
-            candidates.append(row)
-        if not candidates:
+        """Return (row, selection_method). Raises NoSessionMatch only when the
+        agent has no sessions at all.
+
+        Matching is tolerant so a stale/truncated ``usage session id`` never
+        freezes the cost: exact ``period`` match first, then a prefix match. When
+        an id is given but matches nothing, we only auto-heal to the sole session
+        when it is unambiguous (exactly one for the agent); with several sessions
+        we raise ``NoSessionMatch`` rather than guess — the caller then keeps the
+        prior cost and marks it ``stale`` instead of attributing an unrelated
+        session's cost. The non-exact methods (``fallback_prefix`` /
+        ``fallback_latest``) let the caller warn and reconcile the id in state."""
+        rows = [row for row in session_rows(payload) if not agent or row.get("agent") == agent]
+        if not rows:
             raise NoSessionMatch("No ccusage session matched the requested filters.")
         if session_id:
-            return candidates[0], "session_id"
-        candidates.sort(key=last_activity, reverse=True)
-        return candidates[0], "latest_agent_session"
+            exact = [row for row in rows if row.get("period") == session_id]
+            if exact:
+                return exact[0], "session_id"
+            prefix = sorted(
+                (row for row in rows if period_prefix_match(row.get("period"), session_id)),
+                key=last_activity,
+                reverse=True,
+            )
+            if prefix:
+                return prefix[0], "fallback_prefix"
+            if len(rows) == 1:
+                return rows[0], "fallback_latest"
+            raise NoSessionMatch(
+                "No ccusage session matched the requested id and several sessions exist; "
+                "refusing to attribute an unrelated session."
+            )
+        rows.sort(key=last_activity, reverse=True)
+        return rows[0], "latest_agent_session"
 
     def read_session_usage(self, source: object, context: AdapterContext) -> list[CanonicalEvent]:
         """Protocol conformance: the selected session row as one canonical event."""

@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _common import read_text  # noqa: E402
+from shared.model_policy import CLAUDE_TIER_MODEL, FLOOR_BY_LANE, resolve_model_policy  # noqa: E402
 from shared.validation import Severity, ValidationIssue, ValidationReport  # noqa: E402
 
 REQUIRED_HEADINGS = (
@@ -44,7 +45,7 @@ REQUIRED_PATTERNS = (
     (r"(?im)Decisions / architecture \(SAFE\).*\|\s*strongest\s*\|", "SAFE architecture decisions use strongest"),
     (r"(?im)below the risk floor.*warns? the trade-off", "override below floor warns human"),
     (r"(?im)record[s]? it in `state`/`audit`", "override is recorded"),
-    (r"(?im)toolbar shows the \*\*current model\*\*", "toolbar declares current model"),
+    (r"(?im)toolbar shows the \*\*model actually running\*\*", "toolbar declares the running model"),
 )
 
 
@@ -88,7 +89,59 @@ def validate_model_policy(root) -> ValidationReport:
                 path=str(policy_path),
             ))
 
+    check_resolver_consistency(content, policy_path, issues, successes)
     return ValidationReport(tuple(issues), tuple(successes))
+
+
+def resolver_issue(message, policy_path):
+    return ValidationIssue(
+        code="model_policy.resolver_drift",
+        severity=Severity.ERROR,
+        message=message,
+        path=str(policy_path),
+    )
+
+
+def check_resolver_consistency(content, policy_path, issues, successes):
+    """The runtime resolver (shared/model_policy.py) is what actually applies the
+    policy. Assert it matches the markdown floors + tier->model map and encodes
+    the key resolved outcomes, so "written" and "applied" cannot drift."""
+    # Floors mirror the markdown table.
+    for lane, tier in REQUIRED_FLOORS.items():
+        if FLOOR_BY_LANE.get(lane.lower()) != tier:
+            issues.append(resolver_issue(
+                f"Resolver floor for {lane} is {FLOOR_BY_LANE.get(lane.lower())!r}, markdown says {tier!r}", policy_path))
+        else:
+            successes.append(f"OK resolver floor {lane}={tier}")
+
+    # Tier -> concrete model rows match the markdown table.
+    for tier, model in CLAUDE_TIER_MODEL.items():
+        pattern = r"(?im)^\|\s*" + tier + r"\s*\|\s*`?" + re.escape(model) + r"`?\s*\|"
+        if re.search(pattern, content):
+            successes.append(f"OK resolver model {tier}->{model}")
+        else:
+            issues.append(resolver_issue(
+                f"Resolver maps tier {tier!r} to {model!r} but the markdown tier->model table does not", policy_path))
+
+    # Key resolved outcomes the policy commits to.
+    expectations = [
+        ("Standard", "Design", "strong", "Design pinned strong on every lane"),
+        ("SAFE", "Design", "strong", "Design pinned strong on every lane"),
+        ("FAST", "Execution", "medium", "Execution never runs on cheap"),
+        ("FAST", "Inception", "strong", "FAST Inception compensated up to strong"),
+        ("Standard", "Inception", "medium", "Standard Inception is medium"),
+        ("SAFE", "Validate", "strong", "SAFE floor holds on Validate"),
+        ("SAFE", "Operation", "medium", "Operate may drop to medium even in SAFE"),
+        ("FAST", "Operation", "cheap", "cheap remains only for FAST Operate"),
+    ]
+    for lane, phase, tier, why in expectations:
+        decision = resolve_model_policy(lane, phase)
+        if decision is None or decision.tier != tier:
+            got = None if decision is None else decision.tier
+            issues.append(resolver_issue(
+                f"Resolver {lane}/{phase} tier={got!r}, policy requires {tier!r} ({why})", policy_path))
+        else:
+            successes.append(f"OK resolver {lane}/{phase}={tier}")
 
 
 def main():

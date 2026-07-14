@@ -3,20 +3,23 @@
 Every session begins with a fixed sequence before any work. The host runs it once per session. Inherits the spirit of `workspace-detection` + `session-continuity` from AI-DLC. The boot **never loads everything** — only index + state + what is needed; the rest is on demand.
 
 ## Sequence
-1. **Welcome** — short opening message in the butler's voice (`welcome.md` = persona/tone), shown once per session. To render the visual welcome block, load `presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session).
+1. **Welcome (mandatory first output)** — every time a session invokes Alfred, the **first thing shown** is the opening message in the butler's voice (`welcome.md` = persona/tone), before any detection, tool call, or work. Shown once per session (token economy): if the welcome already ran this session, skip re-rendering and continue. To render the visual welcome block, load `presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session). On markdown-rendering hosts (Devin, web/chat, IDE panels), emit the block **inside a fenced code block** — see the fence rule in `presentation/welcome-screen.md` / `presentation/README.md`, or borders and columns collapse.
 2. **Detect repo** — identify which repo we are in, to know which artifacts to read and how:
    - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts). The HUB is the sigla workspace: it holds the demand truth (`state`), problem/scope, decisions, audit, metrics, summary, knowledge, and links to the apps touched.
    - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts). The APP is a product/application repository: it holds the source code plus app-local Alfred artifacts such as reverse engineering, technical spec, evidence, local audit/metrics, and HUB sync notes.
    - **APP-only** if it finds `.alfred-docs-app/` but no writable HUB path. In this mode, write only app-local artifacts and create/update `05-operation/009-hub-sync.md` for later HUB import.
    - **Framework** if it finds `core/principles.md` / `rules/agents/` (editing Alfred itself).
-   - Not identified → ask the human before writing anything. Repository names
-     such as `*-hub` are only hints; they do not prove the repo is a HUB.
-     Before asking, explain the difference in the human interaction language
-     (pt-BR by default for squads): **HUB = governance/source of truth for a
-     sigla and demand; APP = code repo with technical evidence for one
-     application**. Then ask whether the current workspace should be treated as
-     HUB, APP, both, or neither, and whether a missing path should be
-     mounted/provided.
+   - Not identified → **never guess**; ask the human before writing anything.
+     Repository names such as `*-hub` are only hints; they do not prove the repo
+     is a HUB. Render the **APP vs HUB disambiguation block** from
+     `presentation/welcome-screen.md` (load it JIT) so the human sees both roles
+     before choosing — it makes explicit that **HUB = the squad's shared repo,
+     the source of truth for a sigla's governance and shared context (demand
+     state, decisions, audit, metrics, knowledge, links to apps)** and **APP =
+     one application's code repo with its local technical evidence**. Then ask
+     whether the current workspace should be treated as HUB, APP, both, or
+     neither, and whether a missing path should be mounted/provided. Nothing is
+     written until the human answers.
    - **Sigla (auto-label):** derive the sigla from the repo name — pattern `itau-<sigla>-<...>` → the segment right after `itau-` (from the app repo a demand targets, or the current repo). Fallback: the repo/folder name; else `unknown`. It is a **display label only** — no logic depends on it, so **never ask the human** for it. The pattern is configurable per org.
    - **Confirmed empty/new HUB → provision, don't interrogate:** after the repo
      is already identified as a HUB (by existing marker or explicit human
@@ -24,12 +27,13 @@ Every session begins with a fixed sequence before any work. The host runs it onc
      `docs/onboarding-sigla.md`; write owner/apps/tracker as `pending`, read
      notification from `knowledge/notification.md`, and **never present a scope
      menu** — then offer one next step in a line.
-3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified."
+3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified." Use the TTL-cached check (`scripts/workflow/check-update.py`) so boot skips the network when the framework was checked recently; `sync-host-shims.py` is a no-op when nothing changed.
    - **Safeguard (active demand):** if there is an update **and** an active demand, Alfred **warns and asks** — apply now or only on the next demand. The demand records the framework version used and keeps it frozen until it closes, unless a human decides otherwise.
 4. **JIT context load (anti-hypercontext):**
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
    - on resume → **rebuild from the `state`** and show the toolbar by running `scripts/workflow/render-toolbar.py` over the demand `001-state.md` (preferred). On Claude Code, include `-RegisterActive` so the usage attribution hook can write to the same demand JSONL. If the helper cannot run, load `presentation/toolbar-quick.md` before writing anything and emit only its text fallback shape from the same state fields; do not hand-draw a rich toolbar from memory.
+   - **Render ≠ display:** running the helper only *produces* the toolbar block; you must **paste that rendered block into the response** at every checkpoint — demand open/resume, phase transition, and end of any turn with an active demand. Registering the active demand (`-RegisterActive`) is not a substitute for showing the block.
    - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
    - if using RAG, compressed summaries, or codebase-memory output to select

@@ -32,6 +32,14 @@ Intent analysis (clarity class), `tech-inception` unknowns, business gaps from
 4. Open the **gate**: do not advance to Design until the required answers land
    in the file. Do not open host-native question widgets for requirements; chat
    or UI may only say that the file is waiting for answers and provide the path.
+   **Alfred never writes the `[Resposta]:` slots** — only the human answers (D7,
+   `../../../common/question-format.md`). On "continue" with required answers
+   still pending, the gate stays closed: point to the file path, wait for
+   `pronto`/`terminei`, and **never** offer to accept the recommended options and
+   advance on the human's behalf. **Only exception:** if the human explicitly
+   says they will not/cannot answer and **delegates** the decision, Alfred may
+   fill the slots with proposed defaults — but must mark each as `assumida` in
+   the artifact, record the delegation in `audit`, and reconfirm before Design.
 5. After the human confirms completion, read the file and **detect
    contradictions** against earlier inputs; re-ask in the same file if needed.
 6. Consolidate answers into `requirements`; record the gate in `audit`.

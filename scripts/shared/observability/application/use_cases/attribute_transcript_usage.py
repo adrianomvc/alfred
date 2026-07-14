@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable
 
+from shared.observability.domain.services.interaction_context import interaction_context, tool_counters
 from shared.observability.domain.services.legacy_usage import usage_tokens
 from shared.observability.domain.services.rate_card import ModelRate, price_usage_usd
 
@@ -54,6 +55,7 @@ class AttributeTranscriptUsageCommand:
     anchors: Sequence[Mapping[str, object]]
     existing_request_events: Sequence[Mapping[str, object]]
     context: TranscriptAttributionContext
+    interaction_tools: Mapping[str, Sequence[Mapping[str, object]]] | None = None
 
 
 @dataclass(frozen=True)
@@ -85,7 +87,9 @@ class AttributeTranscriptUsage:
             output_events.extend(request_events)
         if context.granularity == "interaction" or context.emit_interactions:
             aggregate_input = [*command.existing_request_events, *request_events]
-            interaction_events = self._make_interaction_events(aggregate_input, context.state_fields)
+            interaction_events = self._make_interaction_events(
+                aggregate_input, context.state_fields, command.interaction_tools
+            )
             output_events.extend(interaction_events)
         return AttributeTranscriptUsageResult(
             events=tuple(output_events),
@@ -225,7 +229,8 @@ class AttributeTranscriptUsage:
             },
         }, None
 
-    def _make_interaction_events(self, request_events, state_fields):
+    def _make_interaction_events(self, request_events, state_fields, interaction_tools=None):
+        interaction_tools = interaction_tools or {}
         by_interaction = defaultdict(list)
         for event in request_events:
             interaction_id = event.get("interaction_id")
@@ -251,6 +256,9 @@ class AttributeTranscriptUsage:
                     lanes.add(event["lane"])
             denominator = tokens["tokens_input"] + tokens["tokens_cache_creation"] + tokens["tokens_cache_read"]
             cache_ratio = None if denominator == 0 else tokens["tokens_cache_read"] / denominator
+            tool_obs = interaction_tools.get(interaction_id, [])
+            call_count, failure_count = tool_counters(tool_obs)
+            context_metrics = interaction_context(tool_obs)
             events.append(
                 {
                     "schema_version": "alfred.observability.v1",
@@ -282,8 +290,8 @@ class AttributeTranscriptUsage:
                     "cost_usd": None,
                     "retry_count": None,
                     "request_count": len(group),
-                    "tool_call_count": None,
-                    "tool_failure_count": None,
+                    "tool_call_count": call_count,
+                    "tool_failure_count": failure_count,
                     "usage": {
                         "tokens_input": tokens["tokens_input"],
                         "tokens_output": tokens["tokens_output"],
@@ -292,17 +300,7 @@ class AttributeTranscriptUsage:
                         "total_tokens": tokens["total_tokens"],
                         "cache_reuse_ratio": cache_ratio,
                     },
-                    "context": {
-                        "unique_artifacts_read": None,
-                        "framework_rules_read": None,
-                        "skills_loaded": None,
-                        "source_files_read": None,
-                        "logs_read": None,
-                        "repeated_reads": None,
-                        "total_bytes_read": None,
-                        "compression_used": None,
-                        "rtk_used": None,
-                    },
+                    "context": context_metrics,
                     "outcome": None,
                     "input": {"source": "usage_attributed_events", "request_ids": [e.get("request_id") for e in group]},
                     "derivation": {"rules_applied": ["metrics/metrics.md"], "method": "sum effective request-scope usage events by interaction_id"},

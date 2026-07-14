@@ -9,6 +9,7 @@ the hygiene contract text stays wired into the rules.
 """
 
 import argparse
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,6 +37,7 @@ def parseable_iso(value):
 def check_log(path, require_distinct_timestamps=True):
     issues = []
     timestamps = []
+    seen_lines = {}  # event_id -> set of exact compact signatures already logged
     for line_number, event, _ in iter_jsonl(path):
         if event is None:
             issues.append(issue(
@@ -45,6 +47,22 @@ def check_log(path, require_distinct_timestamps=True):
                 line_number,
             ))
             continue
+        # Append-once: an event_id may only reappear when its content changed
+        # (e.g. an interaction_completed whose request set grew; read-time dedup
+        # keeps the latest). An exact repeat is pure noise -- the duplication
+        # that idempotent emission removes.
+        event_id = event.get("event_id")
+        if event_id:
+            signature = json.dumps(event, sort_keys=True, separators=(",", ":"))
+            prior = seen_lines.setdefault(event_id, set())
+            if signature in prior:
+                issues.append(issue(
+                    "observability_hygiene.duplicate_event",
+                    f"{path.as_posix()}:{line_number} exact-duplicate event_id {event_id!r}; log must be append-once",
+                    path,
+                    line_number,
+                ))
+            prior.add(signature)
         ts = event.get("ts")
         if not parseable_iso(ts):
             issues.append(issue(

@@ -54,6 +54,9 @@ def main():
                         help="optional app demand artifact path used to read current/captured app commit")
     parser.add_argument("--register-active", "-RegisterActive", dest="register_active", action="store_true",
                         help="record this state as the active demand for host hooks (active-demand.json)")
+    parser.add_argument("--no-fence", "-NoFence", "-Raw", dest="no_fence", action="store_true",
+                        help="do not wrap output in a markdown code fence; use only on a host proven "
+                             "to render replies as raw monospace text (not Devin/Claude Code/web/IDE)")
     parser.add_argument("--write-usage-summary", "-WriteUsageSummary",
                         dest="write_usage_summary", action="store_true",
                         help="persist 001-usage-summary.json while rendering")
@@ -69,10 +72,23 @@ def main():
     if args.register_active:
         register_active_demand(args.state_path, read_lines(args.state_path))
 
-    for line in render(args.state_path, args.model, args.cost, args.profile,
-                       args.cost_usd, args.app_commit, args.app_demand_path,
-                       args.write_usage_summary):
+    lines = list(render(args.state_path, args.model, args.cost, args.profile,
+                        args.cost_usd, args.app_commit, args.app_demand_path,
+                        args.write_usage_summary))
+
+    # Markdown-safe transport (default): most hosts (Devin, Claude Code, web,
+    # IDE panels) render the reply as markdown, which collapses repeated spaces
+    # and soft-wraps long lines — breaking every border/column. A fenced code
+    # block keeps the block monospace. The `web` profile is HTML/SVG, not an
+    # aligned text block, so it is never fenced. Opt out with --no-fence only on
+    # a host proven to render raw monospace text.
+    fenced = not args.no_fence and args.profile != "web"
+    if fenced:
+        print("```")
+    for line in lines:
         print(line)
+    if fenced:
+        print("```")
 
 
 if __name__ == "__main__":

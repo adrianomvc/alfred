@@ -92,6 +92,40 @@ def existing_usage_events(path):
     return events
 
 
+def _interaction_signature(event):
+    """Semantic identity of an interaction event: what changes when the
+    interaction gains requests, tool calls, or context reads. Used to skip
+    re-emitting an unchanged interaction so the log stays append-once (the Stop
+    hook rebuilds every interaction on each turn)."""
+    return (
+        event.get("request_count"),
+        event.get("tool_call_count"),
+        event.get("tool_failure_count"),
+        json.dumps(event.get("usage"), sort_keys=True, separators=(",", ":")),
+        json.dumps(event.get("context"), sort_keys=True, separators=(",", ":")),
+    )
+
+
+def existing_interaction_signatures(path):
+    """Map ``interaction_completed`` event_id -> its last persisted signature.
+
+    Re-emitting an interaction whose request set has not grown is a no-op; when a
+    new request extends the interaction the signature differs and the updated
+    event is appended (read-time dedup keeps the latest by event_id)."""
+    signatures = {}
+    if not path or not Path(path).exists():
+        return signatures
+    for _line_number, event, _raw in iter_jsonl(path):
+        if event is None:
+            continue
+        if event.get("event_type") != "interaction_completed":
+            continue
+        event_id = event.get("event_id")
+        if event_id:
+            signatures[event_id] = _interaction_signature(event)
+    return signatures
+
+
 def load_anchor_events(path):
     events = []
     if not path or not Path(path).exists():
@@ -166,12 +200,24 @@ def main():
     events_path = args.events_path or (str(output_path) if output_path else "")
     anchors = load_anchor_events(events_path) if events_path else []
 
-    existing_requests = existing_usage_events(output_path) if output_path and (args.granularity == "interaction" or args.emit_interactions) else []
+    emit_interactions = args.granularity == "interaction" or args.emit_interactions
+    existing_requests = existing_usage_events(output_path) if output_path and emit_interactions else []
+    interaction_tools = {}
+    if emit_interactions:
+        # Aggregate tool observations over the whole transcript (not just the new
+        # slice) so a re-emitted interaction carries its complete context, mirroring
+        # how request events are re-aggregated. Read-time dedup keeps the latest.
+        _reqs, all_tools, _s, _e = ClaudeTranscriptAdapter().load_requests(args.transcript_path)
+        for tool in all_tools:
+            interaction_id = tool.get("interaction_id")
+            if interaction_id:
+                interaction_tools.setdefault(interaction_id, []).append(tool)
     result = AttributeTranscriptUsage(artifact_builder=canonical_artifact, now=now_iso).execute(
         AttributeTranscriptUsageCommand(
             requests=requests,
             anchors=anchors,
             existing_request_events=existing_requests,
+            interaction_tools=interaction_tools,
             context=TranscriptAttributionContext(
                 transcript_path=str(args.transcript_path),
                 state_fields=state_fields,
@@ -187,6 +233,18 @@ def main():
     if result.missing_rate_card_model:
         raise SystemExit(f"Rate card has no rates for model: {result.missing_rate_card_model}")
     output_events = list(result.events)
+
+    # Append-once for interactions: drop rebuilt interaction events that are
+    # identical to what is already persisted, so the Stop hook cadence does not
+    # duplicate lines. Request events are already deduped by requestId above.
+    if output_path and args.append:
+        signatures = existing_interaction_signatures(output_path)
+        output_events = [
+            event
+            for event in output_events
+            if event.get("event_type") != "interaction_completed"
+            or signatures.get(event.get("event_id")) != _interaction_signature(event)
+        ]
 
     lines = [json.dumps(event, separators=(",", ":")) for event in output_events]
     if output_path and args.append:
