@@ -55,6 +55,7 @@ demand toolbar rendered from `001-state.md`.
 
 ## Degradação (D3 — piso portável)
 Nothing here may be required. The rich block degrades by rules, not by a second copy:
+- **Markdown host (fence rule — do this first):** when the reply is rendered as markdown (Devin, web/chat UIs, IDE panels — most hosts today), paste the whole block **inside a fenced code block** (```). Without the fence, markdown collapses repeated spaces and soft-wraps long lines, so every border and column breaks. This is orthogonal to the character-set rules below (`core/presentation/README.md` → *Markdown-safe rendering*): fence first, then apply the Unicode/emoji/color degradation.
 - **No color (ANSI):** the rich-cli profile adds color; without it the same text reads fine (the mode names carry the meaning). Color never affects alignment (ANSI has zero display width).
 - **No emoji / narrow terminal:** drop the icon column of the modes table; replace `🎩`→`[Alfred]`, the mode dots → the `FAST/Standard/SAFE` text already in the row, callout box → a `>` line.
 - **No Unicode box-drawing:** swap `┌─┐│` for ASCII `+-|`. Alignment holds because every in-border glyph is width 1.
