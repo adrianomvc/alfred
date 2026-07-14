@@ -15,7 +15,7 @@ spec (layers, profiles, rules):
    degraded fallback only: use `-Profile text -AllowTextFallback` after the host
    has proven it cannot render rich output.
 4. Never hand-draw the rich block from memory or paste an older toolbar shape.
-5. **Markdown host (fence rule):** if the reply renders as markdown (Devin, web/chat UIs, IDE panels), paste the rendered block **inside a fenced code block** (```), or the borders/columns collapse. See `core/presentation/README.md` → *Markdown-safe rendering*.
+5. **Markdown host (fence — automatic):** the helper already wraps its output in a fenced code block by default, so pasting the helper's full stdout keeps borders/columns intact on markdown hosts (Devin, web/chat UIs, IDE panels). Do not strip the fence. Pass `--no-fence` only on a host proven to render replies as raw monospace text. If you must emit the text fallback by hand (helper unavailable), wrap it in a code fence yourself — see `core/presentation/README.md` → *Markdown-safe rendering*.
 
 ## Preferred rich block
 ```text
