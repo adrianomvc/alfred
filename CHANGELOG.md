@@ -35,6 +35,20 @@ All notable Alfred framework changes should be recorded here.
   registry, and toolbar presentation view models. This keeps scripts
   host-agnostic while allowing Claude Code, Codex, Devin, ccusage, and generic
   adapters to remain thin edge implementations.
+- `skills/ai-stack-finder/` plus the AI Stack (`@ai-stack/cli`) entry in the
+  `knowledge/external-catalogs.md` allowlist: the internal Itaú catalog of
+  already-built skills, MCP servers, and toolkits, queried at the fallback step
+  before building an integration from scratch.
+- `assert_bash_only_installer_policy` in `validate-framework.py`: fails if
+  `install/install.ps1` reappears, if `install/install.sh` loses its bash
+  shebang, or if a live doc still points at the PowerShell installer. Historical
+  records (`CHANGELOG.md`, `docs/plan/*`) are out of scope by design.
+
+### Removed
+- `install/install.ps1`. The installer is bash-only (`install/install.sh`);
+  the Windows path is Git Bash, which the installer already detects
+  (`MINGW*|MSYS*|CYGWIN*`). The `/alfred` skill installs to `~/.agents/skills`
+  on every platform.
 
 ### Fixed
 - `ccusage` session totals are now state-only for toolbar/forecast display:
@@ -62,6 +76,21 @@ All notable Alfred framework changes should be recorded here.
   artifact reads, repeated reads, and loaded-artifact analysis.
 
 ### Changed
+- External catalog fallback is now a **total order** (AI Stack → AWS → Context7)
+  for any topic, stopping at the first catalog that answers, and it runs only at
+  the fallback step — not as a per-turn preamble. Supersedes the previous
+  topic-routed rule (AWS-first for AWS topics, Context7 as the general
+  fallback), which left overlaps undefined: Athena/Hive is simultaneously an AWS
+  topic and an internal Itaú platform. The order is declared once in
+  `knowledge/external-catalogs.md`; `skills/skills.md`, `docs/skills-activation.md`,
+  `templates/hub/skills.md`, and `install.sh` now point at it instead of
+  transcribing it.
+- `knowledge/external-catalogs.md` § enforcement now defines **pin granularity**
+  (the pinned ref is the content — the resolved `<name>@<version>`, library id, or
+  commit — never the catalog client, which is transport) and **discovery ≠
+  adoption** (querying a catalog is fetching data; installing a skill/MCP is an
+  adoption event requiring human confirmation for both `install -s` and
+  `mcp install`).
 - Observability event hygiene is now an explicit contract (Layer 0): events must
   carry a real ISO-8601 `ts` from the system clock (never a placeholder), a real
   host `session_id`, stable `trace_id`/`ALFRED_RUN_ID`, and the Execution commit,

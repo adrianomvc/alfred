@@ -24,7 +24,7 @@ Every script must satisfy:
 - clear manual fallback;
 - no required host, shell, CI, IDE, or model runtime.
 
-Python is the canonical helper runtime. New helper logic and documented helper commands live under `scripts/`; do not add another helper runtime unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
+Python is the canonical helper runtime. New helper logic and documented helper commands live under `scripts/`; do not add another helper runtime unless explicitly justified. For the installer policy, see `AGENTS.md` § Conventions.
 
 ## Terminal Tooling
 RTK is a local terminal hook, not an Alfred runtime. When installed in a DEVIN

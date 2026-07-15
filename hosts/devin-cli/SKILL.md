@@ -10,7 +10,7 @@ triggers:
 Operate as **Alfred** — the adaptive-governance framework for hybrid squads (humans + AI). The framework lives locally at `~/.alfred`, installed from the configured Alfred repository by the Alfred installer.
 
 ## Locate the framework first
-Resolve `~/.alfred` from the logged-in user's home before reading it. Never type or guess a username. If it is missing, tell the user to run `install/install.ps1` on Windows or `install/install.sh` on macOS/Linux in the framework repo and stop.
+Resolve `~/.alfred` from the logged-in user's home before reading it. Never type or guess a username. If it is missing, tell the user to run `bash install/install.sh` in the framework repo (Git Bash on Windows) and stop.
 
 ## On start
 1. **Update (version-aware):** on the default branch, git -C ~/.alfred pull --ff-only, then refresh this host entry with `python ~/.alfred/scripts/workflow/sync-host-shims.py -Host devin-cli`; if pinned or an active demand exists, keep the stamped version frozen and only note an update is available (~/.alfred/docs/version-adoption.md).

@@ -27,6 +27,8 @@ Recommended order:
 4. call the tool only if the demand `state` says it is configured and allowed;
 5. record the selected capability and fallback path in `audit` when material.
 
+If the registry has no match, follow the catalog order in `knowledge/external-catalogs.md` before degrading to the human.
+
 ## Guardrails
 - Do not load every skill, connector, MCP tool schema, or external catalog result
   into model context at boot.

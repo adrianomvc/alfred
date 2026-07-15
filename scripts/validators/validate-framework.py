@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Validate the Alfred framework structure and run the sub-validators.
 
-Python is the canonical helper runtime. The PowerShell validator remains a
-compatibility entry point for Windows-first host flows.
+Python is the canonical helper runtime; bash is the only installer.
 """
 
 import argparse
@@ -90,7 +89,6 @@ REQUIRED_PATHS = [
     "rules/demand-types/playbooks/README.md",
     "rules/demand-types/playbooks/migration.md",
     "install/README.md",
-    "install/install.ps1",
     "install/install.sh",
     "hosts/README.md",
     "hosts/_template/shim.md",
@@ -464,14 +462,6 @@ def assert_usage_cost_policy(root):
 
 def assert_optional_npm_tools_policy(root):
     checks = {
-        "install/install.ps1": [
-            "NpmRegistry",
-            "CcusagePackage",
-            "CodebaseMemoryPackage",
-            "SkipNpmTools",
-            "npm tool installed/updated",
-            "Alfred works without it",
-        ],
         "install/install.sh": [
             "ALFRED_NPM_REGISTRY",
             "ALFRED_CCUSAGE_PACKAGE",
@@ -502,6 +492,32 @@ def assert_optional_npm_tools_policy(root):
             if phrase not in text:
                 raise SystemExit(f"Optional npm tools policy missing in {rel}: {phrase}")
     print("OK optional npm tools policy")
+
+
+def assert_bash_only_installer_policy(root):
+    # Scope is fixed on purpose: CHANGELOG.md and docs/plan/* are historical
+    # records and must keep naming install.ps1 (see validate-links.py).
+    live_docs = [
+        "AGENTS.md",
+        "install/README.md",
+        "docs/automation-fallback.md",
+        "scripts/README.md",
+        "core/hooks/rtk.md",
+        "hosts/_template/hosts.json",
+        "connectors/codebase-memory.md",
+    ]
+    if (root / "install/install.ps1").exists():
+        raise SystemExit(
+            "bash is the only installer; owner decision 2026-07-15: "
+            "install/install.ps1 must not exist"
+        )
+    installer = (root / "install/install.sh").read_text(encoding="utf-8")
+    if "#!/usr/bin/env bash" not in installer:
+        raise SystemExit("install/install.sh must declare #!/usr/bin/env bash")
+    for rel in live_docs:
+        if "install.ps1" in (root / rel).read_text(encoding="utf-8"):
+            raise SystemExit(f"Stale PowerShell installer reference in {rel}: install.ps1")
+    print("OK bash-only installer policy")
 
 
 def assert_ccusage_import_policy(root):
@@ -697,6 +713,7 @@ def main():
     assert_toolbar_rendering_policy(root)
     assert_usage_cost_policy(root)
     assert_optional_npm_tools_policy(root)
+    assert_bash_only_installer_policy(root)
     assert_ccusage_import_policy(root)
     assert_usage_rate_card_policy(root)
 
