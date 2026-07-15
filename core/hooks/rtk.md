@@ -11,12 +11,8 @@ hosts may use RTK manually, but Alfred must not require it there.
 ## Install inputs
 - RTK binary/package source: provided by the organization, currently expected
   from Artifactory.
-- Installer variable/flag:
-  - PowerShell: `install.ps1 -RtkUrl <artifact-url>`
-  - bash: `ALFRED_RTK_URL=<artifact-url> bash install/install.sh`
-- Skip flag:
-  - PowerShell: `-SkipRtk`
-  - bash: `ALFRED_SKIP_RTK=1`
+- Installer variable: `ALFRED_RTK_URL=<artifact-url> bash install/install.sh`
+- Skip flag: `ALFRED_SKIP_RTK=1`
 
 No URL means no download. The installer records that RTK setup was skipped and
 Alfred falls back to `rules/common/terminal-token-policy.md`.

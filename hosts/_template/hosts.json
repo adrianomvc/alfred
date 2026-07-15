@@ -21,7 +21,7 @@
       "frontmatter": "---\nname: alfred\ndescription: Load the Alfred framework and operate as Alfred, the butler, for this repo.\ntriggers:\n  - user\n---\n\n",
       "title_suffix": "",
       "intro": "Operate as **Alfred** — the adaptive-governance framework for hybrid squads (humans + AI). The framework lives locally at `~/.alfred`, installed from the configured Alfred repository by the Alfred installer.",
-      "framework_access": "## Locate the framework first\nResolve `~/.alfred` from the logged-in user's home before reading it. Never type or guess a username. If it is missing, tell the user to run `install/install.ps1` on Windows or `install/install.sh` on macOS/Linux in the framework repo and stop.",
+      "framework_access": "## Locate the framework first\nResolve `~/.alfred` from the logged-in user's home before reading it. Never type or guess a username. If it is missing, tell the user to run `bash install/install.sh` in the framework repo (Git Bash on Windows) and stop.",
       "boot_path": "~/.alfred/core/boot.md",
       "principles_path": "~/.alfred/core/principles.md",
       "model_policy": "Load `~/.alfred/core/model-policy.md` only when selecting or switching the model. Map its tiers to the models Devin exposes; if switching is unavailable, record which model ran.",

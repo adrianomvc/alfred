@@ -7,7 +7,7 @@
 #
 # Usage:
 #   bash install/install.sh
-#   curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/main/install/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/itau-corp/itau-sq9-modules-alfred-v2/refs/heads/main/install/install.sh | bash
 set -euo pipefail
 
 # ============================================================================
@@ -23,14 +23,30 @@ set -euo pipefail
 #    usage is Windows/Git Bash and the future Artifactory package is also zip.
 #    Replace it with the internal Artifactory zip when available.
 #
+# 3) npm registry / Artifactory:
+#    `ccusage` is confirmed available (verified with `npm view` and a real
+#    `npm install`) in the corporate Artifactory npm-remote repo. Proxy and
+#    SSL settings (`proxy`, `https-proxy`, `strict-ssl`) come from the
+#    corporate npm config already provisioned on the machine (~/.npmrc); the
+#    installer does not hardcode them.
+#    `codebase-memory-mcp` is intentionally NOT installed by default: the npm
+#    package itself is a thin wrapper whose postinstall downloads the real
+#    binary directly from GitHub Releases, and that download is blocked by
+#    the corporate proxy/SWG (`403 MediaTypeBlockedDlownload` on the signed
+#    release-asset URL) — verified 2026-07-13. Paused until a human confirms
+#    an approved download path (e.g. the binary mirrored in Artifactory,
+#    like RTK). See `connectors/codebase-memory.md`. Set
+#    ALFRED_CODEBASE_MEMORY_PACKAGE explicitly to opt in once that path exists.
+#
 # Temporary alternative:
-#    Keep this file unchanged and pass ALFRED_FRAMEWORK_URL / ALFRED_RTK_URL.
+#    Keep this file unchanged and pass ALFRED_FRAMEWORK_URL / ALFRED_RTK_URL /
+#    ALFRED_NPM_REGISTRY.
 # ============================================================================
-DEFAULT_FRAMEWORK_URL="https://github.com/adrianomvc/alfred.git"
-DEFAULT_RTK_URL="https://github.com/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
-DEFAULT_NPM_REGISTRY=""
+DEFAULT_FRAMEWORK_URL="https://github.com/itau-corp/itau-sq9-modules-alfred-v2.git"
+DEFAULT_RTK_URL="https://artifactory.prod.aws.cloud.ihf/artifactory/generic-github-remote/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
+DEFAULT_NPM_REGISTRY="https://artifactory.prod.aws.cloud.ihf/artifactory/api/npm/npm-remote/"
 DEFAULT_CCUSAGE_PACKAGE="ccusage"
-DEFAULT_CODEBASE_MEMORY_PACKAGE="codebase-memory"
+DEFAULT_CODEBASE_MEMORY_PACKAGE=""
 
 FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-$DEFAULT_FRAMEWORK_URL}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
@@ -43,6 +59,7 @@ NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
 CCUSAGE_PACKAGE="${ALFRED_CCUSAGE_PACKAGE:-$DEFAULT_CCUSAGE_PACKAGE}"
 CODEBASE_MEMORY_PACKAGE="${ALFRED_CODEBASE_MEMORY_PACKAGE:-$DEFAULT_CODEBASE_MEMORY_PACKAGE}"
 SKIP_NPM_TOOLS="${ALFRED_SKIP_NPM_TOOLS:-0}"
+SKIP_AI_STACK_CHECK="${ALFRED_SKIP_AI_STACK_CHECK:-0}"
 
 info() { echo "[alfred] $*"; }
 
@@ -88,7 +105,23 @@ fi
 # VERSION (a tag) takes precedence over BRANCH; with neither, default branch (latest).
 REF="${VERSION:-$BRANCH}"
 
+normalize_git_url() {
+  printf '%s' "$1" | sed -e 's#\.git/*$##' -e 's#/*$##' | tr '[:upper:]' '[:lower:]'
+}
+
 # 1. Clone or update the framework into ~/.alfred
+# Guard against a stale clone left over from a different repo/mirror (old
+# fork, a personal remote, a migrated internal URL, ...): fetching/pulling
+# from the wrong origin would silently keep the wrong framework installed.
+# When the remote does not match FRAMEWORK_URL, wipe and re-clone fresh.
+if [ -d "$INSTALL_DIR/.git" ]; then
+  CURRENT_REMOTE="$(git -C "$INSTALL_DIR" remote get-url origin 2>/dev/null || true)"
+  if [ -n "$CURRENT_REMOTE" ] && [ "$(normalize_git_url "$CURRENT_REMOTE")" != "$(normalize_git_url "$FRAMEWORK_URL")" ]; then
+    info "Existing install at $INSTALL_DIR points to a different remote ('$CURRENT_REMOTE' != '$FRAMEWORK_URL'). Removing and re-cloning."
+    rm -rf "$INSTALL_DIR"
+  fi
+fi
+
 if [ -d "$INSTALL_DIR/.git" ]; then
   info "Updating existing framework at $INSTALL_DIR"
   git -C "$INSTALL_DIR" fetch --quiet --tags origin
@@ -193,9 +226,10 @@ if [ "$SKIP_RTK" != "1" ]; then
   fi
 fi
 
-# 5. Optional npm tools (corporate Artifactory path): ccusage + codebase-memory.
-# Best-effort: these tools improve usage attribution and brownfield discovery,
-# but Alfred still works without them.
+# 5. Optional npm tools (corporate Artifactory path): ccusage today; other
+# packages may be added via ALFRED_CODEBASE_MEMORY_PACKAGE (empty by default,
+# see COMPANY SETTINGS above). Best-effort: these tools improve usage
+# attribution, but Alfred still works without them.
 install_npm_tool() {
   local pkg="$1"
   [ -n "$pkg" ] || return 0
@@ -219,30 +253,55 @@ if [ "$SKIP_NPM_TOOLS" != "1" ]; then
     install_npm_tool "$CCUSAGE_PACKAGE"
     install_npm_tool "$CODEBASE_MEMORY_PACKAGE"
   else
-    info "npm not found; skipping optional npm tools (ccusage/codebase-memory)."
+    info "npm not found; skipping optional npm tools (ccusage)."
   fi
 fi
 
-# 6. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
+# 6. AI Stack CLI availability (best-effort) — powers skills/ai-stack-finder.
+# There is no "AI Stack MCP server" to register: `@ai-stack/cli` is a plain CLI
+# (like ccusage) invoked on demand via `npx`, never installed globally here.
+# This step only checks the npm `@ai-stack` scope and warms the npx cache so
+# the first real search is not slowed down by the download.
+if [ "$SKIP_AI_STACK_CHECK" != "1" ]; then
+  if command -v npm >/dev/null 2>&1; then
+    AI_STACK_SCOPE_REGISTRY="$(npm config get @ai-stack:registry 2>/dev/null || true)"
+    if [ -n "$AI_STACK_SCOPE_REGISTRY" ] && [ "$AI_STACK_SCOPE_REGISTRY" != "undefined" ]; then
+      info "Warming up AI Stack CLI (npx @ai-stack/cli)..."
+      if npx -y @ai-stack/cli@latest --version >/dev/null 2>&1; then
+        info "AI Stack CLI available: skills/ai-stack-finder can search the internal catalog (npx @ai-stack/cli)."
+      else
+        info "AI Stack CLI (npx @ai-stack/cli) did not run. skills/ai-stack-finder will degrade to the next catalog in the order (see knowledge/external-catalogs.md)."
+      fi
+    else
+      info "npm scope '@ai-stack' is not configured (.npmrc); skills/ai-stack-finder will degrade to the next catalog. See knowledge/external-catalogs.md."
+    fi
+  else
+    info "npm not found; skipping AI Stack CLI check. skills/ai-stack-finder will degrade to the next catalog."
+  fi
+fi
+
+# 7. Notification adapter (MCP e-mail) — owner decision: channel is MCP + Python.
 # Registers the destination (~/.alfred-email.json, dry-run by default) and the MCP
-# server in Claude Code when available. Best-effort: failures never break the install.
-# Skip entirely with ALFRED_SKIP_EMAIL=1; non-interactive runs skip the prompt.
+# server in Claude Code when available. Fully non-interactive (no prompt, ever):
+# the destination defaults to the org telemetry address in knowledge/notification.md
+# so every runner's logs reach it regardless of the machine the install runs on.
+# Skip entirely with ALFRED_SKIP_EMAIL=1. Best-effort: failures never break the install.
 if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
   EMAIL_CONFIG="$HOME/.alfred-email.json"
   EMAIL="${ALFRED_EMAIL:-}"
   if [ -f "$EMAIL_CONFIG" ]; then
     info "E-mail config already registered at $EMAIL_CONFIG (kept as is)."
   else
-    if [ -z "$EMAIL" ] && [ -t 0 ]; then
-      printf "[alfred] E-mail para notificacoes/relatorios (Enter para pular): "
-      read -r EMAIL || EMAIL=""
-    fi
     # Org telemetry destination: from ALFRED_TELEMETRY_TO or knowledge/notification.md
     # (aggregates every runner's observability logs — provisional until the telemetry API, D45).
     TELEMETRY_TO="${ALFRED_TELEMETRY_TO:-}"
     if [ -z "$TELEMETRY_TO" ] && [ -f "$INSTALL_DIR/knowledge/notification.md" ]; then
       TELEMETRY_TO="$(sed -n 's/^- telemetry_to: *`\{0,1\}\([^` ]*\)`\{0,1\}.*/\1/p' "$INSTALL_DIR/knowledge/notification.md" | head -n1)"
     fi
+    # No prompt: default_to falls back to the org telemetry address when no
+    # explicit ALFRED_EMAIL override is given, so logs always land somewhere
+    # without asking the operator.
+    [ -z "$EMAIL" ] && [ -n "$TELEMETRY_TO" ] && EMAIL="$TELEMETRY_TO"
     if [ -n "$EMAIL" ] || [ -n "$TELEMETRY_TO" ]; then
       ALLOW=""
       [ -n "$EMAIL" ] && ALLOW="\"$EMAIL\""
@@ -252,14 +311,14 @@ if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
       fi
       cat > "$EMAIL_CONFIG" <<JSON
 {
-  "mode": "dry-run",
+  "mode": "auto",
   "default_to": "$EMAIL",
   "telemetry_to": "$TELEMETRY_TO",
   "allowlist": [$ALLOW],
   "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}
 }
 JSON
-      info "E-mail registered at $EMAIL_CONFIG (mode: dry-run — fill smtp{} and set mode: active to really send)."
+      info "E-mail registered at $EMAIL_CONFIG (mode: auto — sends via the local Outlook desktop client when available (Windows), otherwise falls back to dry-run; fill smtp{} and set mode: active to force SMTP instead)."
       [ -n "$TELEMETRY_TO" ] && info "Telemetry destination: $TELEMETRY_TO (observability batches; provisional e-mail transport, D45)."
     else
       info "E-mail setup skipped. Register later: create $EMAIL_CONFIG (see connectors/notification-email.md)."
@@ -268,6 +327,25 @@ JSON
 
   MCP_SERVER="$INSTALL_DIR/scripts/adapters/mcp-email-server.py"
   PYTHON_BIN="$(command -v python3 || command -v python || true)"
+
+  # pywin32 (optional; best-effort; Windows/Git Bash only) — only what
+  # `mode: auto`/`outlook-com` needs to drive the local Outlook desktop
+  # client. The adapter itself stays stdlib-only: it degrades to dry-run
+  # when this is missing or the OS is not Windows.
+  case "$(uname -s 2>/dev/null || true)" in
+    MINGW*|MSYS*|CYGWIN*)
+      if [ -n "$PYTHON_BIN" ]; then
+        if ! "$PYTHON_BIN" -c "import win32com.client" >/dev/null 2>&1; then
+          if "$PYTHON_BIN" -m pip install --user --quiet pywin32 >/dev/null 2>&1; then
+            info "pywin32 installed: mode 'auto'/'outlook-com' can drive the local Outlook desktop client."
+          else
+            info "pywin32 not installed (pip failed); e-mail 'auto' mode will use dry-run until it is available."
+          fi
+        fi
+      fi
+      ;;
+  esac
+
   if command -v claude >/dev/null 2>&1 && [ -n "$PYTHON_BIN" ] && [ -f "$MCP_SERVER" ]; then
     if claude mcp get alfred-email >/dev/null 2>&1; then
       info "MCP 'alfred-email' already registered in Claude Code."
@@ -280,7 +358,7 @@ JSON
     [ -z "$PYTHON_BIN" ] && info "Python 3 not found; the MCP e-mail server needs it."
     command -v claude >/dev/null 2>&1 || info "Claude Code CLI not found; for other MCP hosts register: python \"$MCP_SERVER\" (stdio)."
   fi
-  info "DEVIN projects: MCP servers (alfred-email + Context7) are per-repo — the /alfred skill offers to create .devin/config.local.json from hosts/devin-cli/config.local.template.json on first boot."
+  info "DEVIN projects: MCP servers (alfred-email + Context7) and the per-turn toolbar hook are per-repo — on first boot the /alfred skill offers to run 'python $INSTALL_DIR/scripts/workflow/setup-devin-config.py --alfred-home $INSTALL_DIR', which creates .devin/config.local.json from the template or idempotently merges the MCP server + toolbar hook into an existing one. AI Stack MCPs (Figma, ServiceNow, Atlan, ...) get added dynamically by skills/ai-stack-finder when installed."
 fi
 
 info "Done. Open a repo and type /alfred in the DEVIN CLI."

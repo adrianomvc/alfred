@@ -172,7 +172,7 @@ def render_skills_registry(root):
         "Two tiers plus a fallback, resolved in order:",
         "1. **Safety first** — safer/more restrictive always wins, across tiers. A sigla's HUB may harden a global rule, never relax it.",
         "2. **Specificity** — for the same tool/domain, the sigla's HUB skill (`<hub>/skills/<name>/SKILL.md`, or a HUB pointer in `<hub>/004-skills.md`) overrides the framework's global built-in skill. The squad's chosen skill for a tool is the one that applies to its process.",
-        "3. **Fallback** — when no active skill (HUB or global) covers the need, discover in an allowlisted external catalog (AWS-first for AWS topics, then Context7); never guess. No allowlisted source → ask the human.",
+        "3. **Fallback** — when no active skill (HUB or global) covers the need, discover in an allowlisted external catalog, following the total order in `knowledge/external-catalogs.md` (single source); never guess. No allowlisted source → ask the human.",
         "Unresolved conflict → the human decides.",
         "",
         "## Loading",

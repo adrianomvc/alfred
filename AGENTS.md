@@ -16,7 +16,7 @@ A markdown-first governance framework for hybrid squads (humans + AI). Kernel in
 ## Conventions
 - Folder entry points: navigation index = `README.md`; contract registry = `<name>.md` (e.g. `skills/skills.md`, `connectors/connectors.md`, `metrics/metrics.md`).
 - Skills are folders: each built-in skill is `skills/<name>/SKILL.md` (the ~1-screen entry) plus optional sibling files (checklists, reference tables) loaded JIT; `skills/skills.md` stays the generated registry. A HUB may carry local squad skills at `<hub>/skills/<name>/SKILL.md` or external pointers in `<hub>/004-skills.md`. Precedence: HUB (specific) over framework (global), safety always first; fallback is discovery in an allowlisted catalog. Skill folders hold content, not executable helpers (those stay in `scripts/`).
-- Helper logic and documented helper commands are Python-canonical under `scripts/`. Do not add a second helper implementation unless explicitly justified. Installers remain OS-native (`install.ps1` and `install.sh`).
+- Helper logic and documented helper commands are Python-canonical under `scripts/`. Do not add a second helper implementation unless explicitly justified. The installer is bash-only: `install/install.sh` (Git Bash on Windows).
 - Templates carry the note that generated content is written in pt-BR.
 
 ## Before finishing any change
