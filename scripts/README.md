@@ -20,7 +20,7 @@ Python helpers only. Installers remain OS-native under `install/`.
 Most real logic lives in `shared/`; `workflow/` and `metrics/` files are thin CLI
 drivers that delegate to it (enforced by `validators/validate-scripts-architecture.py`).
 `scripts/_common.py` is a compatibility shim re-exporting `shared.common`.
-Installers remain OS-native at the repo root (`install.ps1`, `install.sh`).
+For the installer policy, see `AGENTS.md` § Conventions.
 
 ## Allowed helpers
 - validate required sections in markdown artifacts

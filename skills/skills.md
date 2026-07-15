@@ -23,7 +23,7 @@ A new skill is born from an **observed gap** (a real failure or missed standard 
 Two tiers plus a fallback, resolved in order:
 1. **Safety first** — safer/more restrictive always wins, across tiers. A sigla's HUB may harden a global rule, never relax it.
 2. **Specificity** — for the same tool/domain, the sigla's HUB skill (`<hub>/skills/<name>/SKILL.md`, or a HUB pointer in `<hub>/004-skills.md`) overrides the framework's global built-in skill. The squad's chosen skill for a tool is the one that applies to its process.
-3. **Fallback** — when no active skill (HUB or global) covers the need, discover in an allowlisted external catalog (AWS-first for AWS topics, then Context7); never guess. No allowlisted source → ask the human.
+3. **Fallback** — when no active skill (HUB or global) covers the need, discover in an allowlisted external catalog, following the total order in `knowledge/external-catalogs.md` (single source); never guess. No allowlisted source → ask the human.
 Unresolved conflict → the human decides.
 
 ## Loading
@@ -50,6 +50,7 @@ Default is **pinned**, for reproducibility (mirrors the framework version freeze
 
 | Skill | Link | Trigger | Sections to load |
 |---|---|---|---|
+| `ai-stack-finder` | [skills/ai-stack-finder/SKILL.md](skills/ai-stack-finder/SKILL.md) | Load at the first fallback step — no active HUB/framework skill covers the need and an external catalog is about to be queried — for any topic; AI Stack is first in the order defined in `knowledge/external-catalogs.md` and degrades to the next catalog. Also load when the human asks to search the AI Stack marketplace/catalog. | process, degradation, review checklist |
 | `coding-standard` | [skills/coding-standard/SKILL.md](skills/coding-standard/SKILL.md) | Load during Execution and Validate when code, configuration, tests, or automation artifacts are changed. | rules, output |
 | `lang-python` | [skills/lang-python/SKILL.md](skills/lang-python/SKILL.md) | Load when the active unit changes Python files, Python tests, Glue Python jobs, FastAPI apps, scripts, or Python packaging. | rules, testing, review checklist |
 | `lang-sql` | [skills/lang-sql/SKILL.md](skills/lang-sql/SKILL.md) | Load when the active unit changes SQL files, migration queries, DDL, data validation queries, warehouse views, stored procedures, reconciliation scripts, or embedded SQL in code. | rules, validation, review checklist |

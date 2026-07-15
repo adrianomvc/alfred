@@ -1,6 +1,6 @@
 # Install — Alfred for the DEVIN CLI
 
-These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
+This installer sets up Alfred for use inside the [DEVIN CLI](https://devin.ai):
 
 1. Clone (or update) the Alfred framework into `~/.alfred`.
 2. Install the `/alfred` skill into the DEVIN CLI user skills directory, so you
@@ -20,9 +20,10 @@ These installers set up Alfred for use inside the [DEVIN CLI](https://devin.ai):
    Windows zip placeholder that should be replaced by the corporate Artifactory
    zip when available.
 5. Optionally install approved npm tools from the corporate npm registry /
-   Artifactory: `ccusage` for local Claude/Codex usage attribution and
-   `codebase-memory` for brownfield structural discovery. This is best-effort:
-   missing npm, registry access, or packages never break the Alfred install.
+   Artifactory: `ccusage` for local Claude/Codex usage attribution. This is
+   best-effort: missing npm, registry access, or packages never break the Alfred
+   install. `codebase-memory` is **not** installed by default (see
+   `connectors/codebase-memory.md`).
 
 The framework stays a **single referenced source** (D15): the skill points at
 `~/.alfred`; nothing is copied into your project repos.
@@ -32,99 +33,76 @@ The framework stays a **single referenced source** (D15): the skill points at
 > (see `hosts/README.md`) — clone the framework, then register that host's entry
 > file. The DEVIN skill source itself now lives at `hosts/devin-cli/SKILL.md`.
 
-## Windows (PowerShell)
-```powershell
-powershell -ExecutionPolicy Bypass -File install/install.ps1
-```
-One-liner (after the installer is on the default branch):
-```powershell
-irm https://raw.githubusercontent.com/adrianomvc/alfred/main/install/install.ps1 | iex
-```
-Installs the skill to `%APPDATA%\devin\skills\alfred\SKILL.md`.
+## Install
+The installer is **bash-only** (`AGENTS.md` § Conventions). On Windows, run it
+from **Git Bash** — the primary corporate path; the installer detects
+`MINGW`/`MSYS`/`CYGWIN` and adapts.
 
-## macOS / Linux (bash)
 ```bash
 bash install/install.sh
 ```
+
 One-liner:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/main/install/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/itau-corp/itau-sq9-modules-alfred-v2/main/install/install.sh | bash
 ```
-Installs the skill to `~/.agents/skills/alfred/SKILL.md` (a user skill path the
-DEVIN CLI reads on every platform).
+
+Installs the skill to `~/.agents/skills/alfred/SKILL.md` — a user skill path the
+DEVIN CLI reads on every platform, Windows included.
 
 ## Corporate Machine Setup
 When preparing this installer for a company computer, there are three external
-locations
-you normally need to replace:
+locations you normally need to replace:
 
 1. **Alfred framework repo**
-   - PowerShell: edit the `-FrameworkUrl` default in the `COMPANY SETTINGS`
-     block at the top of `install/install.ps1`.
-   - bash: edit `DEFAULT_FRAMEWORK_URL` in the `COMPANY SETTINGS` block at the
-     top of `install/install.sh`.
+   - Edit `DEFAULT_FRAMEWORK_URL` in the `COMPANY SETTINGS` block at the top of
+     `install/install.sh`.
    - Temporary alternative:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File install/install.ps1 -FrameworkUrl "<internal-alfred-git-url>"
-     ```
      ```bash
      ALFRED_FRAMEWORK_URL="<internal-alfred-git-url>" bash install/install.sh
      ```
 
 2. **RTK download URL**
-   - PowerShell: edit the `-RtkUrl` default in the same `COMPANY SETTINGS`
-     block at the top of `install/install.ps1`.
-   - bash: edit `DEFAULT_RTK_URL` in the `COMPANY SETTINGS` block at the top of
-     `install/install.sh`.
+   - Edit `DEFAULT_RTK_URL` in the same `COMPANY SETTINGS` block.
    - The default RTK URL is intentionally the public Windows zip placeholder
      because the primary company path is Windows/Git Bash and the Artifactory
      package will also be a zip. Replace it with the internal Artifactory zip
      when available.
    - Temporary alternative:
-     ```powershell
-     powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-rtk-url>"
-     ```
      ```bash
      ALFRED_RTK_URL="<artifactory-rtk-url>" bash install/install.sh
      ```
 
 3. **npm registry / Artifactory**
-   - PowerShell: pass `-NpmRegistry "<artifactory-npm-registry>"`.
-   - bash: set `ALFRED_NPM_REGISTRY="<artifactory-npm-registry>"`.
-   - If the corporate packages have scoped/internal names, override them:
-     `ALFRED_CCUSAGE_PACKAGE` and `ALFRED_CODEBASE_MEMORY_PACKAGE` (bash) or
-     `-CcusagePackage` and `-CodebaseMemoryPackage` (PowerShell).
+   - Set `ALFRED_NPM_REGISTRY="<artifactory-npm-registry>"`.
+   - If the corporate packages have scoped/internal names, override them with
+     `ALFRED_CCUSAGE_PACKAGE` and `ALFRED_CODEBASE_MEMORY_PACKAGE`.
 
 If the one-line install command is used inside the company network, replace the
-`raw.githubusercontent.com/.../install/install.ps1` or `install/install.sh` URL
-with the internal raw-file URL from the company mirror.
+`raw.githubusercontent.com/.../install/install.sh` URL with the internal
+raw-file URL from the company mirror.
 
 ## Options
-| Setting | PowerShell flag | bash env var | Default |
-|---|---|---|---|
-| Framework repo | `-FrameworkUrl` | `ALFRED_FRAMEWORK_URL` | `https://github.com/adrianomvc/alfred.git` |
-| Install dir | `-InstallDir` | `ALFRED_INSTALL_DIR` | `~/.alfred` |
-| Version (tag) | `-Version` | `ALFRED_VERSION` | latest on default branch |
-| Branch | `-Branch` | `ALFRED_BRANCH` | repo default |
-| Skills dir | `-SkillsDir` | `ALFRED_SKILLS_DIR` | `%APPDATA%\devin\skills` / `~/.agents/skills` |
-| Notification e-mail | `-Email` | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
-| Skip e-mail/MCP setup | `-SkipEmail` | `ALFRED_SKIP_EMAIL=1` | setup runs |
-| RTK package URL | `-RtkUrl` | `ALFRED_RTK_URL` | public Windows zip placeholder |
-| Skip RTK setup | `-SkipRtk` | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
-| npm registry / Artifactory | `-NpmRegistry` | `ALFRED_NPM_REGISTRY` | current npm config |
-| ccusage npm package | `-CcusagePackage` | `ALFRED_CCUSAGE_PACKAGE` | `ccusage` |
-| codebase-memory npm package | `-CodebaseMemoryPackage` | `ALFRED_CODEBASE_MEMORY_PACKAGE` | `codebase-memory` |
-| Skip npm tools | `-SkipNpmTools` | `ALFRED_SKIP_NPM_TOOLS=1` | setup runs if `npm` exists |
+| Setting | bash env var | Default |
+|---|---|---|
+| Framework repo | `ALFRED_FRAMEWORK_URL` | `https://github.com/itau-corp/itau-sq9-modules-alfred-v2.git` |
+| Install dir | `ALFRED_INSTALL_DIR` | `~/.alfred` |
+| Version (tag) | `ALFRED_VERSION` | latest on default branch |
+| Branch | `ALFRED_BRANCH` | repo default |
+| Skills dir | `ALFRED_SKILLS_DIR` | `~/.agents/skills` |
+| Notification e-mail | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
+| Skip e-mail/MCP setup | `ALFRED_SKIP_EMAIL=1` | setup runs |
+| RTK package URL | `ALFRED_RTK_URL` | public Windows zip placeholder |
+| Skip RTK setup | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
+| npm registry / Artifactory | `ALFRED_NPM_REGISTRY` | corporate Artifactory npm-remote |
+| ccusage npm package | `ALFRED_CCUSAGE_PACKAGE` | `ccusage` |
+| codebase-memory npm package | `ALFRED_CODEBASE_MEMORY_PACKAGE` | empty (not installed) |
+| Skip npm tools | `ALFRED_SKIP_NPM_TOOLS=1` | setup runs if `npm` exists |
+| Skip AI Stack check | `ALFRED_SKIP_AI_STACK_CHECK=1` | check runs if `npm` exists |
 
 ## RTK terminal hook (DEVIN CLI only)
 RTK setup is optional and currently scoped to the DEVIN CLI install path.
 
-PowerShell:
-```powershell
-powershell -ExecutionPolicy Bypass -File install/install.ps1 -RtkUrl "<artifactory-url>"
-```
-
-bash:
 ```bash
 ALFRED_RTK_URL="<artifactory-url>" bash install/install.sh
 ```
@@ -141,39 +119,27 @@ load `core/hooks/rtk.md` only as guidance.
 ## npm tools (optional)
 The installer can install the approved npm packages used by optional connectors:
 
-PowerShell:
-```powershell
-powershell -ExecutionPolicy Bypass -File install/install.ps1 `
-  -NpmRegistry "<artifactory-npm-registry>" `
-  -CcusagePackage "ccusage" `
-  -CodebaseMemoryPackage "codebase-memory"
-```
-
-bash:
 ```bash
 ALFRED_NPM_REGISTRY="<artifactory-npm-registry>" \
 ALFRED_CCUSAGE_PACKAGE="ccusage" \
-ALFRED_CODEBASE_MEMORY_PACKAGE="codebase-memory" \
 bash install/install.sh
 ```
 
-If npm is already configured with the corporate registry, omit the registry
-flag/env var. If a package cannot be installed, Alfred records the degraded
-state and keeps working through `rg`, bounded file reads, and manual cost input.
+If npm is already configured with the corporate registry, omit the registry env
+var. If a package cannot be installed, Alfred records the degraded state and
+keeps working through `rg`, bounded file reads, and manual cost input.
 
 ## Versions
 Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).
 - **Latest stable** (default): the installer tracks the default branch (`main`).
 - **Pinned** (reproducible): pass a tag to freeze the framework version.
-```powershell
-powershell -ExecutionPolicy Bypass -File install/install.ps1 -Version v0.2.0
-```
 ```bash
 ALFRED_VERSION=v0.2.0 bash install/install.sh
 ```
-Re-running with a different `-Version` switches `~/.alfred` to that tag; re-running
-without it returns to the latest on the default branch. A pinned version maps to
-the framework version a demand stamps in its `state` (reproducibility — D26).
+Re-running with a different `ALFRED_VERSION` switches `~/.alfred` to that tag;
+re-running without it returns to the latest on the default branch. A pinned
+version maps to the framework version a demand stamps in its `state`
+(reproducibility — D26).
 
 ## Verify
 ```bash
@@ -190,17 +156,17 @@ stamped (frozen) version and you are only told an update is available
 (`docs/version-adoption.md`).
 
 Manual controls:
-| Action | PowerShell | bash |
-|---|---|---|
-| Update to latest now | re-run `install.ps1` | re-run `install.sh` |
-| List available versions | `install.ps1 -List` | `bash install.sh list` |
-| Roll back one version | `install.ps1 -Rollback` | `bash install.sh rollback` |
-| Pin a specific version | `install.ps1 -Version v0.1.0` | `ALFRED_VERSION=v0.1.0 bash install.sh` |
+| Action | Command |
+|---|---|
+| Update to latest now | re-run `bash install/install.sh` |
+| List available versions | `bash install/install.sh list` |
+| Roll back one version | `bash install/install.sh rollback` |
+| Pin a specific version | `ALFRED_VERSION=v0.1.0 bash install/install.sh` |
 
-`-Rollback` moves `~/.alfred` to the previous release tag (use it if a new
-version breaks something). Re-running the installer without `-Rollback` returns
-to the latest. A demand records the version it ran on (D26), so you know which
-tag to roll back to.
+`rollback` moves `~/.alfred` to the previous release tag (use it if a new
+version breaks something). Re-running the installer without it returns to the
+latest. A demand records the version it ran on (D26), so you know which tag to
+roll back to.
 
 ## Refresh copied host entries
 Host entry files are copied into native locations during setup. After pulling a
@@ -229,7 +195,7 @@ both. `ccusage` can still update `001-state.md` and the toolbar with the total
 session cost, but that total is not appended to interaction JSONL.
 
 ## Uninstall
-- Delete the skill folder (`%APPDATA%\devin\skills\alfred` or `~/.agents/skills/alfred`); optionally remove `~/.alfred`.
+- Delete the skill folder (`~/.agents/skills/alfred`); optionally remove `~/.alfred`.
 
 ## How it works
 The DEVIN CLI loads skills from `SKILL.md` files under its user/project skill

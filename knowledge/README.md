@@ -16,4 +16,4 @@ Company policy sets the floor. Sigla policy may be stricter, not weaker, unless 
 - `knowledge.md` — registry of policy scope and trigger; load it before selecting an org policy.
 - `policy-template.md` — the mold for writing a new policy (identity → rule → enforcement → audit evidence).
 - `notification.md` — company notification + telemetry destinations and triggers.
-- `external-catalogs.md` — which external catalogs (e.g. Context7) Alfred may query, and the usage gates.
+- `external-catalogs.md` — **which external catalogs Alfred may query, in which order, and the usage gates.**
