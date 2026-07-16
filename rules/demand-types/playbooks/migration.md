@@ -78,6 +78,20 @@ Irreversible once the source is decommissioned → that step is the gate. Until
 then, parallel-run makes rollback = route back to source. Watch data loss on
 incremental/CDC, idempotency, and sensitive-data exposure.
 
+## Required from user
+Confirm before Execution touches real infrastructure (never assume these):
+account/subscription, region, endpoints, buckets/paths, secrets, and the source's
+authoritative window. Record them in `environment-parameters`; a missing value is
+a blocker, not a guess.
+
+## Forbidden actions
+- Do not decommission or stop the source before acceptance — parallel-run is the
+  rollback until the cutover is signed off.
+- Do not run infrastructure/data commands with assumed environment values; park
+  them until `environment-parameters` is confirmed.
+- Do not drop below SAFE for a "small" slice; do not create `file_v2` copies —
+  build in place.
+
 ## Done when
 Target reconciles with source, evidence is signed off, cutover is accepted, and
 the source is decommissioned (or an explicit decision keeps it as fallback).

@@ -1,0 +1,50 @@
+{
+  "method": "estimated_tokens = sum(chars of context-manifest files) / 4. Planning estimate, not a host tokenizer. See scripts/shared/context_budget.py.",
+  "note": "max_estimated_tokens are seeded from the first measurement plus headroom; tighten with real host measurement. max_growth_percent guards regressions.",
+  "scenarios": {
+    "standard-product-design": {
+      "params": {
+        "phase": "Design",
+        "lane": "Standard",
+        "demand_type": "product",
+        "agent": "spec-design",
+        "sub_activity": "functional-design"
+      },
+      "max_estimated_tokens": 8400,
+      "max_growth_percent": 10
+    },
+    "fast-operational-execution": {
+      "params": {
+        "phase": "Execution",
+        "lane": "FAST",
+        "demand_type": "operational",
+        "agent": "orchestrator",
+        "sub_activity": "workflow-planning"
+      },
+      "max_estimated_tokens": 9300,
+      "max_growth_percent": 10
+    },
+    "safe-engineering-inception": {
+      "params": {
+        "phase": "Inception",
+        "lane": "SAFE",
+        "demand_type": "engineering",
+        "agent": "discovery",
+        "sub_activity": "risk-mode-proposal"
+      },
+      "max_estimated_tokens": 8800,
+      "max_growth_percent": 10
+    },
+    "safe-engineering-migration": {
+      "params": {
+        "phase": "Execution",
+        "lane": "SAFE",
+        "demand_type": "engineering",
+        "agent": "orchestrator",
+        "playbook": "migration"
+      },
+      "max_estimated_tokens": 9500,
+      "max_growth_percent": 10
+    }
+  }
+}

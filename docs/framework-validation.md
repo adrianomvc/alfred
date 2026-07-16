@@ -83,7 +83,8 @@ python scripts/validators/validate-framework.py
 - `apply-usage-rate-card.py` appends `usage_cost_attributed` only from exact interaction usage plus an approved rate card. It must not allocate ccusage/session totals into JSONL interactions.
 - Installers keep optional npm tools degradable: Artifactory registry/package knobs for `ccusage` and `codebase-memory`, skip flags, and no hard dependency on npm.
 - `validate-context-compression-policy` checks that compression guardrails stay wired into boot, Design, Execution, and Validate.
-- `validate-token-economy-policy` checks token-budget and deferred-work guardrails.
+- `validate-token-economy-policy` checks token-budget and deferred-work guardrails, plus the host capability matrix and the anti-regression that the DEVIN CLI `PreToolUse` claim stays correct.
+- `validate-context-budget` gates each JIT scenario's estimated context (chars/4) against `metrics/context-budgets.json`, so context growth cannot regress silently.
 - `validate-observability-hygiene` checks example event logs for real, distinct ISO-8601 timestamps (no placeholders) and the Layer 0 hygiene wiring.
 - `validate-model-policy` checks lane floors, tier map, adjustments, override warning, and toolbar transparency.
 - Toolbar rendering remains grounded: boot/orchestrator prefer `render-toolbar`, capable hosts use default/rich profile, CLI `text` requires an explicit fallback flag, manual fallback loads `core/presentation/toolbar-quick.md`, and rich blocks are not hand-drawn.

@@ -46,8 +46,10 @@ agent context with unbounded terminal text.
 ## Scope
 RTK is a local terminal tool and hook. It is optional automation, not a new
 Alfred runtime requirement. The current supported automatic setup path is DEVIN
-CLI only; other hosts follow this policy manually until they receive a native
-RTK hook.
+CLI only. The DEVIN CLI does run a `PreToolUse` hook, but RTK's stock preset
+matches the `Bash` tool, not Devin's `exec` tool, so it does not auto-rewrite
+until a hook entry with an `exec` matcher is installed; until then, DEVIN CLI
+follows this policy by calling `rtk` explicitly. Other hosts follow it manually.
 
 ## Observability
 When the host/runtime exposes it, record raw output bytes, emitted output bytes,

@@ -31,13 +31,17 @@ Alfred falls back to `rules/common/terminal-token-policy.md`.
 
 ## Devin and the auto-rewrite hook (important)
 RTK's transparent rewrite (`git status` → `rtk git status`) is delivered by a
-Claude-Code-style **`PreToolUse` hook**. The RTK docs ship agent presets for
-Claude Code/Copilot (default), Gemini, Cursor, Windsurf, Cline, and OpenCode —
-**there is no Devin preset**, so do not assume Devin executes that hook. On DEVIN
-CLI, guarantee the savings by **calling `rtk` explicitly** for shell and
-large-output commands, whether or not the rewrite fires. Running `rtk init -g`
-still matters: it creates the `~/.config/rtk/config.toml` and `RTK.md` the tool
-reads, and `config.toml` (`[hooks] exclude_commands`, `[tee]`) tunes behavior.
+Claude-Code-style **`PreToolUse` hook**. The DEVIN CLI **does** run `PreToolUse`
+and imports `.claude/` config by default, so the hook is *loaded* — but RTK's
+Claude-Code preset matches the `Bash` tool, while Devin's shell tool is `exec`
+(`read`, `edit`, `grep`, `glob`, `exec`). The matcher never matches, so the
+rewrite **loads yet never fires**. The RTK docs ship presets for Claude
+Code/Copilot (default), Gemini, Cursor, Windsurf, Cline, and OpenCode —
+**none targets Devin's `exec` tool**. Until a Devin hook entry with an `exec`
+matcher is installed, guarantee the savings by **calling `rtk` explicitly** for
+shell and large-output commands. Running `rtk init -g` still matters: it creates
+the `~/.config/rtk/config.toml` and `RTK.md` the tool reads, and `config.toml`
+(`[hooks] exclude_commands`, `[tee]`) tunes behavior.
 
 ## Use
 When RTK is available, call it explicitly for bounded output:

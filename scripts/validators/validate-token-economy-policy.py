@@ -12,6 +12,14 @@ def require_text(path, needle):
     print(f"OK text {path} / {needle}")
 
 
+def forbid_text(path, needle):
+    """Anti-regression: a retired false claim must not reappear."""
+    text = path.read_text(encoding="utf-8")
+    if needle in text:
+        raise SystemExit(f"Forbidden text present in {path}: {needle}")
+    print(f"OK absent {path} / {needle}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", "-Root", dest="root", default=".")
@@ -25,6 +33,11 @@ def main():
     require_text(root / "rules/common/deferred-work-policy.md", "Deferred outputs are drafts or inputs")
     require_text(root / "rules/common/deferred-work-policy.md", "batch, flex, background")
 
+    require_text(root / "rules/common/context-compaction-policy.md", "Compaction safety = state")
+    require_text(root / "rules/common/context-compaction-policy.md", "Forbidden points")
+    require_text(root / "core/boot.md", "context-compaction-policy.md")
+    require_text(root / "rules/common/session-continuity.md", "context-compaction-policy.md")
+
     require_text(root / "core/boot.md", "token-budget-policy.md")
     require_text(root / "core/model-policy.md", "Deferred work")
     require_text(root / "rules/README.md", "token-budget-policy")
@@ -34,6 +47,18 @@ def main():
     require_text(root / "rules/lifecycle/operations/operations.md", "deferred-work-policy.md")
     require_text(root / "rules/lifecycle/operations/sub-activities/metrics-collection.md", "deferred-work-policy.md")
     require_text(root / "docs/framework-validation.md", "validate-token-economy-policy")
+
+    # Host capability matrix (single source of deterministic host claims).
+    require_text(root / "hosts/capabilities.md", "Host capability matrix")
+    require_text(root / "hosts/capabilities.md", "preset targets `Bash`")
+
+    # Anti-regression: the DEVIN CLI *does* have a PreToolUse hook and imports
+    # `.claude/`; RTK's stock preset just matches `Bash` not `exec`. Keep the
+    # retired false claim from creeping back into source or generated shims.
+    for rel in ("hosts/_template/hosts.json", "hosts/devin-cli/SKILL.md", "core/hooks/rtk.md"):
+        forbid_text(root / rel, "does not run Claude Code's auto-rewrite")
+        forbid_text(root / rel, "do not assume Devin executes that hook")
+    require_text(root / "core/hooks/rtk.md", "loads yet never fires")
 
     print("Token economy policy validation completed.")
 

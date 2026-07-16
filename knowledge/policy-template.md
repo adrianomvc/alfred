@@ -1,3 +1,10 @@
+---
+name: policy-template
+description: Template for always-on Alfred knowledge policies
+scope: template
+trigger: creating or changing a knowledge policy file
+---
+
 # Policy Template
 
 Use this template for always-on Alfred knowledge policies.

@@ -40,6 +40,9 @@ Every session begins with a fixed sequence before any work. The host runs it onc
      context, load `rules/common/context-compression-policy.md` first.
    - before opening large multi-file context, load
      `rules/common/token-budget-policy.md` and write a short context budget.
+   - when the host compacts the conversation (or exposes a compaction command),
+     load `rules/common/context-compaction-policy.md`: compact only right after
+     the `state` is saved, never mid-step, and re-read `001-state.md` afterwards.
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
 ## Opening framing checkpoint

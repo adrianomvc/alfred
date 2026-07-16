@@ -1,3 +1,11 @@
+---
+name: external-catalogs
+description: Allowlist and gates for external skill/documentation catalogs
+scope: org
+trigger: discovering a skill or documentation from an external catalog
+macro: "!catalogs"
+---
+
 # Policy — External Catalogs Allowlist
 
 ## identity

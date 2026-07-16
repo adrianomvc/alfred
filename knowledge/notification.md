@@ -1,3 +1,11 @@
+---
+name: notification
+description: Notification and telemetry destinations and default triggers
+scope: org
+trigger: demand completion, checkpoint notification, escalation, incident stabilization, periodic status, or telemetry batch
+macro: "!notify"
+---
+
 # Notification Defaults
 
 ## destination

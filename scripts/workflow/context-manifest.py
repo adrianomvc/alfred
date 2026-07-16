@@ -17,12 +17,14 @@ def main():
     parser.add_argument("--demand-type", "-DemandType", dest="demand_type", required=True)
     parser.add_argument("--agent", "-Agent", required=True)
     parser.add_argument("--sub-activity", "-SubActivity", dest="sub_activity", default="")
+    parser.add_argument("--playbook", "-Playbook", dest="playbook", default="")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
     try:
         for path in build_manifest(
-            root, args.phase, args.lane, args.demand_type, args.agent, args.sub_activity
+            root, args.phase, args.lane, args.demand_type, args.agent,
+            args.sub_activity, args.playbook
         ):
             print(path)
     except ContextManifestError as exc:
