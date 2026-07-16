@@ -358,7 +358,7 @@ JSON
     [ -z "$PYTHON_BIN" ] && info "Python 3 not found; the MCP e-mail server needs it."
     command -v claude >/dev/null 2>&1 || info "Claude Code CLI not found; for other MCP hosts register: python \"$MCP_SERVER\" (stdio)."
   fi
-  info "DEVIN projects: MCP servers (alfred-email + Context7) and the per-turn toolbar hook are per-repo — on first boot the /alfred skill offers to run 'python $INSTALL_DIR/scripts/workflow/setup-devin-config.py --alfred-home $INSTALL_DIR', which creates .devin/config.local.json from the template or idempotently merges the MCP server + toolbar hook into an existing one. AI Stack MCPs (Figma, ServiceNow, Atlan, ...) get added dynamically by skills/ai-stack-finder when installed."
+  info "DEVIN projects: MCP servers (alfred-email + Context7) are per-repo — on first boot the /alfred skill offers to create .devin/config.local.json from $INSTALL_DIR/hosts/devin-cli/config.local.template.json (after human confirmation), resolving \${env:ALFRED_HOME}/\${env:CONTEXT7_API_KEY}. AI Stack MCPs (Figma, ServiceNow, Atlan, ...) get added dynamically by skills/ai-stack-finder when installed."
 fi
 
 info "Done. Open a repo and type /alfred in the DEVIN CLI."

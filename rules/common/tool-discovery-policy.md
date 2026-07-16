@@ -41,6 +41,15 @@ If the registry has no match, follow the catalog order in `knowledge/external-ca
 - If no configured tool covers the need, degrade to markdown handoff or ask the
   human for the missing source. Do not guess a tool.
 
+## Host MCP toggle (configured ≠ enabled)
+A configured MCP server is not a free one: its tool schemas cost context every
+session it is enabled. Prefer keeping servers configured but **disabled**, and
+enable one only when the current task selects its capability (JIT). On the DEVIN
+CLI use `devin mcp enable <name>` / `devin mcp disable <name>` (the config is not
+removed, only toggled); other hosts follow the same intent manually. Do not
+enable every configured server at boot; do not auto-toggle without the selection
+in step 2 above.
+
 ## Audit
 For material external calls or mutations, record the selected connector/tool,
 adapter state, approval basis, and any fallback used.

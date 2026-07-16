@@ -2,11 +2,11 @@
   "mcpServers": {
     "alfred-email": {
       "command": "python",
-      "args": ["<ALFRED_HOME>/scripts/adapters/mcp-email-server.py"]
+      "args": ["${env:ALFRED_HOME}/scripts/adapters/mcp-email-server.py"]
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp", "--api-key", "<CONTEXT7_API_KEY>"]
+      "args": ["-y", "@upstash/context7-mcp", "--api-key", "${env:CONTEXT7_API_KEY}"]
     }
   }
 }

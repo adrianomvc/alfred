@@ -11,10 +11,11 @@ itself never changes per host (D3, agnostic markdown).
 
 > **Sources vs installation:** this folder holds the versioned *sources* of each
 > entry point. Installation copies them into each host's **native location**
-> (`~/.claude/skills/`, `~/.agents/skills/` for the DEVIN CLI on every platform,
-> a project's `.devin/config.local.json`, a repo's `.github/copilot-instructions.md`).
-> Dot-locations are live, per-machine/project, and may hold secrets — they are
-> never the source of truth.
+> (`~/.claude/skills/`; for the DEVIN CLI, `%APPDATA%\devin\skills\` on Windows or
+> `~/.config/devin/skills/` on Linux/macOS, plus `~/.agents/skills/` as the
+> agents_standard location; a project's `.devin/config.local.json`; a repo's
+> `.github/copilot-instructions.md`). Dot-locations are live, per-machine/project,
+> and may hold secrets — they are never the source of truth.
 
 ## Common bind (every host)
 1. Clone the framework once as a single referenced source (D15), using the
@@ -89,6 +90,10 @@ existing validators to hook points (optional layer; everything still works witho
 Advisory rule vs deterministic hook: instructions can be missed under long context;
 a hook always executes. Configure per host (e.g. Claude Code `.claude/settings.json`
 hooks); record in the demand `audit` which hooks were active.
+
+Which hooks/commands each host actually offers is tracked in
+[`capabilities.md`](capabilities.md) — the single source for per-host deterministic
+claims, so rules and shims never guess a host's features.
 
 ## Degradation
 No installer for a host? The integration still works manually: clone the

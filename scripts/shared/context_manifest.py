@@ -85,7 +85,7 @@ def find_sub_activity(rows, phase, sub_activity):
     return matches[0]["path"]
 
 
-def build_manifest(root, phase, lane, demand_type, agent, sub_activity=None):
+def build_manifest(root, phase, lane, demand_type, agent, sub_activity=None, playbook=None):
     root = Path(root)
     phase = normalize_phase(phase)
     lane = normalize_slug(lane)
@@ -102,6 +102,11 @@ def build_manifest(root, phase, lane, demand_type, agent, sub_activity=None):
         find_one(rows, "always", "name", "common-overconfidence"),
         find_one(rows, "lifecycle", "name", "lifecycle"),
         find_one(rows, "demand-type", "demand_type", demand_type),
+    ]
+    # Playbook (JIT) loads next to its demand type when one applies to the demand.
+    if playbook:
+        ordered.append(find_one(rows, "playbook", "name", f"playbook-{normalize_slug(playbook)}"))
+    ordered += [
         find_one(rows, "lane", "lane", lane),
         find_one(rows, "phase", "phase", phase),
         find_one(rows, "agent", "agent", agent),

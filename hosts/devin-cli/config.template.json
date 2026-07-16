@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.alfred/**)",
+      "Exec(python ~/.alfred/scripts)",
+      "Exec(rtk)",
+      "Exec(git)"
+    ]
+  },
+  "read_config_from": {
+    "claude": false
+  }
+}

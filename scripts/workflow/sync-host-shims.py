@@ -18,17 +18,26 @@ HOST_SOURCES = {
 
 def default_targets(host):
     home = Path.home()
+    appdata = os.environ.get("APPDATA")
+
+    # DEVIN CLI global skills path (docs.devin.ai/cli/extensibility/skills):
+    # Windows -> %APPDATA%\devin\skills; POSIX -> ~/.config/devin/skills.
+    # ~/.agents/skills is kept as the agents_standard (read_config_from) location,
+    # which the CLI also imports; without the documented path the skill never
+    # loads on Linux/macOS.
+    devin_targets = []
+    if appdata:
+        devin_targets.append(Path(appdata) / "devin" / "skills" / "alfred" / "SKILL.md")
+    else:
+        devin_targets.append(home / ".config" / "devin" / "skills" / "alfred" / "SKILL.md")
+    devin_targets.append(home / ".agents" / "skills" / "alfred" / "SKILL.md")
+
     targets = {
         "claude-code": [home / ".claude" / "skills" / "alfred" / "SKILL.md"],
-        "devin-cli": [
-            home / ".agents" / "skills" / "alfred" / "SKILL.md",
-        ],
+        "devin-cli": devin_targets,
         "codex": [home / ".codex" / "AGENTS.md"],
         "github-copilot": [],
     }
-    appdata = os.environ.get("APPDATA")
-    if appdata:
-        targets["devin-cli"].insert(0, Path(appdata) / "devin" / "skills" / "alfred" / "SKILL.md")
     return targets[host]
 
 

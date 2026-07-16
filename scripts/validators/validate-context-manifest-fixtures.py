@@ -44,6 +44,17 @@ CASES = [
         },
         "examples/context-manifest-fixtures/safe-engineering-inception.txt",
     ),
+    (
+        "safe-engineering-migration",
+        {
+            "phase": "Execution",
+            "lane": "SAFE",
+            "demand_type": "engineering",
+            "agent": "orchestrator",
+            "playbook": "migration",
+        },
+        "examples/context-manifest-fixtures/safe-engineering-migration.txt",
+    ),
 ]
 
 STABLE_PREFIX = [

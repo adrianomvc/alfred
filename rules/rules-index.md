@@ -10,6 +10,7 @@
 | `agent-reviewer` | `agent` | `all` | `all` | `all` | `reviewer` | Agent - Reviewer | [rules/agents/reviewer.md](rules/agents/reviewer.md) |
 | `agent-spec-design` | `agent` | `all` | `all` | `all` | `spec-design` | Agent - Spec/Design | [rules/agents/spec-design.md](rules/agents/spec-design.md) |
 | `common-content-validation` | `event` | `all` | `all` | `all` | `all` | Common rule — content validation (light) | [rules/common/content-validation.md](rules/common/content-validation.md) |
+| `common-context-compaction-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - when to compact conversation context safely | [rules/common/context-compaction-policy.md](rules/common/context-compaction-policy.md) |
 | `common-context-compression-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - safe RAG/context compression | [rules/common/context-compression-policy.md](rules/common/context-compression-policy.md) |
 | `common-deferred-work-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - deferred and low-priority token work | [rules/common/deferred-work-policy.md](rules/common/deferred-work-policy.md) |
 | `common-escalation-triggers` | `event` | `all` | `all` | `all` | `all` | Common Rule - Escalation Triggers | [rules/common/escalation-triggers.md](rules/common/escalation-triggers.md) |

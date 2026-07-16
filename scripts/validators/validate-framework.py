@@ -124,7 +124,9 @@ REQUIRED_PATHS = [
     "scripts/metrics/import-ccusage.py",
     "scripts/metrics/apply-usage-rate-card.py",
     "scripts/metrics/normalize-usage-cost.py",
+    "scripts/metrics/measure-context-budget.py",
     "scripts/shared/__init__.py",
+    "scripts/shared/context_budget.py",
     "scripts/shared/observability/domain/models.py",
     "scripts/shared/observability/domain/enums.py",
     "scripts/shared/observability/application/ports/adapters.py",
@@ -148,6 +150,7 @@ REQUIRED_PATHS = [
     "scripts/validators/validate-observability-intelligence.py",
     "scripts/validators/validate-scripts-architecture.py",
     "scripts/validators/validate-model-policy.py",
+    "scripts/validators/validate-context-budget.py",
     "connectors/usage-cost.md",
     "connectors/usage-rate-card.md",
     "connectors/adapter-template.md",
@@ -174,6 +177,7 @@ REQUIRED_PATHS = [
     "examples/context-manifest-fixtures/standard-product-design.txt",
     "examples/context-manifest-fixtures/fast-operational-execution.txt",
     "examples/context-manifest-fixtures/safe-engineering-inception.txt",
+    "examples/context-manifest-fixtures/safe-engineering-migration.txt",
     "examples/generated/metrics-rollup.md",
     "examples/generated/insights.md",
     "examples/observability-fixtures/example-demand/05-operation/011-observability-log.jsonl",
@@ -727,6 +731,7 @@ def main():
     run_sub(root, "scripts/validators/validate-tool-discovery-policy.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-context-compression-policy.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-token-economy-policy.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-context-budget.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-observability-hygiene.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-observability-intelligence.py")
     run_sub(root, "scripts/validators/validate-scripts-architecture.py")

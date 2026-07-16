@@ -80,6 +80,10 @@ The policy uses **abstract tiers** (`cheap` / `medium` / `strong`); this map tra
 
 > Proposed default for a Claude host (owner decision, 2026-07-09); other hosts remap on adoption — any cell may be a portable tier or a fixed model. Agnostic: if the host cannot switch models, use the default and **record which model ran** — the policy becomes a recommendation.
 
+**DEVIN CLI concrete map:** `swe-1-6-fast` (cheap, default) · `sonnet` (medium) · `opus`/`gpt` (strong). `adaptive` is Devin's model router — treat it as medium unless a step needs a strong floor. The DEVIN CLI **does** switch models mid-session (`/model opus|sonnet|codex|adaptive`), so it is not a "cannot switch" host; a step may also pin a cheaper model via a skill's `model:` field without changing the whole session.
+
+**Cost of switching mid-demand:** changing the model mid-demand **invalidates the prompt cache** (cache is per model), tensioning `rules/common/prompt-caching-policy.md`. So a switch is a deliberate step-level decision — raise a tier for a hard step, then let it settle — not a per-turn habit. Devin's `adaptive` deliberately stays on one model across turns to preserve cache; follow the same principle.
+
 ## Mechanism — hybrid (declared + auto-suggestion)
 - **Source of truth = declared here** — the Orchestrator obeys it.
 - **Auto-suggestion:** Alfred analyzes `metrics` (model × cost × first-time acceptance) and **proposes** policy adjustments. It never applies them alone.
