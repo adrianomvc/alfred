@@ -51,7 +51,21 @@ FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-$DEFAULT_FRAMEWORK_URL}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
 BRANCH="${ALFRED_BRANCH:-}"
 VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
-SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.config/devin/skills}"   # DEVIN CLI documented global skills path (POSIX)
+# DEVIN CLI documented global skills path: %APPDATA%\devin\skills on Windows
+# (Git Bash sets $APPDATA, e.g. C:\Users\<you>\AppData\Roaming), ~/.config/devin/
+# skills on Linux/macOS. Same signal (APPDATA presence) as sync-host-shims.py.
+# Convert the Windows path to a Unix form MSYS mkdir/cp accept — do NOT use
+# ${APPDATA//\\//}, which does not replace backslashes reliably under MSYS bash.
+if [ -n "${APPDATA:-}" ]; then
+  if command -v cygpath >/dev/null 2>&1; then
+    APPDATA_UNIX="$(cygpath -u "$APPDATA")"
+  else
+    APPDATA_UNIX="$(printf '%s' "$APPDATA" | tr '\\' '/')"
+  fi
+  SKILLS_DIR="${ALFRED_SKILLS_DIR:-$APPDATA_UNIX/devin/skills}"
+else
+  SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.config/devin/skills}"
+fi
 RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # empty on PERSONAL (rtk on PATH); Artifactory zip on CORPORATE
 SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
 NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
