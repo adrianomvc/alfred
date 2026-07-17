@@ -241,8 +241,12 @@ if [ "$SKIP_RTK" != "1" ]; then
     # CLI user config. Idempotent; safe to re-run.
     RTK_PYTHON="$(command -v python3 || command -v python || true)"
     if [ -n "$RTK_PYTHON" ]; then
-      if "$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" >/dev/null 2>&1; then
+      if RTK_HOOK_OUT="$("$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" 2>&1)"; then
         info "DEVIN CLI rtk PreToolUse hook installed (transparent rewrite for exec)."
+        # Surface the version warning: if the DEVIN CLI is too old to honor the
+        # rewrite (< v3000), tell the human here instead of swallowing it.
+        RTK_HOOK_WARN="$(printf '%s\n' "$RTK_HOOK_OUT" | grep -i '^WARN' || true)"
+        [ -n "$RTK_HOOK_WARN" ] && info "$RTK_HOOK_WARN"
       else
         info "Could not install the DEVIN rtk hook automatically; run: python \"$INSTALL_DIR/scripts/workflow/sync-host-shims.py\" -Host devin-cli -InstallHooks"
       fi

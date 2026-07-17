@@ -202,12 +202,13 @@ def warn_if_devin_outdated():
         return
     channel = os.environ.get(
         "ALFRED_DEVIN_UPDATE_CHANNEL",
-        "your organization's software center (e.g. Central de Software) or `devin update`",
+        "Central de Software (or `devin update` if self-managed)",
     )
     print(
-        f"WARN devin-cli: version {major} does not honor the PreToolUse rewrite "
-        f"(need >= {DEVIN_MIN_MAJOR}). The rtk hook is installed but inert until the "
-        f"CLI is updated via {channel}."
+        f"WARN devin-cli: to save tokens with RTK, the DEVIN CLI must be v3000 or "
+        f"newer - yours is v{major}. The rtk hook is already installed but stays "
+        f"INERT until you update. Update the DEVIN CLI via {channel} and pick "
+        f"v3 (v3000) or newer, then reopen Devin."
     )
 
 
