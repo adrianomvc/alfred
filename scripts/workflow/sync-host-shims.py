@@ -4,8 +4,15 @@
 import argparse
 import json
 import os
+import re
 import shutil
+import subprocess
 from pathlib import Path
+
+# DEVIN CLI major version that started honoring PreToolUse `updatedInput`
+# (transparent rewrite). v2026.x calls the hook but runs the original command;
+# confirmed working after updating past this. Below it, the rtk rewrite is inert.
+DEVIN_MIN_MAJOR = 3000
 
 
 HOST_SOURCES = {
@@ -175,6 +182,35 @@ def install_claude_code_usage_hook(alfred_home, settings_path, dry_run):
     return 1
 
 
+def devin_major_version():
+    """Return the DEVIN CLI major version as int, or None if unknown."""
+    devin = shutil.which("devin")
+    if not devin:
+        return None
+    try:
+        out = subprocess.run([devin, "--version"], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    match = re.search(r"v?(\d+)", (out.stdout or "") + (out.stderr or ""))
+    return int(match.group(1)) if match else None
+
+
+def warn_if_devin_outdated():
+    """Warn (do not block) when the DEVIN CLI is too old to honor the hook rewrite."""
+    major = devin_major_version()
+    if major is None or major >= DEVIN_MIN_MAJOR:
+        return
+    channel = os.environ.get(
+        "ALFRED_DEVIN_UPDATE_CHANNEL",
+        "your organization's software center (e.g. Central de Software) or `devin update`",
+    )
+    print(
+        f"WARN devin-cli: version {major} does not honor the PreToolUse rewrite "
+        f"(need >= {DEVIN_MIN_MAJOR}). The rtk hook is installed but inert until the "
+        f"CLI is updated via {channel}."
+    )
+
+
 def default_devin_config_path():
     """User-level DEVIN CLI config (global hooks apply to every project)."""
     appdata = os.environ.get("APPDATA")
@@ -230,6 +266,7 @@ def install_devin_rtk_hook(alfred_home, config_path, dry_run):
     config_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
     action = "reconciled" if already_present else "installed"
     print(f"SYNC devin-cli rtk hook: {action} PreToolUse hook in {config_path}")
+    warn_if_devin_outdated()
     return 1
 
 

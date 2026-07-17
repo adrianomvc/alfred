@@ -50,6 +50,19 @@ Any mismatch — non-`exec` tool, missing rtk, a command rtk cannot compact,
 unparseable stdin — makes the hook print nothing and exit 0, so the original
 command runs unchanged. The hook never blocks.
 
+## Minimum DEVIN CLI version (verified)
+Transparent rewrite needs a DEVIN CLI recent enough to **honor**
+`hookSpecificOutput.updatedInput`. Confirmed on 2026-07-17: `v2026.5.6-12` calls
+the hook and receives the rewrite but **runs the original command anyway** (the
+rtk-rewritten command never reaches rtk); after `devin update`, the same `ls -la`
+was executed as `rtk ls -la` (verified in rtk's history.db). If commands are not
+being rewritten even though `/hooks` lists the entry, update the DEVIN CLI first —
+on a corporate machine through the **organization's software center (e.g. Central
+de Software)**, since the public PowerShell installer may be blocked;
+`devin update` when self-managed. `sync-host-shims.py -InstallHooks`
+prints a warning when it detects a version below v3000 (override the message with
+`ALFRED_DEVIN_UPDATE_CHANNEL`).
+
 ## Confirm it fires in a real session
 After install, in the DEVIN CLI: `/hooks` lists the PreToolUse entry; run a shell
 command with a known rewrite (e.g. `git status`, `cat <file>`) and confirm
