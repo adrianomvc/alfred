@@ -2,49 +2,48 @@
 # Install Alfred for the DEVIN CLI on macOS/Linux.
 #
 # Clones (or updates) the Alfred framework into ~/.alfred and installs the
-# /alfred skill into the DEVIN CLI user skills directory
-# (~/.agents/skills/alfred/SKILL.md).
+# /alfred skill into the DEVIN CLI skills directories on POSIX
+# (~/.config/devin/skills/alfred/SKILL.md and ~/.agents/skills/alfred/SKILL.md).
 #
 # Usage:
 #   bash install/install.sh
-#   curl -fsSL https://raw.githubusercontent.com/itau-corp/itau-sq9-modules-alfred-v2/refs/heads/main/install/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/adrianomvc/alfred/refs/heads/main/install/install.sh | bash
+#   # corporate: pass ALFRED_FRAMEWORK_URL=... (internal mirror) or uncomment the
+#   # CORPORATE profile below.
 set -euo pipefail
 
 # ============================================================================
-# COMPANY SETTINGS - edit these defaults when preparing the installer for a
-# corporate machine/image.
+# ENVIRONMENT PROFILES — two sets of source URLs. PERSONAL is active by
+# default; CORPORATE is kept commented right below it. To prepare the corporate
+# machine/image, comment the three PERSONAL lines and uncomment the three
+# CORPORATE ones (or just pass ALFRED_FRAMEWORK_URL / ALFRED_RTK_URL /
+# ALFRED_NPM_REGISTRY, which override either profile).
 #
-# 1) Alfred framework repository:
-#    Replace DEFAULT_FRAMEWORK_URL when the company uses an internal Git mirror.
-#
-# 2) RTK package URL:
-#    Paste the corporate Artifactory URL in DEFAULT_RTK_URL when it is known.
-#    The default is the public Windows zip placeholder because most company
-#    usage is Windows/Git Bash and the future Artifactory package is also zip.
-#    Replace it with the internal Artifactory zip when available.
-#
-# 3) npm registry / Artifactory:
-#    `ccusage` is confirmed available (verified with `npm view` and a real
-#    `npm install`) in the corporate Artifactory npm-remote repo. Proxy and
-#    SSL settings (`proxy`, `https-proxy`, `strict-ssl`) come from the
-#    corporate npm config already provisioned on the machine (~/.npmrc); the
-#    installer does not hardcode them.
-#    `codebase-memory-mcp` is intentionally NOT installed by default: the npm
-#    package itself is a thin wrapper whose postinstall downloads the real
-#    binary directly from GitHub Releases, and that download is blocked by
-#    the corporate proxy/SWG (`403 MediaTypeBlockedDlownload` on the signed
-#    release-asset URL) — verified 2026-07-13. Paused until a human confirms
-#    an approved download path (e.g. the binary mirrored in Artifactory,
-#    like RTK). See `connectors/codebase-memory.md`. Set
-#    ALFRED_CODEBASE_MEMORY_PACKAGE explicitly to opt in once that path exists.
-#
-# Temporary alternative:
-#    Keep this file unchanged and pass ALFRED_FRAMEWORK_URL / ALFRED_RTK_URL /
-#    ALFRED_NPM_REGISTRY.
+# Notes that apply to both profiles:
+# - RTK: PERSONAL assumes `rtk` is already on PATH (installed via cargo/manual
+#   download). The installer detects it and only runs `rtk init -g`; it does not
+#   `npm install rtk`, because the public npm `rtk` is a DIFFERENT tool (Rust
+#   Type Kit) — see the name-collision note in RTK.md. On CORPORATE, the zip is
+#   fetched from the internal Artifactory mirror.
+# - npm registry: PERSONAL uses public npm (empty = registry.npmjs.org).
+#   CORPORATE uses the Artifactory npm-remote; proxy/SSL come from ~/.npmrc,
+#   never hardcoded here. `ccusage` is confirmed available on both.
+# - `codebase-memory-mcp` stays NOT installed by default on both: its npm
+#   postinstall pulls a binary from GitHub Releases, blocked by the corporate
+#   proxy/SWG (verified 2026-07-13). Opt in via ALFRED_CODEBASE_MEMORY_PACKAGE
+#   once an approved path exists. See `connectors/codebase-memory.md`.
 # ============================================================================
-DEFAULT_FRAMEWORK_URL="https://github.com/itau-corp/itau-sq9-modules-alfred-v2.git"
-DEFAULT_RTK_URL="https://artifactory.prod.aws.cloud.ihf/artifactory/generic-github-remote/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
-DEFAULT_NPM_REGISTRY="https://artifactory.prod.aws.cloud.ihf/artifactory/api/npm/npm-remote/"
+
+# --- PERSONAL (public GitHub + public npm; rtk already on PATH) — ACTIVE ---
+DEFAULT_FRAMEWORK_URL="https://github.com/adrianomvc/alfred.git"
+DEFAULT_RTK_URL=""              # empty: rtk is on PATH; installer skips download and runs `rtk init -g`
+DEFAULT_NPM_REGISTRY=""         # empty: public npm (registry.npmjs.org)
+
+# --- CORPORATE (internal mirror + Artifactory) — uncomment on the corp image ---
+# DEFAULT_FRAMEWORK_URL="https://github.com/itau-corp/itau-sq9-modules-alfred-v2.git"
+# DEFAULT_RTK_URL="https://artifactory.prod.aws.cloud.ihf/artifactory/generic-github-remote/rtk-ai/rtk/releases/download/v0.43.0/rtk-x86_64-pc-windows-msvc.zip"
+# DEFAULT_NPM_REGISTRY="https://artifactory.prod.aws.cloud.ihf/artifactory/api/npm/npm-remote/"
+
 DEFAULT_CCUSAGE_PACKAGE="ccusage"
 DEFAULT_CODEBASE_MEMORY_PACKAGE=""
 
@@ -53,7 +52,7 @@ INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
 BRANCH="${ALFRED_BRANCH:-}"
 VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
 SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.agents/skills}"
-RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # public zip placeholder; replace with corporate Artifactory URL
+RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # empty on PERSONAL (rtk on PATH); Artifactory zip on CORPORATE
 SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
 NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
 CCUSAGE_PACKAGE="${ALFRED_CCUSAGE_PACKAGE:-$DEFAULT_CCUSAGE_PACKAGE}"
@@ -152,13 +151,19 @@ INSTALLED_VERSION="unknown"
 [ -f "$INSTALL_DIR/VERSION" ] && INSTALLED_VERSION="$(head -n1 "$INSTALL_DIR/VERSION" | tr -d '[:space:]')"
 info "Framework version: $INSTALLED_VERSION${VERSION:+ (pinned $VERSION)}"
 
-# 2. Install the /alfred skill for the DEVIN CLI
+# 2. Install the /alfred skill for the DEVIN CLI.
+# Write to both locations the CLI reads on POSIX: the documented global skills
+# dir (~/.config/devin/skills) and the agents_standard dir (~/.agents/skills).
+# Without the documented path the skill may not load on Linux/macOS.
 SKILL_SOURCE="$INSTALL_DIR/hosts/devin-cli/SKILL.md"
 [ -f "$SKILL_SOURCE" ] || { echo "Skill source not found: $SKILL_SOURCE" >&2; exit 1; }
-SKILL_TARGET="$SKILLS_DIR/alfred"
-mkdir -p "$SKILL_TARGET"
-cp -f "$SKILL_SOURCE" "$SKILL_TARGET/SKILL.md"
-info "Installed skill at $SKILL_TARGET/SKILL.md"
+DEVIN_SKILLS_DIR="${ALFRED_DEVIN_SKILLS_DIR:-$HOME/.config/devin/skills}"
+for base in "$DEVIN_SKILLS_DIR" "$SKILLS_DIR"; do
+  target="$base/alfred"
+  mkdir -p "$target"
+  cp -f "$SKILL_SOURCE" "$target/SKILL.md"
+  info "Installed skill at $target/SKILL.md"
+done
 
 # 3. Verify (best-effort) if the DEVIN CLI is available
 if command -v devin >/dev/null 2>&1; then
