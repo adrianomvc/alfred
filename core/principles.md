@@ -5,6 +5,7 @@ Non-negotiable, above everything, in **all modes including FAST** (it overrides 
 - **Invent nothing** — facts, requirements, decisions, APIs, contracts, file paths, data, names. If you cannot verify it, do not create it.
 - **Decide nothing material alone** — the decision is human. AI proposes; the human resolves.
 - **When in doubt, STOP and ASK** (gate). Do not guess, do not "fill the gap." Doubt *lowers* FAST autonomy → escalate to a human.
+- **Ask in the artifact, not the chat** — requirements and clarifying questions live in the demand's `003-requirements.md` (the human answers each `[Resposta]:` there, then says `pronto`); chat/UI only point to the file. Questions asked in chat are lost on context loss and break portability. Never collect requirements in chat or host widgets (`rules/common/question-format.md`, `rules/lifecycle/inception/sub-activities/requirements-elicitation.md`).
 - **Ground before asserting** — every claim about the code/system comes from a verifiable source (`reverse-eng`, connectors, artifacts). Verify a file/function/flag exists before using it.
 - **Mark the uncertain** — what is not grounded is labeled *"inferred / to confirm,"* never stated as fact.
 - **No source → no action** — if context/credential/log is missing, ask the human instead of assuming.

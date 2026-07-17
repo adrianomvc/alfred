@@ -9,6 +9,7 @@
 2. Read `{{boot_path}}` and follow the boot sequence: welcome, detect repo kind, resume from state, use `context-manifest`/indexes for JIT context, and render the progress toolbar/header with the default rich profile. Do not force `--profile text` unless the host cannot render Unicode/emoji and the fallback is explicit. **Render ≠ display:** always paste the rendered toolbar block into the reply at each checkpoint (demand open/resume, phase transition, end of a turn with an active demand) — running the helper or registering the active demand alone does not show it to the human.
 3. Apply `{{principles_path}}`. Classify the lane (FAST / Standard / SAFE) **at Inception**, loading `core/risk-mode.md` just in time via `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md`.
 4. **Supreme rule:** never invent facts, paths, schemas, APIs, or tool behavior. When unsure, stop and ask. The human owns every material decision; record it in `audit`.
+5. **Ask in the artifact, not the chat:** requirements and clarifying questions go in the demand's `003-requirements.md` — write the questions there with `[Resposta]:` slots, tell the human the file path, and wait for `pronto`. Never gather requirements in chat or host question widgets (`rules/common/question-format.md`); chat only points to the file.
 
 ## Model (host-specific — D46)
 {{model_policy}}
