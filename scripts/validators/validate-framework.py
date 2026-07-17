@@ -117,6 +117,7 @@ REQUIRED_PATHS = [
     "scripts/workflow/generate-registry.py",
     "scripts/workflow/render-toolbar.py",
     "scripts/workflow/sync-host-shims.py",
+    "scripts/workflow/devin-rtk-hook.py",
     "scripts/metrics/collect-observability.py",
     "scripts/metrics/generate-metrics-rollup.py",
     "scripts/metrics/generate-metrics-insights.py",

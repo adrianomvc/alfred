@@ -11,9 +11,9 @@ itself never changes per host (D3, agnostic markdown).
 
 > **Sources vs installation:** this folder holds the versioned *sources* of each
 > entry point. Installation copies them into each host's **native location**
-> (`~/.claude/skills/`; for the DEVIN CLI, `%APPDATA%\devin\skills\` on Windows or
-> `~/.config/devin/skills/` on Linux/macOS, plus `~/.agents/skills/` as the
-> agents_standard location; a project's `.devin/config.local.json`; a repo's
+> (`~/.claude/skills/`; for the DEVIN CLI, the documented global skills path —
+> `%APPDATA%\devin\skills\` on Windows or `~/.config/devin/skills/` on
+> Linux/macOS; a project's `.devin/config.local.json`; a repo's
 > `.github/copilot-instructions.md`). Dot-locations are live, per-machine/project,
 > and may hold secrets — they are never the source of truth.
 
