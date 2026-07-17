@@ -54,9 +54,15 @@ accepted.
 
 The proposal includes: target app source/path, workspace placement, initiative
 id, demand id, initial scope, proposed lane, and which artifacts will be created.
-Only deterministic labels may be inferred without asking (for example the sigla
-auto-label from the repo name). Material decisions are never implied by "start a
-demand" or by "act first, ask later".
+**Arrive with concrete proposed values, not a blank form.** Derive a suggested
+initiative id and demand id from the demand description plus the sigla (a short
+kebab-case slug of the goal, e.g. demand `sankey-categoria` under initiative
+`smartcash-ui`), propose the lane with its risk-mode score, and let the human
+confirm or edit each field in one step. Proposing a default for confirmation is
+not "inventing": the human still owns and ratifies every material decision — only
+deterministic labels (the sigla auto-label from the repo name) skip confirmation.
+Material decisions are never implied by "start a demand" or by "act first, ask
+later".
 
 ## App-only resume
 When running inside an app repo without HUB access, Alfred resumes from `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` plus the app-local artifacts. If the HUB `001-state.md` cannot be read, Alfred treats the demand state as **local pending sync**, records that limitation in `05-operation/009-hub-sync.md`, and asks the human for the missing demand/initiative identifiers only if they cannot be inferred from the path or branch.
