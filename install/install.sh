@@ -2,8 +2,8 @@
 # Install Alfred for the DEVIN CLI on macOS/Linux.
 #
 # Clones (or updates) the Alfred framework into ~/.alfred and installs the
-# /alfred skill into the DEVIN CLI skills directories on POSIX
-# (~/.config/devin/skills/alfred/SKILL.md and ~/.agents/skills/alfred/SKILL.md).
+# /alfred skill into the DEVIN CLI global skills directory on POSIX
+# (~/.config/devin/skills/alfred/SKILL.md — the documented path).
 #
 # Usage:
 #   bash install/install.sh
@@ -51,7 +51,7 @@ FRAMEWORK_URL="${ALFRED_FRAMEWORK_URL:-$DEFAULT_FRAMEWORK_URL}"
 INSTALL_DIR="${ALFRED_INSTALL_DIR:-$HOME/.alfred}"
 BRANCH="${ALFRED_BRANCH:-}"
 VERSION="${ALFRED_VERSION:-}"   # e.g. v0.2.0 — pin a reproducible release tag
-SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.agents/skills}"
+SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.config/devin/skills}"   # DEVIN CLI documented global skills path (POSIX)
 RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # empty on PERSONAL (rtk on PATH); Artifactory zip on CORPORATE
 SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
 NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
@@ -151,19 +151,15 @@ INSTALLED_VERSION="unknown"
 [ -f "$INSTALL_DIR/VERSION" ] && INSTALLED_VERSION="$(head -n1 "$INSTALL_DIR/VERSION" | tr -d '[:space:]')"
 info "Framework version: $INSTALLED_VERSION${VERSION:+ (pinned $VERSION)}"
 
-# 2. Install the /alfred skill for the DEVIN CLI.
-# Write to both locations the CLI reads on POSIX: the documented global skills
-# dir (~/.config/devin/skills) and the agents_standard dir (~/.agents/skills).
-# Without the documented path the skill may not load on Linux/macOS.
+# 2. Install the /alfred skill for the DEVIN CLI at the documented global path
+# (~/.config/devin/skills on POSIX). ~/.agents/skills is NOT a Devin skills
+# location — agents_standard imports rules from AGENTS.md, not skills.
 SKILL_SOURCE="$INSTALL_DIR/hosts/devin-cli/SKILL.md"
 [ -f "$SKILL_SOURCE" ] || { echo "Skill source not found: $SKILL_SOURCE" >&2; exit 1; }
-DEVIN_SKILLS_DIR="${ALFRED_DEVIN_SKILLS_DIR:-$HOME/.config/devin/skills}"
-for base in "$DEVIN_SKILLS_DIR" "$SKILLS_DIR"; do
-  target="$base/alfred"
-  mkdir -p "$target"
-  cp -f "$SKILL_SOURCE" "$target/SKILL.md"
-  info "Installed skill at $target/SKILL.md"
-done
+SKILL_TARGET="$SKILLS_DIR/alfred"
+mkdir -p "$SKILL_TARGET"
+cp -f "$SKILL_SOURCE" "$SKILL_TARGET/SKILL.md"
+info "Installed skill at $SKILL_TARGET/SKILL.md"
 
 # 3. Verify (best-effort) if the DEVIN CLI is available
 if command -v devin >/dev/null 2>&1; then

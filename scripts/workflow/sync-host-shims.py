@@ -22,15 +22,13 @@ def default_targets(host):
 
     # DEVIN CLI global skills path (docs.devin.ai/cli/extensibility/skills):
     # Windows -> %APPDATA%\devin\skills; POSIX -> ~/.config/devin/skills.
-    # ~/.agents/skills is kept as the agents_standard (read_config_from) location,
-    # which the CLI also imports; without the documented path the skill never
-    # loads on Linux/macOS.
-    devin_targets = []
+    # This is the only documented global skills location. ~/.agents/skills is NOT
+    # a Devin skills path: read_config_from.agents_standard imports rules from
+    # AGENTS.md/AGENT.md/.windsurfrules in the workspace root, not global skills.
     if appdata:
-        devin_targets.append(Path(appdata) / "devin" / "skills" / "alfred" / "SKILL.md")
+        devin_targets = [Path(appdata) / "devin" / "skills" / "alfred" / "SKILL.md"]
     else:
-        devin_targets.append(home / ".config" / "devin" / "skills" / "alfred" / "SKILL.md")
-    devin_targets.append(home / ".agents" / "skills" / "alfred" / "SKILL.md")
+        devin_targets = [home / ".config" / "devin" / "skills" / "alfred" / "SKILL.md"]
 
     targets = {
         "claude-code": [home / ".claude" / "skills" / "alfred" / "SKILL.md"],

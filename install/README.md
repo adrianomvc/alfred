@@ -47,8 +47,9 @@ One-liner:
 curl -fsSL https://raw.githubusercontent.com/itau-corp/itau-sq9-modules-alfred-v2/main/install/install.sh | bash
 ```
 
-Installs the skill to `~/.agents/skills/alfred/SKILL.md` — a user skill path the
-DEVIN CLI reads on every platform, Windows included.
+Installs the skill to the DEVIN CLI documented global skills path:
+`~/.config/devin/skills/alfred/SKILL.md` on Linux/macOS
+(`%APPDATA%\devin\skills\alfred\SKILL.md` on Windows).
 
 ## Corporate Machine Setup
 When preparing this installer for a company computer, there are three external
@@ -89,7 +90,7 @@ raw-file URL from the company mirror.
 | Install dir | `ALFRED_INSTALL_DIR` | `~/.alfred` |
 | Version (tag) | `ALFRED_VERSION` | latest on default branch |
 | Branch | `ALFRED_BRANCH` | repo default |
-| Skills dir | `ALFRED_SKILLS_DIR` | `~/.agents/skills` |
+| Skills dir | `ALFRED_SKILLS_DIR` | `~/.config/devin/skills` (POSIX) |
 | Notification e-mail | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `ALFRED_SKIP_EMAIL=1` | setup runs |
 | RTK package URL | `ALFRED_RTK_URL` | public Windows zip placeholder |
@@ -195,7 +196,7 @@ both. `ccusage` can still update `001-state.md` and the toolbar with the total
 session cost, but that total is not appended to interaction JSONL.
 
 ## Uninstall
-- Delete the skill folder (`~/.agents/skills/alfred`); optionally remove `~/.alfred`.
+- Delete the skill folder (`~/.config/devin/skills/alfred` on POSIX, `%APPDATA%\devin\skills\alfred` on Windows); optionally remove `~/.alfred`.
 
 ## How it works
 The DEVIN CLI loads skills from `SKILL.md` files under its user/project skill
