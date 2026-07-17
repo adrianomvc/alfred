@@ -175,6 +175,64 @@ def install_claude_code_usage_hook(alfred_home, settings_path, dry_run):
     return 1
 
 
+def default_devin_config_path():
+    """User-level DEVIN CLI config (global hooks apply to every project)."""
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        return Path(appdata) / "devin" / "config.json"
+    return Path.home() / ".config" / "devin" / "config.json"
+
+
+def install_devin_rtk_hook(alfred_home, config_path, dry_run):
+    """Install the PreToolUse->rtk rewrite hook into the DEVIN CLI user config.
+
+    Optional acceleration (D3): RTK ships no Devin preset, so this wires the
+    documented PreToolUse mechanism (matcher `exec`) to `devin-rtk-hook.py`,
+    which asks `rtk rewrite` for a compact equivalent. Idempotent and self-healing
+    via prune_usage_hook_entries; degrades to nothing when rtk is absent (the hook
+    script itself no-ops).
+    """
+    config_path = config_path or default_devin_config_path()
+    hook_script = alfred_home / "scripts" / "workflow" / "devin-rtk-hook.py"
+    if not hook_script.exists():
+        raise SystemExit(f"Devin rtk hook script not found: {hook_script}")
+
+    command = f'python "{hook_script}"'
+    if not config_path.exists():
+        settings = {}
+    else:
+        try:
+            settings = json.loads(config_path.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError as error:
+            raise SystemExit(f"Invalid Devin config JSON at {config_path}: {error}") from error
+
+    before = json.dumps(settings, sort_keys=True)
+    already_present = prune_usage_hook_entries(settings, hook_script.name, command)
+    if not already_present:
+        hooks = settings.setdefault("hooks", {})
+        pre_tool_use = hooks.setdefault("PreToolUse", [])
+        pre_tool_use.append({
+            "matcher": "^exec$",
+            "hooks": [{"type": "command", "command": command}],
+        })
+    after = json.dumps(settings, sort_keys=True)
+
+    if before == after:
+        print(f"OK devin-cli rtk hook: already installed in {config_path}")
+        return 0
+
+    if dry_run:
+        action = "reconcile" if already_present else "add"
+        print(f"DRY-RUN devin-cli rtk hook: would {action} PreToolUse hook in {config_path}")
+        return 1
+
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+    action = "reconciled" if already_present else "installed"
+    print(f"SYNC devin-cli rtk hook: {action} PreToolUse hook in {config_path}")
+    return 1
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", "-Host", dest="host", choices=sorted(HOST_SOURCES), default="")
@@ -188,6 +246,8 @@ def main():
                         help="also install host runtime hooks when supported")
     parser.add_argument("--claude-settings-path", "-ClaudeSettingsPath", dest="claude_settings_path", default="",
                         help="override Claude Code settings path (useful for validation/dry-run)")
+    parser.add_argument("--devin-config-path", "-DevinConfigPath", dest="devin_config_path", default="",
+                        help="override DEVIN CLI config path (useful for validation/dry-run)")
     args = parser.parse_args()
 
     if not args.host and not args.all_hosts:
@@ -207,6 +267,9 @@ def main():
         if args.install_hooks and host == "claude-code":
             settings_path = Path(args.claude_settings_path).expanduser() if args.claude_settings_path else None
             synced += install_claude_code_usage_hook(alfred_home, settings_path, args.dry_run)
+        elif args.install_hooks and host == "devin-cli":
+            devin_config = Path(args.devin_config_path).expanduser() if args.devin_config_path else None
+            synced += install_devin_rtk_hook(alfred_home, devin_config, args.dry_run)
         elif args.install_hooks:
             print(f"SKIP {host} hooks: no runtime hook installer.")
 

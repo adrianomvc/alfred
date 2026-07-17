@@ -236,6 +236,17 @@ if [ "$SKIP_RTK" != "1" ]; then
     else
       info "RTK found, but 'rtk init -g' did not complete. Run it manually when ready."
     fi
+    # RTK ships no Devin preset (its stock hook matches Claude's `Bash` tool, not
+    # Devin's `exec`), so install Alfred's PreToolUse->rtk bridge into the DEVIN
+    # CLI user config. Idempotent; safe to re-run.
+    RTK_PYTHON="$(command -v python3 || command -v python || true)"
+    if [ -n "$RTK_PYTHON" ]; then
+      if "$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" >/dev/null 2>&1; then
+        info "DEVIN CLI rtk PreToolUse hook installed (transparent rewrite for exec)."
+      else
+        info "Could not install the DEVIN rtk hook automatically; run: python \"$INSTALL_DIR/scripts/workflow/sync-host-shims.py\" -Host devin-cli -InstallHooks"
+      fi
+    fi
   else
     info "RTK setup skipped: configure ALFRED_RTK_URL if the default is unavailable."
   fi
