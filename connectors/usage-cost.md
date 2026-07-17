@@ -89,9 +89,12 @@ observability event and must not be appended to the demand JSONL log as
   contents by default.
 - `usage_rate_card`: approved per-model/per-unit table applied to exact
   interaction usage; confidence `rated` or `estimated` depending on approval.
-- `host_cost_command`: host-native cost summary such as Claude Code `/cost`,
-  recorded by the human or by a supported host export. It is valid only as a
-  session/window total, with source and timestamp.
+- `host_cost_command`: host-native usage/cost summary such as Claude Code `/cost`
+  or the DEVIN CLI `/usage` (estimated session credit/ACU; interactive, run by
+  the human), recorded by the human or a supported host export. It is valid only
+  as a session/window total, with source and timestamp. When the host reports no
+  USD (e.g. Devin self-serve gives credit/ACU, not USD), keep `cost usd` empty and
+  show the native consumption unit; never convert it to USD.
 - `manual_allocation`: human/FinOps-approved allocation from aggregate cost.
 
 ## degradation
