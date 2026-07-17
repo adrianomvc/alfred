@@ -202,13 +202,16 @@ def warn_if_devin_outdated():
         return
     channel = os.environ.get(
         "ALFRED_DEVIN_UPDATE_CHANNEL",
-        "Central de Software (or `devin update` if self-managed)",
+        "Central de Software (ou `devin update` se for gerenciado por voce)",
     )
+    # pt-BR without accents on purpose: this line is printed by Python, whose
+    # stdout is cp1252 on Windows and would mojibake accented characters. The
+    # installer (install.sh) prints an accented, highlighted box from bash.
     print(
-        f"WARN devin-cli: to save tokens with RTK, the DEVIN CLI must be v3000 or "
-        f"newer - yours is v{major}. The rtk hook is already installed but stays "
-        f"INERT until you update. Update the DEVIN CLI via {channel} and pick "
-        f"v3 (v3000) or newer, then reopen Devin."
+        f"AVISO devin-cli: para economizar tokens com o RTK, o Devin precisa ser "
+        f"v3000 ou mais recente (a sua e v{major}). O hook ja esta instalado, mas "
+        f"fica INATIVO ate atualizar. Atualize o Devin via {channel} e escolha "
+        f"v3 (v3000) ou mais recente."
     )
 
 
