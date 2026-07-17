@@ -241,12 +241,26 @@ if [ "$SKIP_RTK" != "1" ]; then
     # CLI user config. Idempotent; safe to re-run.
     RTK_PYTHON="$(command -v python3 || command -v python || true)"
     if [ -n "$RTK_PYTHON" ]; then
-      if RTK_HOOK_OUT="$("$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" 2>&1)"; then
+      if "$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" >/dev/null 2>&1; then
         info "DEVIN CLI rtk PreToolUse hook installed (transparent rewrite for exec)."
-        # Surface the version warning: if the DEVIN CLI is too old to honor the
-        # rewrite (< v3000), tell the human here instead of swallowing it.
-        RTK_HOOK_WARN="$(printf '%s\n' "$RTK_HOOK_OUT" | grep -i '^WARN' || true)"
-        [ -n "$RTK_HOOK_WARN" ] && info "$RTK_HOOK_WARN"
+        # Version gate for the transparent rewrite, printed HERE from bash (not
+        # Python) so the pt-BR accents render — Python stdout is cp1252 on Windows
+        # and would mojibake. Highlighted box; only shown when Devin is < v3000.
+        DEVIN_VER="$(devin --version 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)"
+        if [ -n "$DEVIN_VER" ] && [ "$DEVIN_VER" -lt 3000 ] 2>/dev/null; then
+          echo ""
+          echo "  ============================================================"
+          echo "  ATENÇÃO - RTK (economia de tokens no Devin)"
+          echo "  ------------------------------------------------------------"
+          echo "  Para o RTK funcionar, o DEVIN CLI precisa ser v3000 ou mais"
+          echo "  recente. A sua versão é v$DEVIN_VER: o hook está instalado,"
+          echo "  mas fica INATIVO até você atualizar."
+          echo ""
+          echo "  >> Atualize o Devin pela CENTRAL DE SOFTWARE (versão v3 /"
+          echo "     v3000 ou mais recente) e reabra o Devin."
+          echo "  ============================================================"
+          echo ""
+        fi
       else
         info "Could not install the DEVIN rtk hook automatically; run: python \"$INSTALL_DIR/scripts/workflow/sync-host-shims.py\" -Host devin-cli -InstallHooks"
       fi
