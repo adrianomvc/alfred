@@ -25,9 +25,21 @@
 - readiness:
 
 ## Plano
-| Unit | Repo | Escopo | Write scope | Dependencias | Comando de verificacao | Sinal esperado | Evidencia | Revisor | Worktree | Status |
-|---|---|---|---|---|---|---|---|---|---|---|
-| unit-001 |  |  |  |  |  |  |  | none |  | pending |
+| Unit | Repo | Escopo | Write scope | Dependencias | Verificacao | Sinal esperado | Evidencia | Revisor | Modo da tentativa | Worktree | Status |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| unit-001 |  |  |  |  |  |  |  | none | guided |  | pending |
+
+## Relatorios de exploracao
+> Registrar 1-3 tarefas focadas por rodada; detalhe completo continua JIT.
+
+| Tarefa | Hipotese | Arquivos/simbolos | Evidencias | Descoberta | Incertezas | Recomendacao | Nao investigado | Custo aprox. |
+|---|---|---|---|---|---|---|---|---|
+| explore-001 |  |  |  |  |  |  |  |  |
+
+## Tentativas de implementacao
+| Unit | Rodada | Modo | Sinal de falha | Feedback corretivo | Delta de escopo | Resultado |
+|---|---|---|---|---|---|---|
+| unit-001 | 1 | guided |  |  |  | pending |
 
 ## Sequencia
 1. 

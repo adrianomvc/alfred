@@ -41,6 +41,9 @@ Use this shape:
   - expected signal:
   - evidence:
   - reviewer: none | explore | fresh-strong
+  - attempt mode: guided | corrective | strict-minimal
+  - failed signal:
+  - corrective feedback:
   - worktree:
   - status:
 ```
@@ -55,6 +58,8 @@ Use this shape:
   assumed cheaper. Record the actual profile and model.
 - The Orchestrator serializes merge back into `state`.
 - Every completed unit updates observability and audit.
+- Retrying a unit follows `verification-loop.md`; do not rerun an unchanged
+  prompt and call it a correction.
 
 ## Completion
 A unit is done when:

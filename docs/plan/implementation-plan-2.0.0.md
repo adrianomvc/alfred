@@ -127,6 +127,7 @@ Claude-Mem.
 - [x] W9.3 Progressive disclosure: memória em três níveis, exploração estrutural, read advisor não bloqueante e benchmark de token+recall.
 - [x] W9.4 Devin: permissões mínimas, segredos fora de argv/YAML, blueprints por tier, health/pin/rollout, reinjeção pós-compaction e capability probe sem inferência por versão.
 - [x] W9.5 Loop de verificação executável, revisor fresco, worktrees para escritores paralelos, CI Ubuntu/Windows e checksum obrigatório para RTK externo.
+- [x] W9.5a ✅ (2026-07-18) Refinamento ManagerWorker: correção guided→corrective→strict-minimal, relatório compacto de exploração com evidências, delegação condicional e eval A/B antes de alterar o roteamento padrão.
 - [ ] W9.6 Executar os cinco pilotos reais de `docs/hardening-pilot-matrix.md` e anexar evidências.
 - [ ] W9.7 Administrador torna o check de CI obrigatório em `main`; humano cria tag estável somente após W9.6.
 

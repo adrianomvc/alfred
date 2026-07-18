@@ -64,6 +64,25 @@ so Alfred never promises a cheaper write subagent. Parallel writers require
 separate worktrees and serialized integration; without isolation, parallelism is
 read-only. Record the profile, model, worktree, and integration owner in audit.
 
+## Conditional delegation
+Organizational structure has a cost. Prefer **direct execution** for a simple,
+local, well-specified change, or when the host cannot create a meaningful
+capability/cost gap. Use **structured delegation** for ambiguous, multi-file, or
+independently explorable work when a strong director can guide a lower-tier
+executor, or when governance requires an independent reviewer.
+
+Default each exploration round to 1-3 focused tasks and at most 3 rounds.
+Extending either limit requires a recorded reason; SAFE, incident, and deep
+debugging work may extend rather than sacrifice evidence. Workers return compact
+reports with source pointers, uncertainty, and uninvestigated scope. Reports are
+selectors, not authority.
+
+On Devin, `general` inherits the parent model. Unless the host exposes and
+records an explicit worker model, use phase-level switching (strong Design,
+eligible medium Execution, strong review) or label same-tier delegation as a
+governance separation with **no claimed model-cost saving**. In SAFE, same-tier
+strong separation remains valid for independent judgment, not economy.
+
 ## Deferred work — cheaper latency trade-off
 If the host exposes batch, flex, background, queued, or low-priority execution,
 Alfred may use it only for non-critical-path work: metrics rollups, usage
@@ -100,6 +119,10 @@ cost, first-pass acceptance, rework, validation result, duration, and
 interaction/request count. A cheaper model is not recommended on cost alone.
 Insights may propose a pilot, but this policy changes only after a human
 decision and explicit commit.
+
+The ManagerWorker study (`https://arxiv.org/abs/2603.26458`) motivates a pilot,
+not an automatic policy change: it reduced strong-model tokens but increased
+total tokens, used estimated costs, and evaluated Python bug fixes only.
 
 ## User override
 The person may **set/switch the model at any time** — one step or the whole demand. Alfred respects and records it in `state`/`audit`. If the choice is **below the risk floor** (e.g. cheap model in SAFE), Alfred **warns the trade-off** (does not block — human in control) and records the decision. Raising the tier is free.

@@ -141,6 +141,10 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - Executable verification-loop fields, fresh-review guidance, separate
   worktrees for parallel writers, cross-platform GitHub Actions validation, and
   mandatory SHA-256 verification for downloaded RTK packages.
+- ManagerWorker-aligned execution refinement: guided autonomy on the first
+  attempt, corrective feedback on the second, strict-minimal scope on the third,
+  compact evidence-bearing exploration reports, conditional delegation, and an
+  A/B routing eval that measures total usage rather than strong tokens alone.
 - Usage-cost adoption design: `docs/usage-cost-adoption.md` defines the next measurement path with Devin Session Insights + Consumption API as the primary ACU source, `ccusage` as a secondary local-CLI source, `ALFRED_RUN_ID`/`devin-...` correlation, confidence labels, and a pilot checklist before automatic model-policy suggestions.
 - Token economy policies: `rules/common/token-budget-policy.md` adds context-budget preflight before large loads/token-heavy work, and `rules/common/deferred-work-policy.md` allows batch/flex/background execution only for non-critical-path drafts such as rollups, read-only scans, stale reverse-eng refreshes, summaries, and notifications. `validate-token-economy-policy` keeps the wiring intact.
 - Context compression policy: `rules/common/context-compression-policy.md` allows RAG/compressed summaries for safe context selection while requiring original sources for code edits, Design decisions, SAFE/incident judgment, and validation evidence. Design, Execution, Code Generation, Validate, boot, and `validate-context-compression-policy` now enforce that boundary.
