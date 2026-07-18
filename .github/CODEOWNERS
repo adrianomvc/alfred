@@ -1,0 +1,4 @@
+/core/ @adrianomvc
+/rules/ @adrianomvc
+/scripts/shared/ @adrianomvc
+**/*.schema.json @adrianomvc

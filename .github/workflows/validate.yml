@@ -23,5 +23,22 @@ jobs:
           python-version: "3.12"
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+      - name: Python compile check
+        run: python -m compileall -q scripts tests
+      - name: Bash syntax check
+        shell: bash
+        run: bash -n install/install.sh install/alfred
+      - name: Installer always-main policy smoke test
+        shell: bash
+        run: |
+          set +e
+          bash install/install.sh rollback >/dev/null 2>&1
+          test "$?" -eq 2 || exit 1
+          ALFRED_VERSION=v1.0.0 bash install/install.sh >/dev/null 2>&1
+          test "$?" -eq 2 || exit 1
+          exit 0
       - name: Canonical framework gate
         run: python scripts/validators/validate-framework.py
+      - name: ShellCheck
+        if: runner.os == 'Linux'
+        run: shellcheck -S error install/install.sh install/alfred

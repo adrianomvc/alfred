@@ -18,20 +18,27 @@ How Alfred asks humans. Inherited from AI-DLC `question-format-guide`. Used in I
 - **The human answers in the artifact** — Alfred creates/updates `003-requirements.md`, tells the human to edit each `[Resposta]:` line, save the file, and then say `pronto`/`terminei` in chat. Chat confirms completion only; it does not carry the answers.
 - **No host-native question widgets for requirements** — Claude/Codex/Devin UI prompts, popups, or multiple-choice widgets must not be used to ask or collect requirements answers. Chat/UI may only notify that `003-requirements.md` has open questions and point to the file.
 - **Side questions (`/btw`) — never for material ones** — a quick lookup that does **not** change state, a decision, scope, or a checkpoint may use a host sidechain like the DEVIN CLI `/btw` (keeps the main context clean). Anything material — requirements, decisions, checkpoints, escalations — goes in the artifact, never in a sidechain that is not recorded.
-- **AI-DLC-compatible default: single choice + free text** — offer 2 to 5 meaningful options using `A` to `E`, with `Outra / A confirmar` as the last option when the listed options may not cover the answer. The human answers with one letter in `[Resposta]:`.
+- **AI-DLC-compatible default: proposed choices + free text** — expose the
+  model's uncertainty through meaningful alternatives. Use as few or as many
+  options as the decision genuinely needs; `A` to `E` is common, not a fixed
+  shape. Add `Outra / A confirmar` when the set may not cover the answer. The
+  human records the selection in `[Resposta]:`.
 - **Alfred extension: multiple selection** — only when the question explicitly says `selecione uma ou mais`, use checkbox options (`[ ]` / `[x]`) with no `A)`/`B)` labels. Use `[Resposta]:` only for extra detail.
-- **Recommended option** — when there is a safer/default path, mark one option with `(Recomendado)`. For unknown SAFE facts, recommend confirming before execution instead of guessing.
+- **Recommended option** — when there is a safer/default path, mark exactly one
+  option with `(Recomendada)`. The marker is enough; do not add a recommendation
+  explanation. For unknown SAFE facts, mark the confirmation option.
 - **Never pre-fill `[Resposta]:`** — the tag only orients; the human always answers (D7). No auto-confirm, not even for low-risk, and never offer to accept the recommended options and advance on the human's behalf. **Only exception:** explicit human delegation ("I won't answer, decide for me") — then Alfred may fill defaults but marks each `[Resposta]:` as `assumida` and records the delegation in `audit`.
 - **Layout by priority** — group blocking questions (`🔴 bloqueiam o avanço`) before optional ones (`🟡 podem responder depois`), each with a one-line "Por quê" and a status marker (`◻ aberta` · `✓ respondida` · `⚠ contradição`). See `templates/hub/requirements.md`.
 - **`[Resposta]:` tag** — each question is followed by a `[Resposta]:` line the human fills.
 - **One decision per question** — do not bundle several decisions into one item. If more than one option can be selected independently, prefer splitting the question; otherwise label it explicitly as `selecione uma ou mais` and present each option as a checkbox.
-- **Option limit** — use the fewest useful options. Minimum 2, maximum 5. Do not add filler options just to reach 5.
+- **Option count** — use the fewest useful options, but do not impose a fixed
+  count or add filler alternatives.
 - **No emergent behavior** — do not invent options the context does not support; if you do not know, ask, do not guess (supreme law).
 
 ## Format
 ```markdown
 ### Q1 — <clear, specific question?>
-- A) <opcao recomendada> (Recomendado)
+- A) <opcao recomendada> (Recomendada)
 - B) <opcao alternativa>
 - C) Outra / A confirmar
 - D) <opcional, se necessario>
@@ -54,6 +61,9 @@ Por quê: <impacto>.
 
 ## Where the questions live
 - **HUB:** `<id-iniciativa>/<id-demanda>/01-inception/003-requirements.md` — the canonical question list for the demand.
+- **Pre-demand draft:** `000-drafts/<draft-id>/01-inception/003-requirements.md`
+  is canonical until identifiers and lane are confirmed. Draft is a staging
+  status, never a sixth lifecycle phase.
 - Unit-decomposition questions use the same file (or the unit's `questions` block) — never loose in chat.
 - **Surface, do not embed:** the toolbar/response points to the file, e.g. `⏸ 1 decisão pendente → 003-requirements.md`. The response must tell the human exactly what to do: open the file, fill `[Resposta]:`, save, then say `pronto`/`terminei`. Do not duplicate the question text/options in chat.
 - State the path explicitly each time there are open questions, so it is reachable without searching.

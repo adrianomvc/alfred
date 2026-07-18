@@ -36,6 +36,7 @@ native commands with explicit limits (`tail`, `head`, `Select-Object -First`,
 ## Manual Fallback Matrix
 | Helper (`<name>`) | Script output | Manual Markdown/JSONL fallback |
 |---|---|---|
+| `alfred` | governed lifecycle operations | create/update the same documented Markdown/JSONL artifacts and run each gate manually |
 | `alfred-boot` | terminal context summary | read HUB `001-index.md` and demand `001-state.md`; list open demands manually |
 | `render-toolbar` | terminal toolbar | use default rich profile when the helper can run; if Unicode/emoji is unsupported, run `--profile text --allow-text-fallback` or load `core/presentation/toolbar-quick.md` and render only the documented text fallback from `001-state.md`; do not hand-draw the rich block |
 | `validate-framework` | terminal validation result | execute `docs/framework-validation.md` checklist manually |

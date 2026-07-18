@@ -13,7 +13,7 @@ identity, and measured token/usage output.
 | P4 | SAFE demand with budget pressure | no phase, acceptance, security, rollback, or SAFE gate skipped | pending external run |
 | P5 | Enterprise Devin environment rollout | tier placement, secrets UI, least privilege, context reinjection, health evidence | pending external run |
 
-For each accepted row, record the pinned Alfred commit/tag, Devin environment
+For each accepted row, record the Alfred commit history adopted by the demand, Devin environment
 revision, repository commit, commands executed, expected versus actual signal,
 fresh-reviewer result, and unresolved gaps. Redact secret values; a secret's
 presence may be evidenced by its configured name only.

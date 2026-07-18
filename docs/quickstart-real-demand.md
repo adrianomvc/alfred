@@ -2,9 +2,10 @@
 
 Use this when starting the first real demand after the SQ9 pilot.
 
-## 0. Opening framing checkpoint
-Before any clone/fetch, id stamping, `state` write, or HUB/App scaffolding,
-propose the framing and wait for explicit human confirmation:
+## 0. Create the pre-demand draft
+Run `alfred demand draft --hub <alfred-docs-hub> --title <titulo>`. This may
+create only `000-drafts/<draft-id>/001-state.md` and
+`01-inception/003-requirements.md`. Put all framing questions in that file:
 - detected workspace role: HUB, APP, HUB+APP, or unknown;
 - target app source/path and where it will live in the workspace;
 - initiative id and demand id;
@@ -13,7 +14,15 @@ propose the framing and wait for explicit human confirmation:
 - artifacts Alfred will create in HUB/App.
 
 Deterministic labels may be inferred (for example sigla from repo name).
-Material decisions are never inferred from "start a demand".
+Material decisions are never inferred from "start a demand". The model proposes
+as many meaningful alternatives as the decision needs, including multiple
+selection when choices can coexist. Mark one `(Recomendada)` when a preferred
+choice exists and keep `Outra / A confirmar` when the set may be incomplete.
+Never pre-fill `[Resposta]:`.
+
+The analyst edits the file asynchronously and says only `pronto`/`terminei` in
+chat. Run `alfred requirements status --draft <path>` and perform semantic
+review before `alfred demand start --draft <path>` creates canonical artifacts.
 
 If the workspace role is unknown or ambiguous, explain first: the HUB is the
 sigla's source of truth for `state`, decisions, audit, metrics, summary, and
