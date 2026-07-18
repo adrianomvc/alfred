@@ -127,6 +127,7 @@ REQUIRED_PATHS = [
     "scripts/metrics/normalize-usage-cost.py",
     "scripts/metrics/measure-context-budget.py",
     "scripts/metrics/session-cost.py",
+    "scripts/metrics/budget-monitor.py",
     "scripts/shared/__init__.py",
     "scripts/shared/context_budget.py",
     "scripts/shared/observability/domain/models.py",

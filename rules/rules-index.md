@@ -9,6 +9,7 @@
 | `agent-orchestrator` | `agent` | `all` | `all` | `all` | `orchestrator` | Agent - Orchestrator | [rules/agents/orchestrator.md](rules/agents/orchestrator.md) |
 | `agent-reviewer` | `agent` | `all` | `all` | `all` | `reviewer` | Agent - Reviewer | [rules/agents/reviewer.md](rules/agents/reviewer.md) |
 | `agent-spec-design` | `agent` | `all` | `all` | `all` | `spec-design` | Agent - Spec/Design | [rules/agents/spec-design.md](rules/agents/spec-design.md) |
+| `common-budget-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - per-demand budget monitoring and decisions | [rules/common/budget-policy.md](rules/common/budget-policy.md) |
 | `common-content-validation` | `event` | `all` | `all` | `all` | `all` | Common rule — content validation (light) | [rules/common/content-validation.md](rules/common/content-validation.md) |
 | `common-context-compaction-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - when to compact conversation context safely | [rules/common/context-compaction-policy.md](rules/common/context-compaction-policy.md) |
 | `common-context-compression-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - safe RAG/context compression | [rules/common/context-compression-policy.md](rules/common/context-compression-policy.md) |

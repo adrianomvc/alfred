@@ -53,7 +53,9 @@ creating HUB/App demand artifacts, writing `state`, or classifying a lane as
 accepted.
 
 The proposal includes: target app source/path, workspace placement, initiative
-id, demand id, initial scope, proposed lane, and which artifacts will be created.
+id, demand id, initial scope, proposed lane, an **optional budget** for the
+demand (`budget limit` + `budget on limit`, monitored per
+`rules/common/budget-policy.md`), and which artifacts will be created.
 **Arrive with concrete proposed values, not a blank form.** Derive a suggested
 initiative id and demand id from the demand description plus the sigla (a short
 kebab-case slug of the goal, e.g. demand `sankey-categoria` under initiative
