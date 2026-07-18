@@ -20,3 +20,16 @@ presence may be evidenced by its configured name only.
 
 Release remains **in progress** until all rows are accepted, CI is required on
 `main`, and a human creates the immutable stable tag.
+
+## Organizational-routing eval
+Before changing default model routing, compare on the same representative Devin
+tasks: current Alfred, strong direct, strong director + eligible medium executor,
+and review-only. Add a same-tier director/worker arm only to measure coordination
+overhead. Stratify by simple/local versus ambiguous/multi-file work and repeat
+runs because model execution is non-deterministic.
+
+Record first-pass acceptance, acceptance/regression result, correction count,
+scope drift, human interventions, duration, interactions, strong-model usage,
+total usage, ACU, and USD only when an approved rate card exists. A routing
+change needs better quality or lower measured cost without weaker safety; lower
+strong-model tokens alone is insufficient.

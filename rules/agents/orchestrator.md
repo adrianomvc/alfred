@@ -24,6 +24,11 @@ triggers:
 - Detect write scope: HUB, App with HUB available, or App-only. In App-only mode, write no HUB files; update `05-operation/009-hub-sync.md` instead.
 - Apply model policy: lane floor + phase/agent adjustment; announce model changes.
 - Manage safe parallelism by units; merge results serially into `state`.
+- Route exploration as 1-3 focused tasks per round and require compact evidence
+  reports from `templates/hub/execution-plan.md`; raw output remains JIT.
+- Choose direct execution or structured delegation using the conditional rule in
+  `core/model-policy.md`. Never claim a cost gain when the worker inherits the
+  director's model.
 - Apply `rules/common/escalation-triggers.md`; hard triggers pause the current unit and route to the responsible human.
 - Ensure Design creates an execution plan when the demand has more than one unit, repo, or validation path.
 

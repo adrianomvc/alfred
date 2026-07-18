@@ -725,6 +725,23 @@ def assert_hardening_contracts(root):
     email_adapter = (root / "scripts/adapters/mcp-email-server.py").read_text(encoding="utf-8-sig")
     if 'file_smtp.get("password", "")' in email_adapter or "secret_in_file" not in email_adapter:
         raise SystemExit("E-mail adapter must refuse legacy file-based SMTP passwords")
+
+    verification = (root / "rules/common/verification-loop.md").read_text(encoding="utf-8-sig")
+    for marker in ("Guided-then-strict corrections", "Guided autonomy", "Corrective", "Strict minimal"):
+        if marker not in verification:
+            raise SystemExit(f"Guided-then-strict contract missing: {marker}")
+    execution_plan = (root / "templates/hub/execution-plan.md").read_text(encoding="utf-8-sig")
+    for marker in ("## Relatorios de exploracao", "Arquivos/simbolos", "Nao investigado", "## Tentativas de implementacao"):
+        if marker not in execution_plan:
+            raise SystemExit(f"Exploration/attempt evidence contract missing: {marker}")
+    model_policy = (root / "core/model-policy.md").read_text(encoding="utf-8-sig")
+    for marker in ("## Conditional delegation", "1-3 focused tasks", "no claimed model-cost saving"):
+        if marker not in model_policy:
+            raise SystemExit(f"Conditional delegation contract missing: {marker}")
+    routing_eval = (root / "docs/hardening-pilot-matrix.md").read_text(encoding="utf-8-sig")
+    for marker in ("## Organizational-routing eval", "strong direct", "review-only", "total usage"):
+        if marker not in routing_eval:
+            raise SystemExit(f"Organizational-routing eval contract missing: {marker}")
     print("OK hardening contracts")
 
 
