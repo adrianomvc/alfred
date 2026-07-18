@@ -63,6 +63,18 @@ class BuildResultTests(unittest.TestCase):
         self.assertIsNone(result["session"])
 
 
+class DisplayTextTests(unittest.TestCase):
+    def test_compact_acu_line_without_usd_or_confidence(self):
+        result = SC.build_result({"usage acu demand baseline": "100.0", "budget limit": "40"},
+                                 ("acu", 129.42, 180.0), None)
+        text = SC.display_text(result)
+        self.assertIn("129.42/180.0 ACU", text)
+        self.assertIn("28.1% disp", text)
+        self.assertIn("demanda 29.42 (73.6% orc)", text)
+        self.assertNotIn("US$", text)          # USD stays on the Custo line
+        self.assertNotIn("estimated", text)
+
+
 class WriteStateFieldsTests(unittest.TestCase):
     def test_updates_in_place_and_appends_to_section(self):
         with tempfile.TemporaryDirectory() as tmp:

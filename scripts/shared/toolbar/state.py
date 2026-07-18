@@ -26,6 +26,7 @@ class ToolbarState:
     checkpoint: str
     model: str
     usage_cost: str
+    usage_acu_display: str
     state_cost_usd: str
     framework_version: str
     framework_commit: str
@@ -58,6 +59,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
     checkpoint = get_field(content, "checkpoint") or "n/a"
     model = get_first_field(content, ["model", "current model", "modelo", "running model"])
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
+    usage_acu_display = get_first_field(content, ["usage acu display"])
     state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
     framework_version = get_first_field(content, ["framework version", "versao framework", "versão framework"])
     framework_commit = get_first_field(content, ["framework commit"])
@@ -74,6 +76,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
         checkpoint=checkpoint,
         model=model,
         usage_cost=usage_cost,
+        usage_acu_display=usage_acu_display,
         state_cost_usd=state_cost_usd,
         framework_version=framework_version,
         framework_commit=framework_commit,

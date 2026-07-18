@@ -54,6 +54,7 @@ def render_toolbar(
         framework=framework,
         app_commit=app_commit_display,
         summary=summary,
+        usage_fallback=toolbar_state.usage_acu_display,
     )
 
     if profile == "rich":

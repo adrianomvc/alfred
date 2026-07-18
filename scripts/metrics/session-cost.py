@@ -101,10 +101,28 @@ def build_result(fields, parsed, rate_card_path):
     return result
 
 
+def display_text(result):
+    """Compact ACU summary for the toolbar `Consumo` line (pt-BR).
+
+    USD and confidence are omitted here — they already show on the `Custo` line.
+    """
+    unit = "ACU" if result["unit"] == "acu" else "quota %"
+    parts = [f"{result['cycle_consumed']}/{result['cycle_total']} {unit}"]
+    if result.get("available_pct") is not None:
+        parts.append(f"{result['available_pct']}% disp")
+    if result.get("demand") is not None:
+        d = f"demanda {result['demand']}"
+        if "budget_pct" in result:
+            d += f" ({result['budget_pct']}% orc)"
+        parts.append(d)
+    return " · ".join(parts)
+
+
 def state_updates(result, set_baseline, scope):
     updates = {
         "usage acu cycle": f"{result['cycle_consumed']}/{result['cycle_total']}",
         "usage acu total": result["cycle_total"],
+        "usage acu display": display_text(result),
         "cost source": result["source"],
         "cost confidence": result["confidence"],
     }
