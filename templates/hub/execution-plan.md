@@ -25,9 +25,9 @@
 - readiness:
 
 ## Plano
-| Unit | Repo | Escopo | Write scope | Dependencias | Validacao | Status |
-|---|---|---|---|---|---|---|
-| unit-001 |  |  |  |  |  | pending |
+| Unit | Repo | Escopo | Write scope | Dependencias | Comando de verificacao | Sinal esperado | Evidencia | Revisor | Worktree | Status |
+|---|---|---|---|---|---|---|---|---|---|---|
+| unit-001 |  |  |  |  |  |  |  | none |  | pending |
 
 ## Sequencia
 1. 

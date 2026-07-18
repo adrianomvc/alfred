@@ -37,7 +37,11 @@ Use this shape:
   - inputs:
   - outputs:
   - dependencies:
-  - validation:
+  - verification command:
+  - expected signal:
+  - evidence:
+  - reviewer: none | explore | fresh-strong
+  - worktree:
   - status:
 ```
 
@@ -45,7 +49,10 @@ Use this shape:
 - Units share the same demand id and state.
 - Units do not have their own `001-state.md`.
 - Units may raise risk, never lower it below the demand lane.
-- Parallel units must have disjoint write scopes.
+- Parallel writers require disjoint write scopes and separate worktrees. Without
+  isolation, parallel units are read-only research.
+- Devin `explore` is read-only; `general` inherits the parent model and is not
+  assumed cheaper. Record the actual profile and model.
 - The Orchestrator serializes merge back into `state`.
 - Every completed unit updates observability and audit.
 

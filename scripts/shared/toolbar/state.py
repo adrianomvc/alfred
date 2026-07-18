@@ -59,7 +59,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
     checkpoint = get_field(content, "checkpoint") or "n/a"
     model = get_first_field(content, ["model", "current model", "modelo", "running model"])
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
-    usage_acu_display = get_first_field(content, ["usage acu display"])
+    usage_acu_display = typed_usage_display(content) or get_first_field(content, ["usage acu display"])
     state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
     framework_version = get_first_field(content, ["framework version", "versao framework", "versão framework"])
     framework_commit = get_first_field(content, ["framework commit"])
@@ -85,6 +85,24 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
         markers=markers,
         progress=progress,
     )
+
+
+def typed_usage_display(content: Sequence[str]) -> str:
+    unit = get_first_field(content, ["usage unit"])
+    current = get_first_field(content, ["usage current"])
+    limit = get_first_field(content, ["usage limit"])
+    demand = get_first_field(content, ["usage demand consumed"])
+    if not unit or not current or not limit:
+        return ""
+    label = {"acu": "ACU", "quota_percent": "quota %", "usd": "USD", "tokens": "tokens"}.get(unit, unit)
+    parts = [f"{current}/{limit} {label}"]
+    try:
+        parts.append(f"{round((float(limit) - float(current)) / float(limit) * 100, 1)}% disp")
+    except (ValueError, ZeroDivisionError):
+        pass
+    if demand:
+        parts.append(f"demanda {demand}")
+    return " · ".join(parts)
 
 
 def execution_phases(content: Sequence[str], phase: str) -> tuple[str, ...]:

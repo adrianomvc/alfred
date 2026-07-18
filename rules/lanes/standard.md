@@ -35,7 +35,9 @@ Medium risk/complexity. Basic discovery, clear spec, acceptance criteria, techni
 `state` + `decisions` + `audit`.
 
 ## Toolbar
-Rendered by the Orchestrator at the top of each interaction (see `core/...` toolbar spec): mode, % progress, the 5-phase track, current step, checkpoint, next step, accumulated cost.
+Rendered by the Orchestrator at the top of each interaction (see
+`core/presentation/toolbar.md`): mode, % progress, the 5-phase track, current
+step, checkpoint, next step, accumulated cost.
 
 ## Standardized HITL
 Every relevant transition presents 2 options: **🔧 Request Changes** / **✅ Approve & Continue** — no emergent menus. Preceded by a factual summary of what was done.

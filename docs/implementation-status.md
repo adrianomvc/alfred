@@ -21,7 +21,7 @@ All D1–D47 decisions are materialized. Highlights by area:
 Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framework-closure.md`.
 
 ## Still incomplete
-- D10/D43: Claude Code request tokens can be collected from durable transcripts through the optional hook; session cost can be displayed from ccusage/state without being treated as demand cost. Interaction/demand cost still needs an approved rate card or host/API source. Devin ACU import remains pending approved Session Insights/Consumption API access.
+- D10/D43: Claude Code request tokens can be collected from durable transcripts; Devin `/usage` can be pasted into typed `alfred.usage.v2` state with reset-safe deltas. Automatic Devin Session Insights/Consumption API import still depends on approved API access. USD remains unavailable without an approved effective rate card.
 - D14: host-specific execution adapters not implemented; readiness checklist, adapter states, template, validation, and handoff examples exist.
 - D20/D23: tracker/PR integration is a connector contract plus readiness checklist/example handoff, not a working adapter.
 - D32/D46: insight examples and model-policy validation exist; tuning needs more real project data.
@@ -29,11 +29,13 @@ Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framewor
 - D44: notification/email is a contract/template plus example handoff, not a working channel.
 - Historical examples still need migration before they can be promoted to `validate-demand --strict` regression fixtures.
 - Real integrated execution depends on environment parameters, credentials, network access, and target-host decisions from the adopting squad.
-- Release tags and adoption cadence need human governance outside the framework.
+- The five real hardening pilots in `docs/hardening-pilot-matrix.md`, the stable
+  Git tag, and GitHub branch-protection evidence remain external/human gates.
 
 ## Next Implementation Order
 Follow `docs/plan/implementation-plan-2.0.0.md` (waves and prioritized backlog). Summary:
-1. Finish the 2.0.0 hardening waves (hygiene, full SDD templates, assisted risk classification).
-2. Complete one real SQ9 demand through integrated validation once environment parameters are supplied.
+1. Execute and record the five real hardening pilots once target repositories,
+   credentials, and owners are available.
+2. Configure the CI validation check as required on `main`, then create the
+   stable tag only after pilot acceptance.
 3. Add real host adapters only when a target host, credential owner, and allowed operations are defined.
-4. Add language/platform/organization skills as stacks appear; convert repeated manual handoffs into optional scripts only after they prove stable.

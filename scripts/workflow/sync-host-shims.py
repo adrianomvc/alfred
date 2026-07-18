@@ -4,16 +4,8 @@
 import argparse
 import json
 import os
-import re
 import shutil
-import subprocess
 from pathlib import Path
-
-# DEVIN CLI major version that started honoring PreToolUse `updatedInput`
-# (transparent rewrite). v2026.x calls the hook but runs the original command;
-# confirmed working after updating past this. Below it, the rtk rewrite is inert.
-DEVIN_MIN_MAJOR = 3000
-
 
 HOST_SOURCES = {
     "claude-code": "hosts/claude-code/SKILL.md",
@@ -182,39 +174,6 @@ def install_claude_code_usage_hook(alfred_home, settings_path, dry_run):
     return 1
 
 
-def devin_major_version():
-    """Return the DEVIN CLI major version as int, or None if unknown."""
-    devin = shutil.which("devin")
-    if not devin:
-        return None
-    try:
-        out = subprocess.run([devin, "--version"], capture_output=True, text=True, timeout=5)
-    except (OSError, subprocess.SubprocessError):
-        return None
-    match = re.search(r"v?(\d+)", (out.stdout or "") + (out.stderr or ""))
-    return int(match.group(1)) if match else None
-
-
-def warn_if_devin_outdated():
-    """Warn (do not block) when the DEVIN CLI is too old to honor the hook rewrite."""
-    major = devin_major_version()
-    if major is None or major >= DEVIN_MIN_MAJOR:
-        return
-    channel = os.environ.get(
-        "ALFRED_DEVIN_UPDATE_CHANNEL",
-        "Central de Software (ou `devin update` se for gerenciado por voce)",
-    )
-    # pt-BR without accents on purpose: this line is printed by Python, whose
-    # stdout is cp1252 on Windows and would mojibake accented characters. The
-    # installer (install.sh) prints an accented, highlighted box from bash.
-    print(
-        f"AVISO devin-cli: para economizar tokens com o RTK, o Devin precisa ser "
-        f"v3000 ou mais recente (a sua e v{major}). O hook ja esta instalado, mas "
-        f"fica INATIVO ate atualizar. Atualize o Devin via {channel} e escolha "
-        f"v3 (v3000) ou mais recente."
-    )
-
-
 def default_devin_config_path():
     """User-level DEVIN CLI config (global hooks apply to every project)."""
     appdata = os.environ.get("APPDATA")
@@ -234,10 +193,12 @@ def install_devin_rtk_hook(alfred_home, config_path, dry_run):
     """
     config_path = config_path or default_devin_config_path()
     hook_script = alfred_home / "scripts" / "workflow" / "devin-rtk-hook.py"
+    context_script = alfred_home / "scripts" / "workflow" / "devin-context-hook.py"
     if not hook_script.exists():
         raise SystemExit(f"Devin rtk hook script not found: {hook_script}")
 
     command = f'python "{hook_script}"'
+    context_command = f'python "{context_script}"'
     if not config_path.exists():
         settings = {}
     else:
@@ -255,6 +216,11 @@ def install_devin_rtk_hook(alfred_home, config_path, dry_run):
             "matcher": "^exec$",
             "hooks": [{"type": "command", "command": command}],
         })
+    for event_name in ("SessionStart", "PostCompaction"):
+        hooks = settings.setdefault("hooks", {})
+        entries = hooks.setdefault(event_name, [])
+        if not command_exists_in_hooks({"hooks": {event_name: entries}}, context_command):
+            entries.append({"hooks": [{"type": "command", "command": context_command}]})
     after = json.dumps(settings, sort_keys=True)
 
     if before == after:
@@ -270,7 +236,7 @@ def install_devin_rtk_hook(alfred_home, config_path, dry_run):
     config_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
     action = "reconciled" if already_present else "installed"
     print(f"SYNC devin-cli rtk hook: {action} PreToolUse hook in {config_path}")
-    warn_if_devin_outdated()
+    print("VERIFY devin-cli hooks: use /hooks, run a known rewrite, then confirm `rtk gain` increments.")
     return 1
 
 

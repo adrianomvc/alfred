@@ -22,14 +22,16 @@ widening blanket permissions.
 | Allow rule | Covers | Note |
 |---|---|---|
 | `Read(~/.alfred/**)` | reading framework markdown/scripts | `~` expands to home |
-| `Exec(python ~/.alfred/scripts)` | `render-toolbar.py`, `context-manifest.py`, `check-update.py`, `sync-host-shims.py`, `import-ccusage.py` | prefix match |
+| `Exec(python ~/.alfred/scripts/validators)` | deterministic read-only gates | allowed |
 | `Exec(rtk)` | terminal-token-policy commands | |
-| `Exec(git)` | status/diff/commit on the demand branch | |
+| `Exec(git status/diff/log/show)` | repository inspection | allowed as exact prefixes |
+| workflow/metrics, commit, push, PR | state changes or external effects | ask |
+| reset hard, clean force, force-push | destructive operations | deny |
 
 **Must be validated in a real session (not yet confirmed here):** the `Exec(...)`
 matcher matches a command **prefix**, and Alfred resolves `~/.alfred` to an
 absolute path before running (on Windows, `cygpath -w` → `C:\Users\...`). So
-`Exec(python ~/.alfred/scripts)` may not match a command that starts with a
+`Exec(python ~/.alfred/scripts/validators)` may not match a command that starts with a
 resolved `C:\Users\...\.alfred\scripts` path. Confirm with the plan's check —
 run `render-toolbar.py` and see whether it prompts — and widen or adjust the
 prefix (e.g. `Exec(python)`, accepting the broader scope) only if needed. Do not

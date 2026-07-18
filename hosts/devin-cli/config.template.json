@@ -2,9 +2,27 @@
   "permissions": {
     "allow": [
       "Read(~/.alfred/**)",
-      "Exec(python ~/.alfred/scripts)",
       "Exec(rtk)",
-      "Exec(git)"
+      "Exec(python ~/.alfred/scripts/validators)",
+      "Exec(git status)",
+      "Exec(git diff)",
+      "Exec(git log)",
+      "Exec(git show)",
+      "Exec(git branch --show-current)"
+    ],
+    "ask": [
+      "Write(**)",
+      "Exec(python ~/.alfred/scripts/workflow)",
+      "Exec(python ~/.alfred/scripts/metrics)",
+      "Exec(git commit)",
+      "Exec(git push)",
+      "Exec(gh pr create)"
+    ],
+    "deny": [
+      "Exec(git reset --hard)",
+      "Exec(git clean -f)",
+      "Exec(git push --force)",
+      "Exec(git push -f)"
     ]
   },
   "read_config_from": {

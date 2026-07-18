@@ -7,6 +7,8 @@ and metadata the cost event carries.
 
 import hashlib
 import json
+import math
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from shared.observability.domain.services.rate_card import ModelRate
@@ -14,6 +16,36 @@ from shared.observability.domain.services.rate_card import ModelRate
 
 class RateCardError(Exception):
     """Raised when the rate card is missing, malformed, or empty."""
+
+
+def load_approved_acu_usd_rate(path: str, observed_at: str | None = None) -> float | None:
+    """Load an approved, effective USD/ACU rate or degrade to ``None``."""
+    if not path:
+        return None
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+        rate = float((payload.get("acu") or {}).get("usd_per_acu"))
+        effective = date.fromisoformat(payload["effective_from"])
+        observed = datetime.fromisoformat(
+            (observed_at or datetime.now(timezone.utc).isoformat()).replace("Z", "+00:00")
+        ).date()
+    except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return None
+    required = (payload.get("source"), payload.get("approved_by"), payload.get("currency"))
+    if payload.get("schema_version") != "alfred.usage-rate-card.v1" or not all(required):
+        return None
+    if str(payload["currency"]).upper() != "USD" or effective > observed:
+        return None
+    if not math.isfinite(rate) or rate <= 0:
+        return None
+    effective_to = payload.get("effective_to")
+    if effective_to:
+        try:
+            if observed > date.fromisoformat(effective_to):
+                return None
+        except ValueError:
+            return None
+    return rate
 
 
 class JsonRateCardRepository:

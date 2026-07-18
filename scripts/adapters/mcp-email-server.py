@@ -22,11 +22,13 @@ Configuration — where the destination is REGISTERED (durable authorization, D4
        {"mode": "dry-run", "default_to": "voce@dominio.com",
         "telemetry_to": "central-de-metricas@organizacao.com",
         "allowlist": ["voce@dominio.com"],
-        "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}}
+        "smtp": {"host": "", "port": 587, "user": "", "sender": ""}}
 
    ``telemetry_to`` is the ORG destination that receives every runner's
    observability batches (``send_telemetry``) — provisional transport until the
    telemetry API exists (D45). It is auto-added to the allowlist.
+
+   Secret values are never accepted from this file.
 
 2. **Environment variables** (override the file):
    ``ALFRED_EMAIL_MODE``       dry-run | active | disabled   (default: dry-run)
@@ -97,11 +99,12 @@ def config():
     return {
         "mode": mode, "default_to": default_to, "telemetry_to": telemetry_to, "allowlist": allowlist,
         "outbox": outbox, "audit": audit, "config_path": config_path,
+        "secret_in_file": bool(file_smtp.get("password")),
         "smtp": {
             "host": os.environ.get("SMTP_HOST") or file_smtp.get("host", ""),
             "port": int(os.environ.get("SMTP_PORT") or file_smtp.get("port") or 587),
             "user": os.environ.get("SMTP_USER") or file_smtp.get("user", ""),
-            "password": os.environ.get("SMTP_PASS") or file_smtp.get("password", ""),
+            "password": os.environ.get("SMTP_PASS", ""),
             "sender": os.environ.get("SMTP_FROM") or file_smtp.get("sender", "")
                       or os.environ.get("SMTP_USER") or file_smtp.get("user", ""),
         },
@@ -158,6 +161,9 @@ def tool_send_email(cfg, args):
     if cfg["mode"] == "disabled":
         return err("Adapter is disabled (ALFRED_EMAIL_MODE=disabled). "
                    "Prepare the content and remind the human to send manually (degradation).")
+    if cfg["mode"] == "active" and cfg["secret_in_file"]:
+        return err("Remove smtp.password from the JSON config. Store SMTP_PASS in the "
+                   "Devin Secrets UI, environment, or an approved secret store.")
     if not destination:
         return err("No destination: pass `to` or set ALFRED_EMAIL_DEFAULT_TO. "
                    "The destination must come from configuration, not from guessed values.")
@@ -325,6 +331,7 @@ def tool_email_status(cfg, _args):
         "telemetry_to": cfg["telemetry_to"] or None,
         "allowlist": cfg["allowlist"],
         "smtp_configured": smtp_ready,
+        "secret_in_file": cfg["secret_in_file"],
         "outbox": str(cfg["outbox"]),
         "audit_log": str(cfg["audit"]),
         "config_file": cfg["config_path"] or "not found (create ~/.alfred-email.json or set ALFRED_EMAIL_CONFIG)",

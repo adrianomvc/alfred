@@ -46,12 +46,17 @@
 - usage window started at:
 - usage window ended at:
 - usage imported at:
-- usage acu cycle:
-- usage acu total:
-- usage acu session baseline:
-- usage acu demand baseline:
-- session acu:
-- demand acu:
+- usage schema: alfred.usage.v2
+- usage unit:
+- usage current:
+- usage limit:
+- usage session baseline:
+- usage demand baseline:
+- usage demand consumed:
+- usage source:
+- usage confidence:
+- usage observed at:
+- usage cycle reset at:
 - vcs:
 - tracker:
 - notification:

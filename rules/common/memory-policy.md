@@ -33,6 +33,12 @@ When classifying the new demand, scan the index by `trigger`/`tags` and open
 **pointer, not authority**: to decide or edit, open the original artifact it
 points to (`rules/common/context-compression-policy.md`).
 
+Use `scripts/workflow/memory-query.py`: `startup --budget <tokens>` injects a
+bounded gotcha-first/recent-first index, `search` narrows candidates, `timeline`
+shows bounded neighbors, and `get` opens only selected detail. The index exposes
+an estimated token cost and marks a pointer stale when its recorded source hash
+no longer matches. Missing helpers degrade to the same index-first manual flow.
+
 ## Distil (at demand close, human-confirmed)
 In Operation (`rules/lifecycle/operations/sub-activities/memory-distillation.md`),
 Alfred **proposes** 0..N observations from the demand's `decisions`, `audit`, and
@@ -49,9 +55,11 @@ generated from frontmatter; only the observation content is distilled and review
   **future** demand and is not already an insight/knowledge/summary.
 
 ## Token economy
-The index is **compact by contract** (~1 screen). When it grows, prune or archive
-stale/low-value observations by recency and relevance — never dump the whole
-memory into context (that is the RAG context-pollution this avoids).
+The startup slice is **budgeted by contract**; the complete index may grow on
+disk without being injected whole. Archive stale/low-value observations by
+recency and relevance, and measure retrieval with
+`scripts/metrics/evaluate-context-benchmark.py` rather than assuming fewer
+tokens preserved recall.
 
 ## Degradation (D3)
 No SessionStart hook / no MCP → the boot reads the index file and JIT-opens

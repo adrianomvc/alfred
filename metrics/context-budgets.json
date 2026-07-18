@@ -11,6 +11,7 @@
         "sub_activity": "functional-design"
       },
       "max_estimated_tokens": 8400,
+      "baseline_estimated_tokens": 7843,
       "max_growth_percent": 10
     },
     "fast-operational-execution": {
@@ -22,6 +23,7 @@
         "sub_activity": "workflow-planning"
       },
       "max_estimated_tokens": 9300,
+      "baseline_estimated_tokens": 8680,
       "max_growth_percent": 10
     },
     "safe-engineering-inception": {
@@ -33,6 +35,7 @@
         "sub_activity": "risk-mode-proposal"
       },
       "max_estimated_tokens": 8800,
+      "baseline_estimated_tokens": 8203,
       "max_growth_percent": 10
     },
     "safe-engineering-migration": {
@@ -44,6 +47,7 @@
         "playbook": "migration"
       },
       "max_estimated_tokens": 9500,
+      "baseline_estimated_tokens": 8864,
       "max_growth_percent": 10
     }
   }

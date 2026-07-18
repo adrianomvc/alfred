@@ -32,6 +32,10 @@ canonical gate:
 python scripts/validators/validate-framework.py
 ```
 
+GitHub Actions runs the same gate plus unit tests on Ubuntu and Windows through
+`.github/workflows/validate.yml`. The required check must be configured in
+branch protection for `main`; workflow presence alone is not enforcement.
+
 ## Example Validation Tiers
 - `validate-framework` is the required framework gate. It validates examples as framework fixtures, including JSONL, links, generated outputs, toolbar states, connector behavior, and declared strict regression fixtures wired into the validator.
 - `validate-demand --strict` is required only for examples explicitly declared as strict regression fixtures in `examples/README.md`.
@@ -105,3 +109,5 @@ A framework change is acceptable when:
 - no instruction conflicts with markdown-first agnostic operation;
 - remaining gaps are recorded in `docs/implementation-status.md`.
 - release-relevant changes are recorded in `CHANGELOG.md`.
+- unit tests pass on both CI operating systems, and repository-admin evidence
+  confirms the validation check is required before merge.

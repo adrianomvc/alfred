@@ -19,8 +19,8 @@ Config shape (per event): an array of `{ "matcher": <regex>, "hooks": [ {"type":
 | Event | Purpose | Status | Degrades to |
 |---|---|---|---|
 | `PreToolUse` (matcher `^exec$`) | rewrite shell commands through RTK so large output is bounded at 0 model-token cost | **implemented** — `scripts/workflow/devin-rtk-hook.py` | `rules/common/terminal-token-policy.md` (explicit `rtk` calls) |
-| `SessionStart` | detect host capabilities, ensure RTK, re-anchor the active demand via `additionalContext` | contract only | `core/boot.md` sequence in-band |
-| `PostCompaction` | re-anchor the `001-state.md` path after compaction | contract only | re-read state next turn (`context-compaction-policy.md`) |
+| `SessionStart` | re-anchor active state and compact memory index via `additionalContext` | implemented — `devin-context-hook.py` | `core/boot.md` sequence in-band |
+| `PostCompaction` | re-anchor state and memory pointers after compaction | implemented — `devin-context-hook.py` | re-read state next turn (`context-compaction-policy.md`) |
 
 ## The RTK rewrite hook (implemented)
 RTK ships no Devin preset — its stock hook matches the Claude `Bash` tool, not
@@ -50,18 +50,11 @@ Any mismatch — non-`exec` tool, missing rtk, a command rtk cannot compact,
 unparseable stdin — makes the hook print nothing and exit 0, so the original
 command runs unchanged. The hook never blocks.
 
-## Minimum DEVIN CLI version (verified)
-Transparent rewrite needs a DEVIN CLI recent enough to **honor**
-`hookSpecificOutput.updatedInput`. Confirmed on 2026-07-17: `v2026.5.6-12` calls
-the hook and receives the rewrite but **runs the original command anyway** (the
-rtk-rewritten command never reaches rtk); after `devin update`, the same `ls -la`
-was executed as `rtk ls -la` (verified in rtk's history.db). If commands are not
-being rewritten even though `/hooks` lists the entry, update the DEVIN CLI first —
-on a corporate machine through the **organization's software center (e.g. Central
-de Software)**, since the public PowerShell installer may be blocked;
-`devin update` when self-managed. `sync-host-shims.py -InstallHooks`
-prints a warning when it detects a version below v3000 (override the message with
-`ALFRED_DEVIN_UPDATE_CHANNEL`).
+## Capability probe
+Do not infer hook behavior from a hard-coded version number. After installation,
+use `/hooks`, run one command with a known RTK rewrite, and verify that `rtk gain`
+increments. Record the result as observed evidence. If the probe fails, use RTK
+explicitly and keep the hook capability unconfirmed.
 
 ## Confirm it fires in a real session
 After install, in the DEVIN CLI: `/hooks` lists the PreToolUse entry; run a shell

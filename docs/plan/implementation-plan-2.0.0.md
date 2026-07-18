@@ -111,11 +111,27 @@ Aceite: `validate-connectors` 0 erros; 1 handoff real registrado no audit. Não 
 Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Waves 4–6; cada item entra como demanda dogfooding.
 - [x] W8.1 ✅ (2026-07-05) Helper `confidence-score` (2 runtimes): score 0–100 de perguntas sem resposta + lane não confirmada + decisions/plano ausentes (Std/SAFE) + reverse-eng sem commit; ≥80 segue · 50–79 revisa com humano · <50 para e escala (D27). O score informa; o humano decide.
 - [x] W8.2 ✅ (2026-07-05) Helper `spec-vs-impl` (2 runtimes): compara critérios de aceite da spec com a evidência de validação (heurística de cobertura textual); aponta lacunas, nunca aprova. **No primeiro uso já achou lacuna real**: a evidência do simulado não cobria os critérios do lado app — corrigida.
-- [ ] W8.3 Memória operacional: indexar `decisions` fechadas por tema no índice da sigla; Inception consulta decisões passadas.
+- [x] W8.3 ✅ (2026-07-18) Memória operacional markdown-first: observações estreitas `decision|gotcha`, índice determinístico com custo visível, consulta `startup/search/timeline/get`, detalhe JIT, detecção de fonte stale e confirmação humana na destilação.
 - [x] W8.4 ✅ (2026-07-05) `alfred-boot` (2 runtimes) ordena demandas abertas por prioridade de retomada (checkpoint pendente > em andamento > bloqueada, depois última atividade) e imprime "Suggested next" com o motivo — dica de ordenação; o humano escolhe.
 - [ ] W8.5 Sugestão automática de model-policy a partir de metrics (humano ratifica — D46).
 - [ ] W8.6 **Rubrica LLM-as-judge** (evolução D): grader baseado em modelo para qualidade de spec/summary, calibrado por humano antes de valer.
 - [ ] W8.7 **Retrospectiva com transcripts** (evolução E): após N demandas fechadas, analisar audit/JSONL e propor melhorias em regras/perguntas; humano ratifica (estende o padrão D46).
+
+### Wave 9 — Hardening para execução majoritária no Devin ✅ código (2026-07-18)
+Objetivo: fechar lacunas de custo, orçamento, contexto, ambiente e verificação
+encontradas na avaliação cruzada das práticas oficiais do Devin, Claude Code e
+Claude-Mem.
+
+- [x] W9.1 Estado de consumo `alfred.usage.v2`, parser estrito de `/usage`, reset de ciclo, rate card aprovado compartilhado e migração idempotente.
+- [x] W9.2 Orçamento com unidade compatível, cinco fases canônicas e guardrails SAFE/aceite/segurança invioláveis.
+- [x] W9.3 Progressive disclosure: memória em três níveis, exploração estrutural, read advisor não bloqueante e benchmark de token+recall.
+- [x] W9.4 Devin: permissões mínimas, segredos fora de argv/YAML, blueprints por tier, health/pin/rollout, reinjeção pós-compaction e capability probe sem inferência por versão.
+- [x] W9.5 Loop de verificação executável, revisor fresco, worktrees para escritores paralelos, CI Ubuntu/Windows e checksum obrigatório para RTK externo.
+- [ ] W9.6 Executar os cinco pilotos reais de `docs/hardening-pilot-matrix.md` e anexar evidências.
+- [ ] W9.7 Administrador torna o check de CI obrigatório em `main`; humano cria tag estável somente após W9.6.
+
+Aceite do código: testes unitários e `validate-framework` verdes. Aceite de
+release: W9.6/W9.7 concluídos com evidência externa; não inferir sucesso.
 
 ## Backlog consolidado
 
@@ -160,7 +176,10 @@ Objetivo: Alfred mais inteligente para squad híbrida. Depende de dados das Wave
 | P2 | Helper classify-risk | W3 | ✅ concluído (2026-07-05) |
 | P2 | Score de confiança pré-Execution | W8.1 | ✅ concluído (2026-07-05) |
 | P2 | spec-vs-impl | W8.2 | ✅ concluído (2026-07-05) |
-| P2 | Memória de decisões | W8.3 | pendente |
+| P2 | Memória de decisões | W8.3 | ✅ concluído (2026-07-18) |
+| P0 | Hardening Devin/context/custo/orçamento | W9.1–W9.5 | ✅ código concluído (2026-07-18) |
+| P0 | Cinco pilotos reais de hardening | W9.6 | pendente (ambiente/credenciais) |
+| P0 | CI obrigatório + tag estável | W9.7 | pendente (admin/humano) |
 | P2 | Métricas de retrabalho/intervenção | W6 | pendente |
 | P2 | Usage-cost real: desenho Devin-first + ccusage secundário | W6.2 | parcial: ccusage ativo; Devin API pendente |
 | P3 | Adapter real (MCP candidato) | W7 | pendente (DH) |

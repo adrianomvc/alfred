@@ -47,3 +47,8 @@ they update `001-state.md` only.
 Rate cards must include approval metadata (`source`, `approved_by`,
 `effective_from`, `currency`) and are hashed into every
 `usage_cost_attributed` event for auditability.
+
+The optional `effective_to` is also enforced. Invalid, future, expired,
+non-positive, or non-finite ACU rates degrade to unavailable. Shared validation
+lives in `scripts/shared/observability/infrastructure/rate_cards/`; command
+drivers must not implement a second approval rule.
