@@ -13,6 +13,7 @@
 | `common-content-validation` | `event` | `all` | `all` | `all` | `all` | Common rule — content validation (light) | [rules/common/content-validation.md](rules/common/content-validation.md) |
 | `common-context-compaction-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - when to compact conversation context safely | [rules/common/context-compaction-policy.md](rules/common/context-compaction-policy.md) |
 | `common-context-compression-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - safe RAG/context compression | [rules/common/context-compression-policy.md](rules/common/context-compression-policy.md) |
+| `common-context-retrieval-policy` | `event` | `all` | `all` | `all` | `all` | Progressive disclosure and advisory large-file reads | [rules/common/context-retrieval-policy.md](rules/common/context-retrieval-policy.md) |
 | `common-deferred-work-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - deferred and low-priority token work | [rules/common/deferred-work-policy.md](rules/common/deferred-work-policy.md) |
 | `common-escalation-triggers` | `event` | `all` | `all` | `all` | `all` | Common Rule - Escalation Triggers | [rules/common/escalation-triggers.md](rules/common/escalation-triggers.md) |
 | `common-memory-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - cross-demand observation memory (progressive disclosure) | [rules/common/memory-policy.md](rules/common/memory-policy.md) |
@@ -25,6 +26,7 @@
 | `common-token-budget-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - token budget preflight | [rules/common/token-budget-policy.md](rules/common/token-budget-policy.md) |
 | `common-tool-discovery-policy` | `event` | `all` | `all` | `all` | `all` | Common rule - tool discovery and JIT tool loading | [rules/common/tool-discovery-policy.md](rules/common/tool-discovery-policy.md) |
 | `common-units` | `event` | `all` | `all` | `all` | `all` | Common Rule - Demand Units | [rules/common/units.md](rules/common/units.md) |
+| `common-verification-loop` | `event` | `execution` | `all` | `all` | `all` | Executable verification, fresh review, and context recovery | [rules/common/verification-loop.md](rules/common/verification-loop.md) |
 | `common-workflow-changes` | `event` | `all` | `all` | `all` | `all` | Common Rule - Mid-Workflow Changes | [rules/common/workflow-changes.md](rules/common/workflow-changes.md) |
 | `demand-type-engineering` | `demand-type` | `all` | `all` | `engineering` | `all` | Demand-type — Engineering | [rules/demand-types/engineering.md](rules/demand-types/engineering.md) |
 | `demand-type-operational` | `demand-type` | `all` | `all` | `operational` | `all` | Demand-type — Operacional (Operational) | [rules/demand-types/operational.md](rules/demand-types/operational.md) |

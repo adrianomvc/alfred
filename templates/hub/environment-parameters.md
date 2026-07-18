@@ -16,6 +16,16 @@ Registrar parametros reais, credenciais, acessos e valores externos necessarios 
 
 Use este artefato quando a demanda depender de ambientes, contas, secrets, endpoints, quotas, filas, projetos, buckets, tabelas, schedulers, alarmes ou qualquer outro valor que Alfred nao consiga verificar diretamente.
 
+## Ambiente DEVIN (quando aplicavel)
+- blueprint tier: enterprise | organization | repository | nao aplicavel
+- build/snapshot id:
+- health status: healthy | failed | partial | stale | nao observado
+- last verified:
+- pinned: nao
+- pin reason:
+- pin owner:
+- review by:
+
 ## Regra de preenchimento
 - Nao registrar segredo em claro.
 - Registrar o nome/referencia do secret, cofre ou owner responsavel.

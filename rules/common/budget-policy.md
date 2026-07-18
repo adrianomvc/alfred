@@ -23,6 +23,12 @@ At the opening framing checkpoint the human may set a budget for the demand:
 `/usage` delta (`scripts/metrics/session-cost.py`). No budget set → this rule is
 inert; work proceeds normally.
 
+Consumption uses the typed `alfred.usage.v2` fields. Budget and consumption must
+use the same unit; USD is compatible only when an approved, effective ACU rate
+card produced `cost usd`. Unit mismatch is `unmeasurable`, never a conversion
+guess. Migrate legacy state with `scripts/workflow/migrate-state-v2.py --check`
+and review its diff before `--write`.
+
 ## At each checkpoint
 Refresh consumption (`session-cost.py` from the pasted `/usage`), then run
 `python ~/.alfred/scripts/metrics/budget-monitor.py -StatePath <hub-demand>/001-state.md`.

@@ -3,9 +3,14 @@ id: <short-kebab-slug>
 type: decision
 title: <8-12 word semantic title that is searchable on its own>
 trigger: <retrieval phrase or comma tags — when this should surface>
+tags: <comma-separated searchable tags>
+files: <comma-separated related file paths, when applicable>
 source-demand: <demand id it came from>
 date: <YYYY-MM-DD>
 scope: sigla
+source-ref: <path to the original authority>
+source-commit: <commit containing the source, when applicable>
+source-hash: <sha256 of the source artifact, when applicable>
 ---
 
 > Generated content is written in pt-BR. `type` is `decision` or `gotcha` only.

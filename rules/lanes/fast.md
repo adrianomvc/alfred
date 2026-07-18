@@ -19,7 +19,7 @@ Low risk/complexity. Light process, minimal spec, **delegated autonomy**, few ch
 | Phase | Done when |
 |---|---|
 | Inception | problem + objective clear; Risk Mode proposed |
-| Design | approach clear (inline) — no separate Design phase; folds into Execution |
+| Design | minimal approach recorded; may share a working session with Execution, but the phase remains explicit |
 | Execution | small PR; self-review; lean audit |
 | Validate | relevant local tests pass |
 | Operation | merge done; optional note |

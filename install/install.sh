@@ -67,6 +67,7 @@ else
   SKILLS_DIR="${ALFRED_SKILLS_DIR:-$HOME/.config/devin/skills}"
 fi
 RTK_URL="${ALFRED_RTK_URL:-$DEFAULT_RTK_URL}"    # empty on PERSONAL (rtk on PATH); Artifactory zip on CORPORATE
+RTK_SHA256="${ALFRED_RTK_SHA256:-}"
 SKIP_RTK="${ALFRED_SKIP_RTK:-0}"
 NPM_REGISTRY="${ALFRED_NPM_REGISTRY:-$DEFAULT_NPM_REGISTRY}"
 CCUSAGE_PACKAGE="${ALFRED_CCUSAGE_PACKAGE:-$DEFAULT_CCUSAGE_PACKAGE}"
@@ -190,13 +191,29 @@ fi
 # 4. RTK terminal hook (DEVIN CLI only) — optional token-control layer.
 # No URL means no download; Alfred falls back to bounded native commands.
 if [ "$SKIP_RTK" != "1" ]; then
-  if ! command -v rtk >/dev/null 2>&1 && [ -n "$RTK_URL" ]; then
+  if ! command -v rtk >/dev/null 2>&1 && [ -n "$RTK_URL" ] && [ -z "$RTK_SHA256" ]; then
+    info "RTK download skipped: ALFRED_RTK_SHA256 is required for an approved artifact."
+  elif ! command -v rtk >/dev/null 2>&1 && [ -n "$RTK_URL" ]; then
     RTK_DIR="$HOME/.local/bin"
     RTK_TMP="$(mktemp -d)"
     mkdir -p "$RTK_DIR"
     info "Downloading RTK from configured RTK URL..."
     if command -v curl >/dev/null 2>&1; then
       curl -fsSL "$RTK_URL" -o "$RTK_TMP/rtk-download"
+      if command -v sha256sum >/dev/null 2>&1; then
+        RTK_ACTUAL_SHA256="$(sha256sum "$RTK_TMP/rtk-download" | awk '{print $1}')"
+      elif command -v shasum >/dev/null 2>&1; then
+        RTK_ACTUAL_SHA256="$(shasum -a 256 "$RTK_TMP/rtk-download" | awk '{print $1}')"
+      else
+        rm -rf "$RTK_TMP"
+        echo "No SHA-256 tool available; RTK artifact was not installed." >&2
+        exit 1
+      fi
+      if [ "$(printf '%s' "$RTK_ACTUAL_SHA256" | tr '[:upper:]' '[:lower:]')" != "$(printf '%s' "$RTK_SHA256" | tr '[:upper:]' '[:lower:]')" ]; then
+        rm -rf "$RTK_TMP"
+        echo "RTK SHA-256 mismatch; artifact was not installed." >&2
+        exit 1
+      fi
     else
       info "curl not found; install RTK manually, then run 'rtk init -g'."
     fi
@@ -243,24 +260,7 @@ if [ "$SKIP_RTK" != "1" ]; then
     if [ -n "$RTK_PYTHON" ]; then
       if "$RTK_PYTHON" "$INSTALL_DIR/scripts/workflow/sync-host-shims.py" -Host devin-cli -InstallHooks -AlfredHome "$INSTALL_DIR" >/dev/null 2>&1; then
         info "DEVIN CLI rtk PreToolUse hook installed (transparent rewrite for exec)."
-        # Version gate for the transparent rewrite, printed HERE from bash (not
-        # Python) so the pt-BR accents render — Python stdout is cp1252 on Windows
-        # and would mojibake. Highlighted box; only shown when Devin is < v3000.
-        DEVIN_VER="$(devin --version 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)"
-        if [ -n "$DEVIN_VER" ] && [ "$DEVIN_VER" -lt 3000 ] 2>/dev/null; then
-          echo ""
-          echo "  ============================================================"
-          echo "  ATENÇÃO - RTK (economia de tokens no Devin)"
-          echo "  ------------------------------------------------------------"
-          echo "  Para o RTK funcionar, o DEVIN CLI precisa ser v3000 ou mais"
-          echo "  recente. A sua versão é v$DEVIN_VER: o hook está instalado,"
-          echo "  mas fica INATIVO até você atualizar."
-          echo ""
-          echo "  >> Atualize o Devin pela CENTRAL DE SOFTWARE (versão v3 /"
-          echo "     v3000 ou mais recente) e reabra o Devin."
-          echo "  ============================================================"
-          echo ""
-        fi
+        info Verify hook capability with /hooks and rtk gain.
       else
         info "Could not install the DEVIN rtk hook automatically; run: python \"$INSTALL_DIR/scripts/workflow/sync-host-shims.py\" -Host devin-cli -InstallHooks"
       fi
@@ -359,7 +359,7 @@ if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
   "default_to": "$EMAIL",
   "telemetry_to": "$TELEMETRY_TO",
   "allowlist": [$ALLOW],
-  "smtp": {"host": "", "port": 587, "user": "", "password": "", "sender": ""}
+  "smtp": {"host": "", "port": 587, "user": "", "sender": ""}
 }
 JSON
       info "E-mail registered at $EMAIL_CONFIG (mode: auto — sends via the local Outlook desktop client when available (Windows), otherwise falls back to dry-run; fill smtp{} and set mode: active to force SMTP instead)."

@@ -13,8 +13,8 @@ Python helpers only. Installers remain OS-native under `install/`.
 |---|---|---|
 | `shared/` | the reusable implementation (imported by the thin drivers) | `common/` (jsonl, state, markdown, text helpers) · `validation/` · `toolbar/` (service, presenter, renderers, summary, state, active_demand) · `observability/` (hexagonal: `domain/`, `application/`, `infrastructure/`, `composition/`) · `model_policy.py` · `context_manifest.py` · `sdd_gate.py` · `email_tools.py` |
 | `validators/` | checks that gate or verify (exit 0/1) | `validate-*` (framework, demand, links, connectors, knowledge, model-policy, scripts-architecture, observability-hygiene, observability-intelligence, reverse-eng-staleness, sdd-gate, skills-registry, toolbar-fixtures, tool-discovery-policy, token-economy-policy, context-compression-policy, context-manifest-fixtures, email-adapter) |
-| `workflow/` | thin drivers used while running a demand | `alfred-boot` · `render-toolbar` · `resolve-model-policy` · `context-manifest` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `check-update` · `generate-registry` · `generate-host-shims` · `sync-host-shims` |
-| `metrics/` | thin drivers over `shared/observability` | `collect-observability` · `generate-metrics-rollup` · `generate-metrics-insights` · `normalize-usage-cost` · `import-ccusage` · `attribute-usage-transcript` · `apply-usage-rate-card` · `claude-code-usage-hook` |
+| `workflow/` | thin drivers used while running a demand | `alfred-boot` · `render-toolbar` · `resolve-model-policy` · `context-manifest` · `classify-risk` · `confidence-score` · `spec-vs-impl` · `memory-query` · `migrate-state-v2` · `context-read-advisor` · `devin-context-hook` · registry/host sync helpers |
+| `metrics/` | thin drivers over measurement domains | observability drivers · `session-cost` · `budget-monitor` · `evaluate-context-benchmark` |
 | `adapters/` (python only) | concrete connector adapters | `mcp-email-server` |
 
 Most real logic lives in `shared/`; `workflow/` and `metrics/` files are thin CLI
@@ -41,6 +41,10 @@ For the installer policy, see `AGENTS.md` § Conventions.
 - validate the SDD clarity gate before Execution
 - resolve the model-policy decision (tier/model/effort) for a demand step
 - check for a framework update with a TTL cache so boot skips the network when checked recently
+- migrate legacy usage state to the typed `alfred.usage.v2` schema with a reviewable diff
+- retrieve cross-demand memory with bounded progressive disclosure
+- benchmark context retrieval token reduction and answer recall
+- validate Devin environment blueprints without reading or exposing secret values
 
 ## Rule
 Any script output must degrade to a manual markdown checklist when the host cannot run scripts.
@@ -69,6 +73,11 @@ Canonical helpers live at `scripts/<category>/<name>.py`. The `adapters/` folder
 - `spec-vs-impl` - optional heuristic comparison of spec acceptance criteria vs validation evidence: flags criteria with no textual echo in `013-validation-evidence.md` so the Reviewer/human looks at them. Informative by default; `-Strict` fails on gaps. It never approves.
 - `confidence-score` - optional pre-Execution clarity score (0-100) composed from signals Alfred already records: unanswered `[Resposta]:` questions, unconfirmed lane, missing decisions/plan for Standard/SAFE, reverse-eng without commit. >=80 proceed · 50-79 review with human · <50 stop and escalate. The score informs; the human decides.
 - `sync-host-shims` - refreshes copied native host entry files after `~/.alfred` updates, so Claude Code/DEVIN/Codex do not keep running stale host instructions. Use `-InstallHooks` with `-Host claude-code` to install the usage attribution Stop hook.
+- `memory-query` - bounded startup/search/timeline/get access to HUB decision/gotcha memory; detail remains JIT.
+- `migrate-state-v2` - idempotent legacy usage-state migration with `--check`, diff, ambiguity refusal, and explicit `--write`.
+- `context-read-advisor` - advisory cost warning for large reads; it never denies access to authoritative source files.
+- `evaluate-context-benchmark` - gates a 15+ case retrieval fixture at >=30% median token reduction and >=95% recall.
+- `validate-devin-blueprint` - checks environment-tier placement and rejects secret literals in Devin blueprints.
 
 ## Python
 

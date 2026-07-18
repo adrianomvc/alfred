@@ -42,6 +42,8 @@ REQUIRED_PATHS = [
     "rules/common/tool-discovery-policy.md",
     "rules/common/context-compression-policy.md",
     "rules/common/token-budget-policy.md",
+    "rules/common/context-retrieval-policy.md",
+    "rules/common/verification-loop.md",
     "rules/common/deferred-work-policy.md",
     "rules/common/workflow-changes.md",
     "rules/lifecycle/design/sub-activities/README.md",
@@ -94,6 +96,9 @@ REQUIRED_PATHS = [
     "hosts/_template/shim.md",
     "hosts/_template/hosts.json",
     "hosts/devin-cli/SKILL.md",
+    "hosts/devin-cli/environment-management.md",
+    "hosts/devin-cli/config.template.json",
+    "hosts/devin-cli/config.local.template.json",
     "hosts/claude-code/SKILL.md",
     "hosts/github-copilot/copilot-instructions.md",
     "hosts/codex/AGENTS.md",
@@ -105,6 +110,7 @@ REQUIRED_PATHS = [
     "docs/scripts-architecture.md",
     "docs/version-adoption.md",
     "docs/release-governance.md",
+    "docs/hardening-pilot-matrix.md",
     "CHANGELOG.md",
     "docs/skills-activation.md",
     "skills/lang-python/SKILL.md",
@@ -119,6 +125,10 @@ REQUIRED_PATHS = [
     "scripts/workflow/render-toolbar.py",
     "scripts/workflow/sync-host-shims.py",
     "scripts/workflow/devin-rtk-hook.py",
+    "scripts/workflow/devin-context-hook.py",
+    "scripts/workflow/context-read-advisor.py",
+    "scripts/workflow/memory-query.py",
+    "scripts/workflow/migrate-state-v2.py",
     "scripts/metrics/collect-observability.py",
     "scripts/metrics/generate-metrics-rollup.py",
     "scripts/metrics/generate-metrics-insights.py",
@@ -128,6 +138,9 @@ REQUIRED_PATHS = [
     "scripts/metrics/normalize-usage-cost.py",
     "scripts/metrics/measure-context-budget.py",
     "scripts/metrics/session-cost.py",
+    "scripts/metrics/evaluate-context-benchmark.py",
+    "scripts/validators/validate-devin-blueprint.py",
+    ".github/workflows/validate.yml",
     "scripts/metrics/budget-monitor.py",
     "scripts/shared/__init__.py",
     "scripts/shared/context_budget.py",
@@ -685,6 +698,36 @@ def assert_usage_rate_card_policy(root):
     print("OK usage rate card policy")
 
 
+def assert_hardening_contracts(root):
+    state = (root / "templates/hub/state.md").read_text(encoding="utf-8-sig")
+    for field in ("usage schema: alfred.usage.v2", "usage unit:", "usage observed at:", "usage cycle reset at:"):
+        if field not in state:
+            raise SystemExit(f"Usage v2 state contract missing: {field}")
+    for legacy in ("usage acu cycle:", "usage acu display:", "demand acu:", "session acu:"):
+        if legacy in state:
+            raise SystemExit(f"Legacy usage field remains in state template: {legacy}")
+
+    devin = json.loads((root / "hosts/devin-cli/config.template.json").read_text(encoding="utf-8"))
+    permissions = devin.get("permissions") or {}
+    if "Exec(git)" in permissions.get("allow", []):
+        raise SystemExit("Devin config must not allow every git command")
+    for denied in ("Exec(git reset --hard)", "Exec(git clean -f)", "Exec(git push --force)"):
+        if denied not in permissions.get("deny", []):
+            raise SystemExit(f"Devin config missing deny rule: {denied}")
+
+    local = (root / "hosts/devin-cli/config.local.template.json").read_text(encoding="utf-8")
+    if "--api-key" in local or "CONTEXT7_API_KEY" not in local:
+        raise SystemExit("Context7 secret must be injected by environment, never argv")
+    installer = (root / "install/install.sh").read_text(encoding="utf-8-sig")
+    for marker in ("ALFRED_RTK_SHA256", "RTK SHA-256 mismatch"):
+        if marker not in installer:
+            raise SystemExit(f"Installer checksum contract missing: {marker}")
+    email_adapter = (root / "scripts/adapters/mcp-email-server.py").read_text(encoding="utf-8-sig")
+    if 'file_smtp.get("password", "")' in email_adapter or "secret_in_file" not in email_adapter:
+        raise SystemExit("E-mail adapter must refuse legacy file-based SMTP passwords")
+    print("OK hardening contracts")
+
+
 def run_sub(root, rel_script, *script_args):
     script = root / rel_script
     result = subprocess.run(
@@ -724,6 +767,7 @@ def main():
     assert_bash_only_installer_policy(root)
     assert_ccusage_import_policy(root)
     assert_usage_rate_card_policy(root)
+    assert_hardening_contracts(root)
 
     run_sub(root, "scripts/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/workflow/generate-registry.py", "-Root", str(root), "--check")
@@ -738,6 +782,9 @@ def main():
     run_sub(root, "scripts/validators/validate-context-compression-policy.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-token-economy-policy.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-context-budget.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-devin-blueprint.py",
+            "--path", str(root / "examples/devin-fixtures/enterprise-blueprint.yaml"),
+            "--tier", "enterprise")
     run_sub(root, "scripts/validators/validate-observability-hygiene.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-observability-intelligence.py")
     run_sub(root, "scripts/validators/validate-scripts-architecture.py")

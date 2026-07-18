@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -29,10 +30,14 @@ class ParseUsageTests(unittest.TestCase):
 
     def test_parses_quota_used_colon(self):
         self.assertEqual(SC.parse_usage("Quota used: 98% (remaining: 2%)"),
-                         ("quota-%", 98.0, 100.0))
+                         ("quota_percent", 98.0, 100.0))
 
     def test_parses_quota_percent_used(self):
-        self.assertEqual(SC.parse_usage("98% used"), ("quota-%", 98.0, 100.0))
+        self.assertEqual(SC.parse_usage("98% used"), ("quota_percent", 98.0, 100.0))
+
+    def test_parses_decimal_comma_without_truncation(self):
+        self.assertEqual(SC.parse_usage("ACUs consumed: 129,42 of 180,00"),
+                         ("acu", 129.42, 180.0))
 
     def test_unparseable_returns_none(self):
         self.assertIsNone(SC.parse_usage("nothing here"))
@@ -52,7 +57,10 @@ class BuildResultTests(unittest.TestCase):
     def test_usd_only_from_rate_card(self):
         with tempfile.TemporaryDirectory() as tmp:
             rc = Path(tmp) / "rc.json"
-            rc.write_text('{"acu": {"usd_per_acu": 2.0}}', encoding="utf-8")
+            rc.write_text(json.dumps({"schema_version": "alfred.usage-rate-card.v1",
+                                      "currency": "USD", "source": "contract",
+                                      "approved_by": "finops", "effective_from": "2026-01-01",
+                                      "acu": {"usd_per_acu": 2.0}}), encoding="utf-8")
             fields = {"usage acu demand baseline": "100.0"}
             result = SC.build_result(fields, ("acu", 129.42, 180.0), str(rc))
             self.assertEqual(result["demand_usd"], 58.84)
@@ -61,6 +69,11 @@ class BuildResultTests(unittest.TestCase):
         result = SC.build_result({}, ("acu", 129.42, 180.0), None)
         self.assertIsNone(result["demand"])
         self.assertIsNone(result["session"])
+
+    def test_cycle_reset_never_returns_negative_delta(self):
+        result = SC.build_result({"usage demand baseline": "150"}, ("acu", 10, 180))
+        self.assertIsNone(result["demand"])
+        self.assertTrue(result["reset_detected"])
 
 
 class DisplayTextTests(unittest.TestCase):

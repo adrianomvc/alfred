@@ -1,0 +1,9 @@
+initialize:
+  - name: Install shared security scanner
+    run: install-approved-security-scanner
+knowledge:
+  - name: enterprise-security-policy
+    contents: Follow the company security review policy.
+post-build:
+  - name: Health check
+    run: approved-environment-health-check

@@ -41,7 +41,7 @@ Effort is the **second axis**: it controls how deeply the model reasons and how 
 | Phase | FAST | Standard | SAFE |
 |-------|------|----------|------|
 | Inception | high | high | xhigh |
-| Design | folds into Execution | xhigh | xhigh; decisions/architecture = max |
+| Design | high | xhigh | xhigh; decisions/architecture = max |
 | Execution | medium | high | xhigh |
 | Validate | medium | high | xhigh |
 | Operate | low | low | medium |
@@ -57,8 +57,12 @@ Degradation (D3): a host without an effort control ignores this axis, runs its d
 ## Task budget on Execution (bound the agentic loop)
 Execution is the token-heavy, agentic step. When the host supports it, cap the cumulative loop with a **task budget** (min 20,000 tokens) so the model paces itself and finishes gracefully — distinct from any hard per-response cap the model is unaware of. Standard/SAFE benefit most. Degrades: a host without task budgets runs without one and records the actual spend.
 
-## Parallel units — cheaper subagents
-When Design decomposes Execution into **independent, parallelizable units**, a unit that is low-risk on its own may run on the **lane floor tier via a subagent**, keeping the main Execution loop on the step tier. This delegates sub-tasks to a cheaper model without invalidating the main context. A unit's tier never exceeds the demand's lane, and never drops below the Execution `medium` floor; if unsure, keep the unit at the step tier. Record the split in `audit`.
+## Parallel units — isolated subagents
+Use Devin's native `explore` profile for read-only research and `general` for an
+independent write unit. The built-in general profile inherits the parent model,
+so Alfred never promises a cheaper write subagent. Parallel writers require
+separate worktrees and serialized integration; without isolation, parallelism is
+read-only. Record the profile, model, worktree, and integration owner in audit.
 
 ## Deferred work — cheaper latency trade-off
 If the host exposes batch, flex, background, queued, or low-priority execution,
@@ -80,7 +84,7 @@ The policy uses **abstract tiers** (`cheap` / `medium` / `strong`); this map tra
 
 > Proposed default for a Claude host (owner decision, 2026-07-09); other hosts remap on adoption — any cell may be a portable tier or a fixed model. Agnostic: if the host cannot switch models, use the default and **record which model ran** — the policy becomes a recommendation.
 
-**DEVIN CLI concrete map:** `swe-1-6-fast` (cheap, default) · `sonnet` (medium) · `opus`/`gpt` (strong). `adaptive` is Devin's model router — treat it as medium unless a step needs a strong floor. The DEVIN CLI **does** switch models mid-session (`/model opus|sonnet|codex|adaptive`), so it is not a "cannot switch" host; a step may also pin a cheaper model via a skill's `model:` field without changing the whole session.
+**DEVIN CLI concrete map:** `swe-1-6-fast` (cheap) · `adaptive` (common medium work) · `opus` (strong default) · `gpt` (configured strong alternative). Adaptive is a router, not evidence of the effective tier: record the actual model when exposed, otherwise mark it `unconfirmed`. Design, SAFE, and critical operations select an explicit strong family. The DEVIN CLI switches models mid-session with `/model`.
 
 **Cost of switching mid-demand:** changing the model mid-demand **invalidates the prompt cache** (cache is per model), tensioning `rules/common/prompt-caching-policy.md`. So a switch is a deliberate step-level decision — raise a tier for a hard step, then let it settle — not a per-turn habit. Devin's `adaptive` deliberately stays on one model across turns to preserve cache; follow the same principle.
 

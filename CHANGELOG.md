@@ -125,9 +125,22 @@ All notable Alfred framework changes should be recorded here.
 ## 2.0.0 - in progress (opened 2026-07-05)
 
 ### Summary
-Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Waves 0–8: preservation, hygiene, full SDD templates, assisted risk classification, first real integrated demand, real skills/metrics/adapters, evolutionary intelligence) lands in this version. **The version stays `2.0.0` until the plan closes — no bumps per wave** (explicit owner decision).
+Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Waves 0–9: preservation, hygiene, full SDD templates, assisted risk classification, first real integrated demand, real skills/metrics/adapters, evolutionary intelligence, and Devin/context hardening) lands in this version. **The version stays `2.0.0` until the plan closes — no bumps per wave** (explicit owner decision).
 
 ### Added
+- Wave 9 hardening: typed `alfred.usage.v2` state and migration, strict Devin
+  `/usage` parsing with reset-safe deltas, same-unit budget monitoring, shared
+  approved ACU rate validation, and toolbar derivation without invented USD.
+- Progressive-disclosure memory (`startup/search/timeline/get`), structural
+  context retrieval policy, non-blocking read advisor, and a 15-case benchmark
+  gate requiring token reduction without sacrificing recall.
+- Devin execution hardening: least-privilege config templates, environment-tier
+  blueprint validation, secrets outside YAML/argv, SessionStart/PostCompaction
+  state reinjection, capability probes, rollout/build-health/pinning policy, and
+  an explicit five-pilot release evidence matrix.
+- Executable verification-loop fields, fresh-review guidance, separate
+  worktrees for parallel writers, cross-platform GitHub Actions validation, and
+  mandatory SHA-256 verification for downloaded RTK packages.
 - Usage-cost adoption design: `docs/usage-cost-adoption.md` defines the next measurement path with Devin Session Insights + Consumption API as the primary ACU source, `ccusage` as a secondary local-CLI source, `ALFRED_RUN_ID`/`devin-...` correlation, confidence labels, and a pilot checklist before automatic model-policy suggestions.
 - Token economy policies: `rules/common/token-budget-policy.md` adds context-budget preflight before large loads/token-heavy work, and `rules/common/deferred-work-policy.md` allows batch/flex/background execution only for non-critical-path drafts such as rollups, read-only scans, stale reverse-eng refreshes, summaries, and notifications. `validate-token-economy-policy` keeps the wiring intact.
 - Context compression policy: `rules/common/context-compression-policy.md` allows RAG/compressed summaries for safe context selection while requiring original sources for code edits, Design decisions, SAFE/incident judgment, and validation evidence. Design, Execution, Code Generation, Validate, boot, and `validate-context-compression-policy` now enforce that boundary.
@@ -187,7 +200,11 @@ Consolidation line. All work from `docs/plan/implementation-plan-2.0.0.md` (Wave
 - `alfred-boot` (both runtimes, W8.4): open demands are ordered by resume priority (pending human checkpoint > in progress > blocked, then last activity) and a "Suggested next" hint with the reason is printed; the human still chooses.
 
 ### Compatibility notes
-- No lane DoD, connector contract, or observability schema changed. Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
+- Usage state has a new `alfred.usage.v2` schema. Existing state remains readable
+  through compatibility fallbacks, but should be migrated with
+  `migrate-state-v2.py --check` and a reviewed `--write`; a legacy limit of 100
+  requires explicit `--unit acu|quota_percent`.
+- Two framework rule files were renamed (`rules/demand-types/product.md`, `rules/demand-types/operational.md`) and one template was removed (`templates/hub/decision.md` — use `decisions.md`); consumers that deep-linked those paths must update.
 - **All helper script paths moved** into category subfolders (`scripts/<runtime>/{validators,workflow,metrics,adapters}/<name>`). Callers/CI that invoked flat paths (e.g. `scripts/validate-framework.py`) must add the category segment (e.g. `scripts/validators/validate-framework.py`). Flags and behavior are unchanged.
 - New demands should stamp `2.0.0`; active demands stay frozen on their stamped version (see `docs/version-adoption.md`).
 

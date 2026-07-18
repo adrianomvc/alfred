@@ -34,8 +34,10 @@ Before a large context load, record a short budget note:
 2. Load the demand `state`, current plan, and acceptance criteria.
 3. Use `rg`, indexes, manifests, codebase-memory, or bounded tool search to find
    candidate sources.
-4. Open original sources only for the current decision or unit.
-5. Use compression only as a selector, following
+4. Follow `context-retrieval-policy.md`: index/search -> outline -> symbol or
+   bounded range -> full file, based on relevance and estimated retrieval cost.
+5. Open original sources for the current decision or unit before editing.
+6. Use compression only as a selector, following
    `rules/common/context-compression-policy.md`.
 
 ## Guardrails

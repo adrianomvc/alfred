@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -31,13 +32,29 @@ class GenerateMemoryIndexTests(unittest.TestCase):
         # sorted by filename: devin-usage-quota before parallel-run-rollback
         self.assertLess(generated.index("devin-usage-quota"),
                         generated.index("parallel-run-rollback"))
-        self.assertIn("🔴 gotcha", generated)
-        self.assertIn("🔵 decision", generated)
+        self.assertIn("| gotcha |", generated)
+        self.assertIn("| decision |", generated)
+        self.assertIn("| ~Tokens |", generated)
+        self.assertIn("cost, ACU, usage, budget", generated)
 
     def test_missing_required_key_fails(self):
-        obs = GM.parse_frontmatter(FIXTURE_HUB / "memory" / "devin-usage-quota.md")
-        for key in ("id", "type", "title", "date"):
-            self.assertIn(key, obs)
+        with tempfile.TemporaryDirectory() as tmp:
+            hub = Path(tmp)
+            (hub / "memory").mkdir()
+            (hub / "memory" / "bad.md").write_text(
+                "---\nid: bad\ntype: decision\ntitle: Missing fields\ndate: 2026-01-01\n---\n",
+                encoding="utf-8")
+            with self.assertRaises(ValueError):
+                GM.render_index(hub)
+
+    def test_invalid_type_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hub = Path(tmp); (hub / "memory").mkdir()
+            (hub / "memory" / "bad.md").write_text(
+                "---\nid: bad\ntype: fallback\ntitle: Bad type\ntrigger: x\n"
+                "source-demand: d\ndate: 2026-01-01\n---\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                GM.render_index(hub)
 
 
 if __name__ == "__main__":

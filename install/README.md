@@ -71,8 +71,13 @@ locations you normally need to replace:
      when available.
    - Temporary alternative:
      ```bash
-     ALFRED_RTK_URL="<artifactory-rtk-url>" bash install/install.sh
+     ALFRED_RTK_URL="<artifactory-rtk-url>" \
+     ALFRED_RTK_SHA256="<approved-sha256>" \
+     bash install/install.sh
      ```
+   - A custom RTK URL is never installed without its approved SHA-256. A
+     missing or mismatched digest leaves RTK uninstalled and Alfred degrades to
+     bounded native commands.
 
 3. **npm registry / Artifactory**
    - Set `ALFRED_NPM_REGISTRY="<artifactory-npm-registry>"`.
@@ -94,6 +99,7 @@ raw-file URL from the company mirror.
 | Notification e-mail | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `ALFRED_SKIP_EMAIL=1` | setup runs |
 | RTK package URL | `ALFRED_RTK_URL` | public Windows zip placeholder |
+| RTK package SHA-256 | `ALFRED_RTK_SHA256` | empty (download is not installed) |
 | Skip RTK setup | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
 | npm registry / Artifactory | `ALFRED_NPM_REGISTRY` | corporate Artifactory npm-remote |
 | ccusage npm package | `ALFRED_CCUSAGE_PACKAGE` | `ccusage` |
@@ -105,7 +111,9 @@ raw-file URL from the company mirror.
 RTK setup is optional and currently scoped to the DEVIN CLI install path.
 
 ```bash
-ALFRED_RTK_URL="<artifactory-url>" bash install/install.sh
+ALFRED_RTK_URL="<artifactory-url>" \
+ALFRED_RTK_SHA256="<approved-sha256>" \
+bash install/install.sh
 ```
 
 If `rtk` is already on `PATH`, the installer only runs:

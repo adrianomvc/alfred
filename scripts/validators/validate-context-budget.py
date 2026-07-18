@@ -31,8 +31,13 @@ def main():
     errors = []
     for name, spec in budgets.get("scenarios", {}).items():
         cap = spec.get("max_estimated_tokens")
+        baseline = spec.get("baseline_estimated_tokens")
+        growth = spec.get("max_growth_percent")
         if not cap:
             errors.append(f"{name}: no max_estimated_tokens set")
+            continue
+        if not baseline or growth is None:
+            errors.append(f"{name}: baseline_estimated_tokens and max_growth_percent are required")
             continue
         try:
             estimated, _ = measure_scenario(root, spec["params"])
@@ -43,6 +48,12 @@ def main():
             errors.append(
                 f"{name}: estimated {estimated} tk exceeds budget {cap} tk. "
                 "Reduce the scenario's context or raise the budget with an owner decision."
+            )
+        growth_cap = round(baseline * (1 + growth / 100))
+        if estimated > growth_cap:
+            errors.append(
+                f"{name}: estimated {estimated} tk exceeds growth cap {growth_cap} tk "
+                f"(baseline {baseline}, max growth {growth}%)."
             )
         else:
             print(f"OK budget {name}: {estimated} <= {cap} tk")

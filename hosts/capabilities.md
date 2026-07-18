@@ -12,6 +12,11 @@ Keep every claim honest by evidence level:
 Do not upgrade a claim's level without evidence. A `product`-level capability
 that has never been run here is not `observed`.
 
+Documentation evidence was last checked on 2026-07-18. Re-check unstable host
+claims before changing a contract: Devin CLI configuration, permissions, hooks,
+models, and subagents are documented under `https://docs.devin.ai/cli/`; Devin
+Enterprise environments under `https://docs.devin.ai/enterprise/environment-management/`.
+
 ## Matrix
 | Capability | Claude Code | DEVIN CLI | Codex | Copilot | Evidence |
 |---|---|---|---|---|---|
@@ -21,7 +26,7 @@ that has never been run here is not `observed`.
 | `PostToolUse` hook | yes | yes | no | no | product |
 | `Stop` hook | yes | yes | no | no | product |
 | `SessionStart` hook (+ `additionalContext`) | yes | yes | no | no | product |
-| `PostCompaction` hook | no | yes (output format undocumented) | no | no | product |
+| `PostCompaction` hook (+ `additionalContext`) | no | yes | no | no | product |
 | Force compaction command | no | `/compact` | no | no | product |
 | Context-window usage command | no | `/context` | no | no | product |
 | Usage/cost command | `/cost` | `/usage` (ACU/credit, estimated) | no | no | product |

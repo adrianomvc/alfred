@@ -28,6 +28,17 @@ reference, call graph, impact, or related-test discovery before reading files.
   data contracts.
 - `related_tests(symbol_or_file)` returns likely test files or suites.
 - `summarize_module(path)` returns a short structural summary of a module.
+- `search_symbols(query, path)` returns ranked definitions with signatures and
+  estimated retrieval cost.
+- `outline_file(path)` returns the current structural outline without bodies.
+- `read_symbol(path, symbol)` returns the complete current symbol body.
+- `estimate_retrieval_cost(operation)` reports an approximate token cost.
+- `freshness(repo_commit, index_commit)` reports `fresh|stale|unknown`.
+
+An implementation remains experimental until 15 benchmark cases show at least
+30% median token reduction, 95% target recall, and no correctness/completeness
+regression versus `rg` plus bounded reads. Use
+`scripts/metrics/evaluate-context-benchmark.py` for the decision.
 
 ## degradation
 If the connector is unavailable, stale, or not approved for the machine, Alfred

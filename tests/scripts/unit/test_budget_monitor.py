@@ -47,7 +47,18 @@ class EvaluateTests(unittest.TestCase):
     def test_exceeded(self):
         r = BM.evaluate(state(demand_acu="42"))
         self.assertEqual(r["status"], "exceeded")
-        self.assertEqual(r["remaining"], -2.0)
+        self.assertEqual(r["remaining"], 0.0)
+
+    def test_unit_mismatch_is_unmeasurable(self):
+        path = state(demand_acu="20")
+        text = path.read_text(encoding="utf-8").replace("- budget limit: 40", "- budget unit: tokens\n- budget limit: 40")
+        path.write_text(text, encoding="utf-8")
+        self.assertEqual(BM.evaluate(path)["status"], "unmeasurable")
+
+    def test_unrelated_checkboxes_do_not_count_as_phases(self):
+        path = state(demand_acu="20")
+        path.write_text(path.read_text(encoding="utf-8") + "- [x] optional task\n", encoding="utf-8")
+        self.assertEqual(BM.evaluate(path)["delivered_phases"], "2/5")
 
     def test_no_budget(self):
         self.assertEqual(BM.evaluate(state(limit=""))["status"], "no-budget")
