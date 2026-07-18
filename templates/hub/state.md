@@ -46,6 +46,12 @@
 - usage window started at:
 - usage window ended at:
 - usage imported at:
+- usage acu cycle:
+- usage acu total:
+- usage acu session baseline:
+- usage acu demand baseline:
+- session acu:
+- demand acu:
 - vcs:
 - tracker:
 - notification:

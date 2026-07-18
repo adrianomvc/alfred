@@ -5,6 +5,10 @@
   "approved_by": "Alfred fixture",
   "effective_from": "2026-01-01",
   "confidence": "rated",
+  "acu": {
+    "usd_per_acu": 2.0,
+    "note": "DEVIN bills in ACU; Devin publishes no ACU->USD rate, so this is an approved contract value. Alfred converts ACU->USD only from this field (D10)."
+  },
   "models": {
     "gpt-example": {
       "input_per_1m": 10.0,
@@ -17,6 +21,11 @@
       "output_per_1m": 75.0,
       "cache_creation_per_1m": 18.75,
       "cache_read_per_1m": 1.5
+    },
+    "swe-1-6": {
+      "input_per_1m": 0.0,
+      "output_per_1m": 0.0,
+      "note": "DEVIN default model; token prices are contract-approved placeholders."
     }
   }
 }
