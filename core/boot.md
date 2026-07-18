@@ -36,6 +36,10 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - **Render ≠ display:** running the helper only *produces* the toolbar block; you must **paste that rendered block into the response** at every checkpoint — demand open/resume, phase transition, and end of any turn with an active demand. Registering the active demand (`-RegisterActive`) is not a substitute for showing the block.
    - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
+   - load the HUB **memory index** (`alfred-docs-hub/005-memory.md`) when present —
+     compact; scan it and open an observation's detail JIT only when its
+     trigger/tags match the demand (`rules/common/memory-policy.md`). Injected via
+     SessionStart hook where available, else read here.
    - if using RAG, compressed summaries, or codebase-memory output to select
      context, load `rules/common/context-compression-policy.md` first.
    - before opening large multi-file context, load
@@ -53,7 +57,9 @@ creating HUB/App demand artifacts, writing `state`, or classifying a lane as
 accepted.
 
 The proposal includes: target app source/path, workspace placement, initiative
-id, demand id, initial scope, proposed lane, and which artifacts will be created.
+id, demand id, initial scope, proposed lane, an **optional budget** for the
+demand (`budget limit` + `budget on limit`, monitored per
+`rules/common/budget-policy.md`), and which artifacts will be created.
 **Arrive with concrete proposed values, not a blank form.** Derive a suggested
 initiative id and demand id from the demand description plus the sigla (a short
 kebab-case slug of the goal, e.g. demand `sankey-categoria` under initiative

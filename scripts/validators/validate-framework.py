@@ -115,6 +115,7 @@ REQUIRED_PATHS = [
     "scripts/workflow/context-manifest.py",
     "scripts/workflow/generate-host-shims.py",
     "scripts/workflow/generate-registry.py",
+    "scripts/workflow/generate-memory-index.py",
     "scripts/workflow/render-toolbar.py",
     "scripts/workflow/sync-host-shims.py",
     "scripts/workflow/devin-rtk-hook.py",
@@ -126,6 +127,8 @@ REQUIRED_PATHS = [
     "scripts/metrics/apply-usage-rate-card.py",
     "scripts/metrics/normalize-usage-cost.py",
     "scripts/metrics/measure-context-budget.py",
+    "scripts/metrics/session-cost.py",
+    "scripts/metrics/budget-monitor.py",
     "scripts/shared/__init__.py",
     "scripts/shared/context_budget.py",
     "scripts/shared/observability/domain/models.py",
@@ -725,6 +728,8 @@ def main():
     run_sub(root, "scripts/validators/validate-toolbar-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/workflow/generate-registry.py", "-Root", str(root), "--check")
     run_sub(root, "scripts/workflow/generate-host-shims.py", "-Root", str(root), "--check")
+    run_sub(root, "scripts/workflow/generate-memory-index.py",
+            "-Root", str(root / "examples/memory-fixtures/hub"), "--check")
     run_sub(root, "scripts/validators/validate-context-manifest-fixtures.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-skills-registry.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-connectors.py", "-Root", str(root))

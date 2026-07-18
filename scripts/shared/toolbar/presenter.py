@@ -64,7 +64,13 @@ class ToolbarViewModelBuilder:
         framework: str,
         app_commit: str,
         summary: UsageSummary | None,
+        usage_fallback: str = "",
     ) -> ToolbarViewModel:
+        # Hosts without per-interaction usage events (e.g. the DEVIN CLI) have no
+        # observability-derived usage. When the domain usage is unobserved, fall
+        # back to the state's `usage-cost` summary (the ACU line session-cost.py
+        # writes) so the toolbar still shows consumption.
+        default_usage = "não coletado · adapter de uso não configurado"
         if summary is None:
             return ToolbarViewModel(
                 demand_id,
@@ -73,13 +79,16 @@ class ToolbarViewModelBuilder:
                 progress,
                 framework,
                 app_commit,
-                "não coletado · adapter de uso não configurado",
+                usage_fallback or default_usage,
                 None,
                 None,
                 "fonte de custo não configurada",
                 None,
             )
         forecast = self._forecast.forecast(summary.demand_cost, progress, Decimal("80"))
+        primary_usage = format_usage(summary.demand_usage, summary.cache_reuse_ratio)
+        if primary_usage == default_usage and usage_fallback:
+            primary_usage = usage_fallback
         return ToolbarViewModel(
             demand_id=demand_id,
             sigla=sigla,
@@ -87,7 +96,7 @@ class ToolbarViewModelBuilder:
             progress=progress,
             framework=framework,
             app_commit=app_commit,
-            primary_usage_text=format_usage(summary.demand_usage, summary.cache_reuse_ratio),
+            primary_usage_text=primary_usage,
             session_cost_text=format_cost(summary.session_cost),
             demand_cost_text=format_cost(summary.demand_cost),
             cost_gap_text=_cost_gap(summary.gaps),

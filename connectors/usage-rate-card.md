@@ -31,6 +31,13 @@ display and must not drive demand forecasts.
 - `rate_card_hash`
 - `cost_confidence` (`exact`, `rated`, `estimated`, `allocated`, `unavailable`)
 
+## ACU block (DEVIN)
+DEVIN bills in **ACU**, and Devin publishes no ACU→USD rate. To show USD on the
+toolbar for Devin, the approved rate card may carry an `acu` block:
+`{ "usd_per_acu": <approved contract value> }`. `scripts/metrics/session-cost.py`
+converts the demand's ACU delta to USD **only** from this field; with no `acu`
+block, keep `cost usd` empty and show ACU (never invent a USD value — D10).
+
 ## Rule
 Interaction cost needs two inputs: exact interaction/request usage plus an
 approved rate card or a source that already provides per-interaction cost.

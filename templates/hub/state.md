@@ -46,6 +46,12 @@
 - usage window started at:
 - usage window ended at:
 - usage imported at:
+- usage acu cycle:
+- usage acu total:
+- usage acu session baseline:
+- usage acu demand baseline:
+- session acu:
+- demand acu:
 - vcs:
 - tracker:
 - notification:
@@ -58,6 +64,15 @@
 - status values: contract | handoff | dry-run | active | disabled | not configured
 - readiness:
 - adapter notes:
+
+## Budget
+- budget unit: acu
+- budget limit:
+- budget baseline:
+- budget consumed:
+- budget near threshold: 80
+- budget on limit: pause-and-ask
+- budget status:
 
 ## Links
 - problem: `01-inception/002-problem.md`

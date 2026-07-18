@@ -90,11 +90,15 @@ observability event and must not be appended to the demand JSONL log as
 - `usage_rate_card`: approved per-model/per-unit table applied to exact
   interaction usage; confidence `rated` or `estimated` depending on approval.
 - `host_cost_command`: host-native usage/cost summary such as Claude Code `/cost`
-  or the DEVIN CLI `/usage` (estimated session credit/ACU; interactive, run by
-  the human), recorded by the human or a supported host export. It is valid only
-  as a session/window total, with source and timestamp. When the host reports no
-  USD (e.g. Devin self-serve gives credit/ACU, not USD), keep `cost usd` empty and
-  show the native consumption unit; never convert it to USD.
+  or the DEVIN CLI `/usage` (paid: `ACUs consumed: X of Y` for the billing cycle;
+  self-serve: `Quota used: N%`; interactive, run by the human — the agent cannot).
+  `scripts/metrics/session-cost.py` parses the pasted value and computes the
+  session/demand **delta** from baselines in `001-state.md` for the toolbar. Valid
+  only as a session/window total, with source and timestamp. USD only via an
+  approved rate-card `acu.usd_per_acu` (`connectors/usage-rate-card.md`); otherwise
+  keep `cost usd` empty and show ACU/quota, never inventing USD (D10). DEVIN
+  `--export` does not produce a usable transcript (confirmed), so there is no
+  per-turn token source on the CLI — Devin cost is ACU-based and estimated.
 - `manual_allocation`: human/FinOps-approved allocation from aggregate cost.
 
 ## degradation
