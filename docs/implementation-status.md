@@ -15,8 +15,11 @@ All D1–D47 decisions are materialized. Highlights by area:
 - **Artifacts:** D4 state/decisions/audit/metrics; D43/D45 JSONL observability; D26 version stamps; D37 persistence granularity; D28 demand states and resume.
 - **Extension points:** D12/D22 skills registry with precedence and pinned external refs; D40 connector contracts with adapter states; D42 knowledge guardrails; D35/D36 templates and coding standards.
 - **Helper architecture:** `scripts/shared/` is the shared SOLID package for reusable helper logic; `scripts/workflow`, `scripts/metrics`, `scripts/validators`, and `scripts/adapters` remain command entrypoints/compatibility wrappers.
+- **Operational happy path:** `alfred` provides doctor, always-main update,
+  workspace/HUB setup, pre-demand draft, file-only requirements, lifecycle
+  checkpoints/validation/close, usage import, and host sync with dry-run/JSON.
 - **Measurement:** D10/D32 cost and baselines; D43 append-only usage/cost/artifact logs, raw Claude Code hook support, host-agnostic observability domain/ports under `scripts/shared/observability/`, usage summary for toolbar presentation, decision rollups, insights, and D46 model policy with automated validation.
-- **Distribution:** D15/D26 version freeze/upgrade policy; releases with `VERSION` + `CHANGELOG.md`; DEVIN installer; per-host entry points.
+- **Distribution:** D15/D26 single-installation always-main adoption with audit stamps; releases with `VERSION` + `CHANGELOG.md`; DEVIN installer; per-host entry points.
 
 Validated behaviors, optional helpers, and exit criteria: `docs/layer-1-framework-closure.md`.
 

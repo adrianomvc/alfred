@@ -6,7 +6,8 @@ Use this checklist when preparing a new Alfred framework version.
 - `VERSION` is the local framework version stamp.
 - Release notes live in `CHANGELOG.md`.
 - A stable release requires an immutable `vMAJOR.MINOR.PATCH` Git tag. Before
-  that tag exists, pilots may pin an reviewed commit and must label it pre-release.
+  that tag exists, the installation still follows `main` and the framework is
+  labeled release candidate.
 - Do not change HUB/App demand artifacts to create a framework release.
 
 ## Version Semantics
@@ -29,13 +30,15 @@ Before a version is announced or tagged:
 - record migration notes when existing HUB/App artifacts need manual adjustment;
 - keep generated example artifacts parseable and aligned with current validators.
 - confirm the required CI check is green and branch protection requires it on
-  the release branch; repository administrators record this evidence.
+  `main`; repository administrators record this evidence;
+- complete and record the five real hardening pilots;
+- record a fresh independent reviewer for Standard changes and a fresh reviewer
+  or clean independent session for SAFE changes.
 
 ## Human Governance
 Only a human decides:
 - whether to create a Git tag;
-- which branch or commit a sigla adopts;
-- whether active demands may upgrade in-flight;
+- whether the validated commit on `main` is ready for a stable tag;
 - whether a breaking change is acceptable.
 
 Alfred may propose the release note and compatibility assessment, but it does not publish or force adoption by itself.

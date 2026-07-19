@@ -20,6 +20,13 @@ Python helpers only. Installers remain OS-native under `install/`.
 Most real logic lives in `shared/`; `workflow/` and `metrics/` files are thin CLI
 drivers that delegate to it (enforced by `validators/validate-scripts-architecture.py`).
 `scripts/_common.py` is a compatibility shim re-exporting `shared.common`.
+
+## Canonical CLI
+`python scripts/alfred.py` (installed as `alfred`) provides the governed happy
+path: doctor, framework status/update, workspace detection, HUB init,
+draft/requirements/start, demand status/validate/close, checkpoints, usage
+import, and host sync. Human output is pt-BR by default; `--json` emits
+`alfred.cli.v1`. Writes apply directly, are idempotent, and support `--dry-run`.
 For the installer policy, see `AGENTS.md` § Conventions.
 
 ## Allowed helpers
@@ -40,7 +47,7 @@ For the installer policy, see `AGENTS.md` § Conventions.
 - validate reverse-engineering staleness against an app commit
 - validate the SDD clarity gate before Execution
 - resolve the model-policy decision (tier/model/effort) for a demand step
-- check for a framework update with a TTL cache so boot skips the network when checked recently
+- validate and adopt `origin/main` at each safe boundary, with a concurrency lock and honest offline degradation
 - migrate legacy usage state to the typed `alfred.usage.v2` schema with a reviewable diff
 - retrieve cross-demand memory with bounded progressive disclosure
 - benchmark context retrieval token reduction and answer recall

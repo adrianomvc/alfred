@@ -14,9 +14,11 @@ triggers:
 Understand the demand before designing a solution. Owner agent: **Discovery**. Subject to the supreme law and scaled by the active lane.
 
 ## Steps
-0. **Opening framing checkpoint (new demand)** — before any clone, id stamping,
-   state write, or scaffolding, propose target app/source, initiative id, demand
-   id, scope, lane, and artifact set; wait for explicit human confirmation.
+0. **Opening framing checkpoint (new demand)** — create only a pre-demand draft
+   state and `003-requirements.md`. In that file, propose target app/source,
+   initiative id, demand id, scope, lane, and artifact set with meaningful
+   alternatives. Wait for file-based human confirmation before clone, canonical
+   id stamping, or HUB/App demand scaffolding.
 1. Detect **stream/type** and, if **Produto**, ingest the external `inception-input` — do not redo business discovery.
 2. **Intent analysis** — classify clarity (clear/vague/incomplete), type (mapped to streams), scope (1 file → cross-app), complexity. This output **pre-fills the Risk Mode checklist**.
 3. Produce **`tech-inception`** (technical lens: affected systems/apps via reverse-eng, integration points, technical risks).

@@ -47,9 +47,11 @@ App:
 - The HUB holds **only artifacts**. **Nothing from the framework** is copied into HUB or app repos.
 - The framework lives in **its own repo** (single source). HUB and app **consume/reference** it.
 - Evolution/customization is **central and adopted by users**: when the framework evolves, users adopt that version — no divergent copies scattered across HUBs.
-- Artifacts may record which framework version they were produced against (traceability); the active reference is always the framework repo. The *how to reference* mechanism (submodule, version pin, fetch) is an implementation detail, respecting the agnostic principle.
+- Artifacts record the framework commits that governed them (traceability); the active reference is the single global framework repo following `origin/main`.
 
-Version adoption is governed by `docs/version-adoption.md`: active demands freeze the stamped framework version unless a human explicitly approves an in-flight upgrade.
+Version adoption is governed by `docs/version-adoption.md`: active demands adopt
+validated `origin/main` updates at safe operation boundaries and retain the
+old/new commit history.
 
 ## SOLID applied to Alfred itself
 - **S** — one reason to change per module (`core`/`rules`/`skills`/`connectors`/`metrics`) and per artifact; each agent owns 1 phase.

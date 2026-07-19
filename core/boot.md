@@ -27,8 +27,13 @@ Every session begins with a fixed sequence before any work. The host runs it onc
      `docs/onboarding-sigla.md`; write owner/apps/tracker as `pending`, read
      notification from `knowledge/notification.md`, and **never present a scope
      menu** — then offer one next step in a line.
-3. **Update local framework (if CLI)** — pull the framework repo to ensure the latest version; if it changed, announce in one line what changed. No CLI/access → record "not verified." Use the TTL-cached check (`scripts/workflow/check-update.py`) so boot skips the network when the framework was checked recently; `sync-host-shims.py` is a no-op when nothing changed.
-   - **Safeguard (active demand):** if there is an update **and** an active demand, Alfred **warns and asks** — apply now or only on the next demand. The demand records the framework version used and keeps it frozen until it closes, unless a human decides otherwise.
+3. **Update local framework (if CLI)** — run `alfred framework update` at this
+   safe boundary. The single `~/.alfred` installation always follows
+   `origin/main`, including for active demands. Validate a temporary candidate
+   before fast-forward promotion and serialize concurrent updates. If changed,
+   announce `old commit -> new commit`, refresh host shims, and stamp the active
+   demand. No Git/network access → record "not verified"; an invalid candidate
+   keeps the installed commit and blocks adoption.
 4. **JIT context load (anti-hypercontext):**
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
@@ -50,11 +55,12 @@ Every session begins with a fixed sequence before any work. The host runs it onc
 5. **Confirm with the human** the starting point (continue / new / review) before acting.
 
 ## Opening framing checkpoint
-For a **new demand**, Alfred must stop before any mutating action and present one
-concise framing proposal for explicit human confirmation. This checkpoint comes
-before cloning/fetching an app repo, choosing or stamping initiative/demand ids,
-creating HUB/App demand artifacts, writing `state`, or classifying a lane as
-accepted.
+For a **new demand**, Alfred may create only a pre-demand draft under
+`alfred-docs-hub/000-drafts/<draft-id>/`: `001-state.md` with status `draft` and
+`01-inception/003-requirements.md`. All framing questions and answers live in
+that requirements file. Chat only points to its path and receives
+`pronto`/`terminei`. No canonical demand/App artifact, clone/fetch, accepted ID,
+or accepted lane exists before required answers are complete and reviewed.
 
 The proposal includes: target app source/path, workspace placement, initiative
 id, demand id, initial scope, proposed lane, an **optional budget** for the
@@ -74,12 +80,16 @@ later".
 When running inside an app repo without HUB access, Alfred resumes from `.alfred-docs-app/<id-iniciativa>/<id-demanda>/001-index.md` plus the app-local artifacts. If the HUB `001-state.md` cannot be read, Alfred treats the demand state as **local pending sync**, records that limitation in `05-operation/009-hub-sync.md`, and asks the human for the missing demand/initiative identifiers only if they cannot be inferred from the path or branch.
 
 ## Stamp the framework version
-On boot, stamp the framework version/commit into the demand `state` (frozen until the demand closes — traceability). Three coherent stamps exist: **framework** (in `state`), **app** (commit in `reverse-eng`/PR), **demand** (`id` + branch). Result: you can reconstruct "this demand ran with Alfred vX, over the app at commit Y."
+On boot, stamp the current framework version/ref/commit into demand `state`.
+When `origin/main` advances, update the stamp and append the adoption event so
+history shows every Alfred commit that governed the demand.
 
 ## Version adoption
 Follow `docs/version-adoption.md` when the local framework differs from the version stamped in an active demand.
 
-Active demands keep their stamped framework version frozen. If a newer framework is available, Alfred warns the human and records the choice: keep the frozen version or upgrade in-flight. An in-flight upgrade requires an audit event, a JSONL event, and updated state/metrics version fields.
+Active demands adopt a validated newer `origin/main` at the next safe boundary.
+This is not a human choice or a demand pin. Record the old/new commit in
+audit/observability and update state/metrics version fields.
 
 ## Resume from state (resilience)
 The `state` always carries phase, mode, progress, next step, and links — enough for boot to reconstruct context without re-reading everything. If a session drops, resume from the last saved `state`: at most the in-flight step is lost, never the demand. Acceptance criterion: *resume after losing context by reading only the `state`.*

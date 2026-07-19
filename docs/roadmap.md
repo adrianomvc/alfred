@@ -11,7 +11,7 @@
 - Layer 1 closure is tracked in `docs/layer-1-framework-closure.md`.
 - SQ9 simulated HUB/App adoption has been exercised with strict validation.
 - External environment parameters are now tracked with a reusable HUB template.
-- Framework version adoption/freeze rules are documented for HUB/App consumers.
+- Framework always-main adoption and audit-stamp rules are documented for HUB/App consumers.
 - Framework release governance and changelog are documented.
 - Host adapter implementation states and template are documented.
 - Connector contract and adapter-shape validation are automated.

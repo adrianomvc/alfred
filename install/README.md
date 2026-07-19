@@ -93,8 +93,7 @@ raw-file URL from the company mirror.
 |---|---|---|
 | Framework repo | `ALFRED_FRAMEWORK_URL` | `https://github.com/itau-corp/itau-sq9-modules-alfred-v2.git` |
 | Install dir | `ALFRED_INSTALL_DIR` | `~/.alfred` |
-| Version (tag) | `ALFRED_VERSION` | latest on default branch |
-| Branch | `ALFRED_BRANCH` | repo default |
+| CLI bin dir | `ALFRED_BIN_DIR` | `~/.local/bin` |
 | Skills dir | `ALFRED_SKILLS_DIR` | `~/.config/devin/skills` (POSIX) |
 | Notification e-mail | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `ALFRED_SKIP_EMAIL=1` | setup runs |
@@ -139,16 +138,10 @@ var. If a package cannot be installed, Alfred records the degraded state and
 keeps working through `rg`, bounded file reads, and manual cost input.
 
 ## Versions
-Releases are git tags `vMAJOR.MINOR.PATCH` (source of truth: `VERSION` + `CHANGELOG.md`).
-- **Latest stable** (default): the installer tracks the default branch (`main`).
-- **Pinned** (reproducible): pass a tag to freeze the framework version.
-```bash
-ALFRED_VERSION=v0.2.0 bash install/install.sh
-```
-Re-running with a different `ALFRED_VERSION` switches `~/.alfred` to that tag;
-re-running without it returns to the latest on the default branch. A pinned
-version maps to the framework version a demand stamps in its `state`
-(reproducibility — D26).
+Alfred has one global installation at `~/.alfred` and always follows validated
+`origin/main`. `ALFRED_VERSION`, `ALFRED_BRANCH`, local pins, and persistent
+parallel versions are not supported. Demand version fields are audit stamps;
+they are updated when a newer validated main commit is adopted.
 
 ## Verify
 ```bash
@@ -157,25 +150,21 @@ devin skills show alfred
 ```
 Then, inside a repo, type `/alfred` in the DEVIN CLI.
 
-## Update and rollback
-Alfred installs the **latest** version and keeps up to date automatically: on
-each `/alfred` invocation it fast-forwards `~/.alfred` to the latest release —
-**unless a demand is in progress**, in which case the demand stays on its
-stamped (frozen) version and you are only told an update is available
-(`docs/version-adoption.md`).
+## Update and recovery
+At session start and governed checkpoints, `alfred framework update` validates
+`origin/main` in a temporary worktree and promotes it by fast-forward. Active
+demands adopt it at that safe boundary and record `old commit -> new commit`.
 
 Manual controls:
 | Action | Command |
 |---|---|
 | Update to latest now | re-run `bash install/install.sh` |
-| List available versions | `bash install/install.sh list` |
-| Roll back one version | `bash install/install.sh rollback` |
-| Pin a specific version | `ALFRED_VERSION=v0.1.0 bash install/install.sh` |
+| Inspect status | `alfred framework status` |
+| Update and stamp active demand | `alfred framework update --state <001-state.md>` |
 
-`rollback` moves `~/.alfred` to the previous release tag (use it if a new
-version breaks something). Re-running the installer without it returns to the
-latest. A demand records the version it ran on (D26), so you know which tag to
-roll back to.
+Recovery is performed by fixing or reverting the faulty commit on `main`, then
+running the updater again. A failed candidate validation leaves the installed
+commit unchanged.
 
 ## Refresh copied host entries
 Host entry files are copied into native locations during setup. After pulling a

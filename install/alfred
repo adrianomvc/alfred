@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ALFRED_HOME="${ALFRED_HOME:-$HOME/.alfred}"
+PYTHON="$(command -v python3 || command -v python || true)"
+[ -n "$PYTHON" ] || { echo "Python is required to run Alfred." >&2; exit 1; }
+exec "$PYTHON" "$ALFRED_HOME/scripts/alfred.py" "$@"

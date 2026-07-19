@@ -27,7 +27,7 @@ One responsibility per folder — the mental model: **`core/` = what Alfred is �
 - `connectors/` - plug-in contracts for VCS, tracker, notification, telemetry, observability (+ the MCP e-mail adapter in `scripts/adapters/`).
 - `metrics/` - measurement contract, baselines, and insight rules.
 - `templates/` - framework-owned molds for generated HUB/App artifacts.
-- `scripts/` - optional helpers in two runtimes, by category: `validators/` · `workflow/` · `metrics/` · `adapters/`.
+- `scripts/` - optional Python helpers by category: `validators/` · `workflow/` · `metrics/` · `adapters/`.
 - `hosts/` - per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex); sources live here, installation lands in each host's native location.
 - `install/` - turn-key installer (framework + skill + e-mail/telemetry + MCP).
 - `docs/` and `examples/` - adoption guidance and the example suite (also the regression evals).
@@ -36,6 +36,23 @@ One responsibility per folder — the mental model: **`core/` = what Alfred is �
 - **I want to USE Alfred in my squad** → run `install/` and read [`docs/onboarding-sigla.md`](docs/onboarding-sigla.md), then [`docs/quickstart-real-demand.md`](docs/quickstart-real-demand.md).
 - **I want to UNDERSTAND how it works** → [`core/README.md`](core/README.md) → [`core/risk-mode.md`](core/risk-mode.md) → [`rules/README.md`](rules/README.md).
 - **I want to CHANGE the framework** → [`AGENTS.md`](AGENTS.md) (invariants + validation) and [`docs/plan/implementation-plan-2.0.0.md`](docs/plan/implementation-plan-2.0.0.md) (active plan).
+
+## Operational Happy Path
+The installer exposes `alfred`, a Python-canonical helper with pt-BR human
+output and an optional `--json` (`alfred.cli.v1`) envelope:
+
+```bash
+alfred doctor
+alfred sigla init --root . --role hub
+alfred demand draft --title "Objetivo da demanda"
+alfred requirements status --draft alfred-docs-hub/000-drafts/<draft-id>
+alfred demand start --draft alfred-docs-hub/000-drafts/<draft-id>
+```
+
+All questions and answers stay in `003-requirements.md`. The model proposes the
+useful alternatives, supports multiple selection, and marks one
+`(Recomendada)` when appropriate; chat only points to the file and receives the
+completion signal.
 
 ## Observability and Cost
 Alfred keeps the demand log append-only at `05-operation/011-observability-log.jsonl`. The canonical split is:

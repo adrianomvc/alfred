@@ -282,19 +282,19 @@ def assert_host_shim_sync_policy(root):
             "claude-code-usage-hook.py",
         ],
         "hosts/_template/hosts.json": [
-            "sync-host-shims.py -Host claude-code -Create -InstallHooks",
-            "sync-host-shims.py -Host devin-cli",
-            "sync-host-shims.py -Host codex",
+            "alfred.py host sync --host claude-code --install-hooks",
+            "alfred.py host sync --host devin-cli --install-hooks",
+            "alfred.py host sync --host codex",
         ],
         "hosts/claude-code/SKILL.md": [
-            "sync-host-shims.py -Host claude-code -Create -InstallHooks",
+            "alfred.py host sync --host claude-code --install-hooks",
             "-RegisterActive",
         ],
         "hosts/devin-cli/SKILL.md": [
-            "sync-host-shims.py -Host devin-cli",
+            "alfred.py host sync --host devin-cli --install-hooks",
         ],
         "hosts/codex/AGENTS.md": [
-            "sync-host-shims.py -Host codex",
+            "alfred.py host sync --host codex",
         ],
         "hosts/README.md": [
             "Syncing installed host entries",
