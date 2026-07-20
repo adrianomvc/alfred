@@ -94,15 +94,15 @@ release, a clone that lost its `.git`) used to stop the installer with
 *"exists but is not a git repo"*, forcing a manual cleanup on every machine.
 
 Now, when the directory carries Alfred's markers (`core/boot.md`, `VERSION`,
-`scripts/alfred.py`), the installer **moves it aside** to
-`~/.alfred.bak.<timestamp>` and installs fresh. It is moved, not deleted: a
-non-git directory can hold the only copy of something, and unlike a git install
-a re-clone cannot bring it back. Local `runtime/` state (active-demand pointer,
-update cache) is carried over.
+`scripts/alfred.py`), the installer **removes it and installs fresh**. The
+framework holds no user data — demands live in the HUB repo, and `~/.alfred` is
+a referenced source (D15) — so a fresh clone restores everything. Local
+`runtime/` state (the active-demand pointer and the update cache) is generated
+and regenerates on the next boot.
 
-A directory that shows none of those markers is never touched — that is someone
+A directory that shows none of those markers is left untouched — that is someone
 else's data, not a stale Alfred. Use `ALFRED_FORCE_INSTALL=1` to replace it
-anyway; it is still backed up rather than deleted.
+anyway.
 
 ## Options
 | Setting | bash env var | Default |
