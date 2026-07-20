@@ -140,7 +140,14 @@ REQUIRED_PATHS = [
     "scripts/metrics/session-cost.py",
     "scripts/metrics/evaluate-context-benchmark.py",
     "scripts/validators/validate-devin-blueprint.py",
-    ".github/workflows/validate.yml",
+    # `.github/` is deliberately NOT required. Its three files are GitHub
+    # plumbing — the Actions workflow, CODEOWNERS, the PR template — and none of
+    # them runs at install or at runtime. Requiring the workflow made the
+    # framework unvalidatable wherever CI does not exist: a mirror that does not
+    # copy `.github/`, a corporate GitHub that blocks workflows, an offline copy,
+    # a zip export. That is the D3 line ("no feature may require a specific
+    # model, API, CI, or UI"), and it blocked a real corporate install.
+    # CI presence is reported by validate-invariants.py as a non-blocking hint.
     "scripts/metrics/budget-monitor.py",
     "scripts/shared/__init__.py",
     "scripts/shared/context_budget.py",

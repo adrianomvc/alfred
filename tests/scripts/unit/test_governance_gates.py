@@ -498,6 +498,17 @@ class GovernanceGateTests(unittest.TestCase):
         for secret in ("segredo do usuario", "raciocinio privado", "rm -rf"):
             self.assertNotIn(secret, serialized)
 
+    def test_ci_files_are_never_required_to_validate(self):
+        """D3: no feature may require a specific CI. `.github/` holds GitHub
+        plumbing that never runs at install or runtime, so a mirror or copy
+        without it must still validate — requiring it blocked a real corporate
+        install. Presence is an advisory hint, not a gate.
+        """
+        required = load_hyphenated(
+            "validate_framework_paths",
+            "scripts/validators/validate-framework.py").REQUIRED_PATHS
+        self.assertEqual([], [path for path in required if path.startswith(".github/")])
+
     def test_policy_target_uses_the_host_model_map(self):
         """On Devin the target must be a model Devin can run; it used to resolve
         to a Claude name on every host."""

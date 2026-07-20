@@ -37,6 +37,12 @@ PTBR_WORDS = re.compile(
 
 def scan(root):
     warnings = []
+    # CI is recommended, never required (D3). A copy without `.github/` is a
+    # valid framework — it just has no automated gate, which the owner should
+    # know about rather than discover when a bad commit lands.
+    if not (root / ".github" / "workflows" / "validate.yml").is_file():
+        warnings.append("WARN ci: no .github/workflows/validate.yml; the framework gate "
+                        "runs only when someone runs it by hand (valid, but unguarded)")
     for folder in SCAN_DIRS:
         base = root / folder
         if not base.exists():

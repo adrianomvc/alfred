@@ -160,6 +160,15 @@ All notable Alfred framework changes should be recorded here.
 - `demand start` refuses a requirements file where no field is recognised,
   naming the cause and the way out. It previously accepted `{}` and would build a
   demand with no ids, no risk criteria, and no lane.
+- `.github/workflows/validate.yml` is no longer a required path. It is GitHub
+  Actions plumbing that runs neither at install nor at runtime, so requiring it
+  made the framework unvalidatable wherever CI does not exist — a mirror that
+  does not copy `.github/`, a corporate GitHub that blocks workflows, an offline
+  copy, a zip export. That crosses the D3 line ("no feature may require a
+  specific model, API, CI, or UI") and blocked a real corporate install, where
+  the person had reasonably skipped `.github/` as repo metadata.
+  `validate-invariants.py` now reports its absence as a non-blocking hint, and a
+  test asserts no `.github/` path is ever required again.
 - Telemetry path sanitization no longer depends on the host OS. It used
   `os.path.isabs()`, which answers only for the running platform, so a Windows
   path processed on Linux (`C:/abs/path/001-state.md`) was shipped whole instead
