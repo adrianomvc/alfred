@@ -126,9 +126,36 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     "$PYTHON_BIN" "$INSTALL_DIR/scripts/validators/validate-framework.py" --quiet
   fi
 elif [ -e "$INSTALL_DIR" ]; then
-  echo "$INSTALL_DIR exists but is not a git repo. Move or remove it, then re-run." >&2
-  exit 1
-else
+  # A non-git ~/.alfred is almost always an older install: a copied tree, an
+  # unzipped release, or a clone whose .git was lost. Refusing to proceed forced
+  # a manual cleanup on every machine, so an install that recognises Alfred
+  # replaces it — the same call the wrong-remote branch above already makes.
+  #
+  # It is moved aside, not deleted. A non-git directory may hold the only copy
+  # of something, and a re-clone cannot bring it back the way it can for a git
+  # install. What is NOT recognisable as Alfred is never touched: set
+  # ALFRED_FORCE_INSTALL=1 to override that, deliberately.
+  LOOKS_LIKE_ALFRED=0
+  for marker in core/boot.md VERSION scripts/alfred.py; do
+    if [ -e "$INSTALL_DIR/$marker" ]; then LOOKS_LIKE_ALFRED=1; break; fi
+  done
+  if [ "$LOOKS_LIKE_ALFRED" = "1" ] || [ "${ALFRED_FORCE_INSTALL:-0}" = "1" ]; then
+    BACKUP_DIR="${INSTALL_DIR}.bak.$(date +%Y%m%d-%H%M%S)"
+    info "Existing non-git install at $INSTALL_DIR; moving it to $BACKUP_DIR and re-installing."
+    mv "$INSTALL_DIR" "$BACKUP_DIR"
+    # Carry over local runtime state (active demand pointer, update cache): it
+    # is generated data, not framework content, and is not in the repo.
+    if [ -d "$BACKUP_DIR/runtime" ]; then
+      PRESERVED_RUNTIME="$BACKUP_DIR/runtime"
+    fi
+  else
+    echo "$INSTALL_DIR exists, is not a git repo, and does not look like an Alfred install." >&2
+    echo "Nothing was changed. Move it aside, or re-run with ALFRED_FORCE_INSTALL=1 to replace it." >&2
+    exit 1
+  fi
+fi
+
+if [ ! -e "$INSTALL_DIR" ]; then
   CANDIDATE_DIR="${INSTALL_DIR}.candidate.$$"
   info "Cloning framework candidate into $CANDIDATE_DIR"
   git clone --quiet --branch main "$FRAMEWORK_URL" "$CANDIDATE_DIR"
@@ -138,6 +165,11 @@ else
     rm -rf "$CANDIDATE_DIR"
     echo "Framework candidate failed validation; installation was not changed." >&2
     exit 2
+  fi
+  # Restore runtime state carried over from a replaced non-git install.
+  if [ -n "${PRESERVED_RUNTIME:-}" ] && [ -d "$PRESERVED_RUNTIME" ]; then
+    cp -r "$PRESERVED_RUNTIME" "$INSTALL_DIR/runtime"
+    info "Restored local runtime state from the previous install."
   fi
 fi
 

@@ -88,6 +88,22 @@ If the one-line install command is used inside the company network, replace the
 `raw.githubusercontent.com/.../install/install.sh` URL with the internal
 raw-file URL from the company mirror.
 
+## Reinstalling over an older Alfred
+An install directory that is **not** a git repo (a copied tree, an unzipped
+release, a clone that lost its `.git`) used to stop the installer with
+*"exists but is not a git repo"*, forcing a manual cleanup on every machine.
+
+Now, when the directory carries Alfred's markers (`core/boot.md`, `VERSION`,
+`scripts/alfred.py`), the installer **moves it aside** to
+`~/.alfred.bak.<timestamp>` and installs fresh. It is moved, not deleted: a
+non-git directory can hold the only copy of something, and unlike a git install
+a re-clone cannot bring it back. Local `runtime/` state (active-demand pointer,
+update cache) is carried over.
+
+A directory that shows none of those markers is never touched — that is someone
+else's data, not a stale Alfred. Use `ALFRED_FORCE_INSTALL=1` to replace it
+anyway; it is still backed up rather than deleted.
+
 ## Options
 | Setting | bash env var | Default |
 |---|---|---|
@@ -97,6 +113,7 @@ raw-file URL from the company mirror.
 | Skills dir | `ALFRED_SKILLS_DIR` | `~/.config/devin/skills` (POSIX) |
 | Notification e-mail | `ALFRED_EMAIL` | interactive prompt (skipped when non-interactive) |
 | Skip e-mail/MCP setup | `ALFRED_SKIP_EMAIL=1` | setup runs |
+| Replace an unrecognised install dir | `ALFRED_FORCE_INSTALL=1` | refuses and leaves it untouched |
 | RTK package URL | `ALFRED_RTK_URL` | public Windows zip placeholder |
 | RTK package SHA-256 | `ALFRED_RTK_SHA256` | empty (download is not installed) |
 | Skip RTK setup | `ALFRED_SKIP_RTK=1` | setup runs if URL or `rtk` exists |
