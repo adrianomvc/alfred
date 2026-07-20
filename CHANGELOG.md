@@ -169,6 +169,13 @@ All notable Alfred framework changes should be recorded here.
   the person had reasonably skipped `.github/` as repo metadata.
   `validate-invariants.py` now reports its absence as a non-blocking hint, and a
   test asserts no `.github/` path is ever required again.
+- The installer no longer hides why `rtk init -g` failed, and no longer implies
+  it is pending work on a Devin machine. `rtk init -g` configures Claude Code
+  (plus `--opencode`/`--gemini`), and `rtk hook` has no Devin target at all, so
+  on a Devin-only machine it has nothing to configure and fails as expected —
+  Devin is covered by Alfred's own PreToolUse bridge installed right after. The
+  output was swallowed by `>/dev/null 2>&1` and the message said "Run it manually
+  when ready", sending people to re-run a command that fails again.
 - Telemetry path sanitization no longer depends on the host OS. It used
   `os.path.isabs()`, which answers only for the running platform, so a Windows
   path processed on Linux (`C:/abs/path/001-state.md`) was shipped whole instead

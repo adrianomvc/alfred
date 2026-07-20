@@ -268,10 +268,17 @@ if [ "$SKIP_RTK" != "1" ]; then
   fi
 
   if command -v rtk >/dev/null 2>&1; then
-    if rtk init -g >/dev/null 2>&1; then
-      info "RTK initialized globally for DEVIN CLI terminal sessions."
+    # `rtk init -g` only knows Claude Code (plus --opencode/--gemini); `rtk hook`
+    # has no Devin target at all. On a Devin-only machine it has nothing to
+    # configure and fails — which is expected, not a problem to chase. Devin is
+    # covered by Alfred's own PreToolUse bridge, installed right below.
+    RTK_INIT_OUT=""
+    if RTK_INIT_OUT="$(rtk init -g 2>&1)"; then
+      info "RTK initialized globally (Claude Code config)."
     else
-      info "RTK found, but 'rtk init -g' did not complete. Run it manually when ready."
+      info "'rtk init -g' did not complete — expected when Claude Code is absent, since it configures Claude Code/OpenCode/Gemini, not Devin."
+      info "The DEVIN CLI path does not depend on it; the hook below is what matters. RTK said:"
+      printf '%s\n' "$RTK_INIT_OUT" | sed 's/^/    /' | head -5
     fi
     # RTK ships no Devin preset (its stock hook matches Claude's `Bash` tool, not
     # Devin's `exec`), so install Alfred's PreToolUse->rtk bridge into the DEVIN
