@@ -12,11 +12,18 @@ sys.path.insert(0, str(HERE.parent))
 from _common import (  # noqa: E402
     get_field, iter_jsonl, normalize_phase, phase_number, read_lines,
 )
+from shared.cli.demand import PHASES  # noqa: E402
 from shared.cli.requirements import parse as parse_requirements  # noqa: E402
 from shared.common import find_duplicate_keys  # noqa: E402
 from shared.sdd_gate import run as run_sdd_gate  # noqa: E402
 from shared.validation import Severity, ValidationIssue, ValidationReport  # noqa: E402
 from shared.validation.reverse_eng_staleness import validate_reverse_eng_staleness  # noqa: E402
+
+# Lifecycle states a demand may report (rules/common/session-continuity.md) plus
+# the values the CLI writes. Kept as a check, not a rewrite: the human owns the word.
+DEMAND_STATUSES = ("draft", "active", "em andamento", "em espera", "bloqueada",
+                   "aguardando checkpoint", "concluida", "concluída", "rejeitada",
+                   "replanejada", "cancelada")
 
 
 CLOSED_STATUSES = ("closed", "concluida", "concluída", "done", "finalizada", "completed")
@@ -188,6 +195,21 @@ def validate_demand(args):
               "State has duplicated field keys (writer/reader would diverge): "
               + ", ".join(duplicates))
 
+    # The CLI writes fields with section="Demand"/"Opening Framing"/"Progress".
+    # A state carrying translated headings (## Demanda, ## Progresso) parses for
+    # reading but the writer will not find the section and appends a second one —
+    # the same writer/reader divergence as a duplicated key, arriving as data
+    # instead of code. Structure stays English; content is pt-BR (D47).
+    headings = {line.strip()[3:].strip() for line in state_lines if line.startswith("## ")}
+    for required in ("Demand", "Progress"):
+        if required not in headings:
+            translated = {"Demand": "Demanda", "Progress": "Progresso"}[required]
+            hint = f" (found `## {translated}`)" if translated in headings else ""
+            v.add("ERROR", "state_section_not_canonical",
+                  f"State has no `## {required}` section{hint}; the CLI writes into it "
+                  f"and would append a duplicate instead. Headings are English, content pt-BR (D47).")
+
+
     demand_id = get_field(state_lines, ["id"])
     initiative_id = get_field(state_lines, ["initiative id", "id iniciativa"])
     sigla = get_field(state_lines, ["sigla"])
@@ -199,6 +221,14 @@ def validate_demand(args):
     framing_status = get_field(state_lines, ["framing status", "status enquadramento"])
     framing_confirmed_by = get_field(state_lines, ["framing confirmed by", "enquadramento confirmado por"])
     framing_confirmed_at = get_field(state_lines, ["framing confirmed at", "enquadramento confirmado em"])
+
+    # `status` and `current phase` are different axes. A phase name parked in
+    # `status` means the demand reports no lifecycle state at all — and it reads
+    # as plausible, so nothing downstream complains.
+    if status and status.strip().lower() in {phase_name.lower() for phase_name in PHASES}:
+        v.add("ERROR", "status_is_a_phase",
+              f"`status: {status}` is a phase name, not a demand status. "
+              f"Use one of: {', '.join(DEMAND_STATUSES)}.")
 
     v.test_state_field(demand_id, "id", "ERROR")
     v.test_state_field(initiative_id, "initiative id", "WARN")

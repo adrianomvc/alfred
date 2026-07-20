@@ -209,7 +209,17 @@ def start(draft_path, framework_root, confirmed_by="", dry_run=False):
     req = draft_path / "01-inception" / "003-requirements.md"
     if not req.exists():
         return CommandResult("demand start", "blocked", message=f"Requirements do rascunho nao encontrado: {req}")
-    values, _required, missing = parse(req)
+    values, required, missing = parse(req)
+    if not required:
+        # A hand-written requirements file parses as zero fields and would slip
+        # through every check below (no ids, no risk criteria, no lane). Fail here
+        # and name the cause, instead of building a demand out of nothing.
+        return CommandResult("demand start", "blocked",
+                             message=f"Requirements sem nenhum campo reconhecido: {req}. "
+                                     "O arquivo precisa dos marcadores `<!-- field: <nome>; required: true -->` "
+                                     "do template; um arquivo escrito a mao nao e legivel pelo Alfred.",
+                             next_steps=["Recrie o rascunho com `alfred demand draft --hub <hub> --title \"<titulo>\"`, "
+                                         "ou copie `templates/hub/draft-requirements.md` sobre o arquivo atual e responda os campos."])
     if missing:
         return CommandResult("demand start", "blocked", message=f"Requirements incompleto; faltam: {', '.join(missing)}", next_steps=[f"Preencha {req}"])
     if not confirmed_by:

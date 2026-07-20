@@ -9,7 +9,10 @@ class DevinInsightsAdapter:
         self._mapper = mapper or GenericJsonlAdapter()
 
     def capabilities(self) -> AdapterCapabilities:
-        return AdapterCapabilities(request_tokens=False, session_usage=True, cost=False, artifacts=True, tools=False)
+        # request_tokens is True since the local session transcript exposes exact
+        # per-step tokens (see adapters/devin/transcript.py). cost stays False:
+        # Devin publishes ACU only through the web UI and never per request.
+        return AdapterCapabilities(request_tokens=True, session_usage=True, cost=False, artifacts=True, tools=False)
 
     def normalize_event(self, payload: Mapping[str, object], context: AdapterContext) -> list[CanonicalEvent]:
         return self._mapper.normalize_event(payload, context)

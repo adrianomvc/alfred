@@ -1,6 +1,6 @@
 # 001-state - 006-simulado-adocao-v2
 
-## Demanda
+## Demand
 - id: `006-simulado-adocao-v2`
 - titulo: Simulado de adocao do framework 2.0.0 na sigla
 - sigla: SQ9
@@ -21,7 +21,7 @@
 - workspace path: `examples/sq9-pilot/`
 - artifact set: HUB + App pilot artifacts
 
-## Progresso
+## Progress
 - current phase: Operation
 - current step: fechamento concluido
 - next step: nenhum (demanda fechada)

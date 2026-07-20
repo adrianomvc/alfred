@@ -104,6 +104,62 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code policy snapshots now emit `policy_snapshot` instead of
   `artifact_accessed`; metrics rollups ignore snapshot entries for real
   artifact reads, repeated reads, and loaded-artifact analysis.
+- `validate-demand` catches two deviations that read as plausible markdown but
+  break the runtime: a state with translated headings (`## Demanda` instead of
+  `## Demand`), where `write_state_fields` cannot find the section and appends a
+  second one when inserting a new key; and a phase name parked in `status`
+  (`status: inception`), which leaves the demand reporting no lifecycle state.
+  The two example states were migrated to English headings — yesterday's
+  normalization reached the templates and left the examples behind, so every new
+  demand and every existing example disagreed. The strict simulado stays 0/0.
+- Step 6 in `core/boot.md`'s host shims tells the agent to run
+  `alfred demand validate` at every phase transition and before closing. It is
+  the only thing that catches a demand assembled by hand: a full set of markdown
+  artifacts that never touched the CLI has no observability events at all.
+- Devin token usage is attributed without any API. The plan carried Session
+  Insights / the Consumption API as a blocker for W6.2, but that is only true for
+  **cost**: the local session transcript already holds exact per-step
+  `prompt_tokens`/`completion_tokens` with real timestamps, the model that ran,
+  and human turn boundaries (`source: user`). Verified against a real session —
+  the per-step values sum exactly to `final_metrics` (4,968,055 / 27,297).
+  `scripts/metrics/attribute-usage-devin.py` emits one `usage_attributed` event
+  per step, de-duplicated by step id and idempotent on re-runs.
+  `AdapterCapabilities.request_tokens` for Devin was declaring `False` and is now
+  true in both senses.
+- Cost stays `null` on that path, deliberately. Devin publishes ACU only through
+  the web UI, and it does not bill per token, so no coefficient could turn these
+  tokens into ACU without inventing one and presenting it as measurement. USD
+  still comes only from a measured ACU figure times an approved rate card. The
+  framework gate now pins "never convert tokens into ACU" as the invariant.
+- Alfred reads the model a DEVIN CLI session actually ran, instead of showing an
+  unconfirmed policy target. Devin exposes no live model to scripts (no env var,
+  hook field, or session metadata), but the CLI logs the resolved model at
+  session start (`resolved_model_uid=...`) and writes `agent.model_name` into the
+  session transcript. `scripts/workflow/detect-host-model.py` stamps it into the
+  demand state, so the toolbar reports fact. The log is preferred: it is written
+  when the session opens, while the transcript only appears when it ends. Only
+  those fields are read — transcript `steps` carry session content and telemetry
+  is emailed to the org destination.
+- The tier -> model map is per host. `resolve_model_policy` already accepted a
+  map but every caller got the Claude one, so a Devin session was told to target
+  `claude-opus-4-8`, a model the DEVIN CLI cannot run. `core/model-policy.md`
+  documented the Devin map in prose; it now exists in code.
+- The rich toolbar no longer truncates HITL and Modelo into a fixed 30-character
+  cut plus an unbounded model string. They share a line only when both fit whole,
+  and split otherwise. This was not cosmetic: the text being cut was the model's
+  own `nao confirmado` qualifier, so the truncation turned an honest hedge into
+  an apparent claim that a model had run.
+- The rules now name the command that creates a draft. `core/boot.md` and the
+  five host shims said "write the questions in `003-requirements.md` with
+  `[Resposta]:` slots" and never mentioned `alfred demand draft`, so an agent
+  following them authored the file by hand — a faithful reading of the text. The
+  hand-written file carries no `<!-- field: -->` markers, no `[Alternativas]`
+  blocks, and none of the ten risk/complexity criteria, so it parses as zero
+  fields and the lane cannot be derived. The plain-markdown fallback stays
+  explicit (copy the template verbatim), so D3 is preserved.
+- `demand start` refuses a requirements file where no field is recognised,
+  naming the cause and the way out. It previously accepted `{}` and would build a
+  demand with no ids, no risk criteria, and no lane.
 - Telemetry path sanitization no longer depends on the host OS. It used
   `os.path.isabs()`, which answers only for the running platform, so a Windows
   path processed on Linux (`C:/abs/path/001-state.md`) was shipped whole instead

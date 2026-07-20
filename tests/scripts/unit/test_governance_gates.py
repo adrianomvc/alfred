@@ -5,6 +5,7 @@ guard, state single-source, budget fail-loud, telemetry sanitization, and a
 CLI-only FAST lifecycle that closes without any manual markdown edit.
 """
 
+import argparse
 import importlib.util
 import io
 import contextlib
@@ -25,6 +26,9 @@ from shared.cli.demand import (_derive_sigla, checkpoint, close_readiness, draft
 from shared.cli.git_service import _validate_candidate  # noqa: E402
 from shared.cli.parser import run  # noqa: E402
 from shared.common import find_duplicate_keys, read_state_fields, write_state_fields  # noqa: E402
+from shared.model_policy import describe_model  # noqa: E402
+from shared.observability.infrastructure.adapters.devin import session as DEVIN_SESSION  # noqa: E402
+from shared.observability.infrastructure.adapters.devin import transcript as DEVIN_TRANSCRIPT  # noqa: E402
 
 
 def load_hyphenated(name, rel_path):
@@ -37,6 +41,7 @@ def load_hyphenated(name, rel_path):
 EMAIL = load_hyphenated("mcp_email_server", "scripts/adapters/mcp-email-server.py")
 HYGIENE = load_hyphenated("obs_hygiene", "scripts/validators/validate-observability-hygiene.py")
 ROLLUP = load_hyphenated("metrics_rollup", "scripts/metrics/generate-metrics-rollup.py")
+VALIDATE_DEMAND = load_hyphenated("validate_demand", "scripts/validators/validate-demand.py")
 
 FAST_ANSWERS = ["iniciativa-001-e2e", "001-e2e", "Ana", "Entrega pequena",
                 "Fora: resto", "nenhum", "A", "A",
@@ -408,6 +413,117 @@ class GovernanceGateTests(unittest.TestCase):
         secret = EMAIL.sanitize_telemetry_event({"event_type": "x",
                                                  "step": "password=hunter2"})
         self.assertIsNone(secret)
+
+    def test_validate_demand_catches_silent_state_deviations(self):
+        """Translated headings and a phase parked in `status` read as plausible
+        markdown but break the CLI: write_state_fields would not find the section
+        and would append a second one. The validator has to name both."""
+        with tempfile.TemporaryDirectory() as tmp:
+            demand = Path(tmp) / "001-x"
+            demand.mkdir()
+            (demand / "001-state.md").write_text(
+                "# 001-state - x\n\n## Demanda\n- id: 001-x\n- lane: Standard\n\n"
+                "## Progresso\n- current phase: Execution\n- status: inception\n",
+                encoding="utf-8")
+            codes = {issue.code for issue in
+                     VALIDATE_DEMAND.validate_demand(
+                         argparse.Namespace(hub_demand_path=str(demand), app_demand_path="",
+                                            app_repo_path="", app_current_commit="",
+                                            strict=False)).report.issues}
+        self.assertIn("state_section_not_canonical", codes)
+        self.assertIn("status_is_a_phase", codes)
+
+    def test_devin_session_model_is_read_from_the_host_log(self):
+        """Devin exposes no live model to scripts, but the CLI logs the resolved
+        model at startup. Reading it turns the toolbar's unconfirmed policy
+        target into the model that actually ran."""
+        with tempfile.TemporaryDirectory() as tmp:
+            logs = Path(tmp) / "cli" / "logs"
+            logs.mkdir(parents=True)
+            (logs / "devin_20260720-012424_10872.log").write_text(
+                "INFO chisel::repl_mode: model_input=<none> resolved_model=SWE-1.6 Slow "
+                "resolved_model_uid=swe-1-6-slow Model resolution complete\n",
+                encoding="utf-8")
+            found = DEVIN_SESSION.read_session_model(tmp)
+        self.assertEqual("swe-1-6-slow", found["uid"])
+        self.assertEqual("SWE-1.6 Slow", found["model"])
+
+    def _devin_transcript(self, tmp):
+        path = Path(tmp) / "session-x.json"
+        path.write_text(json.dumps({
+            "session_id": "session-x",
+            "agent": {"model_name": "SWE-1.6 Slow"},
+            "steps": [
+                {"step_id": 1, "source": "user", "timestamp": "2026-07-20T04:00:00Z",
+                 "message": "segredo do usuario"},
+                {"step_id": 2, "source": "agent", "timestamp": "2026-07-20T04:00:05Z",
+                 "model_name": "SWE-1.6 Slow", "metrics": {"prompt_tokens": 100,
+                                                           "completion_tokens": 10},
+                 "reasoning_content": "raciocinio privado",
+                 "tool_calls": [{"name": "exec", "args": "rm -rf"}]},
+                {"step_id": 3, "source": "agent", "timestamp": "2026-07-20T04:00:09Z",
+                 "model_name": "SWE-1.6 Slow", "metrics": {"prompt_tokens": 50,
+                                                           "completion_tokens": 5}},
+            ],
+            "final_metrics": {"total_prompt_tokens": 150, "total_completion_tokens": 15},
+        }), encoding="utf-8")
+        return path
+
+    def test_devin_tokens_are_exact_and_reconcile_with_the_session(self):
+        """Devin publishes ACU only in the web UI, but the local transcript has
+        exact per-step tokens. They must sum to what the host itself reports."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._devin_transcript(tmp)
+            requests = DEVIN_TRANSCRIPT.parse_requests(path)
+            totals = DEVIN_TRANSCRIPT.session_totals(path)
+        self.assertEqual(2, len(requests))  # the user step is a boundary, not usage
+        self.assertEqual(totals["total_prompt_tokens"],
+                         sum(r["tokens_input"] for r in requests))
+        self.assertEqual(totals["total_completion_tokens"],
+                         sum(r["tokens_output"] for r in requests))
+        # Cost is absent, and absence must never be rendered as zero.
+        self.assertTrue(all(r["cost_usd"] is None for r in requests))
+        self.assertTrue(all(r["tokens_cache_read"] is None for r in requests))
+        # A user boundary groups the agent steps that follow it.
+        self.assertEqual({"session-x#i1"}, {r["interaction_id"] for r in requests})
+
+    def test_devin_transcript_reader_never_touches_session_content(self):
+        """Steps carry message/reasoning/tool_calls. Alfred emails telemetry to
+        the org destination, so the reader must expose only the five fields."""
+        with tempfile.TemporaryDirectory() as tmp:
+            steps = DEVIN_TRANSCRIPT.load_steps(self._devin_transcript(tmp))
+        for step in steps:
+            self.assertEqual(set(DEVIN_TRANSCRIPT.READ_FIELDS), set(step))
+        serialized = json.dumps(steps)
+        for secret in ("segredo do usuario", "raciocinio privado", "rm -rf"):
+            self.assertNotIn(secret, serialized)
+
+    def test_policy_target_uses_the_host_model_map(self):
+        """On Devin the target must be a model Devin can run; it used to resolve
+        to a Claude name on every host."""
+        devin = describe_model("", "Standard", "Design", host="devin-cli")
+        claude = describe_model("", "Standard", "Design", host="claude-code")
+        self.assertIn("opus", devin)
+        self.assertNotIn("claude-", devin)
+        self.assertIn("claude-opus-4-8", claude)
+
+    def test_hand_written_requirements_is_refused_with_the_cause(self):
+        """A draft authored as free-form markdown parses as zero fields. It used
+        to flow into start() as {} and build a demand with no id, no risk
+        criteria and no lane; now it is refused at the door, naming the cause."""
+        with tempfile.TemporaryDirectory() as tmp:
+            draft_dir = Path(tmp) / "000-drafts" / "sankey-categoria"
+            (draft_dir / "01-inception").mkdir(parents=True)
+            (draft_dir / "01-inception" / "003-requirements.md").write_text(
+                "# 003-requirements - sankey-categoria\n\n"
+                "## Perguntas de Framing\n\n"
+                "### 1. Escopo e Objetivo\n"
+                "[Resposta]: Qual e o objetivo do grafico?\n",
+                encoding="utf-8")
+            result = start(draft_dir, ROOT, confirmed_by="Ana")
+        self.assertEqual("blocked", result.status)
+        self.assertIn("sem nenhum campo reconhecido", result.message)
+        self.assertIn("demand draft", " ".join(result.next_steps))
 
     def test_absolute_paths_are_stripped_on_every_platform(self):
         """Sanitization must not depend on the host OS: a Windows path forwarded

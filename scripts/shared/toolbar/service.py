@@ -31,7 +31,8 @@ def render_toolbar(
     # `model` field); the policy target is shown only as guidance and flagged when
     # it differs. Never present the policy target as if it were running (D3).
     actual_model = model if model and model != "default" else toolbar_state.model
-    described = describe_model(actual_model, toolbar_state.lane, toolbar_state.phase)
+    described = describe_model(actual_model, toolbar_state.lane, toolbar_state.phase,
+                               host=toolbar_state.host)
     model = described if described else model
     framework = resolve_framework_display(
         framework_root,

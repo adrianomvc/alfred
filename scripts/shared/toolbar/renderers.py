@@ -131,7 +131,19 @@ def render_rich(sigla, demand_id, lane, phase, nxt, checkpoint, model, progress,
     lines.append(box_sep())
     if lane.lower() != "fast":
         lines.append(box_line(track))
-        lines.append(box_line(f"HITL: {shorten(checkpoint, 30)}       Modelo: {model}"))
+        # HITL and Modelo share one line only when both fit whole. The old fixed
+        # 30-char cut plus an unbounded model string overflowed the box, and the
+        # tail it dropped was the model's own "nao confirmado" qualifier — the
+        # truncation turned an honest hedge into an apparent claim. Splitting
+        # keeps both readable instead.
+        hitl_text = f"HITL: {checkpoint}"
+        model_text = f"Modelo: {model}"
+        inner = RICH_WIDTH - 4
+        if display_width(hitl_text) + 3 + display_width(model_text) <= inner:
+            lines.append(box_line(f"{hitl_text}   {model_text}"))
+        else:
+            lines.append(box_line(shorten_display(hitl_text, inner)))
+            lines.append(box_line(shorten_display(model_text, inner)))
     else:
         alias = ALIAS_RICH.get(phase, phase)
         lines.append(box_line(f"Fase: {alias} · Modelo: {model}"))

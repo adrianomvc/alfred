@@ -25,6 +25,7 @@ class ToolbarState:
     next_step: str
     checkpoint: str
     model: str
+    host: str
     usage_cost: str
     usage_acu_display: str
     state_cost_usd: str
@@ -58,6 +59,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
     nxt = get_first_field(content, ["next step", "proximo passo", "próximo passo"]) or "unknown"
     checkpoint = get_field(content, "checkpoint") or "n/a"
     model = get_first_field(content, ["model", "current model", "modelo", "running model"])
+    host = get_first_field(content, ["host", "host cli", "host adapter"])
     usage_cost = get_first_field(content, ["usage-cost", "usage cost", "custo", "cost"])
     usage_acu_display = typed_usage_display(content) or get_first_field(content, ["usage acu display"])
     state_cost_usd = get_first_field(content, ["cost usd", "cost_usd", "custo usd"])
@@ -75,6 +77,7 @@ def parse_toolbar_state(content: Sequence[str]) -> ToolbarState:
         next_step=nxt,
         checkpoint=checkpoint,
         model=model,
+        host=host,
         usage_cost=usage_cost,
         usage_acu_display=usage_acu_display,
         state_cost_usd=state_cost_usd,
