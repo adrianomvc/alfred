@@ -140,6 +140,18 @@ elif [ -e "$INSTALL_DIR" ]; then
   for marker in core/boot.md VERSION scripts/alfred.py; do
     if [ -e "$INSTALL_DIR/$marker" ]; then LOOKS_LIKE_ALFRED=1; break; fi
   done
+  if [ "$LOOKS_LIKE_ALFRED" = "0" ]; then
+    # The markers above assume a stale *complete* install, but the most common
+    # non-git ~/.alfred is not one: `framework update` does
+    # `runtime.mkdir(parents=True)` before any install exists, so a machine
+    # where the skill ran first ends up with a ~/.alfred holding only
+    # `runtime/`. That is Alfred's own generated state, not user data — and
+    # refusing it left the install permanently stuck.
+    if [ -z "$(find "$INSTALL_DIR" -mindepth 1 -maxdepth 1 \
+                 ! -name runtime ! -name '.DS_Store' -print -quit 2>/dev/null)" ]; then
+      LOOKS_LIKE_ALFRED=1
+    fi
+  fi
   if [ "$LOOKS_LIKE_ALFRED" = "1" ] || [ "${ALFRED_FORCE_INSTALL:-0}" = "1" ]; then
     info "Existing non-git install at $INSTALL_DIR; removing it and installing fresh."
     rm -rf "$INSTALL_DIR"

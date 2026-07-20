@@ -100,7 +100,12 @@ a referenced source (D15) — so a fresh clone restores everything. Local
 `runtime/` state (the active-demand pointer and the update cache) is generated
 and regenerates on the next boot.
 
-A directory that shows none of those markers is left untouched — that is someone
+The same applies when `~/.alfred` holds **only** generated state or nothing at all:
+`framework update` creates `~/.alfred/runtime/` before any install exists, so a
+machine where the skill ran first has a `~/.alfred` containing just `runtime/`.
+That is Alfred's own leftover, and it is replaced too.
+
+A directory that shows none of those markers, and holds content of its own, is left untouched — that is someone
 else's data, not a stale Alfred. Use `ALFRED_FORCE_INSTALL=1` to replace it
 anyway.
 
