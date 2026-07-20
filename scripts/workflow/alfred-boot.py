@@ -83,20 +83,26 @@ def priority_reason(state):
             2: "blocked - needs external input"}[resume_priority(state)]
 
 
-def render_resume_preview(state, model="default", cost="n/a"):
+def render_resume_preview(state, model="default", cost="n/a", profile=None):
     from shared.toolbar.service import render_toolbar  # lazy: heavy observability graph
 
+    kwargs = {} if profile is None else {"profile": profile}
     return render_toolbar(
         state["Path"],
         framework_root=FRAMEWORK_ROOT,
         model=model,
         cost=cost,
+        **kwargs,
     )
 
 
 def main():
+    # A console that is not UTF-8 (cp1252 Git Bash pipe, legacy cmd) would show
+    # the rich toolbar as mojibake — degrade to the ASCII text floor instead
+    # (core/presentation/toolbar.md) and never crash on unencodable output.
+    utf8_console = "utf" in (getattr(sys.stdout, "encoding", "") or "").lower()
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
 
@@ -162,7 +168,8 @@ def main():
         print("")
         print(f"Suggested next: {first['DemandId']} ({priority_reason(first)}) - the human chooses; this is only an ordering hint.")
         print("Resume preview:")
-        for line in render_resume_preview(first, args.model, args.cost):
+        preview_profile = None if utf8_console else "text"
+        for line in render_resume_preview(first, args.model, args.cost, preview_profile):
             print(line)
         print("")
         print("Next: choose a demand to resume, start a new demand, or run validate-demand on the selected state folder.")

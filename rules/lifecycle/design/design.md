@@ -16,7 +16,7 @@ Define how to solve before executing. Owner agent: **Spec/Design**. SDD is the c
 ## Steps
 1. Load `requirements` + `tech-inception` (JIT).
 2. **Solution shaping** + alternatives (SAFE) → `spec` (SDD) + acceptance criteria.
-3. Sub-activities **by trigger**: application-design (new component) / units-generation (decompose) / functional-design (new logic) / NFR (perf/security/scale) / infrastructure (deploy) / user-stories (Produto). These are sub-activities **inside Design**, not new phases. Each rung has concise JIT guidance in `sub-activities/` — load only what the demand triggers.
+3. Sub-activities **by trigger**: application-design (new component) / unit decomposition (`rules/common/units.md`) / functional-design (new logic) / NFR (perf/security/scale) / infrastructure (deploy) / user-stories (Produto). These are sub-activities **inside Design**, not new phases. Each rung has concise JIT guidance in `sub-activities/` (unit decomposition lives in `rules/common/units.md`) — load only what the demand triggers.
 4. **Execution plan** — impact analysis, skip/execute with justification, sequence, parallelization + test plan.
 5. Confirm applicable **template** (optional — may be none) and **SOLID/language** standard to mirror in Execution. If no template was registered for the sigla, mirror the conventions from the app's reverse engineering and record that none applied.
 6. Record `decisions`; **revalidate Risk Mode**; satisfy **DoD Design** → checkpoint (spec approval).
@@ -28,7 +28,7 @@ or original source pointers. Apply `../../common/context-compression-policy.md`
 when compression is used.
 
 ## Inherited from AI-DLC
-- **Conditional stages → sub-activities** (application-design, units-generation, functional-design, NFR, infrastructure) — by trigger and mode, never new phases.
+- **Conditional stages → sub-activities** (application-design, unit decomposition via `rules/common/units.md`, functional-design, NFR, infrastructure) — by trigger and mode, never new phases.
 - **Workflow-planning → execution plan** — impact, skip/execute justified, sequence, parallelization, risk.
 
 ## Demand × Units (decomposition)
@@ -46,4 +46,4 @@ Tech Lead (architecture/decisions), PM (scope acceptance).
 Spec approval (Standard/SAFE); architecture + alternatives approval (SAFE).
 
 ## Depth by mode
-FAST = inline spec in the PR (no separate Design phase — folds into Execution) · Standard = spec + criteria + decisions · SAFE = + alternatives + dependencies + rollout/rollback.
+FAST = inline spec in the PR — Design still happens, collapsed inside Execution, and the FAST Design DoD (`rules/lanes/fast.md`) still applies; the phase is never skipped · Standard = spec + criteria + decisions · SAFE = + alternatives + dependencies + rollout/rollback.

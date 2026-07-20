@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Migrate legacy ACU state fields to ``alfred.usage.v2``."""
+"""Migrate legacy ACU state fields to ``alfred.usage.v2`` and deduplicate
+state keys (keeping the last occurrence, the one last-wins readers observe)."""
 
 import argparse
 import difflib
@@ -75,6 +76,29 @@ def migrate_content(content, forced_unit=None):
     return "\n".join(output) + "\n", sorted(present), []
 
 
+def dedup_content(content):
+    """Drop duplicate ``- key:`` lines, keeping only the last occurrence."""
+    lines = content.splitlines()
+    counts, last = {}, {}
+    for index, line in enumerate(lines):
+        match = re.match(r"^\s*-\s+([^:]+):", line)
+        if match:
+            key = match.group(1).strip().lower()
+            counts[key] = counts.get(key, 0) + 1
+            last[key] = index
+    removed = []
+    output = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^\s*-\s+([^:]+):", line)
+        if match:
+            key = match.group(1).strip().lower()
+            if counts[key] > 1 and index != last[key]:
+                removed.append(key)
+                continue
+        output.append(line)
+    return "\n".join(output) + "\n", sorted(set(removed))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state-path", required=True)
@@ -86,8 +110,9 @@ def main():
     path = Path(args.state_path)
     original = path.read_text(encoding="utf-8-sig")
     migrated, legacy, errors = migrate_content(original, args.unit)
+    migrated, duplicated = dedup_content(migrated)
     result = {"state_path": str(path), "legacy_fields": legacy, "errors": errors,
-              "changed": migrated != original}
+              "deduplicated_fields": duplicated, "changed": migrated != original}
     if errors:
         print(json.dumps(result) if args.as_json else "ERROR " + "; ".join(errors))
         return 2

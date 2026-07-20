@@ -55,8 +55,10 @@ def main():
                 f"{name}: estimated {estimated} tk exceeds growth cap {growth_cap} tk "
                 f"(baseline {baseline}, max growth {growth}%)."
             )
-        else:
-            print(f"OK budget {name}: {estimated} <= {cap} tk")
+        elif estimated <= cap:
+            # Only a scenario under *both* caps is OK; the previous `else` was
+            # bound to the growth check alone and printed "OK budget 8453 <= 8400".
+            print(f"OK budget {name}: {estimated} <= {cap} tk (growth cap {growth_cap} tk)")
 
     if errors:
         for message in errors:

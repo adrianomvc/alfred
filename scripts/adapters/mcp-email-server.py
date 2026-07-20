@@ -51,8 +51,10 @@ Guardrails (injection/authorization):
 """
 
 import getpass
+import hashlib
 import json
 import os
+import re
 import smtplib
 import socket
 import sys
@@ -67,6 +69,23 @@ from shared.email_tools import TOOLS  # noqa: E402
 SERVER_NAME = "alfred-email"
 SERVER_VERSION = "2.0.0"
 SUBJECT_PREFIX = "[Alfred-Framework]"
+ATTACHMENT_EXTENSIONS = {".md", ".jsonl", ".json", ".txt", ".csv", ".log"}
+ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
+# Telemetry payload allowlist: only schema fields leave the machine (D45).
+TELEMETRY_FIELDS = {
+    "schema_version", "alfred", "ts", "event_id", "trace_id", "session_id",
+    "interaction_id", "request_id", "parent_event_id", "sequence",
+    "interaction_sequence", "request_sequence", "event_type", "event_scope",
+    "initiative_id", "demand_id", "phase", "lane", "agent", "actor_type",
+    "actor_id", "action", "status", "step", "model", "duration_ms",
+    "tokens_input", "tokens_output", "tokens_cache_creation", "tokens_cache_read",
+    "total_tokens", "cost_usd", "retry_count", "token_confidence",
+    "interaction_confidence", "correlation_method", "usage", "context",
+    "outcome", "validation", "artifact", "artifacts_used", "request_count",
+    "tool_call_count", "tool_failure_count", "from_commit", "to_commit",
+}
+SECRET_PATTERNS = re.compile(
+    r"AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY|(?i:(password|secret|api[_-]?key|token)\s*[=:]\s*\S)")
 
 
 def load_config_file():
@@ -96,9 +115,18 @@ def config():
         allowlist.append(telemetry_to.lower())  # org telemetry destination is pre-authorized by config
     outbox = Path(os.environ.get("ALFRED_EMAIL_OUTBOX") or file_cfg.get("outbox") or ".alfred-email-outbox")
     audit = Path(os.environ.get("ALFRED_EMAIL_AUDIT") or file_cfg.get("audit") or str(outbox / "audit-log.jsonl"))
+    attach_raw = os.environ.get("ALFRED_EMAIL_ATTACH_ROOTS")
+    if attach_raw is not None:
+        attach_roots = [a.strip() for a in attach_raw.split(os.pathsep) if a.strip()]
+    else:
+        attach_roots = [str(a) for a in (file_cfg.get("allowed_attachment_roots") or [])]
+    attach_roots = [Path(a).expanduser().resolve() for a in attach_roots] or [Path.cwd().resolve(),
+                                                                              outbox.resolve()]
+    sender_alias = (os.environ.get("ALFRED_EMAIL_SENDER_ALIAS") or file_cfg.get("sender_alias") or "").strip()
     return {
         "mode": mode, "default_to": default_to, "telemetry_to": telemetry_to, "allowlist": allowlist,
         "outbox": outbox, "audit": audit, "config_path": config_path,
+        "attach_roots": attach_roots, "sender_alias": sender_alias,
         "secret_in_file": bool(file_smtp.get("password")),
         "smtp": {
             "host": os.environ.get("SMTP_HOST") or file_smtp.get("host", ""),
@@ -130,9 +158,35 @@ def audit_event(cfg, destination, subject, attachments, result, failure_reason=N
         cfg["audit"].parent.mkdir(parents=True, exist_ok=True)
         with open(cfg["audit"], "a", encoding="utf-8") as f:
             f.write(json.dumps(event, ensure_ascii=False) + "\n")
-    except OSError:
-        pass  # auditing must never break the send path; the caller still reports
-    return event
+    except OSError as exc:
+        # Every external send must be auditable; active mode aborts when the
+        # audit trail cannot be persisted (dry-run only reports the failure).
+        return None, str(exc)
+    return event, None
+
+
+def check_attachments(cfg, attachments):
+    """Attachments are demand/HUB artifacts only: allowed root + type + size."""
+    problems = []
+    for raw in attachments:
+        path = Path(raw).expanduser()
+        try:
+            resolved = path.resolve()
+        except OSError:
+            problems.append(f"{raw}: caminho invalido")
+            continue
+        if not resolved.is_file():
+            problems.append(f"{raw}: nao encontrado")
+            continue
+        if not any(resolved == root or root in resolved.parents for root in cfg["attach_roots"]):
+            problems.append(f"{raw}: fora das raizes permitidas (allowed_attachment_roots)")
+            continue
+        if resolved.suffix.lower() not in ATTACHMENT_EXTENSIONS:
+            problems.append(f"{raw}: extensao nao permitida ({resolved.suffix or 'sem extensao'})")
+            continue
+        if resolved.stat().st_size > ATTACHMENT_MAX_BYTES:
+            problems.append(f"{raw}: acima do limite de {ATTACHMENT_MAX_BYTES // (1024 * 1024)} MB")
+    return problems
 
 
 def build_message(sender, destination, subject, body, attachments):
@@ -175,10 +229,13 @@ def tool_send_email(cfg, args):
         return err(f"Destination '{destination}' is not in the allowlist. "
                    "A new destination requires a HUMAN to update ALFRED_EMAIL_ALLOWLIST "
                    "(durable authorization) — do not retry with other addresses.")
-    missing = [a for a in attachments if not Path(a).is_file()]
-    if missing:
-        return err("Attachment(s) not found: " + ", ".join(missing) +
-                   ". Pass existing file paths (e.g. the demand's metrics/audit files).")
+    problems = check_attachments(cfg, attachments)
+    if problems:
+        audit_event(cfg, destination, subject, attachments, "refused",
+                    "attachment policy: " + "; ".join(problems), trigger)
+        return err("Attachment(s) refused: " + "; ".join(problems) +
+                   ". Attach demand/HUB artifacts under the allowed roots only "
+                   "(config `allowed_attachment_roots`).")
 
     if cfg["mode"] == "dry-run":
         cfg["outbox"].mkdir(parents=True, exist_ok=True)
@@ -186,9 +243,10 @@ def tool_send_email(cfg, args):
         out = cfg["outbox"] / (time.strftime("%Y%m%dT%H%M%S") + "-" +
                                "".join(c if c.isalnum() else "-" for c in subject[:40]) + ".eml")
         out.write_bytes(bytes(msg))
-        audit_event(cfg, destination, subject, attachments, "dry-run", None, trigger)
+        _event, audit_error = audit_event(cfg, destination, subject, attachments, "dry-run", None, trigger)
+        note = f" | AVISO: audit nao gravado ({audit_error})" if audit_error else ""
         return ok(f"DRY-RUN: e-mail composed, not sent. Written to {out} | to={destination} | "
-                  f"subject={subject} | attachments={len(attachments)}. "
+                  f"subject={subject} | attachments={len(attachments)}.{note} "
                   "Set ALFRED_EMAIL_MODE=active (+ SMTP_*) to really send.")
 
     smtp = cfg["smtp"]
@@ -197,6 +255,11 @@ def tool_send_email(cfg, args):
                     "active mode without SMTP configuration", trigger)
         return err("Active mode but SMTP is not configured. Set SMTP_HOST, SMTP_PORT, "
                    "SMTP_USER, SMTP_PASS, SMTP_FROM — or use ALFRED_EMAIL_MODE=dry-run.")
+    _event, audit_error = audit_event(cfg, destination, subject, attachments, "sending", None, trigger)
+    if audit_error:
+        return err(f"Send aborted: the audit trail could not be persisted ({audit_error}). "
+                   "Every external send must be audited; fix the audit path "
+                   f"({cfg['audit']}) or use dry-run.")
     try:
         msg = build_message(smtp["sender"], destination, subject, body, attachments)
         with smtplib.SMTP(smtp["host"], smtp["port"], timeout=30) as client:
@@ -266,10 +329,37 @@ def tool_send_demand_report(cfg, args):
     })
 
 
+def telemetry_sender(cfg):
+    """Configured alias, or a stable anonymous hash — never raw user@hostname."""
+    if cfg["sender_alias"]:
+        return cfg["sender_alias"]
+    digest = hashlib.sha256(f"{getpass.getuser()}@{socket.gethostname()}".encode("utf-8")).hexdigest()
+    return f"runner-{digest[:12]}"
+
+
+def sanitize_telemetry_event(event):
+    """Field-allowlist sanitization: schema fields only, relative paths only.
+
+    Returns the sanitized event, or ``None`` when the event must be skipped
+    (secret-pattern match).
+    """
+    if SECRET_PATTERNS.search(json.dumps(event, ensure_ascii=False)):
+        return None
+    clean = {key: value for key, value in event.items() if key in TELEMETRY_FIELDS}
+    artifacts = clean.get("artifacts_used")
+    if isinstance(artifacts, list):
+        for item in artifacts:
+            if isinstance(item, dict) and isinstance(item.get("path"), str) and os.path.isabs(item["path"]):
+                item["path"] = Path(item["path"]).name
+    return clean
+
+
 def tool_send_telemetry(cfg, args):
     """Batch every local observability JSONL and e-mail it to the org telemetry
     destination — provisional transport (D45) until the telemetry API exists, so
-    logs from everyone running Alfred can be aggregated into org metrics."""
+    logs from everyone running Alfred can be aggregated into org metrics.
+    Events are sanitized by field allowlist; unparsed lines and secret-pattern
+    matches never leave the machine (only their counts do)."""
     if not cfg["telemetry_to"]:
         return err("No telemetry destination configured. Set `telemetry_to` in "
                    "~/.alfred-email.json (or ALFRED_TELEMETRY_TO) — the org address "
@@ -281,18 +371,19 @@ def tool_send_telemetry(cfg, args):
         return err(f"No observability JSONL found under {root}. Pass `root_path` "
                    "pointing at the HUB/app root (or one demand folder).")
 
-    sender_id = f"{getpass.getuser()}@{socket.gethostname()}"
+    sender_id = telemetry_sender(cfg)
     stamp = time.strftime("%Y%m%dT%H%M%S")
     cfg["outbox"].mkdir(parents=True, exist_ok=True)
     batch_path = cfg["outbox"] / f"telemetry-batch-{stamp}.jsonl"
     total = 0
+    skipped = 0
     per_source = []
     with open(batch_path, "w", encoding="utf-8") as batch:
         for log in logs:
             try:
-                rel = str(log.relative_to(root))
+                rel = log.relative_to(root).as_posix()
             except ValueError:
-                rel = str(log)
+                rel = log.name
             count = 0
             for raw in log.read_text(encoding="utf-8-sig").splitlines():
                 raw = raw.strip()
@@ -301,9 +392,14 @@ def tool_send_telemetry(cfg, args):
                 try:
                     event = json.loads(raw)
                 except json.JSONDecodeError:
-                    event = {"_unparsed": raw}
+                    skipped += 1
+                    continue
+                clean = sanitize_telemetry_event(event)
+                if clean is None:
+                    skipped += 1
+                    continue
                 batch.write(json.dumps({"sender": sender_id, "collected_at": stamp,
-                                         "source": rel, "event": event},
+                                         "source": rel, "event": clean},
                                         ensure_ascii=False) + "\n")
                 count += 1
                 total += 1
@@ -311,9 +407,10 @@ def tool_send_telemetry(cfg, args):
 
     subject = f"[telemetry][{sender_id}] {total} eventos de observabilidade"
     body = ("Lote de telemetria do Alfred (transporte provisorio por e-mail ate a API existir - D45).\n"
-            f"- remetente: {sender_id}\n- raiz varrida: {root}\n- fontes: {len(logs)}\n"
+            f"- remetente: {sender_id}\n- fontes: {len(logs)}\n"
+            + (f"- eventos retidos localmente (nao parseaveis ou padrao de segredo): {skipped}\n" if skipped else "")
             + "\n".join(per_source)
-            + "\nCada linha do anexo = {sender, collected_at, source, event}.")
+            + "\nCada linha do anexo = {sender, collected_at, source, event} (campos sanitizados por allowlist).")
     result = tool_send_email(cfg, {
         "subject": subject, "body": body, "to": cfg["telemetry_to"],
         "trigger": str(args.get("trigger", "") or "telemetry_batch"),

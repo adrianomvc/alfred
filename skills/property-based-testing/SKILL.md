@@ -3,11 +3,11 @@ name: property-based-testing
 description: Property-based testing for Validate. Load in SAFE or when units have clear invariants worth checking across generated inputs.
 trigger: SAFE lane, or any unit whose logic has clear invariants (parsing, encoding, serialization, math, idempotent/CDC operations, data reconciliation). Opt-in, activated per demand.
 sections_to_load:
-  - properties: derive invariants from the functional design (round-trip, idempotency, commutativity, bounds, conservation).
-  - generators: define input domains/strategies; bias toward edge values.
-  - oracle: how to decide pass/fail without re-implementing the logic.
-  - shrinking + seed: record the minimal failing case and seed for reproducibility.
-  - integration: language-specific tool comes from the active `lang-*` skill; this pack is the agnostic guidance (precedence D22/D36).
+  - properties
+  - generators
+  - oracle
+  - shrinking and seed
+  - integration
 ---
 
 # Skill - Property-Based Testing
@@ -27,3 +27,26 @@ active language skill (D36) for the concrete framework/tooling.
 A set of properties (invariant + generator strategy) added to the test plan and
 exercised in Validate, with shrinking on failure and the failing seed recorded
 in the evidence.
+
+## properties
+Derive invariants from the functional design: round-trip (encode/decode),
+idempotency (applying twice = once), commutativity/associativity where claimed,
+bounds/ranges, and conservation (nothing lost or duplicated in reconciliation).
+
+## generators
+Define input domains and strategies from the spec's data contracts; bias toward
+edge values (empty, maximum, unicode, negative, boundary timestamps) rather than
+uniform random data.
+
+## oracle
+Decide pass/fail without re-implementing the logic under test: compare against
+an inverse operation, a simpler reference model, or an invariant that must hold
+— never a copy of the production algorithm.
+
+## shrinking and seed
+On failure, record the minimal failing case and the generator seed in the
+validation evidence so the run is reproducible.
+
+## integration
+The concrete tool/framework comes from the active `lang-*` skill; this pack is
+the language-agnostic guidance (precedence D22/D36).

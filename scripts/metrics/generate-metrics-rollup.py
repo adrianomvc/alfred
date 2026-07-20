@@ -27,11 +27,17 @@ def pct(part, total):
 
 
 def money(value):
-    return "n/a" if value is None else f"US$ {value:.4f}"
+    # Absence is reported as not collected — never rendered as US$ 0 (policy:
+    # unknown stays unknown; only observed values become numbers).
+    return "nao coletado" if value is None else f"US$ {value:.4f}"
 
 
 def ratio(value):
     return "n/a" if value is None else f"{value * 100:.1f}%"
+
+
+def count_or_uncollected(value, collected):
+    return value if collected else "nao coletado"
 
 
 def group_by(events, key):
@@ -85,7 +91,8 @@ def summarize(events):
     for event in usage_events:
         add_tokens(tokens, event)
 
-    total_cost = sum(value for value in (cost_value(e) for e in cost_events) if value is not None)
+    cost_values = [value for value in (cost_value(e) for e in cost_events) if value is not None]
+    total_cost = sum(cost_values) if cost_values else None
     requests = {
         e.get("request_id") or tuple((e.get("input") or {}).get("request_ids") or [e.get("event_id")])
         for e in usage_events
@@ -203,10 +210,14 @@ def table_group(lines, title, groups, key_label):
     for name in sorted(groups, key=lambda value: str(value)):
         group = groups[name]
         tokens = group["tokens"]
+        has_usage = bool(group["usage"])
+        cost = group["cost_usd"] if group["cost"] else None
         lines.append(
             f"| {value_or(name, 'unknown')} | {len(group['events'])} | {len(group['usage'])} | {len(group['cost'])} | "
-            f"{money(group['cost_usd'])} | {tokens['tokens_input']} | {tokens['tokens_cache_creation']} | "
-            f"{tokens['tokens_cache_read']} | {tokens['tokens_output']} | {ratio(cache_ratio(tokens))} |"
+            f"{money(cost)} | {count_or_uncollected(tokens['tokens_input'], has_usage)} | "
+            f"{count_or_uncollected(tokens['tokens_cache_creation'], has_usage)} | "
+            f"{count_or_uncollected(tokens['tokens_cache_read'], has_usage)} | "
+            f"{count_or_uncollected(tokens['tokens_output'], has_usage)} | {ratio(cache_ratio(tokens))} |"
         )
 
 
@@ -225,11 +236,12 @@ def render(summary, root_arg, root):
     lines.append(f"- requests observed: {len(summary['requests'])}")
     lines.append(f"- usage events: {len(summary['usage_events'])}")
     lines.append(f"- cost events: {len(summary['cost_events'])}")
-    lines.append(f"- tokens input: {tokens['tokens_input']}")
-    lines.append(f"- tokens cache creation: {tokens['tokens_cache_creation']}")
-    lines.append(f"- tokens cache read: {tokens['tokens_cache_read']}")
-    lines.append(f"- tokens output: {tokens['tokens_output']}")
-    lines.append(f"- tokens processed: {tokens['total_tokens']}")
+    has_usage = bool(summary["usage_events"])
+    lines.append(f"- tokens input: {count_or_uncollected(tokens['tokens_input'], has_usage)}")
+    lines.append(f"- tokens cache creation: {count_or_uncollected(tokens['tokens_cache_creation'], has_usage)}")
+    lines.append(f"- tokens cache read: {count_or_uncollected(tokens['tokens_cache_read'], has_usage)}")
+    lines.append(f"- tokens output: {count_or_uncollected(tokens['tokens_output'], has_usage)}")
+    lines.append(f"- tokens processed: {count_or_uncollected(tokens['total_tokens'], has_usage)}")
     lines.append(f"- cache reuse ratio: {ratio(cache_ratio(tokens))}")
     lines.append(f"- cost usd: {money(summary['total_cost'])}")
 

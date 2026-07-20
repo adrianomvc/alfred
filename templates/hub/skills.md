@@ -7,7 +7,7 @@
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
 
-<!-- Source: framework `skills/<name>.md` or external pointer (repo/URL). External refs are pinned on activation and recorded in state/audit. Status: active | available. -->
+<!-- Source: framework `skills/<name>/SKILL.md` or external pointer (repo/URL). External refs are pinned on activation and recorded in state/audit. Status: active | available. -->
 
 ## External catalogs (allowlist)
 | Catalog | Purpose | Approved by | Since |

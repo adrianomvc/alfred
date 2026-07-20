@@ -61,8 +61,9 @@ At each checkpoint and at close, state what was delivered against the budget:
 - **Never skip a phase** (the 5 phases are invariant) — only skip **optional**
   sub-activities or lean the lane (lowering the lane needs human approval).
 - On the local DEVIN CLI the budget is **soft**: Alfred pauses itself; it cannot
-  force Devin to stop. A **hard** cap exists only via `max_acu_limit` at session
-  creation through the API (paid plans) — see `core/hooks/devin-hooks.md`.
+  force Devin to stop. A **hard** cap exists only via the `max_acu_limit`
+  parameter when a session is created through the Devin API (paid plans) — see
+  the Devin API documentation; the local hook contract is `core/hooks/devin-hooks.md`.
 
 ## Audit
 Record the budget, each status change, and any accepted acceleration/degradation

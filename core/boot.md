@@ -3,7 +3,7 @@
 Every session begins with a fixed sequence before any work. The host runs it once per session. Inherits the spirit of `workspace-detection` + `session-continuity` from AI-DLC. The boot **never loads everything** — only index + state + what is needed; the rest is on demand.
 
 ## Sequence
-1. **Welcome (mandatory first output)** — every time a session invokes Alfred, the **first thing shown** is the opening message in the butler's voice (`welcome.md` = persona/tone), before any detection, tool call, or work. Shown once per session (token economy): if the welcome already ran this session, skip re-rendering and continue. To render the visual welcome block, load `presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session). On markdown-rendering hosts (Devin, web/chat, IDE panels), emit the block **inside a fenced code block** — see the fence rule in `presentation/welcome-screen.md` / `presentation/README.md`, or borders and columns collapse.
+1. **Welcome (mandatory first output)** — every time a session invokes Alfred, the **first thing shown** is the opening message in the butler's voice (`core/welcome.md` = persona/tone), before any detection, tool call, or work. Shown once per session (token economy): if the welcome already ran this session, skip re-rendering and continue. To render the visual welcome block, load `core/presentation/welcome-screen.md` **only at that moment** (JIT; the persona file alone is enough for the rest of the session). On markdown-rendering hosts (Devin, web/chat, IDE panels), emit the block **inside a fenced code block** — see the fence rule in `core/presentation/welcome-screen.md` / `core/presentation/README.md`, or borders and columns collapse.
 2. **Detect repo** — identify which repo we are in, to know which artifacts to read and how:
    - **HUB** if it finds `alfred-docs-hub/` + `<iniciativa-id>/<demanda-id>/` (initiative artifacts). The HUB is the sigla workspace: it holds the demand truth (`state`), problem/scope, decisions, audit, metrics, summary, knowledge, and links to the apps touched.
    - **APP** if it finds `.alfred-docs-app/` + application code (technical artifacts). The APP is a product/application repository: it holds the source code plus app-local Alfred artifacts such as reverse engineering, technical spec, evidence, local audit/metrics, and HUB sync notes.
@@ -12,7 +12,7 @@ Every session begins with a fixed sequence before any work. The host runs it onc
    - Not identified → **never guess**; ask the human before writing anything.
      Repository names such as `*-hub` are only hints; they do not prove the repo
      is a HUB. Render the **APP vs HUB disambiguation block** from
-     `presentation/welcome-screen.md` (load it JIT) so the human sees both roles
+     `core/presentation/welcome-screen.md` (load it JIT) so the human sees both roles
      before choosing — it makes explicit that **HUB = the squad's shared repo,
      the source of truth for a sigla's governance and shared context (demand
      state, decisions, audit, metrics, knowledge, links to apps)** and **APP =
@@ -37,9 +37,9 @@ Every session begins with a fixed sequence before any work. The host runs it onc
 4. **JIT context load (anti-hypercontext):**
    - read the `index` of the detected repo;
    - **list the sigla's open demands** (in progress / on hold / blocked) with last activity, and ask which to resume; otherwise treat as a **new demand**;
-   - on resume → **rebuild from the `state`** and show the toolbar by running `scripts/workflow/render-toolbar.py` over the demand `001-state.md` (preferred). On Claude Code, include `-RegisterActive` so the usage attribution hook can write to the same demand JSONL. If the helper cannot run, load `presentation/toolbar-quick.md` before writing anything and emit only its text fallback shape from the same state fields; do not hand-draw a rich toolbar from memory.
+   - on resume → **rebuild from the `state`** and show the toolbar by running `scripts/workflow/render-toolbar.py` over the demand `001-state.md` (preferred). On Claude Code, include `-RegisterActive` so the usage attribution hook can write to the same demand JSONL. If the helper cannot run, load `core/presentation/toolbar-quick.md` before writing anything and emit only its text fallback shape from the same state fields; do not hand-draw a rich toolbar from memory.
    - **Render ≠ display:** running the helper only *produces* the toolbar block; you must **paste that rendered block into the response** at every checkpoint — demand open/resume, phase transition, and end of any turn with an active demand. Registering the active demand (`-RegisterActive`) is not a substitute for showing the block.
-   - optionally run `scripts/*/workflow/context-manifest` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
+   - optionally run `scripts/workflow/context-manifest.py` with the active phase/lane/demand type/agent to list the minimal rule files; no helper → follow `rules/README.md` + `rules/rules-index.md` manually;
    - open only the current theme's links + active skills.
    - load the HUB **memory index** (`alfred-docs-hub/005-memory.md`) when present —
      compact; scan it and open an observation's detail JIT only when its

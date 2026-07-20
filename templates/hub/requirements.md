@@ -1,20 +1,21 @@
 # Requirements — <id-demanda>
 
-> Framework template — generate content in pt-BR. Canonical path (HUB):
-> `<id-iniciativa>/<id-demanda>/01-inception/003-requirements.md`.
-> This is the single place for the demand's question list (D18).
+> Framework template — generate content in pt-BR (labels stay in English, D47).
+> Canonical path (HUB): `<id-iniciativa>/<id-demanda>/01-inception/003-requirements.md`.
+> This is the single place for the demand's question list (D18). The draft mold
+> (`draft-requirements.md`) becomes this file when the demand starts.
 
 Sigla: <sigla> · Iniciativa: <id-iniciativa> · Modo proposto: <FAST | Standard | SAFE>
 Progresso: <respondidas>/<total> respondidas · <n> bloqueiam o avanço para Design
 Como responder: edite a linha `[Resposta]:` de cada pergunta neste arquivo. Depois de salvar, avise no chat com `pronto` ou `terminei` para eu continuar.
 
-## Requisitos funcionais
+## Functional requirements
 - <...>
 
-## Requisitos não funcionais
+## Non-functional requirements
 - <...>
 
-## Perguntas
+## Questions
 Regras: uma decisão por pergunta · quantidade de opções conforme a dúvida real · escolha única usa letras por padrão e segue AI-DLC · múltipla seleção é extensão Alfred: usa `[ ]`/`[x]` sem letras e deve dizer `selecione uma ou mais` · `(Recomendada)` **apenas orienta**, nunca preenche a resposta · não inventar opção (na dúvida, use "Outra / A confirmar").
 Status por pergunta: `◻ aberta` · `✓ respondida` · `⚠ contradição`.
 
@@ -41,7 +42,7 @@ Por quê: <impacto>.
 Não avanço para Design enquanto as perguntas 🔴 não forem respondidas e validadas.
 Ao ler as respostas, detectar contradição/ambiguidade e gerar pergunta de follow-up.
 
-## Contradições / pendências
+## Contradictions / open items
 - <nenhuma | descrição do conflito detectado>
 
 > Piso (D3): sem emoji, `🔴/🟡` viram `[!]/[.]` e `◻/✓/⚠` viram `[ ]/[x]/(!)`; mesmo conteúdo.

@@ -6,13 +6,13 @@ Este plano deriva do diagnóstico completo do Alfred (plano conceitual D1–D47 
 
 ## Regra de versão (decisão do dono do projeto)
 - A versão do Alfred fica em **`2.0.0`** a partir deste plano.
-- **Todo o trabalho deste plano acontece dentro da 2.0.0** — nenhuma wave gera bump de versão. O `CHANGELOG.md` acumula as entregas na seção `2.0.0` até o plano ser concluído.
+- **Todo o trabalho deste plano acontece dentro da 2.0.0** — nenhuma wave gera bump de versão. O `CHANGELOG.md` acumula as entregas na seção `## Unreleased` até a tag estável 2.0.0 ser criada (W9.7).
 - Salto de `0.4.0` → `2.0.0` sem linha `1.x`: decisão humana explícita registrada aqui.
 - Demandas de HUB/App novas carimbam `2.0.0`; demandas ativas seguem congeladas na versão carimbada (política de `docs/version-adoption.md`).
 
 ## Regras de trabalho
 1. **PRs pequenos** — 1 item do backlog por PR sempre que possível.
-2. Antes de cada merge: `validate-framework` canônico em Python com 0 erros; rodar também o wrapper PowerShell quando ele mudar ou quando o fluxo Windows/host for afetado. `validate-links` sem referência quebrada.
+2. Antes de cada merge: `validate-framework` canônico em Python com 0 erros (o gate roda igualmente em Windows/Linux via CI; não existe wrapper PowerShell desde a W5.8). `validate-links` sem referência quebrada.
 3. Evoluções de inteligência (Wave 8) rodam como **dogfooding**: demanda Engineering do próprio Alfred pelas 5 fases (precedente: skill `property-based-testing`).
 4. Itens marcados **DH** (decisão humana) não avançam sem confirmação explícita do dono.
 5. Não mexer nos preservados: `core/welcome.md`, `core/presentation/toolbar.md` + fixtures, fluxo das 5 fases, lanes, modelo de `state`, continuidade de sessão, templates em uso, `hosts/`, `install/`, validadores.
@@ -134,6 +134,38 @@ Claude-Mem.
 Aceite do código: testes unitários e `validate-framework` verdes. Aceite de
 release: W9.6/W9.7 concluídos com evidência externa; não inferir sucesso.
 
+### Wave 10 — Correções das auditorias cruzadas ✅ código (2026-07-19)
+Objetivo: fechar a distância entre o que os contratos prometem e o que o runtime
+garante, a partir de 3 auditorias independentes cruzadas (interna + 2 externas,
+cada alegação verificada no código antes de aceita).
+
+- [x] W10.1 State como fonte única: `write_state_fields` sem duplicação (substitui a última ocorrência e remove duplicatas), dedup no `migrate-state-v2`, erro de chave duplicada no `validate-demand`.
+- [x] W10.2 Fechamento governado: aceite tipado (Rejeitar/Solicitar ajustes nunca concluem), evidências por lane (Standard: PR/merge/reviewer; SAFE: + approvals/rollback/security), validação estrita inclui o App, audit do aceite.
+- [x] W10.3 Checkpoint sem auto-update (aviso via cache; adoção só no boot/comando explícito), transição sequencial com `--complete` por fase, SDD gate na entrada de Execution (Standard/SAFE), `--force` auditado.
+- [x] W10.4 `demand start` atômico: staging + `os.replace`, guarda contra sobrescrita de demanda App, draft preservado até o fim, rollback em falha parcial.
+- [x] W10.5 Observabilidade v1 canônica no CLI (o "v2" sem spec foi abandonado); eventos com `ts`/`event_type`/`event_id`/sequência.
+- [x] W10.6 Governança executável: lane derivada dos critérios de risco (reuso `shared/risk.py` + confirmação humana com justificativa auditada), demand type/urgência/owner no draft, sigla derivada (nunca perguntada), pergunta de App em texto livre.
+- [x] W10.7 Adapter de e-mail: anexos restritos (raízes/extensão/tamanho), envio ativo aborta sem audit persistido, telemetria sanitizada por allowlist de campos (sem user@hostname, sem paths absolutos, sem linhas não parseadas; destino org inalterado por decisão do dono).
+- [x] W10.8 Instalador: `mode: dry-run` (o `auto` não existia no adapter), update bloqueado não aborta reinstalação, gate `--quiet`, versões npm resolvidas logadas.
+- [x] W10.9 Robustez Windows: subprocess UTF-8 em todo o CLI, toolbar degrada a ASCII em console não-UTF-8, erros do CLI sem traceback cru.
+- [x] W10.10 Consistência documental: agente fantasma "Code Generator", sub-atividade fantasma `units-generation`, glob `scripts/*/workflow/`, "FAST sem Design" reconciliado, teto de tentativas unificado no verification-loop, commons completas no `rules/README.md`, refs root-relative, mapa artefato→template, headings EN nos templates (conteúdo pt-BR, D47).
+- [x] W10.11 ✅ (2026-07-19) Regras de governança para casos de borda (Onda 5 do plano de auditoria): **desempate entre humanos** em `core/squad.md` (dono por eixo decide; empate só cruza eixos → pausa, ambas posições em `decisions`, Sponsor decide; segurança não é empate) + hard trigger em `escalation-triggers.md`; **estabilização de emergência que falha/piora** em `rules/demand-types/operational.md` (eleva severidade, força SAFE, 2º ciclo com uma ação autorizada por vez, post-mortem cobre os dois ciclos); **replanejamento × cancelamento** em `rules/lifecycle/lifecycle.md` (`replanejada` mantém id/histórico e exige `--force` auditado; reverter entrega é questão separada, via contrato `vcs`) + ponteiro em `session-continuity.md`.
+- [x] W10.12 ✅ (2026-07-19) E2E Standard completo em `tests/scripts/unit/test_governance_gates.py` (draft → start com lane derivada → `--complete` por fase com gate SDD na entrada de Execution → close com evidências de lane → rollup). **Achou 2 bugs reais no caminho que nenhum teste exercitava:** (a) `_transition_gate` quebrava com `TypeError` ao formatar os erros do SDD gate (tuplas `(severity, code, message)` unidas como string) — o gate de Execution nunca havia sido disparado de verdade; (b) `validate-context-budget.py` imprimia `OK budget 8453 <= 8400` porque o `else` estava ligado só ao cap de crescimento, escondendo estouro de orçamento.
+- [x] W10.13 ✅ (2026-07-19, decisão do dono) Teto de contexto do cenário `fast-operational-execution` sobe de 9300 → 9400 tk para acomodar a regra de estabilização falha, que precisa morar em `operational.md` (o maior arquivo de demand-type). Continua **abaixo** do cap de crescimento de 10% (9548 sobre o baseline 8680), ou seja, a política de crescimento segue intacta; a decisão fica registrada em `metrics/context-budgets.json`.
+
+Verificação final executada (2026-07-19): `validate-framework` exit 0 · 154 testes unitários verdes · re-simulação real do CLI no scratchpad (draft sem pergunta de sigla → lane FAST derivada 3/10·2/10 → 4 checkpoints → "Rejeitar" bloqueia com `status: rejeitada` → "Aceitar" fecha com exit 0), com `state`, toolbar, checklist e JSONL concordando e 0 chaves duplicadas · 7 eventos `alfred.observability.v1`, higiene 0 problemas, rollup com `cost usd: nao coletado` · telemetria dry-run sem hostname/cwd/paths absolutos e segredo descartado · `bash -n` no instalador OK · `knowledge/notification.md` intocado.
+
+Backlog W10 (não nesta rodada; DH quando marcado):
+- [ ] W10.B1 Execution-first executável no CLI (incidentes: investigação/autorização/post-mortem no runtime).
+- [ ] W10.B2 Multi-App por demanda com lane override e artefatos por App.
+- [ ] W10.B3 `sigla init` completo (skills ativos, knowledge, memória, parâmetros org).
+- [ ] W10.B4 Journal transacional + locks por demanda + idempotency keys.
+- [ ] W10.B5 Modo `outlook-com` real no adapter de e-mail (pywin32).
+- [ ] W10.B6 Consolidar as 8 políticas de contexto/token sobrepostas em `rules/common/`.
+- [ ] W10.B7 Alinhar numeração de artefatos HUB×App (mesmo índice, artefatos diferentes).
+- [ ] W10.B8 Máquina de transição completa do lifecycle (gates por lane em todas as transições).
+- [ ] W10.B9 (owner) Proteção da main + CI required + reviewer independente (W9.7) e 5 pilotos reais (W9.6).
+
 ## Backlog consolidado
 
 | Prioridade | Item | Wave | Status |
@@ -190,7 +222,7 @@ release: W9.6/W9.7 concluídos com evidência externa; não inferir sucesso.
 
 ## Organização de `scripts/` (pedido do dono, 2026-07-05)
 - [x] ✅ Diretório reorganizado por responsabilidade nos 2 runtimes: `validators/` · `workflow/` · `metrics/` · `adapters/` (python-only). Referências atualizadas em todo o repo (CHANGELOG e plano conceitual preservados como históricos); smoke tests e validação estrita 0/0 pós-mudança. Nota de compatibilidade no CHANGELOG (paths de chamada mudaram; flags idênticos).
-- [x] ✅ Política simplificada de runtime (pedido do dono, 2026-07-09): Python passa a ser o runtime canônico para lógica de helpers e para exemplos de uso. `install.ps1` e `install.sh` continuam nativos por sistema operacional.
+- [x] ✅ Política simplificada de runtime (pedido do dono, 2026-07-09): Python passa a ser o runtime canônico para lógica de helpers e para exemplos de uso. Instalador é **bash-only** (`install/install.sh`, inclusive no Windows via Git Bash) — o `install.ps1` foi removido na W5.8.
 - [ ] Remover gradualmente helpers de runtime não canônico quando forem tocados, sem big-bang e sem quebrar instalações existentes.
 
 ### Migração SOLID dos scripts (observabilidade)

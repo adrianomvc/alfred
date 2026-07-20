@@ -346,7 +346,7 @@ def assert_toolbar_rendering_policy(root):
         "core/boot.md": [
             "scripts/workflow/render-toolbar.py",
             "-RegisterActive",
-            "load `presentation/toolbar-quick.md`",
+            "load `core/presentation/toolbar-quick.md`",
             "do not hand-draw a rich toolbar from memory",
         ],
         "rules/agents/orchestrator.md": [
@@ -731,7 +731,7 @@ def assert_hardening_contracts(root):
         if marker not in verification:
             raise SystemExit(f"Guided-then-strict contract missing: {marker}")
     execution_plan = (root / "templates/hub/execution-plan.md").read_text(encoding="utf-8-sig")
-    for marker in ("## Relatorios de exploracao", "Arquivos/simbolos", "Nao investigado", "## Tentativas de implementacao"):
+    for marker in ("## Exploration reports", "Files/symbols", "Not investigated", "## Implementation attempts"):
         if marker not in execution_plan:
             raise SystemExit(f"Exploration/attempt evidence contract missing: {marker}")
     model_policy = (root / "core/model-policy.md").read_text(encoding="utf-8-sig")
@@ -762,10 +762,34 @@ def run_sub(root, rel_script, *script_args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", "-Root", dest="root", default=".")
+    parser.add_argument("--quiet", action="store_true",
+                        help="print only section summaries; full output on failure")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
+    if not args.quiet:
+        _run_all(root)
+        return
 
+    import contextlib
+    import io
+    buffer = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(buffer):
+            _run_all(root)
+    except SystemExit:
+        sys.stdout.write(buffer.getvalue())  # a failing quiet gate stays verbose
+        raise
+    lines = buffer.getvalue().splitlines()
+    ok_count = sum(1 for line in lines if line.startswith("OK "))
+    for line in lines:
+        if line.startswith("WARN ") or (
+                line.endswith("completed.") and line != "Framework validation completed."):
+            print(line)
+    print(f"Framework validation completed. ({ok_count} checks OK, quiet mode)")
+
+
+def _run_all(root):
     for rel in REQUIRED_PATHS:
         assert_path(root, rel)
 
@@ -807,6 +831,7 @@ def main():
     run_sub(root, "scripts/validators/validate-scripts-architecture.py")
     run_sub(root, "scripts/validators/validate-model-policy.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-knowledge.py", "-Root", str(root))
+    run_sub(root, "scripts/validators/validate-invariants.py", "-Root", str(root))  # advisory, never fails
     run_sub(root, "scripts/validators/validate-links.py", "-Root", str(root))
     run_sub(root, "scripts/validators/validate-demand.py",
             "-HubDemandPath", str(root / STRICT_EXAMPLE_DEMAND),

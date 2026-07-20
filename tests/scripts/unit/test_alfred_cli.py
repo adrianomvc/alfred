@@ -97,27 +97,50 @@ class AlfredCliTests(unittest.TestCase):
         self.assertEqual("Email", values["channels"])
         self.assertEqual([], missing)
 
+    # Answer order mirrors templates/hub/draft-requirements.md. Risk criteria
+    # B,B,B,B,A sum to risk=4 -> Standard proposal, confirmed in a second pass.
+    STANDARD_ANSWERS = ["iniciativa-001-teste", "001-demanda", "Ana", "Entregar teste",
+                        "Mudancas externas", "nenhum", "A", "A",
+                        "B", "B", "B", "B", "A",
+                        "A", "A", "A", "A", "A",
+                        "A", "nenhum"]
+
+    @staticmethod
+    def _fill_answers(req, answers):
+        text = req.read_text(encoding="utf-8")
+        answer_iter = iter(answers)
+        text = re.sub(r"(?m)^\[Resposta\]:$",
+                      lambda _match: f"[Resposta]: {next(answer_iter)}", text)
+        req.write_text(text, encoding="utf-8")
+
+    def _start_standard(self, draft_data, lane_answer="A"):
+        first = start(draft_data["draft"], ROOT)
+        self.assertEqual("blocked", first.status)
+        self.assertIn("lane_confirm", first.message)
+        self._fill_answers(Path(draft_data["requirements"]), [lane_answer])
+        return start(draft_data["draft"], ROOT)
+
     def test_start_moves_completed_draft_to_canonical_demand(self):
-        answers = ["iniciativa-001-teste", "001-demanda", "abc", "Entregar teste",
-                   "Mudancas externas", "nenhum", "Standard", "nenhum"]
         with tempfile.TemporaryDirectory() as tmp:
             hub = Path(tmp) / "alfred-docs-hub"; hub.mkdir()
             created = draft(hub, ROOT, "Teste", "draft-004")
             req = Path(created.data["requirements"])
-            text = req.read_text(encoding="utf-8")
-            answer_iter = iter(answers)
-            text = re.sub(r"(?m)^\[Resposta\]:", lambda _match: f"[Resposta]: {next(answer_iter)}", text)
-            req.write_text(text, encoding="utf-8")
-            result = start(created.data["draft"], ROOT)
+            self._fill_answers(req, self.STANDARD_ANSWERS)
+            result = self._start_standard(created.data)
             target = Path(result.data["demand"])
             log = target / "05-operation" / "011-observability-log.jsonl"
             draft_exists = Path(created.data["draft"]).exists()
             log_exists = log.exists()
             plan_exists = (target / "03-execution" / "012-execution-plan.md").exists()
+            events = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
         self.assertEqual("ok", result.status)
+        self.assertEqual("Standard", result.data["lane"])
         self.assertFalse(draft_exists)
         self.assertTrue(log_exists)
         self.assertTrue(plan_exists)
+        self.assertEqual("alfred.observability.v1", events[0]["schema_version"])
+        self.assertEqual("demand_started", events[0]["event_type"])
+        self.assertTrue(events[0]["ts"])
 
     def test_start_creates_app_artifacts_for_approved_local_path(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -125,14 +148,10 @@ class AlfredCliTests(unittest.TestCase):
             hub = root / "alfred-docs-hub"; hub.mkdir()
             app = root / "app"; app.mkdir()
             created = draft(hub, ROOT, "Teste App", "draft-app")
-            answers = ["iniciativa-001-app", "001-app", "abc", "Alterar app",
-                       "Outros repositorios", str(app), "Standard", "nenhum"]
-            req = Path(created.data["requirements"])
-            answer_iter = iter(answers)
-            text = re.sub(r"(?m)^\[Resposta\]:", lambda _match: f"[Resposta]: {next(answer_iter)}",
-                          req.read_text(encoding="utf-8"))
-            req.write_text(text, encoding="utf-8")
-            result = start(created.data["draft"], ROOT)
+            answers = list(self.STANDARD_ANSWERS)
+            answers[0], answers[1], answers[5] = "iniciativa-001-app", "001-app", str(app)
+            self._fill_answers(Path(created.data["requirements"]), answers)
+            result = self._start_standard(created.data)
             app_target = app / ".alfred-docs-app" / "iniciativa-001-app" / "001-app"
             index_exists = (app_target / "001-index.md").exists()
             spec_exists = (app_target / "02-design" / "003-spec.md").exists()

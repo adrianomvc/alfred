@@ -4,7 +4,10 @@ Alfred uses one global installation at `~/.alfred` and always follows
 `origin/main`. Demand stamps are an audit trail, not runtime pins.
 
 ## Contract
-- Check `origin/main` at session start and governed checkpoints.
+- Check `origin/main` at session start (boot) or via an explicit
+  `alfred framework update`. Checkpoints never fetch or adopt: they only warn
+  (from the cached `runtime/last-update-check.json`) when the installation has
+  not been verified recently — adoption mid-demand stays a boot/explicit act.
 - Finish the current atomic command before updating; never replace files during
   an in-flight helper operation.
 - Validate the candidate in a temporary Git worktree before promotion.

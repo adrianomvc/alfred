@@ -6,7 +6,8 @@
 ## Demandas
 | Demanda | HUB | Status |
 |---|---|---|
-| 001-implantacao-alfred | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/001-implantacao-alfred/001-state.md` | Fechada |
-| 002-simulado-fast | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/002-simulado-fast/001-state.md` | Fechada |
-| 003-simulado-safe | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/003-simulado-safe/001-state.md` | Fechada |
-| 004-execution-first | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/004-execution-first/001-state.md` | Fechada |
+| 001-implantacao-alfred | historico - pasta nao versionada neste exemplo | Fechada |
+| 002-simulado-fast | historico - pasta nao versionada neste exemplo | Fechada |
+| 003-simulado-safe | historico - pasta nao versionada neste exemplo | Fechada |
+| 004-execution-first | historico - pasta nao versionada neste exemplo | Fechada |
+| 006-simulado-adocao-v2 | `examples/sq9-pilot/alfred-docs-hub/iniciativa-001-piloto/006-simulado-adocao-v2/001-state.md` | Fechada |

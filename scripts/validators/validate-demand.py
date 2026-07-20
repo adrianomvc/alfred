@@ -12,6 +12,8 @@ sys.path.insert(0, str(HERE.parent))
 from _common import (  # noqa: E402
     get_field, iter_jsonl, normalize_phase, phase_number, read_lines,
 )
+from shared.cli.requirements import parse as parse_requirements  # noqa: E402
+from shared.common import find_duplicate_keys  # noqa: E402
 from shared.sdd_gate import run as run_sdd_gate  # noqa: E402
 from shared.validation import Severity, ValidationIssue, ValidationReport  # noqa: E402
 from shared.validation.reverse_eng_staleness import validate_reverse_eng_staleness  # noqa: E402
@@ -180,6 +182,12 @@ def validate_demand(args):
 
     state_lines = read_lines(state_path)
 
+    duplicates = find_duplicate_keys(state_path)
+    if duplicates:
+        v.add("ERROR", "duplicate_state_key",
+              "State has duplicated field keys (writer/reader would diverge): "
+              + ", ".join(duplicates))
+
     demand_id = get_field(state_lines, ["id"])
     initiative_id = get_field(state_lines, ["initiative id", "id iniciativa"])
     sigla = get_field(state_lines, ["sigla"])
@@ -229,16 +237,30 @@ def validate_demand(args):
         v.assert_path(hub, "01-inception/003-requirements.md", "WARN")
         v.assert_path(hub, "02-design/006-decisions.md", "WARN")
 
-    if pnum >= 2:
-        v.assert_path(hub, "01-inception/005-tech-inception.md", "WARN")
-    if pnum >= 3:
-        v.assert_path(hub, "03-execution/012-execution-plan.md", "WARN")
-    if pnum >= 4:
-        v.assert_path(hub, "04-validate/013-validation-evidence.md", "WARN")
+    requirements_path = hub / "01-inception/003-requirements.md"
+    if requirements_path.exists():
+        answers, required, missing = parse_requirements(requirements_path)
+        if missing:
+            v.add("WARN", "unanswered_required_questions",
+                  "Requirements has unanswered required questions: " + ", ".join(missing))
+        elif required:
+            v.ok(f"OK requirements answers {len(required)}/{len(required)}")
+
+    # FAST folds Design into Execution (inline spec in the PR): the separate
+    # tech-inception/decisions/execution-plan/evidence artifacts are not
+    # required for that lane (rules/lanes/fast.md, design.md depth-by-mode).
+    if lane.lower() != "fast":
+        if pnum >= 2:
+            v.assert_path(hub, "01-inception/005-tech-inception.md", "WARN")
+        if pnum >= 3:
+            v.assert_path(hub, "03-execution/012-execution-plan.md", "WARN")
+        if pnum >= 4:
+            v.assert_path(hub, "04-validate/013-validation-evidence.md", "WARN")
 
     if pnum >= 3:
         output, errors, warnings, _ = run_sdd_gate(
-            str(hub), args.app_demand_path if args.app_demand_path else "", False
+            str(hub), args.app_demand_path if args.app_demand_path else "", False,
+            lane=lane,
         )
         for line in output:
             v.output.append(line)

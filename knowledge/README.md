@@ -4,6 +4,8 @@ Knowledge contains always-on guardrails and defaults. It is not a skill: it is l
 
 **What lives here (owner decision):** the **company-wide rules and facts shared by every squad that uses Alfred** — this folder is the single source those squads inherit. It is not a template shipped empty: the values here (notification destinations, allowed catalogs, internal policies) are real and in force.
 
+**Corporate instance note:** this repository is a corporate instance of Alfred. The framework core (`core/`, `rules/`, `skills/` contracts) stays organization-agnostic; the org-specific values — the AI-Stack catalog, the telemetry destination in `notification.md`, internal URLs — are adoption configuration recorded here on purpose. Another organization adopting Alfred replaces the contents of `knowledge/` (and the org-specific skill entries), not the core.
+
 ## Scopes
 - **Org/company (this folder):** rules every squad inherits — notification/telemetry destinations, external-catalog allowlist, internal policies (naming, access, "repo via issue"...). One file per policy, following `policy-template.md`.
 - **Sigla/HUB:** system-specific constraints, contacts, active skills — in each HUB's `knowledge/`.

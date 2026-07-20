@@ -13,14 +13,14 @@ import tempfile
 import time
 
 from shared.cli.result import CommandResult
-from shared.common import write_state_fields
+from shared.common import append_event, lifecycle_event, write_state_fields
 
 
 def run_git(root, *args, timeout=60):
     try:
         return subprocess.run(
             ["git", "-C", str(root), *args], capture_output=True, text=True,
-            timeout=timeout, check=False,
+            encoding="utf-8", errors="replace", timeout=timeout, check=False,
         )
     except (OSError, subprocess.SubprocessError) as error:
         return subprocess.CompletedProcess(args, 1, "", str(error))
@@ -79,8 +79,30 @@ def status(root):
     return CommandResult("framework status", message=f"Alfred {data['version']} em {current[:12] or 'desconhecido'}", data=data, warnings=warnings)
 
 
+def update_check_advice(root, max_age_hours=24):
+    """Offline staleness advice for checkpoints: no fetch, no adoption.
+
+    Reads ``runtime/last-update-check.json`` (written by ``update``) and
+    returns a warning string when the installation has not verified
+    ``origin/main`` recently, or ``""`` when the check is fresh.
+    """
+    root = Path(root)
+    marker = root / "runtime" / "last-update-check.json"
+    advice = ("Atualizacao do framework nao verificada recentemente; "
+              "rode `alfred framework update` no proximo boot.")
+    try:
+        payload = json.loads(marker.read_text(encoding="utf-8"))
+        checked_at = datetime.fromisoformat(payload.get("checked_at", ""))
+    except (OSError, ValueError, json.JSONDecodeError):
+        return advice
+    age = datetime.now(timezone.utc) - checked_at
+    if age.total_seconds() > max_age_hours * 3600:
+        return advice
+    return ""
+
+
 def _validate_candidate(root, candidate, state_path=""):
-    python = shutil.which("python") or shutil.which("python3")
+    python = sys.executable or shutil.which("python") or shutil.which("python3")
     if not python:
         return False, "Python nao encontrado para validar a atualizacao"
     added = run_git(root, "worktree", "add", "--quiet", "--detach", str(candidate), "origin/main", timeout=120)
@@ -89,18 +111,20 @@ def _validate_candidate(root, candidate, state_path=""):
     try:
         gate = subprocess.run(
             [python, str(candidate / "scripts" / "validators" / "validate-framework.py")],
-            cwd=candidate, capture_output=True, text=True, timeout=180, check=False,
+            cwd=candidate, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=180, check=False,
         )
-        evidence = (gate.stdout + gate.stderr).strip()
+        evidence = ((gate.stdout or "") + (gate.stderr or "")).strip()
         if gate.returncode != 0:
             return False, evidence
         migration = candidate / "scripts" / "workflow" / "migrate-state-v2.py"
         if state_path and Path(state_path).exists() and migration.exists():
             checked = subprocess.run(
                 [python, str(migration), "--state-path", str(Path(state_path).resolve()), "--check", "--json"],
-                cwd=candidate, capture_output=True, text=True, timeout=60, check=False,
+                cwd=candidate, capture_output=True, text=True,
+                encoding="utf-8", errors="replace", timeout=60, check=False,
             )
-            evidence += "\n" + (checked.stdout + checked.stderr).strip()
+            evidence += "\n" + ((checked.stdout or "") + (checked.stderr or "")).strip()
             if checked.returncode != 0:
                 return False, evidence
         return True, evidence
@@ -134,14 +158,9 @@ def _record_adoption(state_path, before, after, stamp):
         for line in state.read_text(encoding="utf-8-sig").splitlines():
             if line.startswith("- ") and ":" in line:
                 key, value = line[2:].split(":", 1); fields[key.strip().lower()] = value.strip()
-        event = {"schema_version": fields.get("observability schema", "alfred.observability.v2"),
-                 "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-                 "event": "framework_adopted", "initiative_id": fields.get("initiative id", ""),
-                 "demand_id": fields.get("id", ""), "phase": fields.get("current phase", ""),
-                 "lane": fields.get("lane", ""), "alfred": stamp,
-                 "from_commit": before, "to_commit": after, "artifacts_used": ["001-state.md"]}
-        with log.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+        event = lifecycle_event(fields, stamp, "framework_adopted", "framework_adopted",
+                                extra={"from_commit": before, "to_commit": after})
+        append_event(log, event)
 
 
 def update(root, *, state_path="", dry_run=False, sync_hosts=True):
@@ -165,6 +184,10 @@ def update(root, *, state_path="", dry_run=False, sync_hosts=True):
             if not after:
                 return CommandResult("framework update", "error", message="origin/main nao possui um commit resolvivel.")
             if before == after:
+                runtime.mkdir(parents=True, exist_ok=True)
+                (runtime / "last-update-check.json").write_text(json.dumps({
+                    "checked_at": datetime.now(timezone.utc).isoformat(), "commit": after,
+                }), encoding="utf-8")
                 return CommandResult("framework update", message=f"Alfred ja esta atualizado em {before[:12]}", data=framework_stamp(root))
             if dry_run:
                 return CommandResult("framework update", changed=False, message=f"Atualizacao disponivel: {before[:12]} -> {after[:12]}", data={"from": before, "to": after})
@@ -190,11 +213,12 @@ def update(root, *, state_path="", dry_run=False, sync_hosts=True):
             if sync_hosts and sync_script.exists():
                 synced = subprocess.run(
                     [sys.executable, str(sync_script), "--all", "--alfred-home", str(root), "--create"],
-                    cwd=root, capture_output=True, text=True, timeout=60, check=False,
+                    cwd=root, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace", timeout=60, check=False,
                 )
                 if synced.returncode != 0:
                     warnings.append("Framework atualizado, mas a sincronizacao dos hosts falhou: " +
-                                    (synced.stderr.strip() or synced.stdout.strip()))
+                                    ((synced.stderr or "").strip() or (synced.stdout or "").strip()))
             runtime.mkdir(parents=True, exist_ok=True)
             (runtime / "last-update-check.json").write_text(json.dumps({
                 "checked_at": datetime.now(timezone.utc).isoformat(), "commit": after,
