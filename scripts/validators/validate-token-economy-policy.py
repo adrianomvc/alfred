@@ -59,6 +59,8 @@ def main():
         forbid_text(root / rel, "does not run Claude Code's auto-rewrite")
         forbid_text(root / rel, "do not assume Devin executes that hook")
     require_text(root / "core/hooks/rtk.md", "loads yet never fires")
+    require_text(root / "install/install.sh", "if command -v claude >/dev/null 2>&1; then")
+    require_text(root / "install/install.sh", "RTK global initialization skipped: Claude Code CLI not found")
 
     print("Token economy policy validation completed.")
 

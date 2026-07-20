@@ -21,7 +21,8 @@ set -euo pipefail
 #
 # Notes that apply to both profiles:
 # - RTK: PERSONAL assumes `rtk` is already on PATH (installed via cargo/manual
-#   download). The installer detects it and only runs `rtk init -g`; it does not
+#   download). The installer detects it and runs `rtk init -g` only when Claude
+#   Code is present; it does not
 #   `npm install rtk`, because the public npm `rtk` is a DIFFERENT tool (Rust
 #   Type Kit) — see the name-collision note in RTK.md. On CORPORATE, the zip is
 #   fetched from the internal Artifactory mirror.
@@ -36,7 +37,7 @@ set -euo pipefail
 
 # --- PERSONAL (public GitHub + public npm; rtk already on PATH) — ACTIVE ---
 DEFAULT_FRAMEWORK_URL="https://github.com/adrianomvc/alfred.git"
-DEFAULT_RTK_URL=""              # empty: rtk is on PATH; installer skips download and runs `rtk init -g`
+DEFAULT_RTK_URL=""              # empty: rtk is on PATH; installer skips download (Claude setup is conditional)
 DEFAULT_NPM_REGISTRY=""         # empty: public npm (registry.npmjs.org)
 
 # --- CORPORATE (internal mirror + Artifactory) — uncomment on the corp image ---
@@ -235,7 +236,7 @@ if [ "$SKIP_RTK" != "1" ]; then
         exit 1
       fi
     else
-      info "curl not found; install RTK manually, then run 'rtk init -g'."
+      info "curl not found; install RTK manually (Claude Code users can then run 'rtk init -g')."
     fi
 
     if [ -f "$RTK_TMP/rtk-download" ]; then
@@ -248,7 +249,7 @@ if [ "$SKIP_RTK" != "1" ]; then
             [ -n "$CANDIDATE" ] || CANDIDATE="$(find "$RTK_TMP/unpacked" -type f \( -name rtk -o -name rtk.exe \) 2>/dev/null | head -n1)"
             [ -n "$CANDIDATE" ] && cp "$CANDIDATE" "$RTK_DIR/rtk"
           else
-            info "unzip not found; install RTK manually, then run 'rtk init -g'."
+            info "unzip not found; install RTK manually (Claude Code users can then run 'rtk init -g')."
           fi
           ;;
         *.tar.gz|*.tgz)
@@ -268,17 +269,19 @@ if [ "$SKIP_RTK" != "1" ]; then
   fi
 
   if command -v rtk >/dev/null 2>&1; then
-    # `rtk init -g` only knows Claude Code (plus --opencode/--gemini); `rtk hook`
-    # has no Devin target at all. On a Devin-only machine it has nothing to
-    # configure and fails — which is expected, not a problem to chase. Devin is
-    # covered by Alfred's own PreToolUse bridge, installed right below.
-    RTK_INIT_OUT=""
-    if RTK_INIT_OUT="$(rtk init -g 2>&1)"; then
-      info "RTK initialized globally (Claude Code config)."
+    # Plain `rtk init -g` targets Claude Code. Do not invoke it on Devin-only
+    # machines: RTK may try to write ~/.claude/RTK.md even when ~/.claude does
+    # not exist. Devin is covered by Alfred's own PreToolUse bridge below.
+    if command -v claude >/dev/null 2>&1; then
+      RTK_INIT_OUT=""
+      if RTK_INIT_OUT="$(rtk init -g 2>&1)"; then
+        info "RTK initialized globally (Claude Code config)."
+      else
+        info "'rtk init -g' could not configure Claude Code. RTK said:"
+        printf '%s\n' "$RTK_INIT_OUT" | sed 's/^/    /' | head -5
+      fi
     else
-      info "'rtk init -g' did not complete — expected when Claude Code is absent, since it configures Claude Code/OpenCode/Gemini, not Devin."
-      info "The DEVIN CLI path does not depend on it; the hook below is what matters. RTK said:"
-      printf '%s\n' "$RTK_INIT_OUT" | sed 's/^/    /' | head -5
+      info "RTK global initialization skipped: Claude Code CLI not found (not required for Devin)."
     fi
     # RTK ships no Devin preset (its stock hook matches Claude's `Bash` tool, not
     # Devin's `exec`), so install Alfred's PreToolUse->rtk bridge into the DEVIN

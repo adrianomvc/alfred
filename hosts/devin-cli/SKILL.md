@@ -46,7 +46,7 @@ For Devin, **token** attribution needs no API: the local session transcript (`cl
 
 ## RTK terminal hook (DEVIN CLI only)
 On start, **ensure RTK is configured** — it stays optional (D3), but when the binary is present the SKILL guarantees it is set up and used on every invocation:
-1. Check `rtk --version`. If the binary is present but not yet initialized (no `~/.config/rtk/config.toml` / `RTK.md`), run `rtk init -g` once (idempotent) per `~/.alfred/core/hooks/rtk.md`.
+1. Check `rtk --version`. Do not run `rtk init -g` on a Devin-only machine; that command targets Claude Code and may fail when `~/.claude` is absent. Alfred's Devin hook works without it. If Claude Code is also installed, follow `~/.alfred/core/hooks/rtk.md` for its optional global initialization.
 2. Load `~/.alfred/rules/common/terminal-token-policy.md` before any shell command or large terminal output.
 3. **Automatic rewrite via the Alfred hook.** Alfred installs a `PreToolUse`/`exec` hook (`~/.alfred/scripts/workflow/devin-rtk-hook.py`, via `python ~/.alfred/scripts/workflow/sync-host-shims.py -Host devin-cli -InstallHooks`) that rewrites shell commands through `rtk` transparently — no explicit prefix needed (see `~/.alfred/core/hooks/devin-hooks.md`). RTK's own Claude preset does not fire here (it matches the `Bash` tool, not Devin's `exec`); this hook is what enables the rewrite.
 4. **Capability probe.** Do not infer rewrite support from a version number. Confirm the hook with `/hooks`, run a known rewrite, and verify `rtk gain` increments. If it does not, call RTK explicitly and record the capability as unconfirmed.
