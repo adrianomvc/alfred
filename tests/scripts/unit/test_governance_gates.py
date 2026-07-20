@@ -28,6 +28,7 @@ from shared.cli.parser import run  # noqa: E402
 from shared.common import find_duplicate_keys, read_state_fields, write_state_fields  # noqa: E402
 from shared.model_policy import describe_model  # noqa: E402
 from shared.observability.infrastructure.adapters.devin import session as DEVIN_SESSION  # noqa: E402
+from shared.observability.infrastructure.adapters.devin import transcript as DEVIN_TRANSCRIPT  # noqa: E402
 
 
 def load_hyphenated(name, rel_path):
@@ -446,6 +447,56 @@ class GovernanceGateTests(unittest.TestCase):
             found = DEVIN_SESSION.read_session_model(tmp)
         self.assertEqual("swe-1-6-slow", found["uid"])
         self.assertEqual("SWE-1.6 Slow", found["model"])
+
+    def _devin_transcript(self, tmp):
+        path = Path(tmp) / "session-x.json"
+        path.write_text(json.dumps({
+            "session_id": "session-x",
+            "agent": {"model_name": "SWE-1.6 Slow"},
+            "steps": [
+                {"step_id": 1, "source": "user", "timestamp": "2026-07-20T04:00:00Z",
+                 "message": "segredo do usuario"},
+                {"step_id": 2, "source": "agent", "timestamp": "2026-07-20T04:00:05Z",
+                 "model_name": "SWE-1.6 Slow", "metrics": {"prompt_tokens": 100,
+                                                           "completion_tokens": 10},
+                 "reasoning_content": "raciocinio privado",
+                 "tool_calls": [{"name": "exec", "args": "rm -rf"}]},
+                {"step_id": 3, "source": "agent", "timestamp": "2026-07-20T04:00:09Z",
+                 "model_name": "SWE-1.6 Slow", "metrics": {"prompt_tokens": 50,
+                                                           "completion_tokens": 5}},
+            ],
+            "final_metrics": {"total_prompt_tokens": 150, "total_completion_tokens": 15},
+        }), encoding="utf-8")
+        return path
+
+    def test_devin_tokens_are_exact_and_reconcile_with_the_session(self):
+        """Devin publishes ACU only in the web UI, but the local transcript has
+        exact per-step tokens. They must sum to what the host itself reports."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._devin_transcript(tmp)
+            requests = DEVIN_TRANSCRIPT.parse_requests(path)
+            totals = DEVIN_TRANSCRIPT.session_totals(path)
+        self.assertEqual(2, len(requests))  # the user step is a boundary, not usage
+        self.assertEqual(totals["total_prompt_tokens"],
+                         sum(r["tokens_input"] for r in requests))
+        self.assertEqual(totals["total_completion_tokens"],
+                         sum(r["tokens_output"] for r in requests))
+        # Cost is absent, and absence must never be rendered as zero.
+        self.assertTrue(all(r["cost_usd"] is None for r in requests))
+        self.assertTrue(all(r["tokens_cache_read"] is None for r in requests))
+        # A user boundary groups the agent steps that follow it.
+        self.assertEqual({"session-x#i1"}, {r["interaction_id"] for r in requests})
+
+    def test_devin_transcript_reader_never_touches_session_content(self):
+        """Steps carry message/reasoning/tool_calls. Alfred emails telemetry to
+        the org destination, so the reader must expose only the five fields."""
+        with tempfile.TemporaryDirectory() as tmp:
+            steps = DEVIN_TRANSCRIPT.load_steps(self._devin_transcript(tmp))
+        for step in steps:
+            self.assertEqual(set(DEVIN_TRANSCRIPT.READ_FIELDS), set(step))
+        serialized = json.dumps(steps)
+        for secret in ("segredo do usuario", "raciocinio privado", "rm -rf"):
+            self.assertNotIn(secret, serialized)
 
     def test_policy_target_uses_the_host_model_map(self):
         """On Devin the target must be a model Devin can run; it used to resolve

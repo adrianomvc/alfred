@@ -116,6 +116,21 @@ All notable Alfred framework changes should be recorded here.
   `alfred demand validate` at every phase transition and before closing. It is
   the only thing that catches a demand assembled by hand: a full set of markdown
   artifacts that never touched the CLI has no observability events at all.
+- Devin token usage is attributed without any API. The plan carried Session
+  Insights / the Consumption API as a blocker for W6.2, but that is only true for
+  **cost**: the local session transcript already holds exact per-step
+  `prompt_tokens`/`completion_tokens` with real timestamps, the model that ran,
+  and human turn boundaries (`source: user`). Verified against a real session —
+  the per-step values sum exactly to `final_metrics` (4,968,055 / 27,297).
+  `scripts/metrics/attribute-usage-devin.py` emits one `usage_attributed` event
+  per step, de-duplicated by step id and idempotent on re-runs.
+  `AdapterCapabilities.request_tokens` for Devin was declaring `False` and is now
+  true in both senses.
+- Cost stays `null` on that path, deliberately. Devin publishes ACU only through
+  the web UI, and it does not bill per token, so no coefficient could turn these
+  tokens into ACU without inventing one and presenting it as measurement. USD
+  still comes only from a measured ACU figure times an approved rate card. The
+  framework gate now pins "never convert tokens into ACU" as the invariant.
 - Alfred reads the model a DEVIN CLI session actually ran, instead of showing an
   unconfirmed policy target. Devin exposes no live model to scripts (no env var,
   hook field, or session metadata), but the CLI logs the resolved model at

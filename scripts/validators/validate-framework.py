@@ -562,7 +562,11 @@ def assert_ccusage_import_policy(root):
         "hosts/_template/hosts.json": [
             "automatically import the current local CLI session",
             "do not append the ccusage session total",
-            "For Devin, automatic usage attribution requires",
+            # Devin token attribution no longer needs the API (the local
+            # transcript is exact); ACU still does. Pin the invariant that
+            # matters: tokens must never be turned into ACU, since Devin does
+            # not bill per token and any coefficient would be invented.
+            "never convert tokens into ACU",
             "append JSONL only when the export provides interaction/request-granular usage",
         ],
         "templates/hub/state.md": [
