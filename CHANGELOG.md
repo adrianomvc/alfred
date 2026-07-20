@@ -104,6 +104,12 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code policy snapshots now emit `policy_snapshot` instead of
   `artifact_accessed`; metrics rollups ignore snapshot entries for real
   artifact reads, repeated reads, and loaded-artifact analysis.
+- Telemetry path sanitization no longer depends on the host OS. It used
+  `os.path.isabs()`, which answers only for the running platform, so a Windows
+  path processed on Linux (`C:/abs/path/001-state.md`) was shipped whole instead
+  of being reduced to its filename. Absolute paths are now matched explicitly for
+  POSIX roots, drive letters, and UNC shares; relative artifact paths still
+  survive intact. Caught by the CI Ubuntu leg, which the Windows leg could not see.
 - The SDD gate on entry to Execution crashed with a `TypeError` instead of
   blocking: `_transition_gate` joined `run_sdd_gate`'s
   `(severity, code, message)` triples as if they were strings, so the
