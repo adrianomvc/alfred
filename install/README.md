@@ -137,10 +137,13 @@ ALFRED_RTK_SHA256="<approved-sha256>" \
 bash install/install.sh
 ```
 
-If `rtk` is already on `PATH`, the installer only runs:
+If `rtk` is already on `PATH`, the installer reuses it. When Claude Code is
+also present, it initializes Claude's global integration with:
 ```bash
 rtk init -g
 ```
+On a Devin-only machine this command is skipped; Alfred installs its own
+`PreToolUse` hook for Devin's `exec` tool instead.
 
 If the URL is removed or RTK cannot be downloaded, Alfred then follows
 `rules/common/terminal-token-policy.md`: prefer bounded native commands and
