@@ -57,8 +57,13 @@ Every session begins with a fixed sequence before any work. The host runs it onc
 ## Opening framing checkpoint
 For a **new demand**, Alfred may create only a pre-demand draft under
 `alfred-docs-hub/000-drafts/<draft-id>/`: `001-state.md` with status `draft` and
-`01-inception/003-requirements.md`. All framing questions and answers live in
-that requirements file. Chat only points to its path and receives
+`01-inception/003-requirements.md`. **Create it with the command, never by hand:**
+`python <alfred-home>/scripts/alfred.py demand draft --hub <hub> --title "<title>"`.
+The questions carry `<!-- field: -->` markers, `[Alternativas]` blocks, and the ten
+risk/complexity criteria that derive the lane — hand-written files miss all of it
+and parse as zero fields. Without Python, copy `templates/hub/draft-requirements.md`
+verbatim and fill only the `{{...}}` proposals (D3). All framing questions and
+answers live in that requirements file. Chat only points to its path and receives
 `pronto`/`terminei`. No canonical demand/App artifact, clone/fetch, accepted ID,
 or accepted lane exists before required answers are complete and reviewed.
 

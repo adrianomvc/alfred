@@ -409,6 +409,24 @@ class GovernanceGateTests(unittest.TestCase):
                                                  "step": "password=hunter2"})
         self.assertIsNone(secret)
 
+    def test_hand_written_requirements_is_refused_with_the_cause(self):
+        """A draft authored as free-form markdown parses as zero fields. It used
+        to flow into start() as {} and build a demand with no id, no risk
+        criteria and no lane; now it is refused at the door, naming the cause."""
+        with tempfile.TemporaryDirectory() as tmp:
+            draft_dir = Path(tmp) / "000-drafts" / "sankey-categoria"
+            (draft_dir / "01-inception").mkdir(parents=True)
+            (draft_dir / "01-inception" / "003-requirements.md").write_text(
+                "# 003-requirements - sankey-categoria\n\n"
+                "## Perguntas de Framing\n\n"
+                "### 1. Escopo e Objetivo\n"
+                "[Resposta]: Qual e o objetivo do grafico?\n",
+                encoding="utf-8")
+            result = start(draft_dir, ROOT, confirmed_by="Ana")
+        self.assertEqual("blocked", result.status)
+        self.assertIn("sem nenhum campo reconhecido", result.message)
+        self.assertIn("demand draft", " ".join(result.next_steps))
+
     def test_absolute_paths_are_stripped_on_every_platform(self):
         """Sanitization must not depend on the host OS: a Windows path forwarded
         through a Linux runner (or the reverse) still leaves as a bare filename."""

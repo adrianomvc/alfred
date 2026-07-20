@@ -104,6 +104,17 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code policy snapshots now emit `policy_snapshot` instead of
   `artifact_accessed`; metrics rollups ignore snapshot entries for real
   artifact reads, repeated reads, and loaded-artifact analysis.
+- The rules now name the command that creates a draft. `core/boot.md` and the
+  five host shims said "write the questions in `003-requirements.md` with
+  `[Resposta]:` slots" and never mentioned `alfred demand draft`, so an agent
+  following them authored the file by hand — a faithful reading of the text. The
+  hand-written file carries no `<!-- field: -->` markers, no `[Alternativas]`
+  blocks, and none of the ten risk/complexity criteria, so it parses as zero
+  fields and the lane cannot be derived. The plain-markdown fallback stays
+  explicit (copy the template verbatim), so D3 is preserved.
+- `demand start` refuses a requirements file where no field is recognised,
+  naming the cause and the way out. It previously accepted `{}` and would build a
+  demand with no ids, no risk criteria, and no lane.
 - Telemetry path sanitization no longer depends on the host OS. It used
   `os.path.isabs()`, which answers only for the running platform, so a Windows
   path processed on Linux (`C:/abs/path/001-state.md`) was shipped whole instead
