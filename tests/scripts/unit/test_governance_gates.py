@@ -5,6 +5,7 @@ guard, state single-source, budget fail-loud, telemetry sanitization, and a
 CLI-only FAST lifecycle that closes without any manual markdown edit.
 """
 
+import argparse
 import importlib.util
 import io
 import contextlib
@@ -37,6 +38,7 @@ def load_hyphenated(name, rel_path):
 EMAIL = load_hyphenated("mcp_email_server", "scripts/adapters/mcp-email-server.py")
 HYGIENE = load_hyphenated("obs_hygiene", "scripts/validators/validate-observability-hygiene.py")
 ROLLUP = load_hyphenated("metrics_rollup", "scripts/metrics/generate-metrics-rollup.py")
+VALIDATE_DEMAND = load_hyphenated("validate_demand", "scripts/validators/validate-demand.py")
 
 FAST_ANSWERS = ["iniciativa-001-e2e", "001-e2e", "Ana", "Entrega pequena",
                 "Fora: resto", "nenhum", "A", "A",
@@ -408,6 +410,25 @@ class GovernanceGateTests(unittest.TestCase):
         secret = EMAIL.sanitize_telemetry_event({"event_type": "x",
                                                  "step": "password=hunter2"})
         self.assertIsNone(secret)
+
+    def test_validate_demand_catches_silent_state_deviations(self):
+        """Translated headings and a phase parked in `status` read as plausible
+        markdown but break the CLI: write_state_fields would not find the section
+        and would append a second one. The validator has to name both."""
+        with tempfile.TemporaryDirectory() as tmp:
+            demand = Path(tmp) / "001-x"
+            demand.mkdir()
+            (demand / "001-state.md").write_text(
+                "# 001-state - x\n\n## Demanda\n- id: 001-x\n- lane: Standard\n\n"
+                "## Progresso\n- current phase: Execution\n- status: inception\n",
+                encoding="utf-8")
+            codes = {issue.code for issue in
+                     VALIDATE_DEMAND.validate_demand(
+                         argparse.Namespace(hub_demand_path=str(demand), app_demand_path="",
+                                            app_repo_path="", app_current_commit="",
+                                            strict=False)).report.issues}
+        self.assertIn("state_section_not_canonical", codes)
+        self.assertIn("status_is_a_phase", codes)
 
     def test_hand_written_requirements_is_refused_with_the_cause(self):
         """A draft authored as free-form markdown parses as zero fields. It used

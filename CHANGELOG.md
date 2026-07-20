@@ -104,6 +104,18 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code policy snapshots now emit `policy_snapshot` instead of
   `artifact_accessed`; metrics rollups ignore snapshot entries for real
   artifact reads, repeated reads, and loaded-artifact analysis.
+- `validate-demand` catches two deviations that read as plausible markdown but
+  break the runtime: a state with translated headings (`## Demanda` instead of
+  `## Demand`), where `write_state_fields` cannot find the section and appends a
+  second one when inserting a new key; and a phase name parked in `status`
+  (`status: inception`), which leaves the demand reporting no lifecycle state.
+  The two example states were migrated to English headings — yesterday's
+  normalization reached the templates and left the examples behind, so every new
+  demand and every existing example disagreed. The strict simulado stays 0/0.
+- Step 6 in `core/boot.md`'s host shims tells the agent to run
+  `alfred demand validate` at every phase transition and before closing. It is
+  the only thing that catches a demand assembled by hand: a full set of markdown
+  artifacts that never touched the CLI has no observability events at all.
 - The rules now name the command that creates a draft. `core/boot.md` and the
   five host shims said "write the questions in `003-requirements.md` with
   `[Resposta]:` slots" and never mentioned `alfred demand draft`, so an agent
