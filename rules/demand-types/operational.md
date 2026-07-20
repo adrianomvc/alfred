@@ -51,6 +51,14 @@ Input: **incident number + description**. Step by step:
 
 Rule: **no post-mortem, the demand does not close.**
 
+### When stabilization fails or makes it worse
+Step 5 came back negative — still bleeding, or the hotfix broke something new. Autonomy shrinks here; never retry on your own judgment.
+- Raise the severity in `state`; the failed attempt stays in `audit`, never rewritten.
+- **Force SAFE governance** for the rest of the incident: time stays compressed, approval does not.
+- Second cycle: **one authorized action at a time** with the on-call human, revert included. Offer the last known-good state before any second forward fix.
+- The post-mortem covers **both** cycles, each with its own root cause — else the demand does not close.
+- Second cycle also fails → hard escalation (`../common/escalation-triggers.md`).
+
 ## Mode tendency
 Normal → FAST/Standard. Emergency → governance by risk (often SAFE-level record), time mode compressed.
 

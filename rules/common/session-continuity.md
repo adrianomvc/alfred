@@ -39,6 +39,7 @@ Observability is append-only and must not wait for a final summary. Append one J
 - **Multi-demand:** several may be in progress/on hold at once; the `id` + `state` keep each isolated and resumable.
 - **`última atividade`** (last-activity date) in the `state` helps notice long-stalled demands — but the human decides to cancel/resume. No auto-cancellation.
 - **Cancel (explicit):** produces a mini-`summary` (why) + updates the `index` (leaves the active set), then archives. Pausing does not archive.
+- **`replanejada` (replanned) is not cancellation:** when an invalidated premise sends an approved demand back to Design/Inception, it keeps its `id`, history, and place in the active set. Rules: `../lifecycle/lifecycle.md` → Going backwards.
 
 ## Context compaction (mid-demand)
 When the host compacts/summarizes the conversation inside a session, follow `rules/common/context-compaction-policy.md`: compact only right after the `state` is saved (the save-points above), never mid-step; preserve at minimum the demand id and `state` path, the current step's files, the next step, the pending checkpoint and its owner, and any open escalation; and re-read `001-state.md` before acting — the state file, not the summary, is the source of truth.

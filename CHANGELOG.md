@@ -43,6 +43,36 @@ All notable Alfred framework changes should be recorded here.
   `install/install.ps1` reappears, if `install/install.sh` loses its bash
   shebang, or if a live doc still points at the PowerShell installer. Historical
   records (`CHANGELOG.md`, `docs/plan/*`) are out of scope by design.
+- Executable governance in the lifecycle CLI (Wave 10): typed acceptance
+  (Reject / Request changes never close a demand), lane-scoped closing evidence
+  (Standard requires PR/merge/reviewer; SAFE additionally approvals, rollback,
+  and security), strict validation that also covers the App side, and an audit
+  entry for every acceptance.
+- `scripts/shared/risk.py` as the single risk-criteria implementation: the lane
+  is now derived from the risk criteria and confirmed by a human with an audited
+  justification, instead of being asked outright. Demand type, urgency, and
+  owner are captured in the draft, and the sigla stays derived from the repo
+  name.
+- `scripts/shared/common/observability_event.py`: canonical v1 observability
+  events carrying `ts`, `event_type`, `event_id`, and a monotonic sequence. The
+  unspecified "v2" event shape was abandoned rather than shipped.
+- `scripts/validators/validate-invariants.py`: non-blocking advisory pass over
+  the framework invariants (currently the ~1-screen file rule), reported as
+  warnings so it never gates a merge.
+- `tests/scripts/unit/test_governance_gates.py`: 18 tests pinning the gates that
+  the contracts promise — acceptance outcomes, lane evidence, phase-jump audit,
+  budget modes, attachment restrictions, and telemetry sanitization — including a
+  full Standard end-to-end (draft → start with a derived lane → `--complete` per
+  phase through the SDD gate → close with lane evidence → rollup).
+- Governance rules for the edge cases that had none: a tie between two humans
+  (`core/squad.md` — one owner per axis decides; a cross-axis tie pauses the step,
+  records both positions, and goes to the Sponsor; safety is never a tie), an
+  emergency stabilization that fails or regresses
+  (`rules/demand-types/operational.md` — raise severity, force SAFE, one
+  authorized action at a time, post-mortem covers both cycles), and replan versus
+  cancel (`rules/lifecycle/lifecycle.md` — `replanejada` keeps id and history and
+  needs an audited `--force`; reverting shipped work is a separate `vcs`
+  question).
 
 ### Removed
 - `install/install.ps1`. The installer is bash-only (`install/install.sh`);
@@ -74,6 +104,40 @@ All notable Alfred framework changes should be recorded here.
 - Claude Code policy snapshots now emit `policy_snapshot` instead of
   `artifact_accessed`; metrics rollups ignore snapshot entries for real
   artifact reads, repeated reads, and loaded-artifact analysis.
+- The SDD gate on entry to Execution crashed with a `TypeError` instead of
+  blocking: `_transition_gate` joined `run_sdd_gate`'s
+  `(severity, code, message)` triples as if they were strings, so the
+  Standard/SAFE gate had never actually fired. Found by the new Standard E2E.
+- `validate-context-budget.py` reported `OK budget 8453 <= 8400 tk` for scenarios
+  that busted their cap: the `else` was bound to the growth-cap check alone. A
+  scenario is now only OK when it is under both caps, and the line names both.
+- `state` is once again a single source of truth: `write_state_fields` replaces
+  the last occurrence of a key and drops the duplicates instead of appending,
+  `migrate-state-v2` de-duplicates on migration, and `validate-demand` now fails
+  on a duplicated key rather than silently reading one of them.
+- `demand start` is atomic: it stages the demand folder and commits it with
+  `os.replace`, refuses to overwrite an existing App demand, keeps the draft
+  until the very end, and rolls back on partial failure.
+- Checkpoints no longer auto-update. A stale cache produces a warning; adoption
+  happens only at boot or through an explicit command. Phase transitions are
+  sequential (`--complete` per phase), the SDD gate runs on entry to Execution
+  for Standard/SAFE, and `--force` is audited.
+- Email adapter hardening: attachments are restricted by root, extension, and
+  size; an active send aborts when its audit entry cannot be persisted; and
+  telemetry is sanitized through a field allowlist (no `user@hostname`, no
+  absolute paths, no unparsed lines). The org destination is unchanged, by owner
+  decision.
+- Installer: `mode: dry-run` replaces the `auto` value the adapter never
+  supported, a blocked update no longer aborts the reinstall, `--quiet` is gated,
+  and resolved npm versions are logged.
+- Windows robustness: UTF-8 subprocesses across the CLI, a toolbar that degrades
+  to ASCII on non-UTF-8 consoles, and CLI errors without raw tracebacks.
+- Documentation consistency: removed the phantom "Code Generator" agent and the
+  phantom `units-generation` sub-activity, fixed the `scripts/*/workflow/` glob,
+  reconciled "FAST has no Design", unified the attempt ceiling in the
+  verification loop, completed the commons list in `rules/README.md`, made refs
+  root-relative, added the artifact→template map, and switched template headings
+  to English (content stays pt-BR, D47).
 
 ### Changed
 - External catalog fallback is now a **total order** (AI Stack → AWS → Context7)

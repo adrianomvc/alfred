@@ -25,6 +25,7 @@ from _common import read_text  # noqa: E402
 SCAN_DIRS = [
     "core", "rules", "skills", "connectors", "metrics",
     "knowledge", "templates", "docs", "install", "hosts",
+    "scripts", "examples",
 ]
 # CHANGELOG.md is intentionally excluded: it is a historical ledger where path
 # references are point-in-time (a past entry may name a file that has since
@@ -52,6 +53,19 @@ INLINE_PATH = re.compile(r"^(?:" + "|".join(TOP_DIRS) + r")/[\w./-]+$")
 
 def strip_anchor(target):
     return target.split("#", 1)[0].strip()
+
+
+def heading_anchors(text):
+    """GitHub-style anchor slugs for every heading in a Markdown text."""
+    anchors = set()
+    for line in text.splitlines():
+        match = re.match(r"^#{1,6}\s+(.*)$", line)
+        if match:
+            slug = match.group(1).strip().lower()
+            slug = re.sub(r"[`*_\[\]():.,!?/·]", "", slug)
+            slug = re.sub(r"\s+", "-", slug.strip())
+            anchors.add(slug)
+    return anchors
 
 
 def is_external(target):
@@ -109,6 +123,7 @@ def main():
     files = 0
     checked = 0
     broken = 0
+    anchor_warnings = 0
     for md in iter_markdown(root):
         files += 1
         text = read_text(md)
@@ -122,8 +137,26 @@ def main():
                 broken += 1
                 rel = md.relative_to(root)
                 print(f"BROKEN {rel} -> {target} ({kind})")
+        # Anchor targets are advisory (warning only): a wrong `#section` link
+        # misleads readers but does not break file resolution.
+        for match in MD_LINK.finditer(text):
+            raw = match.group(1).split()[0] if match.group(1).split() else ""
+            if not raw or is_external(raw) or "#" not in raw or "*" in raw:
+                continue
+            path_part, anchor = raw.split("#", 1)
+            anchor = anchor.strip().lower()
+            if not anchor:
+                continue
+            target_file = md if not path_part else next(
+                (cand for cand in (md.parent / path_part, root / path_part) if cand.is_file()), None)
+            if target_file is None:
+                continue  # file breakage already reported above
+            if anchor not in heading_anchors(read_text(target_file)):
+                anchor_warnings += 1
+                rel = md.relative_to(root)
+                print(f"WARN {rel} -> #{anchor} not found in {path_part or 'same file'} (anchor)")
 
-    print(f"Link validation completed. files={files} refs={checked} broken={broken}")
+    print(f"Link validation completed. files={files} refs={checked} broken={broken} anchor_warnings={anchor_warnings}")
     if broken:
         raise SystemExit(1)
 

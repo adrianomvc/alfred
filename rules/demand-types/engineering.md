@@ -32,7 +32,7 @@ Short Inception (clear technical problem) with a **strong technical lens** (`tec
 Tends to **Standard**; **migration / architecture / security / breaking-upgrade → SAFE** (hard overrides).
 
 ## Sub-activities (Design, by trigger)
-application-design · units-generation · NFR · infrastructure-design.
+application-design · unit decomposition (`rules/common/units.md`) · NFR · infrastructure-design.
 
 ## Playbooks
 Operational step-by-step roteiros for a type, loaded JIT when it applies (see `rules/demand-types/playbooks/`):

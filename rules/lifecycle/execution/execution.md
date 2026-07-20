@@ -11,7 +11,7 @@ triggers:
 
 # Lifecycle — Execution ("Do")
 
-Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewer** (review) + Code Generator (generation). Subject to the supreme law; escalation triggers watched.
+Execute aligned to the spec, in small, traceable changes. Owner agent: **Reviewer** — code generation itself is the `sub-activities/code-generation.md` sub-activity, not a separate agent (the roster is fixed in `core/squad.md`). Subject to the supreme law; escalation triggers watched.
 
 ## Steps
 1. Load `spec` + template + active coding-standard (JIT).

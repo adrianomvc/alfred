@@ -22,14 +22,14 @@ Each step carries **two axes**: the **tier** (which model — this section) and 
 ## Adjustment per step (rises above the floor, never below)
 | Phase / agent / type | Adjustment |
 |----------------------|------------|
-| Inception | FAST=strong (no Design gate — compensate), Standard=medium, SAFE=strong (floor) |
+| Inception | FAST=strong (Design collapses into Execution — compensate), Standard=medium, SAFE=strong (floor) |
 | Design · spec-design (all lanes) | strong (always — solution shaping/SDD sets the whole build; supersedes the old +1 tier) |
 | Execution (incl. boilerplate) | lane floor, minimum medium — never runs on `cheap` |
 | Validate · reviewer | lane floor, minimum medium (never `cheap`); +1 if risk |
 | Operate | lane floor, but may drop to `medium` even in SAFE (see note) |
 | Decisions / architecture (SAFE) | strongest |
 
-> **Design** is **pinned to `strong` on every lane** (owner decision, 2026-07-09) — solution shaping/SDD sets the whole build. **Inception** is lane-specific: **FAST=`strong`** (FAST has no Design gate, so its Inception carries more weight and is compensated up), **Standard=`medium`** (Design catches issues downstream), **SAFE=`strong`** (floor). The `effort` axis carries the depth on the `medium` steps.
+> **Design** is **pinned to `strong` on every lane** (owner decision, 2026-07-09) — solution shaping/SDD sets the whole build. **Inception** is lane-specific: **FAST=`strong`** (in FAST, Design collapses into Execution — the phase still happens and its DoD applies, but there is no separate gate, so Inception carries more weight and is compensated up), **Standard=`medium`** (Design catches issues downstream), **SAFE=`strong`** (floor). The `effort` axis carries the depth on the `medium` steps.
 >
 > Execution and Validate never drop below `medium` (owner decision, 2026-07-09): they write/inspect code, so `cheap` would be the least-supervised, highest-risk spot. `cheap` (Haiku) therefore remains only for **FAST Operate**.
 >

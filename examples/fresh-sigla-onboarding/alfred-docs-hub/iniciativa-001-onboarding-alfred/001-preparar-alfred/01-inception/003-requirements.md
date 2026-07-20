@@ -8,7 +8,7 @@
 [Resposta]: `abc-app-api`
 
 ### Q2 - Ha politica de dados sensiveis conhecida?
-- A) Sim, registrar em `knowledge/policies.md` (Recomendado)
+- A) Sim, registrar em `alfred-docs-hub/knowledge/policies.md` (Recomendado)
 - B) Nao identificada ainda
 
 [Resposta]: Sim, dado sensivel sobe a lane para SAFE.

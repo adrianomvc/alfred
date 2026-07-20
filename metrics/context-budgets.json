@@ -22,7 +22,8 @@
         "agent": "orchestrator",
         "sub_activity": "workflow-planning"
       },
-      "max_estimated_tokens": 9300,
+      "max_estimated_tokens": 9400,
+      "budget_note": "Raised 9300 -> 9400 by owner decision (2026-07-19) to fit the failed-stabilization rule, which must live in operational.md. Still under the 10% growth cap (9548) over the 8680 baseline.",
       "baseline_estimated_tokens": 8680,
       "max_growth_percent": 10
     },

@@ -25,7 +25,7 @@ The framework is the **single source, referenced — not copied — into HUBs/ap
 - [`risk-mode.md`](risk-mode.md) — the selector: checklist, scale, hard overrides. Loaded **JIT at Inception** (via `rules/lifecycle/inception/sub-activities/risk-mode-proposal.md`), not at boot.
 - [`architecture.md`](architecture.md) — the 3 layers (Framework / HUB / App).
 - [`boot.md`](boot.md) — session start: detect HUB/APP → pull → JIT load.
-- [`welcome.md`](welcome.md) — the butler's voice (persona); the rendered screen lives in `presentation/welcome-screen.md` (JIT).
+- [`welcome.md`](welcome.md) — the butler's voice (persona); the rendered screen lives in `core/presentation/welcome-screen.md` (JIT).
 - [`presentation/`](presentation/README.md) — optional rendering layer (profiles · `toolbar-quick.md` · `toolbar.md` · `welcome-screen.md`) over one `state`; degrades to text.
 - [`hooks/`](hooks/README.md) — optional deterministic host hooks such as RTK terminal token control; degrades to rules.
 - [`squad.md`](squad.md) — human/agent responsibilities and HITL ownership.
@@ -36,4 +36,4 @@ The framework is the **single source, referenced — not copied — into HUBs/ap
 - `../hosts/` — per-host entry points (DEVIN CLI, Claude Code, Copilot, Codex) that load this framework via each host's native mechanism.
 
 ## Operating model
-Alfred has **no runtime of its own**. It is markdown instructions/artifacts consumed by host agents (DEVIN CLI/Web, Claude CLI, GitHub Copilot). Everything **degrades to plain markdown/ASCII** — any automation (metrics collection, cost, rich toolbar) is an optional layer. Nothing in the framework may require a specific model, API, CI, or UI.
+Alfred's **normative contract is markdown-first**: instructions/artifacts consumed by host agents (DEVIN CLI/Web, Claude CLI, GitHub Copilot). The Python CLI (`scripts/alfred.py`) is the **reference implementation** of the operational flow — every critical behavior it automates has a documented manual fallback (templates map in `templates/README.md`, rules in `rules/`), and everything **degrades to plain markdown/ASCII**. Nothing in the framework may require a specific model, API, CI, or UI.

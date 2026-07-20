@@ -25,13 +25,14 @@ def doctor(framework_root):
 
 
 def run_command(command, args, *, cwd=None, json_output=False, changes_files=False):
-    process = subprocess.run(args, cwd=cwd, capture_output=True, text=True, check=False)
-    output = (process.stdout + process.stderr).strip()
+    process = subprocess.run(args, cwd=cwd, capture_output=True, text=True,
+                             encoding="utf-8", errors="replace", check=False)
+    output = ((process.stdout or "") + (process.stderr or "")).strip()
     status = "ok" if process.returncode == 0 else "blocked"
     data = {"output": output, "returncode": process.returncode}
     if json_output:
         try:
-            data["result"] = json.loads(process.stdout)
+            data["result"] = json.loads(process.stdout or "")
         except json.JSONDecodeError:
             pass
     return CommandResult(command, status, changed=changes_files and process.returncode == 0,

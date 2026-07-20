@@ -1,8 +1,8 @@
 # 014-environment-parameters
 
-> Generated content should be written in pt-BR.
+> Generated content should be written in pt-BR (labels stay in English, D47).
 
-## Contexto
+## Context
 - demand id:
 - initiative id:
 - lane:
@@ -11,12 +11,12 @@
 - owner:
 - updated at:
 
-## Objetivo
+## Objective
 Registrar parametros reais, credenciais, acessos e valores externos necessarios para validar, planejar ou executar a demanda sem inventar dados.
 
 Use este artefato quando a demanda depender de ambientes, contas, secrets, endpoints, quotas, filas, projetos, buckets, tabelas, schedulers, alarmes ou qualquer outro valor que Alfred nao consiga verificar diretamente.
 
-## Ambiente DEVIN (quando aplicavel)
+## DEVIN environment (when applicable)
 - blueprint tier: enterprise | organization | repository | nao aplicavel
 - build/snapshot id:
 - health status: healthy | failed | partial | stale | nao observado
@@ -26,15 +26,15 @@ Use este artefato quando a demanda depender de ambientes, contas, secrets, endpo
 - pin owner:
 - review by:
 
-## Regra de preenchimento
+## Filling rules
 - Nao registrar segredo em claro.
 - Registrar o nome/referencia do secret, cofre ou owner responsavel.
 - Marcar cada item como `confirmado`, `pendente`, `nao aplicavel` ou `bloqueado`.
 - Se um valor for inferido, marcar como `a confirmar`.
 - Se faltar item material, manter a demanda em `bloqueada` ou `em espera`, conforme o caso.
 
-## Parametros por dominio
-| Dominio | Item | Valor/Referencia | Status | Fonte/Owner | Observacao |
+## Parameters by domain
+| Domain | Item | Value/Reference | Status | Source/Owner | Notes |
 |---|---|---|---|---|---|
 | ambiente |  |  | pendente |  |  |
 | credencial/secret |  |  | pendente |  |  |
@@ -45,20 +45,20 @@ Use este artefato quando a demanda depender de ambientes, contas, secrets, endpo
 | observabilidade/alarme |  |  | pendente |  |  |
 | rollback/coexistencia |  |  | pendente |  |  |
 
-## Gatilhos de bloqueio
-| Gatilho | Status | Impacto | Proxima acao |
+## Blocking triggers
+| Trigger | Status | Impact | Next action |
 |---|---|---|---|
 | Parametro obrigatorio ausente | pendente |  |  |
 | Acesso nao confirmado | pendente |  |  |
 | Owner de secret nao definido | pendente |  |  |
 | Ambiente divergente da especificacao | pendente |  |  |
 
-## Decisoes humanas necessarias
-| Decisao | Owner | Prazo | Status | Registro relacionado |
+## Required human decisions
+| Decision | Owner | Due | Status | Related record |
 |---|---|---|---|---|
 |  |  |  | pendente |  |
 
-## Evidencias de confirmacao
-| Item | Evidencia | Data | Responsavel |
+## Confirmation evidence
+| Item | Evidence | Date | Responsible |
 |---|---|---|---|
 |  |  |  |  |

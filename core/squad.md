@@ -25,6 +25,9 @@ The last three act as checkpoint owners mainly in **SAFE** (or in emergencies, f
 | Reviewer | code review and validation evidence |
 | Metrics | metrics, summary, closeout |
 
+## When two humans disagree
+Each row names **one owner per axis**, who decides within it even against someone more senior. It is only a tie when it crosses axes (PM wants scope the Tech Lead calls unsafe). Alfred never picks a side nor averages both into a compromise nobody approved: **pause** the disputed step, record **both** positions in `02-design/006-decisions.md` (owner + rationale, neither marked chosen), escalate to the **Sponsor** to decide or delegate, and log it in `05-operation/007-audit.md`. Safety is not a tie — the more restrictive position on risk, security, or data exposure holds until the Sponsor rules otherwise (`rules/common/escalation-triggers.md`).
+
 ## HITL rule
 The AI may propose and execute within the active lane. Material decisions, approvals, and protected-branch merges remain human actions and are recorded in `audit`/`decisions`.
 

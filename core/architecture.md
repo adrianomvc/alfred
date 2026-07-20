@@ -25,7 +25,7 @@ Alfred operates across three distinct repositories. **Compliance is not part of 
 - **No hidden cross-repo writes:** writing outside the detected repo requires an explicit mounted path, connector, or human-approved sync step.
 
 ## Demand artifact layout (canonical — single source)
-Artifacts are grouped by lifecycle phase inside each demand folder. Keep only the boot/resume file at the demand root. Filenames use `<sequencia>-<nomeartefato>` (reading order stays stable across hosts).
+Artifacts are grouped by lifecycle phase inside each demand folder. Keep only the boot/resume file at the demand root. Filenames use `<sequencia>-<nomeartefato>` (reading order stays stable across hosts). The artifact→template map for creating any of these by hand is in `templates/README.md` — copy from a mold, never guess a template path.
 
 HUB:
 - root: `001-state.md`

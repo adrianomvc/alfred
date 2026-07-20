@@ -108,13 +108,22 @@ fi
 if [ -d "$INSTALL_DIR/.git" ]; then
   info "Updating existing framework at $INSTALL_DIR"
   if [ -f "$INSTALL_DIR/scripts/alfred.py" ]; then
-    "$PYTHON_BIN" "$INSTALL_DIR/scripts/alfred.py" --alfred-home "$INSTALL_DIR" framework update
+    # A blocked update (exit 2 — e.g. local changes in ~/.alfred) must not
+    # abort the whole re-install: the current framework keeps working.
+    UPDATE_RC=0
+    "$PYTHON_BIN" "$INSTALL_DIR/scripts/alfred.py" --alfred-home "$INSTALL_DIR" framework update || UPDATE_RC=$?
+    if [ "$UPDATE_RC" = "2" ]; then
+      info "Framework update was blocked (see message above); keeping the current version and continuing the install."
+    elif [ "$UPDATE_RC" != "0" ]; then
+      echo "Framework update failed (exit $UPDATE_RC)." >&2
+      exit "$UPDATE_RC"
+    fi
   else
     # One-time bootstrap from installations created before the canonical CLI.
     git -C "$INSTALL_DIR" fetch --quiet origin main
     git -C "$INSTALL_DIR" checkout --quiet main
     git -C "$INSTALL_DIR" merge --quiet --ff-only origin/main
-    "$PYTHON_BIN" "$INSTALL_DIR/scripts/validators/validate-framework.py"
+    "$PYTHON_BIN" "$INSTALL_DIR/scripts/validators/validate-framework.py" --quiet
   fi
 elif [ -e "$INSTALL_DIR" ]; then
   echo "$INSTALL_DIR exists but is not a git repo. Move or remove it, then re-run." >&2
@@ -123,7 +132,7 @@ else
   CANDIDATE_DIR="${INSTALL_DIR}.candidate.$$"
   info "Cloning framework candidate into $CANDIDATE_DIR"
   git clone --quiet --branch main "$FRAMEWORK_URL" "$CANDIDATE_DIR"
-  if "$PYTHON_BIN" "$CANDIDATE_DIR/scripts/validators/validate-framework.py"; then
+  if "$PYTHON_BIN" "$CANDIDATE_DIR/scripts/validators/validate-framework.py" --quiet; then
     mv "$CANDIDATE_DIR" "$INSTALL_DIR"
   else
     rm -rf "$CANDIDATE_DIR"
@@ -256,13 +265,15 @@ install_npm_tool() {
   [ -n "$pkg" ] || return 0
   if [ -n "$NPM_REGISTRY" ]; then
     if npm install -g "$pkg" --registry "$NPM_REGISTRY" >/dev/null 2>&1; then
-      info "npm tool installed/updated: $pkg"
+      RESOLVED="$(npm list -g --depth=0 "$pkg" 2>/dev/null | grep -o "$pkg@[^ ]*" | head -n1)"
+      info "npm tool installed/updated: ${RESOLVED:-$pkg} (registry: $NPM_REGISTRY)"
     else
       info "Could not install npm tool '$pkg'. Check Artifactory/npm access; Alfred will degrade."
     fi
   else
     if npm install -g "$pkg" >/dev/null 2>&1; then
-      info "npm tool installed/updated: $pkg"
+      RESOLVED="$(npm list -g --depth=0 "$pkg" 2>/dev/null | grep -o "$pkg@[^ ]*" | head -n1)"
+      info "npm tool installed/updated: ${RESOLVED:-$pkg} (registry: public npm)"
     else
       info "Could not install npm tool '$pkg'. Check npm access; Alfred will degrade."
     fi
@@ -330,16 +341,19 @@ if [ "${ALFRED_SKIP_EMAIL:-}" != "1" ]; then
         [ -n "$ALLOW" ] && ALLOW="$ALLOW, "
         ALLOW="$ALLOW\"$TELEMETRY_TO\""
       fi
+      # The adapter implements dry-run | active | disabled only; dry-run is the
+      # safe default (composes to the outbox, never sends until a human
+      # switches to active with SMTP configured).
       cat > "$EMAIL_CONFIG" <<JSON
 {
-  "mode": "auto",
+  "mode": "dry-run",
   "default_to": "$EMAIL",
   "telemetry_to": "$TELEMETRY_TO",
   "allowlist": [$ALLOW],
   "smtp": {"host": "", "port": 587, "user": "", "sender": ""}
 }
 JSON
-      info "E-mail registered at $EMAIL_CONFIG (mode: auto — sends via the local Outlook desktop client when available (Windows), otherwise falls back to dry-run; fill smtp{} and set mode: active to force SMTP instead)."
+      info "E-mail registered at $EMAIL_CONFIG (mode: dry-run — composes to the outbox without sending; fill smtp{} and set mode: active to really send)."
       [ -n "$TELEMETRY_TO" ] && info "Telemetry destination: $TELEMETRY_TO (observability batches; provisional e-mail transport, D45)."
     else
       info "E-mail setup skipped. Register later: create $EMAIL_CONFIG (see connectors/notification-email.md)."
@@ -348,24 +362,6 @@ JSON
 
   MCP_SERVER="$INSTALL_DIR/scripts/adapters/mcp-email-server.py"
   PYTHON_BIN="$(command -v python3 || command -v python || true)"
-
-  # pywin32 (optional; best-effort; Windows/Git Bash only) — only what
-  # `mode: auto`/`outlook-com` needs to drive the local Outlook desktop
-  # client. The adapter itself stays stdlib-only: it degrades to dry-run
-  # when this is missing or the OS is not Windows.
-  case "$(uname -s 2>/dev/null || true)" in
-    MINGW*|MSYS*|CYGWIN*)
-      if [ -n "$PYTHON_BIN" ]; then
-        if ! "$PYTHON_BIN" -c "import win32com.client" >/dev/null 2>&1; then
-          if "$PYTHON_BIN" -m pip install --user --quiet pywin32 >/dev/null 2>&1; then
-            info "pywin32 installed: mode 'auto'/'outlook-com' can drive the local Outlook desktop client."
-          else
-            info "pywin32 not installed (pip failed); e-mail 'auto' mode will use dry-run until it is available."
-          fi
-        fi
-      fi
-      ;;
-  esac
 
   if command -v claude >/dev/null 2>&1 && [ -n "$PYTHON_BIN" ] && [ -f "$MCP_SERVER" ]; then
     if claude mcp get alfred-email >/dev/null 2>&1; then

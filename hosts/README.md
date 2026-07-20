@@ -49,18 +49,21 @@ The username is whatever the command prints — taken from the live session, nev
 The entry files above are committed for simple copy/install flows, but they are
 generated from `hosts/_template/shim.md` plus host deltas in
 `hosts/_template/hosts.json`. Edit the template or the delta, then run
-`scripts/*/workflow/generate-host-shims`; `validate-framework` checks drift.
+`scripts/workflow/generate-host-shims.py`; `validate-framework` checks drift.
 
 ## Syncing installed host entries
 Updating `~/.alfred` is not enough when a host reads a copied native entry file.
-After a framework pull, refresh the host entry with:
+`alfred framework update` refreshes host entries automatically; after a manual
+framework pull, refresh with the canonical CLI:
 
 ```bash
-python ~/.alfred/scripts/workflow/sync-host-shims.py -Host claude-code
+python ~/.alfred/scripts/alfred.py host sync --host claude-code --install-hooks
 ```
 
-Use `-Host devin-cli` or `-Host codex` for those hosts. Missing targets are
-skipped by default; pass `-Create` only during installation or explicit setup.
+Use `--host devin-cli` or `--host codex` for those hosts. Missing targets are
+skipped by default; the underlying helper is
+`scripts/workflow/sync-host-shims.py` (pass `-Create` only during installation
+or explicit setup).
 
 ## Cache-friendly loading
 Hosts that expose prompt caching or persistent context should keep Alfred's

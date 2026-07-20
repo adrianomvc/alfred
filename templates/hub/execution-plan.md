@@ -1,8 +1,8 @@
 # 012-execution-plan
 
-> Generated content should be written in pt-BR.
+> Generated content should be written in pt-BR (labels stay in English, D47).
 
-## Contexto
+## Context
 - demand id:
 - initiative id:
 - lane:
@@ -10,13 +10,13 @@
 - branch:
 - framework version:
 
-## Skills ativos
+## Active Skills
 - base:
-- linguagem/plataforma:
-- segurança:
-- seções carregadas:
+- language/platform:
+- security:
+- loaded sections:
 
-## Adapters de host
+## Host Adapters
 - vcs:
 - tracker:
 - notification:
@@ -24,27 +24,27 @@
 - usage-cost:
 - readiness:
 
-## Plano
-| Unit | Repo | Escopo | Write scope | Dependencias | Verificacao | Sinal esperado | Evidencia | Revisor | Modo da tentativa | Worktree | Status |
+## Plan
+| Unit | Repo | Scope | Write scope | Dependencies | Verification | Expected signal | Evidence | Reviewer | Attempt mode | Worktree | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | unit-001 |  |  |  |  |  |  |  | none | guided |  | pending |
 
-## Relatorios de exploracao
+## Exploration reports
 > Registrar 1-3 tarefas focadas por rodada; detalhe completo continua JIT.
 
-| Tarefa | Hipotese | Arquivos/simbolos | Evidencias | Descoberta | Incertezas | Recomendacao | Nao investigado | Custo aprox. |
+| Task | Hypothesis | Files/symbols | Evidence | Finding | Uncertainties | Recommendation | Not investigated | Approx. cost |
 |---|---|---|---|---|---|---|---|---|
 | explore-001 |  |  |  |  |  |  |  |  |
 
-## Tentativas de implementacao
-| Unit | Rodada | Modo | Sinal de falha | Feedback corretivo | Delta de escopo | Resultado |
+## Implementation attempts
+| Unit | Round | Mode | Failure signal | Corrective feedback | Scope delta | Result |
 |---|---|---|---|---|---|---|
 | unit-001 | 1 | guided |  |  |  | pending |
 
-## Sequencia
+## Sequence
 1. 
 
-## Paralelismo
+## Parallelism
 - unidades paralelizaveis:
 - restricoes:
 - merge serializado no `001-state.md`:
@@ -55,8 +55,8 @@
 - PR alvo:
 - merge: somente humano
 
-## Gatilhos de escalonamento
+## Escalation triggers
 - 
 
-## Evidencias esperadas
+## Expected evidence
 - 

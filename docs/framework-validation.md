@@ -74,7 +74,7 @@ python scripts/validators/validate-framework.py
 - `rules/common/token-budget-policy.md` requires a preflight context budget before large loads or token-heavy steps.
 - `rules/common/deferred-work-policy.md` keeps batch/flex/background work off the critical path and out of final decision authority.
 - `core/hooks/rtk.md` scopes automatic RTK setup to DEVIN CLI until another host explicitly supports it.
-- `docs/version-adoption.md` keeps active-demand framework upgrades explicit and human-approved.
+- `docs/version-adoption.md` keeps framework adoption at explicit boundaries (boot or `alfred framework update`) with candidate validation before promotion; adoption of `origin/main` is the standing policy, not a per-demand human choice (`core/boot.md`).
 - `docs/release-governance.md` and `CHANGELOG.md` record release intent and compatibility notes.
 - `docs/adapter-implementation.md` keeps concrete host adapters explicit, auditable, and degradable.
 - `validate-connectors` checks connector contracts and adapter-shaped examples.
