@@ -86,6 +86,12 @@ TELEMETRY_FIELDS = {
 }
 SECRET_PATTERNS = re.compile(
     r"AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY|(?i:(password|secret|api[_-]?key|token)\s*[=:]\s*\S)")
+# Absolute paths must be reduced to a bare filename before telemetry leaves the
+# machine. os.path.isabs() answers for the *running* platform only — on Linux it
+# does not recognise "C:/x/y", so a Windows path forwarded through a Linux host
+# would ship the whole path. Telemetry sanitization must not depend on where it
+# runs, so both conventions are matched explicitly: POSIX root, drive letter, UNC.
+ABSOLUTE_PATH = re.compile(r"^(?:[/\\]|[A-Za-z]:[/\\])")
 
 
 def load_config_file():
@@ -349,9 +355,20 @@ def sanitize_telemetry_event(event):
     artifacts = clean.get("artifacts_used")
     if isinstance(artifacts, list):
         for item in artifacts:
-            if isinstance(item, dict) and isinstance(item.get("path"), str) and os.path.isabs(item["path"]):
-                item["path"] = Path(item["path"]).name
+            if isinstance(item, dict) and isinstance(item.get("path"), str):
+                item["path"] = strip_absolute_path(item["path"])
     return clean
+
+
+def strip_absolute_path(value):
+    """Reduce an absolute path to its filename, on any platform (see ABSOLUTE_PATH).
+
+    Relative paths are meaningful telemetry (``01-inception/003-requirements.md``
+    says which artifact was touched) and are kept as-is.
+    """
+    if not ABSOLUTE_PATH.match(value):
+        return value
+    return re.split(r"[/\\]", value)[-1]
 
 
 def tool_send_telemetry(cfg, args):

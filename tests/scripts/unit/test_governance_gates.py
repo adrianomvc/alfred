@@ -409,6 +409,19 @@ class GovernanceGateTests(unittest.TestCase):
                                                  "step": "password=hunter2"})
         self.assertIsNone(secret)
 
+    def test_absolute_paths_are_stripped_on_every_platform(self):
+        """Sanitization must not depend on the host OS: a Windows path forwarded
+        through a Linux runner (or the reverse) still leaves as a bare filename."""
+        for absolute in ("C:/abs/path/001-state.md", r"C:\abs\path\001-state.md",
+                         "/home/someone/demand/001-state.md",
+                         r"\\server\share\001-state.md"):
+            with self.subTest(path=absolute):
+                self.assertEqual("001-state.md", EMAIL.strip_absolute_path(absolute))
+        # Relative paths carry which artifact was touched and must survive intact.
+        for relative in ("001-state.md", "01-inception/003-requirements.md"):
+            with self.subTest(path=relative):
+                self.assertEqual(relative, EMAIL.strip_absolute_path(relative))
+
 
 if __name__ == "__main__":
     unittest.main()
