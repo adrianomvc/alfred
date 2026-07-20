@@ -126,9 +126,31 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     "$PYTHON_BIN" "$INSTALL_DIR/scripts/validators/validate-framework.py" --quiet
   fi
 elif [ -e "$INSTALL_DIR" ]; then
-  echo "$INSTALL_DIR exists but is not a git repo. Move or remove it, then re-run." >&2
-  exit 1
-else
+  # A non-git ~/.alfred is almost always an older install: a copied tree, an
+  # unzipped release, or a clone whose .git was lost. Refusing to proceed forced
+  # a manual cleanup on every machine, so an install that recognises Alfred is
+  # removed and re-cloned — the same call the wrong-remote branch above makes.
+  # The framework carries no user data (demands live in the HUB repo), so there
+  # is nothing here a fresh clone does not restore.
+  #
+  # A directory with none of Alfred's markers is someone else's data, not a
+  # stale install, and is left untouched: ALFRED_FORCE_INSTALL=1 overrides that
+  # deliberately.
+  LOOKS_LIKE_ALFRED=0
+  for marker in core/boot.md VERSION scripts/alfred.py; do
+    if [ -e "$INSTALL_DIR/$marker" ]; then LOOKS_LIKE_ALFRED=1; break; fi
+  done
+  if [ "$LOOKS_LIKE_ALFRED" = "1" ] || [ "${ALFRED_FORCE_INSTALL:-0}" = "1" ]; then
+    info "Existing non-git install at $INSTALL_DIR; removing it and installing fresh."
+    rm -rf "$INSTALL_DIR"
+  else
+    echo "$INSTALL_DIR exists, is not a git repo, and does not look like an Alfred install." >&2
+    echo "Nothing was changed. Move it aside, or re-run with ALFRED_FORCE_INSTALL=1 to replace it." >&2
+    exit 1
+  fi
+fi
+
+if [ ! -e "$INSTALL_DIR" ]; then
   CANDIDATE_DIR="${INSTALL_DIR}.candidate.$$"
   info "Cloning framework candidate into $CANDIDATE_DIR"
   git clone --quiet --branch main "$FRAMEWORK_URL" "$CANDIDATE_DIR"
