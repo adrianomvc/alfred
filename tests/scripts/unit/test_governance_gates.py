@@ -26,6 +26,8 @@ from shared.cli.demand import (_derive_sigla, checkpoint, close_readiness, draft
 from shared.cli.git_service import _validate_candidate  # noqa: E402
 from shared.cli.parser import run  # noqa: E402
 from shared.common import find_duplicate_keys, read_state_fields, write_state_fields  # noqa: E402
+from shared.model_policy import describe_model  # noqa: E402
+from shared.observability.infrastructure.adapters.devin import session as DEVIN_SESSION  # noqa: E402
 
 
 def load_hyphenated(name, rel_path):
@@ -429,6 +431,30 @@ class GovernanceGateTests(unittest.TestCase):
                                             strict=False)).report.issues}
         self.assertIn("state_section_not_canonical", codes)
         self.assertIn("status_is_a_phase", codes)
+
+    def test_devin_session_model_is_read_from_the_host_log(self):
+        """Devin exposes no live model to scripts, but the CLI logs the resolved
+        model at startup. Reading it turns the toolbar's unconfirmed policy
+        target into the model that actually ran."""
+        with tempfile.TemporaryDirectory() as tmp:
+            logs = Path(tmp) / "cli" / "logs"
+            logs.mkdir(parents=True)
+            (logs / "devin_20260720-012424_10872.log").write_text(
+                "INFO chisel::repl_mode: model_input=<none> resolved_model=SWE-1.6 Slow "
+                "resolved_model_uid=swe-1-6-slow Model resolution complete\n",
+                encoding="utf-8")
+            found = DEVIN_SESSION.read_session_model(tmp)
+        self.assertEqual("swe-1-6-slow", found["uid"])
+        self.assertEqual("SWE-1.6 Slow", found["model"])
+
+    def test_policy_target_uses_the_host_model_map(self):
+        """On Devin the target must be a model Devin can run; it used to resolve
+        to a Claude name on every host."""
+        devin = describe_model("", "Standard", "Design", host="devin-cli")
+        claude = describe_model("", "Standard", "Design", host="claude-code")
+        self.assertIn("opus", devin)
+        self.assertNotIn("claude-", devin)
+        self.assertIn("claude-opus-4-8", claude)
 
     def test_hand_written_requirements_is_refused_with_the_cause(self):
         """A draft authored as free-form markdown parses as zero fields. It used

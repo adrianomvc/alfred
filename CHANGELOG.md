@@ -116,6 +116,24 @@ All notable Alfred framework changes should be recorded here.
   `alfred demand validate` at every phase transition and before closing. It is
   the only thing that catches a demand assembled by hand: a full set of markdown
   artifacts that never touched the CLI has no observability events at all.
+- Alfred reads the model a DEVIN CLI session actually ran, instead of showing an
+  unconfirmed policy target. Devin exposes no live model to scripts (no env var,
+  hook field, or session metadata), but the CLI logs the resolved model at
+  session start (`resolved_model_uid=...`) and writes `agent.model_name` into the
+  session transcript. `scripts/workflow/detect-host-model.py` stamps it into the
+  demand state, so the toolbar reports fact. The log is preferred: it is written
+  when the session opens, while the transcript only appears when it ends. Only
+  those fields are read — transcript `steps` carry session content and telemetry
+  is emailed to the org destination.
+- The tier -> model map is per host. `resolve_model_policy` already accepted a
+  map but every caller got the Claude one, so a Devin session was told to target
+  `claude-opus-4-8`, a model the DEVIN CLI cannot run. `core/model-policy.md`
+  documented the Devin map in prose; it now exists in code.
+- The rich toolbar no longer truncates HITL and Modelo into a fixed 30-character
+  cut plus an unbounded model string. They share a line only when both fit whole,
+  and split otherwise. This was not cosmetic: the text being cut was the model's
+  own `nao confirmado` qualifier, so the truncation turned an honest hedge into
+  an apparent claim that a model had run.
 - The rules now name the command that creates a draft. `core/boot.md` and the
   five host shims said "write the questions in `003-requirements.md` with
   `[Resposta]:` slots" and never mentioned `alfred demand draft`, so an agent

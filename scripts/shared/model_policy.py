@@ -27,6 +27,18 @@ CLAUDE_TIER_MODEL = {
     "medium": "claude-sonnet-5",
     "strong": "claude-opus-4-8",
 }
+# core/model-policy.md "DEVIN CLI concrete map". Without it every host resolved to
+# a Claude model name, so a Devin session was told to target `claude-opus-4-8` —
+# a model the DEVIN CLI cannot run.
+DEVIN_TIER_MODEL = {
+    "cheap": "swe-1-6-fast",
+    "medium": "adaptive",
+    "strong": "opus",
+}
+TIER_MODEL_BY_HOST = {
+    "claude-code": CLAUDE_TIER_MODEL,
+    "devin-cli": DEVIN_TIER_MODEL,
+}
 
 # Per-phase tier adjustment, already resolved by lane (model-policy.md
 # "Adjustment per step"). Combined with the floor via max, except Operate.
@@ -134,7 +146,7 @@ def resolve_model_policy(lane, phase, tier_model=None):
     )
 
 
-def describe_model(actual_model, lane, phase):
+def describe_model(actual_model, lane, phase, host=None):
     """Toolbar model string.
 
     Always shows the model **actually running** when known; the policy target is
@@ -146,7 +158,7 @@ def describe_model(actual_model, lane, phase):
     actual = str(actual_model or "").strip()
     if actual.lower() in ("", "default", "unknown"):
         actual = ""
-    decision = resolve_model_policy(lane, phase)
+    decision = resolve_model_policy(lane, phase, TIER_MODEL_BY_HOST.get(host or ""))
     if actual and decision:
         if actual == decision.model:
             return f"{actual} · {decision.tier} · esf {decision.effort}"
