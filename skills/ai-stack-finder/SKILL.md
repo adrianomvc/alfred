@@ -1,7 +1,7 @@
 ---
 name: ai-stack-finder
 description: Searches the internal Itaú AI Stack catalog for existing skills, MCP servers, and toolkits before building an integration with an internal system from scratch.
-trigger: Load at the first fallback step — no active HUB/framework skill covers the need and an external catalog is about to be queried — for any topic; AI Stack is first in the order defined in `knowledge/external-catalogs.md` and degrades to the next catalog. Also load when the human asks to search the AI Stack marketplace/catalog.
+trigger: Load after the mandatory capability checkpoint finds an uncovered capability and external discovery is required — for any topic; AI Stack is first in the order defined in `knowledge/external-catalogs.md` and degrades to the next catalog. Also load when the human asks to search or refresh the AI Stack marketplace/catalog.
 sections_to_load:
   - process
   - degradation
@@ -38,10 +38,10 @@ Portal de Massa, IUChaos.
 - an `audit` entry when material (source, name/version installed, what was extracted)
 
 ## process
-1. Confirm you are at the fallback step: neither `skills/skills.md` nor the HUB's
-   `004-skills.md` has an active skill covering the need. AI Stack is the first catalog for
-   any topic — do not pre-filter by "is this Itaú-specific?"; that guess is exactly what the
-   total order exists to remove.
+1. Read the capability checkpoint in `state`. Confirm that at least one required
+   capability is not covered by `skills/skills.md` or the HUB's `004-skills.md`.
+   Search only for the recorded gaps. AI Stack is the first catalog for any topic — do not
+   pre-filter by "is this Itaú-specific?"; that guess is exactly what the total order removes.
 2. Search with the official CLI:
    ```bash
    npx -y @ai-stack/cli@latest list -s          # skills
@@ -63,7 +63,8 @@ Portal de Massa, IUChaos.
    On approval, register the resolved `<name>@<version>` as a pointer in the sigla's
    `004-skills.md` (**Ref (pinned)** column) and record it in `state`/`audit`.
 6. If nothing relevant exists, proceed with the custom implementation — do not block the
-   task waiting for a perfect match.
+   task waiting for a perfect match. Record the query fingerprint and result so an unchanged
+   demand does not repeat the same search every turn.
 7. If AI Stack does not cover the need, continue to the next catalog in the order defined
    in `knowledge/external-catalogs.md`.
 
@@ -75,7 +76,8 @@ record the degradation and move to the next catalog in the order defined in
 name, and never change npm registry configuration without asking.
 
 ## review checklist
-- the chain was entered at the fallback step (no active skill covered the need);
+- the chain was entered for a capability explicitly recorded as uncovered;
+- unchanged capability sets did not repeat the same catalog query;
 - at least one AI Stack search attempted before a from-scratch implementation;
 - explicit human confirmation before installing any skill **or** MCP server;
 - the resolved `<name>@<version>` pinned in the sigla's `004-skills.md` on adoption;

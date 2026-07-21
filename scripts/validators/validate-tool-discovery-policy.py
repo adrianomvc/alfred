@@ -80,6 +80,12 @@ def validate_tool_discovery_policy(root) -> ValidationReport:
     successes = []
 
     require_text(root / "rules/common/tool-discovery-policy.md", "Do not load every skill", issues, successes)
+    require_text(root / "rules/common/tool-discovery-policy.md", "## Capability checkpoint (required, lightweight)", issues, successes)
+    require_text(root / "rules/common/tool-discovery-policy.md", "This coverage check always runs; an external catalog query does not.", issues, successes)
+    require_text(root / "docs/skills-activation.md", "Do not repeat the query on every turn.", issues, successes)
+    require_text(root / "templates/hub/state.md", "## Capability checkpoint", issues, successes)
+    require_text(root / "templates/hub/execution-plan.md", "## Capability checkpoint", issues, successes)
+    require_text(root / "skills/ai-stack-finder/SKILL.md", "Search only for the recorded gaps.", issues, successes)
     require_text(root / "rules/README.md", "tool-discovery-policy", issues, successes)
     require_text(root / "connectors/connectors.md", "## Tool discovery / JIT tools", issues, successes)
     require_text(root / "hosts/_template/shim.md", "## JIT tools", issues, successes)

@@ -39,6 +39,17 @@
 - security:
 - loaded sections:
 
+## Capability checkpoint
+- status: pending | complete | degraded
+- assessed at:
+- capability set:
+- active skill refs:
+- covered capabilities:
+- uncovered capabilities:
+- external discovery: not required | pending | complete | degraded
+- query fingerprint:
+- catalog result:
+
 ## Host Adapters
 - alfred run id:
 - host:

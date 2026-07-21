@@ -19,6 +19,21 @@ external catalogs, or specialty skills.
 Search/select the needed capability first; load the full tool, skill, adapter,
 or schema only after it is relevant to the current action.
 
+## Capability checkpoint (required, lightweight)
+After the demand scope is understood and before the first technical plan is
+finalized, record in `state`:
+- the normalized capability set required by the demand (languages, platforms,
+  integrations, artifact types, and specialty reviews);
+- which active HUB/framework skills cover each capability;
+- uncovered capabilities and whether external discovery is needed.
+
+This coverage check always runs; an external catalog query does not. Reuse the
+recorded result while the capability set and active skill refs are unchanged.
+Run it again only when either changes, before custom implementation of an
+uncovered capability, or when the human requests discovery/refresh. If scope is
+still too vague, mark the checkpoint `pending` and complete it after technical
+inception instead of searching with generic terms.
+
 Recommended order:
 1. read the role registry: `skills/skills.md`, `connectors/connectors.md`, or
    the active HUB registry;
@@ -27,7 +42,10 @@ Recommended order:
 4. call the tool only if the demand `state` says it is configured and allowed;
 5. record the selected capability and fallback path in `audit` when material.
 
-If the registry has no match, follow the catalog order in `knowledge/external-catalogs.md` before degrading to the human.
+If one or more required capabilities remain uncovered, query only for those
+gaps and follow the catalog order in `knowledge/external-catalogs.md` before
+degrading to the human. Record the capability set as the query fingerprint so
+the same fallback is not repeated every turn.
 
 ## Guardrails
 - Do not load every skill, connector, MCP tool schema, or external catalog result
