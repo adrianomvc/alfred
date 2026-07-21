@@ -16,6 +16,14 @@
 - security:
 - loaded sections:
 
+## Capability checkpoint
+- capability set:
+- covered by active skills:
+- uncovered capabilities:
+- external discovery decision:
+- query fingerprint:
+- refresh trigger: capability set or active skill refs changed | human requested
+
 ## Host Adapters
 - vcs:
 - tracker:
